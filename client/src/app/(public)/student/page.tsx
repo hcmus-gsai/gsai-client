@@ -9,9 +9,6 @@ export default function StudentLandingPage() {
 
   return (
     <main className="">
-
-      
-
       {/* Hero section */}
       <section className="text-center pt-24 pb-16 px-4">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">

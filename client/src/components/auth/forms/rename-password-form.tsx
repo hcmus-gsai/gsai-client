@@ -1,52 +1,32 @@
 'use client';
-import {useRouter} from 'next/navigation';
-import {Form, Input,  Button, Checkbox} from "antd";
-import {GoogleSignIn} from '../ui/form';
+
+import {Form, Input, Button} from 'antd';
+
 /*Tạo tính năng đăng nhập với Google*/
 
-import Link from 'next/link';
+import {twMerge} from 'tailwind-merge';
+import Image from 'next/image';
+import {GoogleSignIn} from '../ui/form';
 
-/*============================== */
 
-const SignUpForm = () => {
-
+const RenamePasswordForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
 
-    const finishHandler = async()  => {
+    const finishHandler = async() => {
         console.log(formData.getFieldsValue());
     }
 
     return (
         <Form
             form = {formData}
-            name = "sign-up"
+            name = "check-mail"
             layout = "vertical"
             size = "large"
-            initialValues = {{remember: false}}
             onFinish = {finishHandler}
         >
             <div className = "mb-2">
-                <p className="font-medium font-bold">Email<span className="text-red-500">*</span></p>
-            </div>
-
-            <Form.Item
-                name = "email"
-                rules = {[
-                    {
-                        required: true,
-                        message: 'Vui lòng nhập email'
-                    }
-                ]}
-            >
-                <Input 
-                    placeholder = "name@gmail.com"
-                    className = "form__input"
-                />
-            </Form.Item>
-
-            <div className = "mb-2">
-                <p className="font-medium font-bold">Mật khẩu <span className="text-red-500">*</span></p>
+                <p className="font-medium font-bold">Mật khẩu<span className="text-red-500">*</span></p>
             </div>
 
             <Form.Item
@@ -98,45 +78,13 @@ const SignUpForm = () => {
                 />
             </Form.Item>
 
-            <Form.Item
-                name = "remember"
-                valuePropName = "checked"
-                className = "!mt-[-15px]"
-            >
-                <div className = "flex items-start gap-2">
-                    <Checkbox
-                        name = "remember"
-                        className = "form__checkbox !mt-1"
-                    />
-                    <p className = "text-gray-500 font-normal font-sm">
-                        Tôi đã đọc và đồng ý với <Link href = "/privacy-policy">Điều khoản và điều kiện</Link> cùng <Link href = "/privacy-policy">Chính sách bảo mật</Link> của GSAI
-                    </p>
-                </div>
-            </Form.Item>
-
             <Form.Item>
                 <Button type = "primary" htmlType = "submit" className = "!form__button !w-[100%]">
-                    Đăng ký
+                    Đặt lại mật khẩu
                 </Button>
-            </Form.Item>
-
-            <Form.Item>
-                <div className="flex items-center justify-center gap-3 w-full">
-                    <span className="flex-1 h-[1px] bg-gray-300"></span>
-                    <p className="text-gray-500 text-center whitespace-nowrap">Hoặc</p>
-                    <span className="flex-1 h-[1px] bg-gray-300"></span>
-                </div>
-            </Form.Item>
-
-            <Form.Item
-                name = "google-sign-in"
-            >
-                <GoogleSignIn
-                    className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
-                />
             </Form.Item>
         </Form>
     )
 }
 
-export {SignUpForm}
+export {RenamePasswordForm}
