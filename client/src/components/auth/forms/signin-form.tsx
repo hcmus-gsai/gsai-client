@@ -17,6 +17,8 @@ const SignInForm = () => {
     const finishHandler = async() => {
         console.log(formData.getFieldsValue());
     }
+
+
     
     return (
         <Form
@@ -30,6 +32,7 @@ const SignInForm = () => {
             <div className = "mb-2">
                 <p className="font-medium font-bold">Email <span className="text-red-500">*</span></p>
             </div>
+            
             <Form.Item
                 name = "email"
                 rules = {[
