@@ -14,28 +14,26 @@ import { ArrowRightOutlined, FacebookFilled, InstagramFilled, YoutubeFilled,Mail
 
 
 const GreetingSection = () => {
-    const [isLoading, setIsLoading] = useState(true);
-
-    const router = useRouter();
-
+    
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className="flex w-full items-center justify-between h-[40px] px-24">
+            <div className="flex w-full items-center justify-between h-[4.8125rem] px-24">
                 <div className = "flex flex-1 items-center justify-start gap-2">
                     <div className = "text-2xl font-bold">
-                        <p className = "text-[#366ED8]"><span className = "font-style nabla">AT</span> AI.Tutor</p>
+                        <p className = "!text-[var(--color-bg_white)]"><span className = "!text-[var(--color-bg_white)]">AT</span> AI.Tutor</p>
                     </div>
+                </div>
+                <div className = "flex flex-1 items-center justify-center gap-2 ">
                     <Menu 
                         mode = "horizontal"
                         defaultSelectedKeys={["home"]}
                         items = {[
-                            { key: "intro", label: "Giới thiệu" },
-                            { key: "courses", label: "Môn học" },
-                            { key: "evaluate", label: "Đánh giá" },
-                            { key: "contact", label: "Liên hệ" },
-
+                            { key: "intro", label: <span className = "!text-[var(--color-primary)] !text-[1rem]">Giới thiệu</span> },
+                            { key: "courses", label: <span className = "!text-[var(--color-primary)] !text-[1rem]">Môn học</span> },
+                            { key: "evaluate", label: <span className = "!text-[var(--color-primary)] !text-[1rem]">Đánh giá</span> },
+                            { key: "contact", label: <span className = "!text-[var(--color-primary)] !text-[1rem]">Liên hệ</span> },
                         ]}
-                        className = "border-none flex-1 ml-10"
+                        className = "!border-none !flex-1 !flex !items-center !justify-center"
                         style = {{
                             backgroundColor: 'transparent'
                         }}
@@ -43,23 +41,27 @@ const GreetingSection = () => {
                 </div>
                 <div className = "flex flex-1 items-center justify-end gap-2">
                     <div className = "flex items-center justify-center gap-2">
-                        <Button
-                            type = "primary"
-                            className = "!bg-transparent !text-white hover:!bg-blue-400 hover:!text-white !rounded-full !border-blue-400"
-                        >
-                            Tham gia ngay
-                            <div className = "flex items-center justify-center bg-white rounded-full p-2">
-                                <ArrowRightOutlined className = "!rotate-315 !text-black "/>
-                            </div>
-                        </Button>
+                    <Button
+                        type="primary"
+                        className="!bg-transparent !text-white hover:!bg-blue-400 hover:!text-white 
+                                !rounded-full !border !border-white !px-6 !py-[1.1rem] 
+                                !flex !items-center !justify-between !w-[157px]"
+                    >
+                        {/* Spacer to push icon right */}
+                        <span>Tham gia ngay</span>
+
+                        {/* Icon */}
+                        <span className="flex items-center justify-center bg-white rounded-full p-2">
+                            <ArrowRightOutlined className="!rotate-315 !text-[var(--color-secondary)]" />
+                        </span>
+                    </Button>
                     </div>
                 </div>
             </div>
-
             <div className = "mx-auto w-full h-full flex flex-col items-center justify-center w-[calc(100vh-40px)]">
                 <div className = "flex items-center justify-center gap-4">
                     <div className = "text-[4rem] font-bold leading-tight">
-                        <p className = "text-center">Chào Mừng Đến Với GSAI</p>
+                        <p className = "text-center !text-[var(--color-primary)]">Chào Mừng Đến Với GSAI</p>
                     </div>
                 </div>
                 <div className = "flex flex-col justify-center items-center">
@@ -182,12 +184,12 @@ const CourseDisplaySection = () => {
                 </div>
             </div>
             <div className = "w-full h-full flex items-center justify-center">
-                <Row gutter = {[16,16]} className = "w-[calc(100%-500px)] mx-auto p-4">
+                <Row gutter = {[16,16]} className = "w-[calc(100%-300px)] mx-auto p-4">
                     {
                         courseSampleData.map((c, idx) => {
                             return (
                                 <Col span = {6} key = {idx} className = "!flex !items-center !justify-center !gap-2">
-                                    <Card className = "w-[262px] h-[303px] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    <Card className = "w-[262px] h-[303px] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300">
                                         <div className = "flex flex-col items-center justify-center">
                                             <Image src = {EmptyLayout} alt = {c.name} width = {0} height = {0} 
                                                 className = "w-full h-full object-cover"                                                    
@@ -206,7 +208,6 @@ const CourseDisplaySection = () => {
                                                     })
                                                 }
                                             </div>
-                                            
                                         </div>
                                     </Card>
                                 </Col>
@@ -218,8 +219,8 @@ const CourseDisplaySection = () => {
 
             <StyledButton
                 name = "Xem tất cả"
-                buttonClassName = "!bg-black !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                iconClassName = "!rotate-45 !text-black"
+                buttonClassName = "!bg-black !text-white hover:!bg-[var(--color-bg_white)] hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
+                iconClassName = "!rotate-315 !text-[var(--color-bg_white)] !hover:!text-black"
             />
         </section>
     )
@@ -230,7 +231,7 @@ const FooterSection = () => {
     return (
 
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center gap-4 w-[calc(100%-300px)] shadow-md rounded-md p-[2rem] bg-green-200 mt-[4rem]">
+            <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_20px_var(--color-neutral)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
                 <div className = "text-center w-[calc(100%-300px)]">
                     <h1 className = "text-[2rem] font-bold">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
                     <p className = "text-[1.25rem] font-light text-gray-600 text-center">
@@ -244,49 +245,31 @@ const FooterSection = () => {
                     Tham gia
                 </Button>
             </div>
-            <div className = "grid grid-cols-4 gap-4 justify-center items-start w-full pt-10 px-24 py-12">
+            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[calc(100%-24rem)]">
                 <div className = "flex flex-col justify-center items-center">
                     <div>
                         <div>
-                            <h1 className = "text-[0.75rem] font-bold text-blue-400">AT AI.Tutor</h1>
+                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">AT AI.Tutor</h1>
                         </div>
                         <div>
-                            <p><span className = "font-bold">Văn phòng</span>: 227 Nguyễn Văn Cừ, phường Chợ Quán,
-                            quận 5, TP.HCM</p>
-                         
-                            <p><span className = "font-bold">Số điện thoại</span>: +84 123 456 789</p>
-
-                            <p><span className = "font-bold">Email</span>: info@email.com</p>
-
+                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Văn phòng</span>: 227 Nguyễn Văn Cừ, phường Chợ Quán, quận 5, TP.HCM</p> 
+                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Số điện thoại</span>: +84 123 456 789</p>
+                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Email</span>: info@email.com</p>
                         </div>
                     </div>
-                    
                 </div>
 
                 <div className = "flex flex-col justify-center items-center ">
                     <div>
                         <div>
-                            <p className = "text-[0.75rem] font-bold">Liên kết nhanh</p>
+                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Liên kết nhanh</h1>
                         </div>
                         <div>
-                            <p>Chi phí</p>
-                            <p>Học sinh</p>
-                            <p>Giáo viên</p>
-                            <p>Môn học</p>
-                            <p>Liên hệ</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className = "flex flex-col justify-center items-center">
-                    <div>
-                        <div>
-                            <p className = "text-[0.75rem] font-bold">Khác</p>
-                        </div>
-                        <div>
-                            <p>Cách hoạt động</p>
-                            <p>Điều khoản & Điều lệ</p>
-                            <p>Chính sách bảo mật</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Chi phí</p>
+                            <p className = "text-[var(--color-primary)]">Học sinh</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Giáo viên</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Môn học</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Liên hệ</p>
                         </div>
                     </div>
                 </div>
@@ -294,17 +277,30 @@ const FooterSection = () => {
                 <div className = "flex flex-col justify-center items-center">
                     <div>
                         <div>
-                            <p className = "text-[0.75rem] font-bold">Về GSAI</p>
+                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Khác</h1>
                         </div>
                         <div>
-                            <p>Giới thiệu</p>
-                            <p>Tầm nhìn</p>
-                            <p>Ban điều hành</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Cách hoạt động</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Điều khoản & Điều lệ</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Chính sách bảo mật</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className = "flex flex-col justify-center items-center">
+                    <div>
+                        <div>
+                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Về GSAI</h1>
+                        </div>
+                        <div>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Giới thiệu</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Tầm nhìn</p>
+                            <p className = "text-[1rem] text-[var(--color-primary)]">Ban điều hành</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <footer className = "w-full h-[100px] flex items-center justify-between px-24">
+            <footer className = "h-[100px] flex items-center justify-between w-[calc(100%-24rem)]">
                 <div>
                     <p>Copyright © 2025 AT AI.Tutor. All rights reserved.</p>
                 </div>
