@@ -1,17 +1,20 @@
 'use client';
 
 import Link from "next/link";
-
 import {useEffect, useState} from 'react';
 import {useRouter} from "next/navigation";
 import {Button, Menu, Row, Col, Card} from "antd";
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
-
-
-
 import { ArrowRightOutlined, FacebookFilled, InstagramFilled, YoutubeFilled,MailOutlined, StarFilled } from "@ant-design/icons"
 
+import Cate_1 from "@/../public/guest/Cate_1.svg";
+import Cate_2 from "@/../public/guest/Cate_2.svg";
+import Cate_3 from "@/../public/guest/Cate_3.svg";
+import Cate_4 from "@/../public/guest/Cate_4.svg";
+import Cate_5 from "@/../public/guest/Cate_5.svg";
+import Cate_6 from "@/../public/guest/Cate_6.svg";
+import Cate_7 from "@/../public/guest/Cate_7.svg";
 
 const GreetingSection = () => {
     
@@ -177,11 +180,52 @@ const CourseDisplaySection = () => {
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center">
+            <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)]">
                 <div className = "text-center">
                     <h1 className = "text-[3rem] font-bold">Môn học phổ biến hiện nay</h1>
                     <p className = "text-[1.25rem] font-light text-gray-600 text-center">Chọn môn học đúng hướng, nâng tầm hồ sơ tương lai!</p>
                 </div>
+            </div>
+            <div className = "flex items-center justify-center w-[calc(100%-24rem)]">
+                <Menu 
+                    mode = "horizontal"
+                    defaultSelectedKeys={["home"]}
+                    items = {[
+                        { key: "field-1", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_1} alt = "Cate_1" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-2", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_2} alt = "Cate_2" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-3", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_3} alt = "Cate_3" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-4", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_4} alt = "Cate_4" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-5", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_5} alt = "Cate_5" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-6", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_6} alt = "Cate_6" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+                        { key: "field-7", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
+                            <Image src = {Cate_7} alt = "Cate_7" width = {20} height = {20} className = "w-full h-full object-cover" />
+                            <span>Phân loại</span>
+                        </div> },
+
+                    ]}
+                    className = "!w-full !flex !items-center !justify-center gap-4"
+                    style = {{
+                        backgroundColor: 'transparent'
+                    }}
+                />
             </div>
             <div className = "w-full h-full flex items-center justify-center">
                 <Row gutter = {[16,16]} className = "w-[calc(100%-300px)] mx-auto p-4">
@@ -195,7 +239,10 @@ const CourseDisplaySection = () => {
                                                 className = "w-full h-full object-cover"                                                    
                                             />
                                             <h3 className = "text-[1.25rem] font-bold text-center text-truncate line-clamp-1">{c.name}</h3>
-                                            <p><StarFilled className ="!text-yellow-400"/><span className = "font-bold text-gray-600 text-center ml-[2px]">{c.rating}</span></p>
+                                            <div className="flex items-center justify-center">
+                                                <StarFilled className ="!text-yellow-400"/>
+                                                <span className = "font-bold text-gray-600 text-center ml-[2px]">{c.rating}</span>
+                                            </div>
                                             <p className = "text-[1rem] font-light text-gray-600 text-center">{c.teacher}</p>
                                             <p className = "text-[1rem] font-light text-gray-600 text-center">Thời lượng: {c.estimated_time}</p>
                                             
@@ -224,17 +271,17 @@ const CourseDisplaySection = () => {
             />
         </section>
     )
-
 }
+
 
 const FooterSection = () => {
     return (
 
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_20px_var(--color-neutral)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
-                <div className = "text-center w-[calc(100%-300px)]">
-                    <h1 className = "text-[2rem] font-bold">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
-                    <p className = "text-[1.25rem] font-light text-gray-600 text-center">
+            <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
+                <div className = "flex flex-col items-center justify-center text-center w-[calc(100%-300px)]">
+                    <h1 className = "text-[2.5rem] text-[var(--color-primary)] w-[calc(100%-120px)]">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
+                    <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center">
                         Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
                     </p>
                 </div>
@@ -302,13 +349,13 @@ const FooterSection = () => {
             </div>
             <footer className = "h-[100px] flex items-center justify-between w-[calc(100%-24rem)]">
                 <div>
-                    <p>Copyright © 2025 AT AI.Tutor. All rights reserved.</p>
+                    <p>©2025 All rights reserved</p>
                 </div>
                 <div className = "flex items-center justify-center gap-2">
-                    <p><FacebookFilled style={{ fontSize: '20px' }}/></p>
-                    <p><InstagramFilled style={{ fontSize: '20px' }}/></p>
-                    <p><YoutubeFilled style={{ fontSize: '20px' }}/></p>
-                    <p><MailOutlined style={{ fontSize: '20px' }}/></p>
+                    <FacebookFilled style={{ fontSize: '20px' }}/>
+                    <InstagramFilled style={{ fontSize: '20px' }}/>
+                    <YoutubeFilled style={{ fontSize: '20px' }}/>
+                    <MailOutlined style={{ fontSize: '20px' }}/>
                 </div>
             </footer>
         </section>

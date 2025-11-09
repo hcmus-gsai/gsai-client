@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body suppressHydrationWarning={true}>
+      <body>
         <div id="app">
           {children}
         </div>

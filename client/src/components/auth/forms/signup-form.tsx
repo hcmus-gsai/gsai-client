@@ -108,9 +108,9 @@ const SignUpForm = () => {
                         name = "remember"
                         className = "form__checkbox !mt-1"
                     />
-                    <p className = "text-gray-500 font-normal font-sm">
+                    <span className = "text-gray-500 font-normal font-sm">
                         Tôi đã đọc và đồng ý với <Link href = "/privacy-policy">Điều khoản và điều kiện</Link> cùng <Link href = "/privacy-policy">Chính sách bảo mật</Link> của GSAI
-                    </p>
+                    </span>
                 </div>
             </Form.Item>
 

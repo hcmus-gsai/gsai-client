@@ -100,7 +100,7 @@ const FormLayout = ({
         <div
             className = {
                 twMerge(
-                    'relative m-auto flex flex-col items-center justify-start max-w-2xl min-h-[600px] w-[500px] h-[607px] overflow-clip rounded-3xl shadow-xl',
+                    'relative m-auto overflow-clip shadow-lg w-full h-[100%]',
                     className || 'bg-white',
                 )
             }
@@ -109,6 +109,7 @@ const FormLayout = ({
         </div>
     )
 }
+
 
 
 export {FormTitle, FormNavigation, FormLayout};
