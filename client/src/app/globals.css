@@ -8,3 +8,7 @@
   --color-bg_white: #FFFFFF;
   --color-bg_white_soft: #FAFAFA;
 }
+
+/* ::-webkit-scrollbar {
+  scrollbar-width: 100px;
+} */
