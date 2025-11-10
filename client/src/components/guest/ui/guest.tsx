@@ -276,7 +276,6 @@ const CourseDisplaySection = () => {
 
 const FooterSection = () => {
     return (
-
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
             <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
                 <div className = "flex flex-col items-center justify-center text-center w-[calc(100%-300px)]">
