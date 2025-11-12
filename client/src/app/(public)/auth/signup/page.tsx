@@ -9,7 +9,7 @@ import {FormTitle, FormNavigation, FormLayout} from '@/components/auth/ui/form';
 export default function SignUpPage() {
     return (
         <FormLayout
-            className = "!min-h-[750px]"
+            className = "my-10 bg-red-200"
         >
             <FormTitle 
                 title = "Đăng ký tài khoản"

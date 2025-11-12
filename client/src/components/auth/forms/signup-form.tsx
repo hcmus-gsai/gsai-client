@@ -5,6 +5,8 @@ import {GoogleSignIn} from '../ui/form';
 /*Tạo tính năng đăng nhập với Google*/
 
 import Link from 'next/link';
+import {useState} from 'react';
+import {useNotification} from '@/lib/hooks/use-notification';
 
 /*============================== */
 
@@ -16,6 +18,11 @@ const SignUpForm = () => {
     const finishHandler = async()  => {
         console.log(formData.getFieldsValue());
     }
+    const [isLoading, setIsLoading] = useState(false);
+    const email = Form.useWatch('email', formData);
+    const password = Form.useWatch('password', formData);
+    const confirmPassword = Form.useWatch('confirmPassword', formData);
+
 
     return (
         <Form

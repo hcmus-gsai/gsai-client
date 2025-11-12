@@ -1,6 +1,8 @@
 // src/app/(public)/student/page.tsx
 
 "use client";
+import '@ant-design/v5-patch-for-react-19';
+
 import { useState } from "react";
 import Image from "next/image";
 import { GreetingSection, CourseDisplaySection, FooterSection } from "@/components/guest/ui/guest";

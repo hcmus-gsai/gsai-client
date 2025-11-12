@@ -19,3 +19,19 @@ export default function ResendLinkPage() {
         </FormLayout>
     )
 }
+
+/**
+Inject endpoint
+import {EndpointBuilder} from "@reduxjs/toolkit/dist/query/endpointDefinitions";
+
+export const makeCrudEndpoint = <T, E extends string>(
+Entity: E,
+path: string,
+build: EndpointBuilder <any, any, any, any, any>
+
+) => {
+    return  {
+    [Entity]: build.query<T, void>({
+    }
+}
+*/

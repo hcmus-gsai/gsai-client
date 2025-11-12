@@ -49,6 +49,7 @@ type FunctionProps = {
 };
 
 const GreetingSection = () => {
+    const router = useRouter();
     
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
@@ -78,14 +79,9 @@ const GreetingSection = () => {
                     <div className = "flex items-center justify-center gap-2">
                     <Button
                         type="primary"
-                        // className="!bg-transparent !text-white hover:!bg-blue-400 hover:!text-white 
-                        //         !rounded-full !border !border-white !px-6 !py-[1.1rem] 
-                        //         !flex !items-center !justify-between !w-[157px]"
+                        onClick = {() => router.push("/auth/signin")}
                     >
-                        {/* Spacer to push icon right */}
                         <span>Tham gia ngay</span>
-
-                        {/* Icon */}
                         <span className="flex items-center justify-center bg-white rounded-full p-2">
                             <ArrowRightOutlined className="!rotate-315 !text-[var(--color-secondary)]" />
                         </span>

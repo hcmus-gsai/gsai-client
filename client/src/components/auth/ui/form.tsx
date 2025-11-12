@@ -80,7 +80,7 @@ const FormNavigation = ({
         <Paragraph style={{ textAlign: 'center' }}>
             {description}{' '}
             <Link href={href}>
-                <strong>{textHref}</strong>
+                <span className = "text-[var(--color-secondary)] font-md font-sm underline cursor-pointer">{textHref}</span>
             </Link>
         </Paragraph>
     )
@@ -100,13 +100,14 @@ const FormLayout = ({
         <div
             className = {
                 twMerge(
-                    'relative m-auto overflow-clip shadow-lg w-full h-[100%]',
+                    'relative m-auto overflow-clip w-full h-[100%] flex items-center justify-center',
                     className || 'bg-white',
                 )
             }
         >
-            <div className="content-start w-full h-full p-[2rem]">{children}</div>
+            <div className="content-start  p-[2rem] w-[31.25rem] flex flex-col space-y-6 rounded-[1.25rem] border border-gray-200 shadow-lg">{children}</div>
         </div>
+        // h-[37.9375rem]
     )
 }
 
