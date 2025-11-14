@@ -1,4 +1,5 @@
 'use client';
+import '@ant-design/v5-patch-for-react-19';
 import {useRouter} from 'next/navigation';
 import {Form, Input,  Button, Checkbox} from "antd";
 import {GoogleSignIn} from '../ui/form';
@@ -7,7 +8,7 @@ import {GoogleSignIn} from '../ui/form';
 import Link from 'next/link';
 import {useState} from 'react';
 import {useNotification} from '@/lib/hooks/use-notification';
-
+import {authClient} from '@/lib/auth-client';
 /*============================== */
 
 const SignUpForm = () => {
@@ -15,14 +16,59 @@ const SignUpForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
 
+    const router = useRouter();
     const finishHandler = async()  => {
-        console.log(formData.getFieldsValue());
+
+        try {
+            const data = formData.getFieldsValue();
+
+            const defaultName = data.email.split('@')[0];
+            const defaultGender = "";
+            const defaultPhoneNumber = "";
+            const defaultBirthday = new Date();
+            const defaultProvince = "";
+            const defaultRole = "STUDENT";
+            const defaultIdentityCardImage = "";
+            const defaultProfileCompleted = false;
+            const defaultProfileImage = "";
+            setIsLoading(true);
+            
+            const response = await authClient.signUp.email({
+                email: data.email,
+                password: data.password,
+                name: defaultName,
+                profileCompleted: defaultProfileCompleted,
+                gender: defaultGender,
+                phoneNumber: defaultPhoneNumber,
+                // birthday: defaultBirthday,
+                province: defaultProvince,
+                role: defaultRole,
+
+                // identityCardImage: defaultIdentityCardImage,
+                // profileImage: defaultProfileImage
+            });
+
+            if (response.error) {
+                setIsLoading(false);
+                throw new Error(response.error.message);
+            }
+
+            // Redirect to complete profile page
+            router.push("/auth/complete-profile");
+            return response;
+        }
+        catch(error) {
+            setIsLoading(false);
+            console.error("An unexpected error occurred during sign-up:", error);
+        }
     }
+
     const [isLoading, setIsLoading] = useState(false);
+
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
     const confirmPassword = Form.useWatch('confirmPassword', formData);
-
+    const remember = Form.useWatch('remember', formData);
 
     return (
         <Form
@@ -33,6 +79,15 @@ const SignUpForm = () => {
             initialValues = {{remember: false}}
             onFinish = {finishHandler}
         >
+            {/* <div className = "mb-2">
+                <p className="font-medium font-bold">Họ tên<span className="text-red-500">*</span></p>
+            </div>
+            <Form.Item
+                name = "name"
+            >
+                <Input placeholder = "Nguyen Van A" className = "form__input" />
+            </Form.Item> */}
+
             <div className = "mb-2">
                 <p className="font-medium font-bold">Email<span className="text-red-500">*</span></p>
             </div>
@@ -84,7 +139,7 @@ const SignUpForm = () => {
             </div>
 
             <Form.Item
-                name = "cofirmPassword"
+                name = "confirmPassword"
                 rules = {[
                     {
                         required: true,
@@ -122,7 +177,15 @@ const SignUpForm = () => {
             </Form.Item>
 
             <Form.Item>
-                <Button type = "primary" htmlType = "submit" className = "!form__button !w-[100%]">
+                <Button 
+                    type = "primary" 
+                    htmlType = "submit" 
+                    disabled = {isLoading || !password || !email || !confirmPassword || !remember}
+                    className = {`!form__button !w-[100%] ${
+                        isLoading || !password || !email || !confirmPassword || !remember ?
+                        "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
+                    }`}
+                >
                     Đăng ký
                 </Button>
             </Form.Item>

@@ -4,15 +4,8 @@ import {Typography, Button} from 'antd';
 import Link from 'next/link';
 const {Title, Paragraph} = Typography;
 import GoogleLogo from '../../../../public/shared/Google Logo.svg';
-import {createAuthClient} from "better-auth/react";
-import {adminClient, magicLinkClient} from "better-auth/client/plugins"
 import Image from 'next/image';
-
-const authClient = createAuthClient({
-    plugins: [
-        adminClient(), magicLinkClient()
-    ]
-});
+import {authClient} from '@/lib/auth-client';
 
 interface GoogleSignInProps {
     children?:React.ReactNode;
@@ -27,10 +20,15 @@ export function GoogleSignIn({
 }:GoogleSignInProps) {
     const handleGoogleSignIn = async() => {
         try{
-            await authClient.signIn.social({
+            const response = await authClient.signIn.social({
                 provider: "google",
                 callbackURL: callbackUrl,
             })
+            if (response.error) {
+                throw new Error(response.error.message);
+            }
+            console.log("Google sign-in response:", response);
+            return response;
         }
         catch(error){
             console.error("Google sign-in error:", error);
@@ -88,10 +86,12 @@ const FormNavigation = ({
 
 const FormLayout = ({
     className,
+    formWidth ,
     visibleBackground = true,
     children,
 }:{
     className?:string;
+    formWidth?:string;
     visibleBackground?:boolean;
     children:React.ReactNode;
 })  => {
@@ -105,9 +105,9 @@ const FormLayout = ({
                 )
             }
         >
-            <div className="content-start  p-[2rem] w-[31.25rem] flex flex-col space-y-6 rounded-[1.25rem] border border-gray-200 shadow-lg">{children}</div>
+            <div className= {twMerge("content-start  p-[2rem]  flex flex-col space-y-6 rounded-[1.25rem] border border-gray-200 shadow-lg", formWidth || 'w-[31.25rem]')}>{children}</div>
         </div>
-        // h-[37.9375rem]
+        // h-[37.9375rem]w-[31.25rem]
     )
 }
 

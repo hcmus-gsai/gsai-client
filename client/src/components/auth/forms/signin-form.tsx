@@ -12,6 +12,8 @@ import {useNotification} from '@/lib/hooks/use-notification';
 import Link from "next/link";
 import { router } from 'better-auth/api';
 import {useRouter} from "next/navigation";
+
+import {authClient} from '@/lib/auth-client';
 const SignInForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
@@ -24,34 +26,62 @@ const SignInForm = () => {
     const finishHandler = async() => {
 
         const data = formData.getFieldsValue();
+        
         setIsLoading(true);
-       
-        // const response = await signIn('credentials', {
-        //     email: data.email,
-        //     password : data.password,
-        //     redirect: false,
-        // });
+
+        const response = await authClient.signIn.email({
+            email: data.email,
+            password: data.password
+        })
+        
+        if (response.error) {
+            throw new Error(response.error.message);
+        }
+
+        setIsLoading(false);
 
         // if (!response?.error && response !== undefined) {
         //     notify({
         //         message: "Đăng nhập thành công",
         //         description: "Chào mừng bạn đến với EPIS"
-        //     });
-        // }else{
-        //     notify({
-        //         message: "Đăng nhập thất bại",
-        //         description: "Vui lòng kiểm tra lại email và mật khẩu",
-        //         notiType: 'error'
         //     })
-        //     setIsLoading(false);
         // }
+
+        return response;
+       
 
     }
 
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
-    const handleGoogleSignIn = async() => {
 
+    // const handleGoogleSignIn = async() => {
+    //     try {
+    //         await authClient.signIn.social({
+    //             provider: "google",
+    //             callbackURL: "/",
+    //         })
+    //     }
+    //     catch(error) {
+    //         console.error("An unexpected error occurred during Google sign-in:", error);
+    //     }
+    // }
+
+    const handleGoogleSignIn = async() => {
+        try {
+            const response = await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/",
+            })
+            if (response.error) {
+                throw new Error(response.error.message);
+            }
+            console.log("Google sign-in response:", response);
+            return response;
+        }
+        catch(error) {
+            console.error("An unexpected error occurred during Google sign-in:", error);
+        }
     }
 
     
@@ -144,9 +174,16 @@ const SignInForm = () => {
             <Form.Item
                 name = "google-sign-in"
             >
-                <GoogleSignIn
+                {/* <GoogleSignIn
                     className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
-                />
+                /> */}
+                <Button
+                    type = "primary"
+                    className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
+                    onClick = {handleGoogleSignIn}
+                >
+                    Đăng nhập với google
+                </Button>
             </Form.Item>
         </Form>
     )

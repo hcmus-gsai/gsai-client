@@ -1,4 +1,5 @@
 'use client';
+import "@ant-design/v5-patch-for-react-19";
 import {useState} from "react";
 import {Typography} from "antd";
 import {ProfileCompletionForm} from '@/components/auth/forms/profile-completion-form';
@@ -13,8 +14,11 @@ import GradientTopRight from "@/../public/guest/gradient_top_right.svg";
 export default function ResendLinkPage() {
     return (
         
-        <FormLayout>
-            <div className="relative">
+        <FormLayout
+            formWidth = "w-[64%]" //910px
+            className = "py-10"
+        >
+            {/* <div className="relative">
                 <div className="absolute top-0 left-0 -z-10 pointer-events-none">
                     <Image
                         src={GradientTopLeft}
@@ -35,7 +39,7 @@ export default function ResendLinkPage() {
                         priority
                     />
                 </div>
-            </div> 
+            </div>  */}
             <FormTitle 
                 title = "Hoàn thành Hồ sơ"
             />

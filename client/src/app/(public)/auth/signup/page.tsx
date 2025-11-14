@@ -9,7 +9,7 @@ import {FormTitle, FormNavigation, FormLayout} from '@/components/auth/ui/form';
 export default function SignUpPage() {
     return (
         <FormLayout
-            className = "my-10 bg-red-200"
+            className = "py-10"
         >
             <FormTitle 
                 title = "Đăng ký tài khoản"
@@ -17,7 +17,7 @@ export default function SignUpPage() {
             />
             <SignUpForm/>
             <FormNavigation
-                href = "signin"
+                href = "/auth/signin"
                 textHref = "Đăng nhập"
                 description = "Đã có tài khoản?"
             />
