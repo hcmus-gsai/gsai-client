@@ -14,6 +14,8 @@ import { router } from 'better-auth/api';
 import {useRouter} from "next/navigation";
 
 import {authClient} from '@/lib/auth-client';
+
+import { auth } from '@/lib/auth';
 const SignInForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
@@ -26,12 +28,35 @@ const SignInForm = () => {
     const finishHandler = async() => {
 
         const data = formData.getFieldsValue();
-        
+        //Load name from database correspond to email
+        async function getUserName(email:string) {
+            const {data: session, error} = await authClient.getSession();
+            if (session) {
+                const user = session.user;
+                return user.name;
+            }
+            if (error) {
+                throw new Error(error.message);
+            }
+            return null;
+        }
+        const userName = await getUserName(data.email);
+        console.log("User name:", userName);
         setIsLoading(true);
+        /*
+        The if case here prevent a user 
+        -> user signup only fill in the password + email and then
+            -> Go to signin page and signin => this is not correct behavior
+        -> Correct flow: user fill in (email+ password) -> redirect to profile completion page to fill in the rest of the value
+        -> After that user can signin with email + password
+        */
+        if (!userName || userName === "" || userName === undefined) {
+            throw new Error("User name not found");
+        }
 
         const response = await authClient.signIn.email({
             email: data.email,
-            password: data.password
+            password: data.password,
         })
         
         if (response.error) {
@@ -39,33 +64,12 @@ const SignInForm = () => {
         }
 
         setIsLoading(false);
-
-        // if (!response?.error && response !== undefined) {
-        //     notify({
-        //         message: "Đăng nhập thành công",
-        //         description: "Chào mừng bạn đến với EPIS"
-        //     })
-        // }
-
         return response;
-       
-
     }
 
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
 
-    // const handleGoogleSignIn = async() => {
-    //     try {
-    //         await authClient.signIn.social({
-    //             provider: "google",
-    //             callbackURL: "/",
-    //         })
-    //     }
-    //     catch(error) {
-    //         console.error("An unexpected error occurred during Google sign-in:", error);
-    //     }
-    // }
 
     const handleGoogleSignIn = async() => {
         try {
@@ -111,7 +115,6 @@ const SignInForm = () => {
                     }
                 ]}
             >
-                
                 <Input 
                     placeholder = "example@gmail.com"
                     className = "form__input"
@@ -136,17 +139,12 @@ const SignInForm = () => {
                     placeholder = "Nhập mật khẩu"
                     className = "form__input"
                 />
-                {/* <div className = "flex items-center justify-end">
-                    <p className = "text-[var(--color-secondary)] font-md font-sm underline cursor-pointer"
-                        onClick = {() => router.push("/auth/rename-password")}>
-                            Quên mật khẩu?
-                    </p>
-                </div> */}
+                
             </Form.Item>
             <p className = "flex items-center justify-end relative top-[-1rem]">
-                    <span className = "text-[var(--color-secondary)] font-md font-sm underline cursor-pointer"
-                        onClick = {() => router.push("/auth/rename-password")}
-                    >Quên mật khẩu?</span>
+                <span className = "text-[var(--color-secondary)] font-md font-sm underline cursor-pointer"
+                    onClick = {() => router.push("/auth/rename-password")}
+                >Quên mật khẩu?</span>
             </p>
 
             <Form.Item>
@@ -174,9 +172,7 @@ const SignInForm = () => {
             <Form.Item
                 name = "google-sign-in"
             >
-                {/* <GoogleSignIn
-                    className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
-                /> */}
+                
                 <Button
                     type = "primary"
                     className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"

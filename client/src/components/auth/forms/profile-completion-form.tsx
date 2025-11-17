@@ -121,6 +121,8 @@ const ProfileCompletionForm = () => {
         if(!file) {
             return;
         }
+        //Resource Reference: https://stackoverflow.com/questions/74973640/cloudinary-image-upload
+
 
         const timestamp = Math.round(new Date().getTime() / 1000);
         const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -176,107 +178,62 @@ const ProfileCompletionForm = () => {
             previewUrl: URL.createObjectURL(file),
             isValid: true,
             error: null
-        })
+        });
 
-
-
-        //Resource Reference: https://stackoverflow.com/questions/74973640/cloudinary-image-upload
-
-
-        // const response = await fetch("/api/image-upload");
-        // const data = await response.json();
-        // const {signature, timestamp} = data;
-
-        // const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`
-
-
-        // const currentFormData = new FormData();
-        // currentFormData.append("file", file);
-        // currentFormData.append("api_key", process.env.CLOUDINARY_API_KEY!);
-        // currentFormData.append("signature", signature);
-        // currentFormData.append("timestamp", timestamp.toString());
-        // // currentFormData.append("folder", "profile");
-        // currentFormData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
-        
-        // const uploadResponse = await fetch(url, {method: "POST", body: currentFormData});
-        // const uploadData = await uploadResponse.json();
-        // const {secure_url} = uploadData.info;
-
-        // setProfileUpload({
-        //     fileObj: file,
-        //     previewUrl: secure_url,
-        //     isValid: true,
-        //     error: null
-        // });
-
-        // console.log(secure_url);
-        // formData.setFieldsValue({
-        //     profileImage: secure_url
-        // });
-
-
-        
-
-        //======
-        
-        // let isValidExtension = true;
-        // const maxSizeMb = 10;
-        // const maxSizeInBytes = maxSizeMb * 1024 * 1024;
-
-        // if (file.size > maxSizeInBytes) {
-        //     isValidExtension = false;
-        // }
-
-        // const allowedExtensions = ['image/jpeg', 'image/png', 'image/jpg'];
-        // if(!allowedExtensions.includes(file.type)) {
-        //     isValidExtension = false;
-        // }
-
-        // if(!isValidExtension) {
-        //     setProfileUpload({
-        //         fileObj: null,
-        //         previewUrl: null,
-        //         isValid: false,
-        //         error: 'Chỉ chấp nhận file JPEG, PNG, JPG'
-        //     });
-        //     return;
-        // }
-
-        // setProfileUpload({
-        //     fileObj: file,
-        //     previewUrl: URL.createObjectURL(file),
-        //     isValid: true,
-        //     error: null
-        // });
     }
 
-    const handleIdentityCardUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleIdentityCardUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if(!file) {
+        if (!file) {
             return;
         }
-        let isValidExtension = true;
-        
-        const maxSizeMb = 10;
-        const maxSizeInBytes = maxSizeMb * 1024 * 1024;
-        if (file.size > maxSizeInBytes) {
-            isValidExtension = false;
+
+        const timestamp = Math.round(new Date().getTime() / 1000);
+        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+        const paramsToSign = {
+            timestamp: timestamp,
+            upload_preset: uploadPreset,
+        }
+        const signatureResponse = await fetch("/api/image-upload", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({paramsToSign}),
+        });
+
+        if(!signatureResponse.ok) {
+            throw new Error("Failed to get signature");
         }
 
-        const allowedExtensions = ['application/pdf', 'image/png', 'image/jpeg'];
-        if (!allowedExtensions.includes(file.type)) {
-            isValidExtension = false;
+        const signature = await signatureResponse.json();
+
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+        const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+        const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+
+        const currentFormData = new FormData();
+        currentFormData.append("file", file);
+        currentFormData.append("api_key", apiKey!);
+        currentFormData.append("signature", signature);
+        currentFormData.append("timestamp", timestamp.toString());
+
+        const uploadResponse = await fetch(url, {
+            method: "POST",
+            body: currentFormData
+        });
+
+        if(!uploadResponse.ok) {
+            throw new Error('Upload failed');
         }
 
-        if(!isValidExtension) {
-            setIdentityCardUpload({
-                fileObj: null,
-                previewUrl: null,
-                isValid: false,
-                error: 'Chỉ chấp nhận file PDF'
-            });
-            return;
-        }
+        const uploadData = await uploadResponse.json();
+        const secure_url = uploadData.secure_url;
+
+        formData.setFieldsValue({
+            identityCardImage: secure_url
+        })
+
         setIdentityCardUpload({
             fileObj: file,
             previewUrl: URL.createObjectURL(file),
