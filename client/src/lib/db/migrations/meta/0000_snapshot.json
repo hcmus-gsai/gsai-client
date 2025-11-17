@@ -1,5 +1,5 @@
 {
-  "id": "a9c5311b-ff4b-4ba3-b479-7df509afb69b",
+  "id": "69d3d44b-9999-4341-aa5a-b1bdb8002cfd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -277,7 +277,19 @@
         },
         "birthday": {
           "name": "birthday",
-          "type": "timestamp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profile_image": {
+          "name": "profile_image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "identity_card_image": {
+          "name": "identity_card_image",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

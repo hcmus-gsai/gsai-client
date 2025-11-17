@@ -22,11 +22,6 @@ export const authClient = createAuthClient({
                 required: true
               },
 
-              // birthday: {
-              //   type: 'date',
-              //   required: true
-              // },
-
               province: {
                 type: 'string',
                 required: true
@@ -37,15 +32,20 @@ export const authClient = createAuthClient({
                 required: true
               },
 
-              // identityCardImage: {
-              //   type: 'string',
-              //   required: true
-              // },
+              birthday: {
+                type: 'string',
+                required: true
+              },
 
-              // profileImage: {
-              //   type: 'string',
-              //   required: false
-              // }
+              identityCardImage: {
+                type: 'string',
+                required: false
+              },
+
+              profileImage: {
+                type: 'string',
+                required: false
+              }
             }
         })
     ]

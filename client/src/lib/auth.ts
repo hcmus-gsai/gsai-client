@@ -57,10 +57,10 @@ export const auth = betterAuth({
                 defaultValue: null
             },
 
-            // birthday: {
-            //     type: "string", // Store as ISO string or timestamp
-            //     required: true,
-            // },
+            birthday: {
+                type: "string", // Store as ISO string (YYYY-MM-DD)
+                required: true,
+            },
 
             role: {
                 type: "string",
@@ -68,15 +68,15 @@ export const auth = betterAuth({
                 defaultValue: null
             },
 
-            // identityCardImage: {
-            //     type: "string",
-            //     required: false,
-            // },
+            identityCardImage: {
+                type: "string",
+                required: false,
+            },
 
-            // profileImage: {
-            //     type: "string",
-            //     required: false,
-            // },
+            profileImage: {
+                type: "string",
+                required: false,
+            },
 
             
         }

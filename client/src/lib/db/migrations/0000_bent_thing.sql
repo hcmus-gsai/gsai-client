@@ -39,7 +39,9 @@ CREATE TABLE "user" (
 	"phone_number" text,
 	"role" text DEFAULT 'STUDENT',
 	"province" text,
-	"birthday" timestamp,
+	"birthday" text,
+	"profile_image" text,
+	"identity_card_image" text,
 	"last_login_at" timestamp,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );

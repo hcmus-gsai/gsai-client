@@ -25,11 +25,12 @@ const SignUpForm = () => {
             const defaultName = data.email.split('@')[0];
             const defaultGender = "";
             const defaultPhoneNumber = "";
-            const defaultBirthday = new Date();
             const defaultProvince = "";
             const defaultRole = "STUDENT";
-            const defaultIdentityCardImage = "";
             const defaultProfileCompleted = false;
+
+            const defaultIdentityCardImage = "";
+            const defaultBirthday = new Date().toISOString();
             const defaultProfileImage = "";
             setIsLoading(true);
             
@@ -40,12 +41,11 @@ const SignUpForm = () => {
                 profileCompleted: defaultProfileCompleted,
                 gender: defaultGender,
                 phoneNumber: defaultPhoneNumber,
-                // birthday: defaultBirthday,
                 province: defaultProvince,
                 role: defaultRole,
-
-                // identityCardImage: defaultIdentityCardImage,
-                // profileImage: defaultProfileImage
+                birthday: defaultBirthday,
+                identityCardImage: defaultIdentityCardImage,
+                profileImage: defaultProfileImage
             });
 
             if (response.error) {

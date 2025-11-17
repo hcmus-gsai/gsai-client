@@ -16,9 +16,9 @@ export const user = pgTable("user", {
   phoneNumber: text("phone_number"),
   role: text("role").default("STUDENT"),
   province: text("province"),
-  birthday: timestamp("birthday"),
-  // profileImage: text("profile_image"),
-  // identityCardImage: text("identity_card_image"),
+  birthday: text("birthday"), // Store as ISO string (YYYY-MM-DD)
+  profileImage: text("profile_image"),
+  identityCardImage: text("identity_card_image"),
   lastLoginAt: timestamp("last_login_at"),
 });
 
