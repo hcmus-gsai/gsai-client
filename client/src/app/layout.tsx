@@ -1,8 +1,9 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import "@ant-design/v5-patch-for-react-19";
-import { Provider} from "react-redux";
-import { store } from "../store/store";
+import { ReduxProvider } from "./provider";
+
 
 export const metadata: Metadata = {
   title: "GiaSuAI",
@@ -17,11 +18,11 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
-        <Provider store={store}>
+        <ReduxProvider>
           <div id="app">
             {children}
           </div>
-        </Provider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+'use client';
 import {Button, Form, Input, Select, Radio, InputRef, Upload} from 'antd';
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";

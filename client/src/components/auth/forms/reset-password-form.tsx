@@ -4,7 +4,6 @@ import {Form, Input, Button, message} from 'antd';
 import {twMerge} from 'tailwind-merge';
 import Image from 'next/image';
 import {GoogleSignIn} from '../ui/form';
-import { authClient } from '@/lib/auth-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -15,45 +14,7 @@ const RenamePasswordForm = () => {
     const formData = formInstance[0];
     const [loading, setLoading] = useState(false);
 
-    const finishHandler = async() => {
-        try {
-            setLoading(true);
-            const data = formData.getFieldsValue();
-            console.log(data);
-            
-            // Lấy token từ URL
-            const token = searchParams.get('token');
-            console.log(token);
-            
-            if(!token) {
-                message.error("Token không hợp lệ hoặc đã hết hạn");
-                return;
-            }
-
-            // Sử dụng better-auth's reset password API
-            const response = await authClient.resetPassword({
-                newPassword: data.password,
-                token: token,
-            });
-
-            if(response.error) {
-                message.error(response.error.message || "Đặt lại mật khẩu thất bại");
-                return;
-            }
-
-            message.success("Đặt lại mật khẩu thành công!");
-            
-            // Redirect về trang đăng nhập sau 1.5s
-            setTimeout(() => {
-                router.push('/auth/signin');
-            }, 1500);
-
-        } catch (error: any) {
-            message.error(error.message || "Có lỗi xảy ra, vui lòng thử lại");
-        } finally {
-            setLoading(false);
-        }
-    }
+    const finishHandler = () => {}
 
     return (
         <Form
