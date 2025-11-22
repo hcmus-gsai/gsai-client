@@ -107,7 +107,6 @@ export default function StudentCoursePage() {
                 buttonText = "Tham gia ngay"
                 isCourse = {true}
                 hasTopGradient = {false}
-                hasMiddleGradient = {true}
                 hasCurveSpace = {false}
             />
             <CourseSyllabusSection />

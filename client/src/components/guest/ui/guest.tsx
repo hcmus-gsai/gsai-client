@@ -33,6 +33,8 @@ import workFlowPic from "../../../../public/guest/workflowPic.svg";
 
 import testimonialPic from "../../../../public/guest/testimonialPic.svg";
 
+import { RedirectButton } from '@/components/shared/redirect-button'
+
 type FunctionBlock = {
     title: string;
     subtext: string;
@@ -53,7 +55,7 @@ const GreetingSection = () => {
     
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className="flex w-full items-center justify-between h-[4.8125rem] px-24">
+            <div className="flex w-[78%] items-center justify-between h-[4.8125rem]">
                 <div className = "flex flex-1 items-center justify-start gap-2">
                     <div className = "text-2xl font-bold">
                         <p className = "!text-[var(--color-bg_white)]"><span className = "!text-[var(--color-bg_white)]">AT</span> AI.Tutor</p>
@@ -77,15 +79,14 @@ const GreetingSection = () => {
                 </div>
                 <div className = "flex flex-1 items-center justify-end gap-2">
                     <div className = "flex items-center justify-center gap-2">
-                        <Button
-                            type="primary"
-                            onClick = {() => router.push("/auth/signin")}
-                        >
-                            <span>Tham gia ngay</span>
-                            <span className="flex items-center justify-center bg-white rounded-full p-2">
-                                <ArrowRightOutlined className="!rotate-315 !text-[var(--color-secondary)]" />
-                            </span>
-                        </Button>
+                        <RedirectButton
+                            href = "/auth/signin"
+                            text = "Tham gia ngay"
+                            buttonText = "var(--color-bg_white)"
+                            buttonBorder = "white"
+                            iconBg = "var(--color-bg-white)"
+                            iconText = "var(--color-secondary)"
+                        />
                     </div>
                 </div>
             </div>
@@ -208,13 +209,13 @@ const CourseDisplaySection = () => {
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)]">
+            <div className = "flex flex-col items-center justify-center w-[78%]">
                 <div className = "text-center">
                     <h1 className = "text-[3rem] font-bold">Môn học phổ biến hiện nay</h1>
                     <p className = "text-[1.25rem] font-light text-gray-600 text-center">Chọn môn học đúng hướng, nâng tầm hồ sơ tương lai!</p>
                 </div>
             </div>
-            <div className = "flex items-center justify-center w-[calc(100%-24rem)]">
+            <div className = "flex items-center justify-center w-[78%]">
                 <Menu 
                     mode = "horizontal"
                     defaultSelectedKeys={["home"]}
@@ -255,8 +256,9 @@ const CourseDisplaySection = () => {
                     }}
                 />
             </div>
-            <div className = "w-full h-full flex items-center justify-center">
-                <Row gutter = {[16,16]} className = "w-[calc(100%-300px)] mx-auto p-4">
+
+            <div className = "w-[78%] h-full flex items-center justify-center">
+                <Row gutter = {[16,16]} className = "mx-auto">
                     {
                         courseSampleData.map((c, idx) => {
                             return (
@@ -301,7 +303,6 @@ const CourseDisplaySection = () => {
     )
 }
 
-
 const FooterSection = ({
     hasRegisterBox = true
 }:{
@@ -311,8 +312,8 @@ const FooterSection = ({
         <section className = "w-full flex flex-col items-center justify-center">
             {
                 hasRegisterBox && (
-                    <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
-                        <div className = "flex flex-col items-center justify-center text-center w-[calc(100%-300px)]">
+                    <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[78%]">
+                        <div className = "flex flex-col items-center justify-center text-center w-full">
                             <h1 className = "text-[2.5rem] text-[var(--color-primary)] w-[calc(100%-120px)]">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center">
                                 Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
@@ -328,7 +329,7 @@ const FooterSection = ({
                 )
             }
            
-            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[calc(100%-24rem)]">
+            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[78%]">
                 <div className = "flex flex-col justify-center items-center">
                     <div>
                         <div>
@@ -383,7 +384,7 @@ const FooterSection = ({
                     </div>
                 </div>
             </div>
-            <footer className = "h-[100px] flex items-center justify-between w-[calc(100%-24rem)]">
+            <footer className = "h-[100px] flex items-center justify-between w-[78%]">
                 <div>
                     <p>©2025 All rights reserved</p>
                 </div>
@@ -397,7 +398,6 @@ const FooterSection = ({
         </section>
     )
 }
-
 
 const FunctionSection = (
     {
@@ -547,9 +547,9 @@ const WorkFlowSection = () => {
     
     return (
         <section
-            className="w-full min-h-[50vh] bg-white"
+            className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
         >
-            <div className="w-full h-full py-19 px-38 grid grid-cols-12">
+            <div className="w-[78%] h-full py-19 grid grid-cols-12">
                 <div className="col-span-7 flex flex-col">
                     <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
 
@@ -655,7 +655,12 @@ const TestimonialSection = () => {
                         <Card 
                             className="w-full h-full" 
                             style={{ borderRadius: "20px", backgroundColor: "#06283D", color:"white", padding: "2vw" }}
-                            bodyStyle={{ height: "100%"}}>
+                            styles={{
+                                body: {
+                                height: "100%",
+                                },
+                            }}
+                        >
                             <div className="h-full flex flex-col justify-between items-center">
                                 <div className="flex text-[2vw] orde-first">
                                     <p>Tên giáo viên</p>

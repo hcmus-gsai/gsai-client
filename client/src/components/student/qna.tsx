@@ -12,9 +12,9 @@ const QASection = () => {
 
     return (
         <section
-            className="w-full h-[90vh] bg-white"
+            className="w-full h-[90vh] flex flex-col items-center justify-between bg-white"
         >
-            <div className="w-full h-full py-19 px-38 flex flex-col">
+            <div className="h-full w-[calc(100%-12rem)] py-19 flex flex-col">
                 <p className="text-[3.8vw] font-semibold mb-8">Câu hỏi thường gặp</p>
 
                 <div className="grid grid-cols-2 gap-4">

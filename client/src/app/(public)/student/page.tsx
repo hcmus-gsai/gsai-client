@@ -5,7 +5,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { useState } from "react";
 import Image from "next/image";
-import { GreetingSection, CourseDisplaySection, FooterSection } from "@/components/guest/ui/guest";
+import { GreetingSection, FunctionSection, WorkFlowSection, CourseDisplaySection, FooterSection } from "@/components/guest/ui/guest";
 import Link from "next/link";
 import GradientTopLeft from "@/../public/guest/gradient_top_left.svg";
 import GradientTopRight from "@/../public/guest/gradient_top_right.svg";
@@ -16,8 +16,8 @@ export default function StudentLandingPage() {
 
   return (
     <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-        <nav className="bg-primary h-10 text-white p-4">
-            <div className="container mx-auto flex h-full items-center justify-between px-4">
+        <nav className="flex flex-col items-center bg-primary h-10 text-white">
+            <div className="w-[78%] flex h-full items-center justify-between">
                 <div>
                     <Link href="/student" className="mr-15 text-white">
                         Học sinh
@@ -28,6 +28,7 @@ export default function StudentLandingPage() {
                 </div>
             </div>
         </nav>
+
         <div className="relative">
             <div className="absolute top-0 left-0 -z-10 pointer-events-none">
                 <Image
@@ -52,6 +53,30 @@ export default function StudentLandingPage() {
         </div> 
         
         <GreetingSection />
+        <FunctionSection 
+          title="Khám phá các chức năng dành cho học sinh"
+          firstBlock={{
+            title: "Học tập thông minh",
+            subtext: "Sử dụng AI để hỗ trợ việc học tập và nghiên cứu của bạn.",
+            button: "Tìm hiểu thêm",
+          }}
+          secondBlock={{
+            title: "Học tập thông minh",
+            subtext: "Sử dụng AI để hỗ trợ việc học tập và nghiên cứu của bạn.",
+            button: "Tìm hiểu thêm",
+          }}
+          thirdBlock={{
+            title: "Học tập thông minh",
+            subtext: "Sử dụng AI để hỗ trợ việc học tập và nghiên cứu của bạn.",
+            button: "Tìm hiểu thêm",
+          }}
+          fourthBlock={{
+            title: "Học tập thông minh",
+            subtext: "Sử dụng AI để hỗ trợ việc học tập và nghiên cứu của bạn.",
+            button: "Tìm hiểu thêm",
+          }}
+        />
+        <WorkFlowSection />
         <CourseDisplaySection />
         <FooterSection />
 

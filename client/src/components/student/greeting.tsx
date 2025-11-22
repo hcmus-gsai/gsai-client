@@ -3,9 +3,12 @@
 import Image from "next/image";
 import { Button } from "antd";
 import AbstractTop from "@/../public/student/AbstractTop.svg";
-import AbstractMiddle from "@/../public/student/AsbtractMiddle.svg";
-import CurveSpace from "@/../public/student/CurveSpace.svg";
+import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
+import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";
 import { string } from "better-auth";
+
+import { CourseCategoryComponent } from '@/components/student/course-category-props';
+
 
 const StudentGreetingSection = (
 {
@@ -14,7 +17,6 @@ const StudentGreetingSection = (
     isCourse = true,
     buttonText,
     hasTopGradient = true,
-    hasMiddleGradient = true,
     hasCurveSpace = true,
 }:{
     title: string,
@@ -22,55 +24,109 @@ const StudentGreetingSection = (
     isCourse?: boolean
     buttonText: string
     hasTopGradient?: boolean
-    hasMiddleGradient?: boolean
     hasCurveSpace?: boolean
 }) => {
-
+    const learningCategory = [
+        {
+            id: 1,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 2,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 3,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 4,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 5,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 6,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 7,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 8,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 9,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 10,
+            name: 'Lập trình',
+            image: '/images/learning-category-1.jpg'
+        },
+    ];
+    var columns = 4;
 
     return (
-        <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
+        <section className = "w-full h-[100vh] flex flex-col">
             {hasTopGradient && (
                 <Image 
-                    src = {AbstractTop} alt = "Curve Space" width = {0} height = {0}
-                    className = "absolute top-0 left-0 w-full h-auto z-0"
+                    src = {AbstractTop} alt = "Curve Space Top" width = {0} height = {0}
+                    className = "absolute top-0 left-0 w-full h-auto z-10"
                 />
             )}
-            {hasMiddleGradient && (
-                <Image 
-                    src = {AbstractMiddle} alt = "Curve Space" width = {0} height = {0}
-                    className = "absolute top-0 left-0 w-full h-auto z-0"
-                />
-            )}
-           
-            <div className = "w-full h-[100vh] flex flex-col items-center justify-center z-10">
-                <div className = "w-[calc(100%-24rem)] h-[242px] flex items-center justify-between">
+
+            <div className="w-full h-[70%] absolute top-0 left-0 z-0">
+                {hasCurveSpace ? (
+                    <Image 
+                        src = {AbstractNCurve} alt = "Curve Space Middle" width = {0} height = {0}
+                        className = "w-full h-auto"
+                    />
+                ) : (
+                    <Image 
+                        src = {AbstractMiddle} alt = "Curve Space Middle" width = {0} height = {0}
+                        className = "w-full h-auto"
+                    />
+                )}
+            </div>
+            
+            <div className = "w-full h-full flex flex-col items-center z-10">
+                <div className = "w-[calc(100%-24rem)] h-[242px] mt-[15vh] flex items-center justify-between">
                     <div className = "h-full w-[546px] flex flex-col items-start justify-between">
                         <div className = "flex flex-col items-start justify-between w-full">                    
                             <p className = "text-[3.5rem] font-bold text-[var(--color-primary)]">{title}</p>
                             <p className = "text-[1rem] font-bold text-[var(--color-primary)]">{description}</p>
                         </div>
                         <div>
-                            <Button className = "!bg-black !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]">Thời gian biểu</Button>
+                            <Button className = "!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]">Thời gian biểu</Button>
                         </div>
                     </div>
                 </div>
-                <div className = "w-[calc(100%-24rem)] h-[242px] flex flex-col items-center justify-between">
-                    
+                <div className = "w-[calc(100%-24rem)] h-[242px] mt-[10vh] flex flex-col items-center justify-between">
                     <div className = "h-full w-full flex flex-col items-center justify-between z-10">
                         <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
                     </div>
-                    <div className = "flex items-center justify-center w-full h-full z-10">
-                        <div className = "grid grid-rows-2 grid-cols-4 gap-2 w-full">
-                           Chỗ này là mấy cái nút chứa category của các môn học
-                        </div>
-                    </div>
                 </div>
+                <CourseCategoryComponent columns = {columns} categories = {learningCategory}/>
             </div>
-            {hasCurveSpace && (
+            {/* {hasCurveSpace && (
                 <Image src = {CurveSpace} alt = "Curve Space" width = {0} height = {0} 
                     className = "absolute bottom-0 left-0 w-full h-auto z-0"
                 />
-            )}
+            )} */}
         </section>
     )
 }
