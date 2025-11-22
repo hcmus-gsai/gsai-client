@@ -5,7 +5,6 @@ import Link from 'next/link';
 const {Title, Paragraph} = Typography;
 import GoogleLogo from '../../../../public/shared/Google Logo.svg';
 import Image from 'next/image';
-import {authClient} from '@/lib/auth-client';
 
 interface GoogleSignInProps {
     children?:React.ReactNode;
@@ -18,26 +17,11 @@ export function GoogleSignIn({
     className,
     callbackUrl = "/",
 }:GoogleSignInProps) {
-    const handleGoogleSignIn = async() => {
-        try{
-            const response = await authClient.signIn.social({
-                provider: "google",
-                callbackURL: callbackUrl,
-            })
-            if (response.error) {
-                throw new Error(response.error.message);
-            }
-            console.log("Google sign-in response:", response);
-            return response;
-        }
-        catch(error){
-            console.error("Google sign-in error:", error);
-        }
-    }
+    
 
     return (
         <Button
-            onClick = {handleGoogleSignIn}
+            onClick = {() => {}}
             type = "primary"
             className = {twMerge('form__button', className)}
         >

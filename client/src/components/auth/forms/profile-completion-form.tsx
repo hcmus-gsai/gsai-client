@@ -1,11 +1,8 @@
-'use client';
-
 import {Button, Form, Input, Select, Radio, InputRef, Upload} from 'antd';
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { FormTitle } from '../ui/form';
 import React, {useState, useRef, useEffect} from 'react';
-import {authClient} from "@/lib/auth-client";
 import { X ,XCircle} from "@deemlol/next-icons"
 
 //use cloudinary to upload image
@@ -37,28 +34,8 @@ const ProfileCompletionForm = () => {
     const role = Form.useWatch('role', formData);
     const identityCard = Form.useWatch('identityCard', formData);
 
-    const finishHandler = async() => {
-        const data = formData.getFieldsValue();
-        const response = await authClient.updateUser({
-            name: data.name,
-            profileCompleted: true,
-            gender: data.gender,
-            phoneNumber: data.phoneNumber,
-            province: data.province,
-            role: data.role,
-            birthday: data.birthday, // Input type="date" returns string in YYYY-MM-DD format
-            identityCardImage: data.identityCardImage,
-            profileImage: data.profileImage
-        })
+    const finishHandler = () => {}
 
-        if (response.error) {
-            console.error(response.error.message);
-        }
-        else{
-            console.log("Create user successfully");
-            console.log(response);
-        }
-    }
     const provinces = [
         "Hà Nội",
         "Thành phố Hồ Chí Minh",
@@ -244,7 +221,7 @@ const ProfileCompletionForm = () => {
             form = {formData}
             name = "profile-completion"
             layout = "vertical"
-            onFinish = {finishHandler}
+            onFinish = {() => {}}
 
             initialValues = {{
                 email: "example@gmail.com",

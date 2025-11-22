@@ -1,83 +1,68 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import {useRouter} from 'next/navigation';
-import {Form, Input,  Button, Checkbox} from "antd";
-import {GoogleSignIn} from '../ui/form';
-/*Tạo tính năng đăng nhập với Google*/
-
+import { useRouter } from 'next/navigation';
+import { Form, Input, Button, Checkbox } from "antd";
 import Link from 'next/link';
-import {useState} from 'react';
-import {useNotification} from '@/lib/hooks/use-notification';
-import {authClient} from '@/lib/auth-client';
-/*============================== */
+import { useState } from 'react';
+import { useCheckEmailMutation } from '../../../store/api/authApi';
+import {GoogleSignIn} from '../ui/form';
+import { sign } from 'crypto';
 
 const SignUpForm = () => {
-
-    const formInstance = Form.useForm();
-    const formData = formInstance[0];
-
+    const [form] = Form.useForm();
     const router = useRouter();
-    const finishHandler = async()  => {
+    const [isLoading, setIsLoading] = useState(false);
 
+    const [checkEmail] = useCheckEmailMutation();
+
+    const signUpHandler = async () => {
         try {
-            const data = formData.getFieldsValue();
-
-            const defaultName = data.email.split('@')[0];
-            const defaultGender = "";
-            const defaultPhoneNumber = "";
-            const defaultProvince = "";
-            const defaultRole = "STUDENT";
-            const defaultProfileCompleted = false;
-
-            const defaultIdentityCardImage = "";
-            const defaultBirthday = new Date().toISOString();
-            const defaultProfileImage = "";
+            const data = form.getFieldsValue();
             setIsLoading(true);
-            
-            const response = await authClient.signUp.email({
-                email: data.email,
-                password: data.password,
-                name: defaultName,
-                profileCompleted: defaultProfileCompleted,
-                gender: defaultGender,
-                phoneNumber: defaultPhoneNumber,
-                province: defaultProvince,
-                role: defaultRole,
-                birthday: defaultBirthday,
-                identityCardImage: defaultIdentityCardImage,
-                profileImage: defaultProfileImage
-            });
 
-            if (response.error) {
+            // STEP 1: Check Email Availability
+            const response = await checkEmail({ email: data.email }).unwrap();
+
+            if (!response.available) {
+                console.error('Email đã tồn tại, vui lòng dùng email khác.');
                 setIsLoading(false);
-                throw new Error(response.error.message);
+                return;
             }
 
-            // Redirect to complete profile page
+            // STEP 2: Save temp data to session/local storage or Redux
+            // Here we use sessionStorage as example
+            sessionStorage.setItem(
+                'signUpTempData',
+                JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                    remember: data.remember || false,
+                })
+            );
+
+            // Redirect to Complete Profile page
             router.push("/auth/complete-profile");
-            return response;
-        }
-        catch(error) {
+
+        } catch (error: any) {
+            console.error('Check email failed:', error);
+        } finally {
             setIsLoading(false);
-            console.error("An unexpected error occurred during sign-up:", error);
         }
     }
 
-    const [isLoading, setIsLoading] = useState(false);
-
-    const email = Form.useWatch('email', formData);
-    const password = Form.useWatch('password', formData);
-    const confirmPassword = Form.useWatch('confirmPassword', formData);
-    const remember = Form.useWatch('remember', formData);
+    const email = Form.useWatch('email', form);
+    const password = Form.useWatch('password', form);
+    const confirmPassword = Form.useWatch('confirmPassword', form);
+    const remember = Form.useWatch('remember', form);
 
     return (
         <Form
-            form = {formData}
+            form = {form}
             name = "sign-up"
             layout = "vertical"
             size = "large"
             initialValues = {{remember: false}}
-            onFinish = {finishHandler}
+            onFinish = {signUpHandler}
         >
 
             <div className = "mb-2">
@@ -139,7 +124,7 @@ const SignUpForm = () => {
                     },
                     {
                         validator: (_, value) => {
-                            if (value !== formData.getFieldValue('password')) {
+                            if (value !== form.getFieldValue('password')) {
                                 return Promise.reject(new Error('Mật khẩu không khớp'));
                             }
                             return Promise.resolve();
@@ -190,9 +175,7 @@ const SignUpForm = () => {
                 </div>
             </Form.Item>
 
-            <Form.Item
-                name = "google-sign-in"
-            >
+            <Form.Item name = "google-sign-in">
                 <GoogleSignIn
                     className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
                 />
