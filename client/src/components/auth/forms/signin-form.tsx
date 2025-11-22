@@ -58,10 +58,12 @@ const SignInForm = () => {
             email: data.email,
             password: data.password,
         })
+
         
         if (response.error) {
             throw new Error(response.error.message);
         }
+        console.log("Sign in response:", response);
 
         setIsLoading(false);
         return response;

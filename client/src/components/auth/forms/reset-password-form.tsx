@@ -1,20 +1,58 @@
 'use client';
-
-import {Form, Input, Button} from 'antd';
-
-/*Tạo tính năng đăng nhập với Google*/
-
+import "@ant-design/v5-patch-for-react-19";
+import {Form, Input, Button, message} from 'antd';
 import {twMerge} from 'tailwind-merge';
 import Image from 'next/image';
 import {GoogleSignIn} from '../ui/form';
-
+import { authClient } from '@/lib/auth-client';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 const RenamePasswordForm = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const formInstance = Form.useForm();
     const formData = formInstance[0];
+    const [loading, setLoading] = useState(false);
 
     const finishHandler = async() => {
-        console.log(formData.getFieldsValue());
+        try {
+            setLoading(true);
+            const data = formData.getFieldsValue();
+            console.log(data);
+            
+            // Lấy token từ URL
+            const token = searchParams.get('token');
+            console.log(token);
+            
+            if(!token) {
+                message.error("Token không hợp lệ hoặc đã hết hạn");
+                return;
+            }
+
+            // Sử dụng better-auth's reset password API
+            const response = await authClient.resetPassword({
+                newPassword: data.password,
+                token: token,
+            });
+
+            if(response.error) {
+                message.error(response.error.message || "Đặt lại mật khẩu thất bại");
+                return;
+            }
+
+            message.success("Đặt lại mật khẩu thành công!");
+            
+            // Redirect về trang đăng nhập sau 1.5s
+            setTimeout(() => {
+                router.push('/auth/signin');
+            }, 1500);
+
+        } catch (error: any) {
+            message.error(error.message || "Có lỗi xảy ra, vui lòng thử lại");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -26,7 +64,7 @@ const RenamePasswordForm = () => {
             onFinish = {finishHandler}
         >
             <div className = "mb-2">
-                <p className="font-medium font-bold">Mật khẩu<span className="text-red-500">*</span></p>
+                <p className="font-medium font-bold">Mật khẩu mới<span className="text-red-500">*</span></p>
             </div>
 
             <Form.Item
@@ -46,7 +84,7 @@ const RenamePasswordForm = () => {
                     }
                 ]}
             >
-                <Input.Password placeholder = "Tạo mật khẩu"
+                <Input.Password placeholder = "Nhập mật khẩu mới"
                     className = "form__input"
                 />
             </Form.Item>
@@ -57,7 +95,7 @@ const RenamePasswordForm = () => {
             </div>
 
             <Form.Item
-                name = "cofirmPassword"
+                name = "confirmPassword"
                 rules = {[
                     {
                         required: true,
@@ -79,7 +117,11 @@ const RenamePasswordForm = () => {
             </Form.Item>
 
             <Form.Item>
-                <Button type = "primary" htmlType = "submit" className = "!form__button !w-[100%]">
+                <Button 
+                    type = "primary" 
+                    htmlType = "submit" 
+                    className = "!form__button !w-[100%]"
+                >
                     Đặt lại mật khẩu
                 </Button>
             </Form.Item>

@@ -1,4 +1,5 @@
-import 'server-only';
+'use server';
+
 
 import {
     and,
@@ -12,6 +13,7 @@ import {
     lt,
     countDistinct,
     type SQL,
+    type InferSelectModel,
 } from "drizzle-orm";
 
 import {drizzle} from "drizzle-orm/postgres-js";
@@ -19,20 +21,23 @@ import postgres from "postgres";
 
 
 import {user} from "./auth-schema";
-import { useServerInsertedHTML } from 'next/navigation';
-
 
 const client = postgres(process.env.DATABASE_URL as string);
 const db = drizzle(client);
 
+export type User = InferSelectModel<typeof user>
 
-// export async function getUserById({}:{}):Promise<User[]> {
-//     try{
-//         return await db.update(user).set({
-//             role, updatedAt: new Date()
-//         }).where(eq(user.id, id)).returning();
-//     }
-//     catch(error) {
-//         console.error(error);
-//     }
-// }
+export async function getUser(email: string): Promise<Array<User> | undefined> {
+
+    try {
+        return await db.select().from(user).where(eq(user.email, email));
+    }
+    catch(error) {
+        console.error(error);
+        return undefined;
+    }
+}
+
+
+
+

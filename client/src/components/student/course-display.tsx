@@ -1,0 +1,143 @@
+'use client';
+import {useState, useEffect} from 'react';
+
+import { RedirectButton } from "@/components/shared/redirect-button";
+import { CourseGrid } from "@/components/shared/course-grid";
+
+const CourseDisplaySection = ({
+    title,
+    queryType = "",
+    hasExtended = false,
+}:{
+    title:string;
+    queryType?:string;
+    hasExtended?:boolean;
+}) => {
+
+    const courseSampleData = [
+        {
+            id: 1,
+            image : '/images/course-1.jpg',
+            name: 'Nhập môn cấu trúc dữ liệu và giải thuật',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        {
+            id: 2,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        
+        {
+            id: 3,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+
+        {
+            id: 4,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        {
+            id: 5,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        
+        {
+            id: 6,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        {
+            id: 7,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+        {
+            id: 8,
+            name: 'hệ thống thông tin',
+            teacher: 'Nguyễn Văn A',
+            estimated_time : '1 tháng',
+            rating: 5.0,
+            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+        },
+    ];
+    return (
+        <section className = "w-full h-[41.375rem] flex flex-col items-center justify-center">
+            {
+                hasExtended && (
+                    <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)] gap-[1.5rem]">
+                        <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">Tiếp tục môn học</h1>
+                        <div className = "flex items-center justify-center w-full h-[114px] bg-red-200 rounded-[20px]">
+                            <div className = "flex flex-col items-start justify-center w-full h-full mr-auto pl-[1.5rem]">
+                                <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">
+                                    Tên môn học
+                                </p>
+                                <div>
+                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">
+                                        Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
+                                    </p>
+                                    <div className = "bg-[var(--color-secondary)] w-full h-[10px] rounded-full">
+                                    </div>
+                                </div>
+                            </div>
+                            <div className = "flex items-center justify-end relative w-full h-full ml-auto pr-[1.5rem] gap-[1.5rem]">
+                                <div>
+                                    <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Tên bài giảng</p>
+                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Video 2 phút</p>
+                                </div>
+                                <div>
+                                    <RedirectButton href = "/student/courses" text = "Xem bài giảng" buttonBg = "var(--color-bg_white)" buttonText = "var(--color-secondary)" buttonBorder = "var(--color-secondary)" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
+                                </div>
+                                <div>
+                                    Icon
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)] gap-[1.5rem]">
+                <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
+                <div className = "flex items-center justify-center w-full h-[18.9375rem]">
+                    <CourseGrid courseData = {courseSampleData} colWidth = {6} maxItems = {4} />
+                </div>
+            </div>
+            <div className = "flex items-center justify-center w-[calc(100%-24rem)] py-[2rem]">
+                <RedirectButton 
+                    href = "/student/courses" 
+                    text = "Xem tất cả" 
+                    buttonBg = "var(--color-bg_white)" 
+                    buttonText = "var(--color-secondary)"
+                    buttonBorder = "var(--color-secondary)"
+                    iconBg = "var(--color-secondary)"
+                    iconText = "var(--color-bg_white)"
+                />
+            </div>
+        </section>
+    )
+}
+
+export {CourseDisplaySection};

@@ -39,8 +39,6 @@ const ProfileCompletionForm = () => {
 
     const finishHandler = async() => {
         const data = formData.getFieldsValue();
-
-
         const response = await authClient.updateUser({
             name: data.name,
             profileCompleted: true,
@@ -168,7 +166,6 @@ const ProfileCompletionForm = () => {
         const uploadData = await uploadResponse.json();
         const secure_url = uploadData.secure_url;
 
-        console.log(secure_url);
         formData.setFieldsValue({
             profileImage: secure_url
         });
@@ -179,7 +176,6 @@ const ProfileCompletionForm = () => {
             isValid: true,
             error: null
         });
-
     }
 
     const handleIdentityCardUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,35 +305,7 @@ const ProfileCompletionForm = () => {
                                 </Button>
 
                             </div>
-                        )}
-
-                        {/* <CldUploadWidget
-                            uploadPreset = {process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                            signatureEndpoint = "/api/image-upload"
-                            onSuccess = {(result) => {
-                                if (typeof result.info === 'object' && "secure_url" in result.info){
-                                    formData.setFieldsValue({
-                                        profileImage: result.info.secure_url
-                                    })
-                                } 
-                            }}
-                            options = {{
-                                singleUploadAutoClose: true,
-                                
-                            }}
-                        >
-                            {({open}) => {
-                                return(
-                                    <Button type = "primary" onClick = {() => open()}
-                                        className="!rounded-md !bg-indigo-600 !px-2.5 !py-1.5 !text-sm !font-semibold !text-white !shadow-sm !hover:!bg-indigo-500 !focus-visible:!outline !focus-visible:!outline-2 !focus-visible:!outline-offset-2 !focus-visible:!outline-indigo-600"
-                                    >
-                                        Upload Avatar here
-                                    </Button>
-                                )
-                            }}
-
-                        </CldUploadWidget> */}
-                        
+                        )}    
                     </Form.Item>            
 
                     <div className = "mb-2 w-full">
@@ -411,7 +379,6 @@ const ProfileCompletionForm = () => {
                 </div>
 
                 <div className = "flex flex-col items-center justify-start h-full w-full">
-
                     <div className = "mb-2 w-full">
                         <p className="font-medium font-bold">Họ và tên<span className="text-red-500">*</span></p>
                     </div>

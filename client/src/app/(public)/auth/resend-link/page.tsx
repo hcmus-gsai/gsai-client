@@ -10,6 +10,7 @@ import {FormTitle, FormNavigation, FormLayout} from '@/components/auth/ui/form';
 export default function ResendLinkPage() {
     return (
         <FormLayout
+            className = "py-10"
         >
             <FormTitle 
                 title = "Kiểm tra hộp thư của bạn"
@@ -17,7 +18,7 @@ export default function ResendLinkPage() {
             />
             <ResendLinkForm/>
             <FormNavigation
-                href = "resend-link"
+                href = "/auth/signin"
                 textHref = "Đăng nhập"
                 description = "Quay lại?"
             />

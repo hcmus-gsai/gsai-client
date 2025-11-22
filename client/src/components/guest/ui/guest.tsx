@@ -77,15 +77,15 @@ const GreetingSection = () => {
                 </div>
                 <div className = "flex flex-1 items-center justify-end gap-2">
                     <div className = "flex items-center justify-center gap-2">
-                    <Button
-                        type="primary"
-                        onClick = {() => router.push("/auth/signin")}
-                    >
-                        <span>Tham gia ngay</span>
-                        <span className="flex items-center justify-center bg-white rounded-full p-2">
-                            <ArrowRightOutlined className="!rotate-315 !text-[var(--color-secondary)]" />
-                        </span>
-                    </Button>
+                        <Button
+                            type="primary"
+                            onClick = {() => router.push("/auth/signin")}
+                        >
+                            <span>Tham gia ngay</span>
+                            <span className="flex items-center justify-center bg-white rounded-full p-2">
+                                <ArrowRightOutlined className="!rotate-315 !text-[var(--color-secondary)]" />
+                            </span>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -302,23 +302,32 @@ const CourseDisplaySection = () => {
 }
 
 
-const FooterSection = () => {
+const FooterSection = ({
+    hasRegisterBox = true
+}:{
+    hasRegisterBox?: boolean;
+}) => {
     return (
-        <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
-                <div className = "flex flex-col items-center justify-center text-center w-[calc(100%-300px)]">
-                    <h1 className = "text-[2.5rem] text-[var(--color-primary)] w-[calc(100%-120px)]">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
-                    <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center">
-                        Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
-                    </p>
-                </div>
-                
-                <Button
-                    className = "!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                >
-                    Tham gia
-                </Button>
-            </div>
+        <section className = "w-full flex flex-col items-center justify-center">
+            {
+                hasRegisterBox && (
+                    <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[calc(100%-24rem)]">
+                        <div className = "flex flex-col items-center justify-center text-center w-[calc(100%-300px)]">
+                            <h1 className = "text-[2.5rem] text-[var(--color-primary)] w-[calc(100%-120px)]">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center">
+                                Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
+                            </p>
+                        </div>
+                        
+                        <Button
+                            className = "!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
+                        >
+                            Tham gia
+                        </Button>
+                    </div>
+                )
+            }
+           
             <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[calc(100%-24rem)]">
                 <div className = "flex flex-col justify-center items-center">
                     <div>

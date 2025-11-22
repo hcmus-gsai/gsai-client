@@ -79,14 +79,6 @@ const SignUpForm = () => {
             initialValues = {{remember: false}}
             onFinish = {finishHandler}
         >
-            {/* <div className = "mb-2">
-                <p className="font-medium font-bold">Họ tên<span className="text-red-500">*</span></p>
-            </div>
-            <Form.Item
-                name = "name"
-            >
-                <Input placeholder = "Nguyen Van A" className = "form__input" />
-            </Form.Item> */}
 
             <div className = "mb-2">
                 <p className="font-medium font-bold">Email<span className="text-red-500">*</span></p>

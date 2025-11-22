@@ -1,7 +1,7 @@
 'use client';
 import {useState} from "react";
 import {Typography} from "antd";
-import {RenamePasswordForm} from '@/components/auth/forms/rename-password-form';
+import {RenamePasswordForm} from '@/components/auth/forms/reset-password-form';
 import Link from "next/link";
 import {twMerge} from "tailwind-merge";
 const {Title, Paragraph} = Typography;
@@ -10,6 +10,7 @@ import {FormTitle, FormNavigation, FormLayout} from '@/components/auth/ui/form';
 export default function ResendLinkPage() {
     return (
         <FormLayout
+            className = "py-10"
         >
             <FormTitle 
                 title = "Đặt lại mật khẩu"
@@ -21,6 +22,7 @@ export default function ResendLinkPage() {
 }
 
 /**
+
 Inject endpoint
 import {EndpointBuilder} from "@reduxjs/toolkit/dist/query/endpointDefinitions";
 

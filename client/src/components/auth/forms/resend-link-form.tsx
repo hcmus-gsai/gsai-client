@@ -27,6 +27,7 @@ const ResendLinkForm = () => {
         >
             <Form.Item
                 name = "resend-link"
+                className = "w-full"
             >
                 <Button
                     type = "primary"
@@ -35,12 +36,11 @@ const ResendLinkForm = () => {
                 >
                     Gửi liên kết lại
                 </Button>
-
-                <div className = "flex items-center justify-center gap-2 w-full">
-                    <p className = "text-gray-500 font-normal font-sm">Không thể tìm thấy liên kết? Hãy kiểm tra mục spam của bạn.</p>
-                </div>
-
             </Form.Item>
+
+            <div className = "flex items-center justify-center gap-2 w-full">
+                <p className = "text-gray-500 font-normal font-sm">Không thể tìm thấy liên kết? Hãy kiểm tra mục spam của bạn.</p>
+            </div>
         </Form>
     )
 }
