@@ -8,14 +8,11 @@ import {twMerge} from 'tailwind-merge';
 import Image from 'next/image';
 import {GoogleSignIn} from '../ui/form';
 import {useState} from 'react';
-import {useNotification} from '@/lib/hooks/use-notification';
 import Link from "next/link";
 import { router } from 'better-auth/api';
 import {useRouter} from "next/navigation";
 
-import {authClient} from '@/lib/auth-client';
 
-import { auth } from '@/lib/auth';
 const SignInForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
@@ -25,70 +22,13 @@ const SignInForm = () => {
 
     const router = useRouter();
 
-    const finishHandler = async() => {
-
-        const data = formData.getFieldsValue();
-        //Load name from database correspond to email
-        async function getUserName(email:string) {
-            const {data: session, error} = await authClient.getSession();
-            if (session) {
-                const user = session.user;
-                return user.name;
-            }
-            if (error) {
-                throw new Error(error.message);
-            }
-            return null;
-        }
-        const userName = await getUserName(data.email);
-        console.log("User name:", userName);
-        setIsLoading(true);
-        /*
-        The if case here prevent a user 
-        -> user signup only fill in the password + email and then
-            -> Go to signin page and signin => this is not correct behavior
-        -> Correct flow: user fill in (email+ password) -> redirect to profile completion page to fill in the rest of the value
-        -> After that user can signin with email + password
-        */
-        if (!userName || userName === "" || userName === undefined) {
-            throw new Error("User name not found");
-        }
-
-        const response = await authClient.signIn.email({
-            email: data.email,
-            password: data.password,
-        })
-
-        
-        if (response.error) {
-            throw new Error(response.error.message);
-        }
-        console.log("Sign in response:", response);
-
-        setIsLoading(false);
-        return response;
-    }
+    const finishHandler = () => {};
 
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
 
 
-    const handleGoogleSignIn = async() => {
-        try {
-            const response = await authClient.signIn.social({
-                provider: "google",
-                callbackURL: "/",
-            })
-            if (response.error) {
-                throw new Error(response.error.message);
-            }
-            console.log("Google sign-in response:", response);
-            return response;
-        }
-        catch(error) {
-            console.error("An unexpected error occurred during Google sign-in:", error);
-        }
-    }
+    const handleGoogleSignIn = () => {}
 
     
     return (
