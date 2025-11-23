@@ -181,6 +181,7 @@ const CourseModules = () => {
     //ý tưởng: click vào mũi tên  -> Chỉ mở rộng chapter được ấn
 
 
+
     
 
     return (
@@ -324,12 +325,13 @@ const CourseSchedule = () => {
 
 
                     </div>
-                    
+
                 </div>
             </div>
         </section>
     );
 }
+
 export default function CourseDetailPage(){
 
     const params = useParams();
