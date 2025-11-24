@@ -6,6 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3
 // Base query with JWT token
 const baseQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL,
+    credentials: 'include',
     prepareHeaders: (headers) => {
         const token = localStorage.getItem('accessToken');
         if (token) {
@@ -13,6 +14,7 @@ const baseQuery = fetchBaseQuery({
         }
         return headers;
     },
+    timeout: 10_000, // 10 seconds timeout
 });
 
 // Base query with automatic token refresh

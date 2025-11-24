@@ -35,7 +35,9 @@ const ProfileCompletionForm = () => {
     const role = Form.useWatch('role', formData);
     const identityCard = Form.useWatch('identityCard', formData);
 
-    const finishHandler = () => {}
+    const createProfileHandler = async() => {
+   
+    }
 
     const provinces = [
         "Hà Nội",

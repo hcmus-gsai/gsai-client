@@ -1,16 +1,10 @@
-'use client';
+"use client";
 
 import {Form, Input, Button} from 'antd';
-
-/*Tạo tính năng đăng nhập với Google*/
-
-import {twMerge} from 'tailwind-merge';
-import Image from 'next/image';
-import {GoogleSignIn} from '../ui/form';
 import {useState} from 'react';
-import Link from "next/link";
-import { router } from 'better-auth/api';
 import {useRouter} from "next/navigation";
+import { useSignInMutation } from '@/store/api/authApi';
+import jwt from 'jsonwebtoken';
 
 
 const SignInForm = () => {
@@ -18,11 +12,40 @@ const SignInForm = () => {
     const formData = formInstance[0];
     const [isLoading, setIsLoading] = useState(false);
 
+    const [signIn] = useSignInMutation()
+
     // const {notify} = useNotification();
 
     const router = useRouter();
 
-    const finishHandler = () => {};
+    const handleEmailPasswordSignIn = async () => {
+        try {
+            const data = formData.getFieldsValue();
+            setIsLoading(true);
+
+            const { accessToken } = await signIn({ email: data.email, password: data.password }).unwrap();
+            const decodedToken: any = jwt.decode(accessToken);
+
+            if (decodedToken) {
+                // notify.success('Đăng nhập thành công!');
+                const role = decodedToken.role;
+
+                // Redirect based on role
+                if (role === 'student') {
+                    router.push('/student/home');
+                } else if (role === 'teacher') {
+                    router.push('/teacher/home');
+                } else {
+                    router.push('/');
+                }
+            }
+        }
+        catch (error) {
+            console.error('Sign in failed:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
@@ -38,7 +61,7 @@ const SignInForm = () => {
             layout = "vertical"
             size = "large"
             initialValues = {{remember: true}}
-            onFinish = {finishHandler}
+            onFinish = {handleEmailPasswordSignIn}
         >
             <div className = "mb-2">
                 <p className="font-medium font-bold">Email <span className="text-red-500">*</span></p>

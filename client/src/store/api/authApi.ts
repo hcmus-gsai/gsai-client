@@ -1,10 +1,11 @@
 import { baseApi } from './baseApi';
 import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, User } from '../../type/auth.type';
+import Cookies from "js-cookie";
 
 export const authApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         // Check Email Availability
-        checkEmail: builder.mutation<{ available: boolean }, { email: string }>({
+        checkEmail: builder.mutation<{ isExist: boolean }, { email: string }>({
             query: (body) => ({
                 url: '/auth/check-email',
                 method: 'POST',
@@ -24,8 +25,17 @@ export const authApi = baseApi.injectEndpoints({
             async onQueryStarted(arg, { queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    localStorage.setItem('accessToken', data.accessToken);
-                    localStorage.setItem('refreshToken', data.refreshToken);
+                    Cookies.set("accessToken", data.accessToken, {
+                        path: "/",
+                        expires: 7,          
+                        secure: true,
+                        sameSite: "strict",
+                    });
+                    Cookies.set("refreshToken", data.refreshToken, {
+                        expires: 30,          // 30 ngày
+                        secure: true,
+                        sameSite: "strict",
+                    });
                 } catch (error) {
                     console.error('Sign up failed:', error);
                 }
@@ -40,16 +50,6 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'POST',
                 body: credentials,
             }),
-            // Store tokens after successful login
-            async onQueryStarted(arg, { queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    localStorage.setItem('accessToken', data.accessToken);
-                    localStorage.setItem('refreshToken', data.refreshToken);
-                } catch (error) {
-                    console.error('Sign in failed:', error);
-                }
-            },
             invalidatesTags: ['Auth'],
         }),
 

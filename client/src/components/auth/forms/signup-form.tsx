@@ -1,7 +1,7 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from 'next/navigation';
-import { Form, Input, Button, Checkbox } from "antd";
+import { Form, Input, Button, Checkbox, notification } from "antd";
 import Link from 'next/link';
 import { useState } from 'react';
 import { useCheckEmailMutation } from '../../../store/api/authApi';
@@ -22,12 +22,16 @@ const SignUpForm = () => {
 
             // STEP 1: Check Email Availability
             const response = await checkEmail({ email: data.email }).unwrap();
+            const isExist = response.isExist;
 
-            if (!response.available) {
-                console.error('Email đã tồn tại, vui lòng dùng email khác.');
+            if (isExist) {
+                notification.error({
+                    message: 'Lỗi đăng ký',
+                    description: 'Email đã tồn tại, vui lòng dùng email khác.',
+                });
                 setIsLoading(false);
                 return;
-            }
+            } 
 
             // STEP 2: Save temp data to session/local storage or Redux
             // Here we use sessionStorage as example
