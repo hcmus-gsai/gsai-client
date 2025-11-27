@@ -12,9 +12,9 @@ const StudentNavbar = () => {
     const router = useRouter();
     return (
         <nav
-        className = "fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20"
-    >
-            <div className = "w-[calc(100%-24rem)] flex items-center justify-between">
+            className = "fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20"
+        >
+            <div className = "w-[calc(100%-12rem)] flex items-center justify-between">
                 <div className = "flex items-center justify-start w-full h-[3.5rem]">
                     <div className = "flex items-center justify-start w-[32vw] h-full">
                         <div className = "flex items-center justify-start w-[121px]">
@@ -41,7 +41,7 @@ const StudentNavbar = () => {
                                         <span onClick = {() => router.push("/student/home")} className = "cursor-pointer text-[var(--color-primary)] font-bold">Trang chủ</span>
                                     </div> },   
                                     { key: "courses", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center">
-                                        <span onClick = {() => router.push("/student/home/courses")} className = "cursor-pointer text-[var(--color-primary)] font-bold">Môn học</span>
+                                        <span onClick = {() => router.push("/student/home/course")} className = "cursor-pointer text-[var(--color-primary)] font-bold">Môn học</span>
                                     </div> },
                                     { key: "about", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center ">
                                         <span className = "cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>

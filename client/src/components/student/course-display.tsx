@@ -4,7 +4,7 @@ import {useState, useEffect} from 'react';
 import { RedirectButton } from "@/components/shared/redirect-button";
 import { CourseGrid } from "@/components/shared/course-grid";
 
-import {Button} from "antd";
+import {Button, Progress} from "antd";
 import {useRouter} from "next/navigation";
 
 const CourseDisplaySection = ({
@@ -65,7 +65,7 @@ const CourseDisplaySection = ({
         <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
             {
                 hasExtended && (
-                    <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)] gap-[1.5rem] mb-[2rem]">
+                    <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem] mb-[2rem]">
                         <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">Tiếp tục môn học</h1>
                         <div className = "flex items-center justify-center w-full h-[114px] rounded-[20px] border-[1px] border-solid border-[#DCDCDC]">
                             <div className = "flex flex-col items-start justify-center w-full h-full mr-auto pl-[1.5rem]">
@@ -77,12 +77,14 @@ const CourseDisplaySection = ({
                                     Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
                                 </p>
 
-                                <div className="bg-gray-200 w-full h-[10px] rounded-full overflow-hidden">
+                                {/* <div className="bg-gray-200 w-full h-[10px] rounded-full overflow-hidden">
                                     <div
                                         className="bg-[var(--color-secondary)] h-full rounded-full"
                                         style={{ width: `${75}%` }}
                                     ></div>
-                                </div>
+                                </div> */}
+                                <Progress percent={75} showInfo = {false}/>
+
                             </div>
                             <div className = "flex items-center justify-end relative w-full h-full ml-auto pr-[1.5rem] gap-[1.5rem]">
                                 <div>
@@ -92,7 +94,7 @@ const CourseDisplaySection = ({
                                 <div>
                                     <Button
                                         type="primary"
-                                        onClick = {() => router.push(`/student/home/courses/${courseSampleData[0].name.toLowerCase().replace(/ /g, '-')}/chapter-1/video-1  `)}
+                                        onClick = {() => router.push(`/student/home/course/${courseSampleData[0].name.toLowerCase().replace(/ /g, '-')}/chapter-1/video-1  `)}
                                         className = {`!border-1 !border-solid !w-[9rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-[#1363DF]`} 
                                     >
                                         <div className = "flex items-center justify-center relative w-[calc(100%-5rem)]">

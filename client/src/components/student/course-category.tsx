@@ -106,7 +106,7 @@ const CourseCategorySection = () => {
         },
     ]
 
-    var columns = 6;
+    var columns = 5;
     
     return (
         <section className = "w-full min-h-[242px] grow flex flex-col items-center justify-between my-[8rem]">   

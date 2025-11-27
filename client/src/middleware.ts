@@ -9,8 +9,9 @@ export function middleware(req: NextRequest) {
   // Không có token → cho vào public routes
   const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
   if (!token) {
-    if (publicPaths.includes(req.nextUrl.pathname)) return NextResponse.next();
-    return NextResponse.redirect(new URL('/auth/signin', req.url));
+    // if (publicPaths.includes(req.nextUrl.pathname)) return NextResponse.next();
+    // return NextResponse.redirect(new URL('/auth/signin', req.url));
+    return NextResponse.next();
   }
 
   // Giải mã token

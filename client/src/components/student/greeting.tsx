@@ -6,9 +6,8 @@ import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
 import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";
 
-import { CourseCategoryComponent } from '@/components/student/course-category-props';
+import { CourseCategoryComponent, CourseHighLightComponent } from '@/components/student/course-category-props';
 import EmptyLayout from "@/../public/EmptyLayout.svg";
-
 
 const StudentGreetingSection = (
 {
@@ -82,6 +81,7 @@ const StudentGreetingSection = (
     ];
 
     var columns = 4;
+    var paticipants = 10;
 
     return (
         <section className = "w-full h-[100vh] flex flex-col">
@@ -107,7 +107,7 @@ const StudentGreetingSection = (
             </div>
             
             <div className = "w-full h-full flex flex-col items-center z-10">
-                <div className = "w-[calc(100%-24rem)] h-[242px] mt-[15vh] flex items-center justify-between">
+                <div className = "w-[calc(100%-12rem)] h-[242px] mt-[15vh] flex items-center justify-between">
                     <div className = "h-full w-[546px] flex flex-col items-start justify-between">
                         <div className = {`flex flex-col items-start justify-between w-full ${isCourse ? '' : 'mb-[5.0625rem]'}`}>                    
                             <p className = {`${titleSize} font-bold text-[var(--color-primary)]`}>{title}</p>
@@ -121,19 +121,23 @@ const StudentGreetingSection = (
                                 </div>
                             )
                         }
-                        <div className = "w-full flex items-center justify-start">
+                        <div className = "w-full flex items-center justify-start mb-[1rem]">
                             <Button className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">Thời gian biểu</Button>
                         </div>
+
+                        <p className = "text-[1rem] font-bold text-[var(--color-primary)]">{paticipants} người tham gia</p>
                     </div>
                 </div>
                 {
-                    !isCourse && (
-                        <div className = "w-[calc(100%-24rem)] h-[242px] mt-[10vh] flex flex-col items-center justify-between">
+                    !isCourse ? (
+                        <div className = "w-full h-[242px] mt-[10vh] flex flex-col items-center justify-between">
                             <div className = "h-full w-full flex flex-col items-center justify-between z-10">
                                 <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
                             </div>
                             <CourseCategoryComponent columns = {columns} categories = {learningCategory}/>
                         </div>
+                    ) : (
+                        <CourseHighLightComponent />
                     )
                 }
                 

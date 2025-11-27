@@ -9,6 +9,7 @@ import {Card, Button} from "antd";
 import { QASection } from "@/components/student/qna";
 import {FooterSection} from "@/components/guest/ui/guest";
 import { useParams } from "next/navigation";
+
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
         {
@@ -41,13 +42,12 @@ const CourseSyllabusSection = () => {
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "w-[calc(100%-24rem)] h-full flex items-center justify-center flex flex-col gap-[3rem]">
+            <div className = "w-[calc(100%-12rem)] h-full flex items-center justify-center flex flex-col gap-[3rem]">
                 <div className = "w-full">
                     <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Bạn sẽ học được</p></div>
-                    
                     <div className = "w-full grid grid-cols-2 grid-rows-2 gap-2">
                         {achievableKnowledge.slice(0,4).map((knowledge) => (
-                            <Card key = {knowledge.title} className = "border-gray-600 shadow-[5px_5px_20px_var(--color-neutral)] hover:shadow-[5px_5px_20px_var(--color-secondary)] transition-all duration-300 !rounded-[20px]">
+                            <Card key = {knowledge.title} className = "!pr-[1.5rem] !border-gray-200 hover:shadow-[10px_10px_10px_var(--color-neutral)] transition-all duration-300 !rounded-[20px]">
                                 <p className = "text-[1.25rem] font-bold text-[var(--color-primary)]">{knowledge.title}</p>
                                 <p className = "text-[1rem] font-light text-[var(--color-primary)]">{knowledge.description}</p>
                             </Card>
@@ -56,7 +56,7 @@ const CourseSyllabusSection = () => {
                 </div>
 
                 <div className = "w-full">
-                    <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Bạn sẽ học được</p></div>
+                    <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Kỹ năng bạn sẽ học được</p></div>
                       
                     <div className = "w-full flex items-center justify-start gap-2">
                         {achievableSkills.map((skill) => (
@@ -71,33 +71,7 @@ const CourseSyllabusSection = () => {
     )
 }
 
-const CourseHighLight = () => {
-    
-    return (
-        <div className = "absolute top-[30rem] right-[12rem] w-[calc(100%-24rem)] h-[10.625rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 flex items-center justify-center gap-2 pl-[1.5rem]">
-           
-            <div className = "flex flex-col items-start justify-start w-[21%] h-[54%] mr-auto">
-                <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
-                <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
-            </div>
 
-            <div className = "flex flex-col items-start justify-start  w-[21%] h-[54%]">
-                <p className = "text-[1rem] font-bold text-[var(--color-primary)]">5 đánh giá</p>
-                <p className = "text-[1rem] font-light text-[var(--color-primary)]">5 đánh giá</p>
-            </div>
-            
-            <div className = "flex flex-col items-start justify-start w-[21%] h-[54%]">
-                <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Trình độ đề xuất</p>
-                <p className = "text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
-            </div>
-            
-            <div className = "flex flex-col items-start justify-start w-[21%] h-[54%] ml-auto">
-                <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Lịch trình linh hoạt</p>
-                <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành 5 giờ học mỗi tuần</p>
-            </div>
-        </div>
-    )
-}
 export default function StudentCoursePage() {
    
     return(
@@ -112,7 +86,6 @@ export default function StudentCoursePage() {
                 hasCurveSpace = {false}
             />
             <CourseSyllabusSection />
-            <CourseHighLight />
 
             <CourseDisplaySection 
                 title = "Môn học tương tự"

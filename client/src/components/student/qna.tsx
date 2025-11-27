@@ -20,7 +20,7 @@ const QASection = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <Card
                         onClick={() => handleCardClick(1) }
-                        className={"flex items-center cursor-pointer border rounded-2xl transition-all duration-300"}
+                        className={"flex items-center cursor-pointer border !rounded-[20px] transition-all duration-300"}
                         style={{ backgroundColor: selectedId === 1 ? "#E0F2FF" : "#FFFFFF", borderColor: selectedId === 1 ? "#3B82F6" : "#E5E7EB", borderWidth: "2px" }}
                     >
                         <div className="w-full h-full flex">
@@ -41,7 +41,7 @@ const QASection = () => {
 
                     <Card
                         onClick={() => handleCardClick(4) }
-                        className={"flex items-center cursor-pointer border rounded-2xl transition-all duration-300"}
+                        className={"flex items-center cursor-pointer border !rounded-[20px] transition-all duration-300"}
                         style={{ backgroundColor: selectedId === 4 ? "#E0F2FF" : "#FFFFFF", borderColor: selectedId === 4 ? "#3B82F6" : "#E5E7EB", borderWidth: "2px" }}
                     >
                         <div className="w-full h-full flex">
@@ -62,7 +62,7 @@ const QASection = () => {
 
                     <Card
                         onClick={() => handleCardClick(2) }
-                        className={"flex items-center cursor-pointer border rounded-2xl transition-all duration-300"}
+                        className={"flex items-center cursor-pointer border !rounded-[20px] transition-all duration-300"}
                         style={{ backgroundColor: selectedId === 2 ? "#E0F2FF" : "#FFFFFF", borderColor: selectedId === 2 ? "#3B82F6" : "#E5E7EB", borderWidth: "2px" }}
                     >
                         <div className="w-full h-full flex">
@@ -83,7 +83,7 @@ const QASection = () => {
 
                     <Card
                         onClick={() => handleCardClick(5) }
-                        className={"flex items-center cursor-pointer border rounded-2xl transition-all duration-300"}
+                        className={"flex items-center cursor-pointer border !rounded-[20px] transition-all duration-300"}
                         style={{ backgroundColor: selectedId === 5 ? "#E0F2FF" : "#FFFFFF", borderColor: selectedId === 5 ? "#3B82F6" : "#E5E7EB", borderWidth: "2px" }}
                     >
                         <div className="w-full h-full flex">
@@ -104,7 +104,7 @@ const QASection = () => {
 
                     <Card
                         onClick={() => handleCardClick(3) }
-                        className={"flex items-center cursor-pointer border rounded-2xl transition-all duration-300"}
+                        className={"flex items-center cursor-pointer border !rounded-[20px] transition-all duration-300"}
                         style={{ backgroundColor: selectedId === 3 ? "#E0F2FF" : "#FFFFFF", borderColor: selectedId === 3 ? "#3B82F6" : "#E5E7EB", borderWidth: "2px" }}
                     >
                         <div className="w-full h-full flex">

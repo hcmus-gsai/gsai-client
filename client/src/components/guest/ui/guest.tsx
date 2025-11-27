@@ -28,7 +28,7 @@ import arrow2Icon from "../../../../public/guest/Arrow2.svg";
 import createAccIcon from "../../../../public/guest/createAccIcon.svg";
 import pickClassIcon from "../../../../public/guest/pickClassIcon.svg";
 import AITutorIcon from "../../../../public/guest/AITutorIcon.svg";
-
+import Epis from "../../../../public/shared/EPIS.svg";
 import workFlowPic from "../../../../public/guest/workflowPic.svg";
 
 import testimonialPic from "../../../../public/guest/testimonialPic.svg";
@@ -80,7 +80,7 @@ const GreetingSection = () => {
                 <div className = "flex flex-1 items-center justify-end gap-2">
                     <div className = "flex items-center justify-center gap-2">
                         <RedirectButton
-                            href = "/auth/signin"
+                            onClick = {() => router.push("/auth/signin")}
                             text = "Tham gia ngay"
                             buttonText = "var(--color-bg_white)"
                             buttonBorder = "white"
@@ -309,7 +309,7 @@ const FooterSection = ({
     hasRegisterBox?: boolean;
 }) => {
     return (
-        <section className = "w-full flex flex-col items-center justify-center">
+        <section className = "w-full flex flex-col items-center justify-center border-t border-gray-200 ">
             {
                 hasRegisterBox && (
                     <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[78%]">
@@ -329,14 +329,15 @@ const FooterSection = ({
                 )
             }
            
-            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[78%]">
+            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[calc(100%-12rem)]">
                 <div className = "flex flex-col justify-center items-center">
                     <div>
-                        <div>
-                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">AT AI.Tutor</h1>
+                        <div className = "w-[80px]">
+                            {/* <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">AT AI.Tutor</h1> */}
+                            <Image src = {Epis} alt = "Epis Logo" width = {0} height = {0} className = "w-full h-full object-contain" />
                         </div>
                         <div>
-                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Văn phòng</span>: 227 Nguyễn Văn Cừ, phường Chợ Quán, quận 5, TP.HCM</p> 
+                            <p className = "text-[var(--color-primary)] mb-[1rem]"><span className = "font-bold text-[var(--color-primary)]">Văn phòng</span>: 227 Nguyễn Văn Cừ, phường Chợ Quán, quận 5, TP.HCM</p> 
                             <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Số điện thoại</span>: +84 123 456 789</p>
                             <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Email</span>: info@email.com</p>
                         </div>
@@ -384,7 +385,7 @@ const FooterSection = ({
                     </div>
                 </div>
             </div>
-            <footer className = "h-[100px] flex items-center justify-between w-[78%]">
+            <footer className = "h-[100px] flex items-center justify-between w-[calc(100%-12rem)]">
                 <div>
                     <p>©2025 All rights reserved</p>
                 </div>
