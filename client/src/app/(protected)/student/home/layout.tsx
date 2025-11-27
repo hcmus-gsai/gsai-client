@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 import Image from "next/image";
 import Epis from "@/../public/shared/EPIS.svg";
@@ -5,8 +7,9 @@ import SearchIcon from "@/../public/shared/SearchIcon.svg";
 import UserIcon from "@/../public/shared/User.svg";
 import NotificationIcon from "@/../public/shared/Notification.svg";
 import { Menu, Input, Button, ConfigProvider } from "antd";
-
+import { useRouter } from "next/navigation";
 const StudentNavbar = () => {
+    const router = useRouter();
     return (
         <nav
         className = "fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20"
@@ -35,10 +38,10 @@ const StudentNavbar = () => {
                                 defaultSelectedKeys={["homepage"]}
                                 items = {[
                                     { key: "homepage", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center px-3">
-                                        <span className = "cursor-pointer text-[var(--color-primary)] font-bold">Trang chủ</span>
+                                        <span onClick = {() => router.push("/student/home")} className = "cursor-pointer text-[var(--color-primary)] font-bold">Trang chủ</span>
                                     </div> },   
                                     { key: "courses", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center">
-                                        <span className = "cursor-pointer text-[var(--color-primary)] font-bold">Môn học</span>
+                                        <span onClick = {() => router.push("/student/home/courses")} className = "cursor-pointer text-[var(--color-primary)] font-bold">Môn học</span>
                                     </div> },
                                     { key: "about", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center ">
                                         <span className = "cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>

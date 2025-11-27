@@ -38,7 +38,6 @@ export default function StudentHomePage() {
                 // hasTopGradient = {false}
                 // hasMiddleGradient = {false}
                 // hasCurveSpace = {false}
-             
             />
             <CourseDisplaySection title = "Môn học đã xem gần đây" hasExtended = {true}/>
             <CourseDisplaySection title = "Môn học phổ biến hiện nay"/>

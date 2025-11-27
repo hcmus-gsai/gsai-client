@@ -7,7 +7,7 @@ import {useRouter} from "next/navigation";
 
 
 export const RedirectButton = ({
-    href,
+    onClick,
     text,
     buttonBg,
     buttonText,
@@ -15,7 +15,7 @@ export const RedirectButton = ({
     iconBg,
     iconText,
 }:{
-    href: string;
+    onClick?: () => void;
     text: string;
     buttonBg?: string;
     buttonText?: string;
@@ -25,13 +25,13 @@ export const RedirectButton = ({
     iconText?:string;
 }) => {
 
-    const router = useRouter();
+    
     return (
         <Button
             type="primary"
-            onClick = {() => router.push(`${href}`)}
             className = {`!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent`} 
             style={{ border: `1px solid ${buttonBorder}` }}
+            onClick = {onClick}
         >
             <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
                 <span className = {`text-[1rem] !text-[${buttonText}]`}>{text}</span>

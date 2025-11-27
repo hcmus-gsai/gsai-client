@@ -22,77 +22,50 @@ const CourseDisplaySection = ({
         {
             id: 1,
             image : '/images/course-1.jpg',
-            name: 'Nhập môn cấu trúc dữ liệu và giải thuật',
-            teacher: 'Nguyễn Văn A',
+            name: 'Toán ứng dụng & thống kê',
+            teacher: ['Vũ Quốc Hoàng', 'Nguyễn Văn Quang Huy', 'Nguyễn Ngọc Toàn', 'Phan Thị Phương Uyên'],
             estimated_time : '1 tháng',
             rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+            tags : ['toán học', 'thống kê', 'kinh tế']
         },
         {
             id: 2,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
+            image : '/images/course-2.jpg',
+            name: 'Cấu trúc dữ liệu & giải thuật',
+            teacher: ['Nguyễn Thanh Phương', 'Nguyễn Thị Ngọc Thảo'],
             estimated_time : '1 tháng',
             rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+            tags : ['toán học', 'cấu trúc dữ liệu', 'giải thuật']
         },
         
         {
             id: 3,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
+            image : '/images/course-3.jpg',
+            name: 'Nhập môn công nghệ phần mềm',
+            teacher: ['Hồ Tuấn Thanh','Mai Anh Tuấn', 'Nguyễn Thị Minh Tuyền'],
             estimated_time : '1 tháng',
             rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+            tags : ['công nghệ phần mềm', 'lập trình', 'thiết kế']
         },
 
         {
             id: 4,
             name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 5,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        
-        {
-            id: 6,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 7,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 8,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
+            teacher: ['Nguyễn Văn A'],
             estimated_time : '1 tháng',
             rating: 5.0,
             tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
         },
     ];
+    const [isExpanded, setIsExpanded] = useState(false);
+    const handleExpand = () => {
+        setIsExpanded(!isExpanded);
+    }
     return (
-        <section className = "w-full min-h-[70vh] flex flex-col items-center">
+        <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
             {
                 hasExtended && (
-                    <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem] mb-[2rem]">
+                    <div className = "flex flex-col items-center justify-center w-[calc(100%-24rem)] gap-[1.5rem] mb-[2rem]">
                         <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">Tiếp tục môn học</h1>
                         <div className = "flex items-center justify-center w-full h-[114px] rounded-[20px] border-[1px] border-solid border-[#DCDCDC]">
                             <div className = "flex flex-col items-start justify-center w-full h-full mr-auto pl-[1.5rem]">
@@ -119,7 +92,7 @@ const CourseDisplaySection = ({
                                 <div>
                                     <Button
                                         type="primary"
-                                        onClick = {() => router.push("/student/courses")}
+                                        onClick = {() => router.push(`/student/home/courses/${courseSampleData[0].name.toLowerCase().replace(/ /g, '-')}/chapter-1/video-1  `)}
                                         className = {`!border-1 !border-solid !w-[9rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-[#1363DF]`} 
                                     >
                                         <div className = "flex items-center justify-center relative w-[calc(100%-5rem)]">
@@ -137,14 +110,19 @@ const CourseDisplaySection = ({
             }
             <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem]">
                 <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
-                <div className = "flex items-center justify-center w-full h-[18.9375rem]">
-                    <CourseGrid courseData = {courseSampleData} colWidth = {6} maxItems = {4} />
+                <div className = "flex items-center justify-center w-full">
+                    <CourseGrid 
+                        courseData = {courseSampleData} 
+                        colWidth = {6} 
+                        maxItems = {isExpanded ? 12 : 4} 
+                    />
                 </div>
             </div>
             <div className = "flex items-center justify-center w-[calc(100%-12rem)] py-[2rem]">
+                
                 <RedirectButton 
-                    href = "/student/courses" 
-                    text = "Xem tất cả" 
+                    onClick = {handleExpand}
+                    text = {isExpanded ? "Thu gọn" : "Xem tất cả"} 
                     buttonBg = "white" 
                     buttonText = "var(--color-secondary)"
                     buttonBorder = "#1363DF"

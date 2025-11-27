@@ -3,8 +3,10 @@ import { RedirectButton } from "@/components/shared/redirect-button";
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 
-
+import { useRouter } from "next/navigation";
 const LearningPathSection = () => {
+
+    const router = useRouter();
 
     return (
         <section className = "w-full h-[50vh] flex flex-col items-center">
@@ -19,7 +21,7 @@ const LearningPathSection = () => {
                             <p className = "text-[1rem] text-[var(--color-primary)] w-full">Nếu bạn đã xác định rõ môn mình muốn học</p>
                         </div>
                         <div>
-                            <RedirectButton href = "/student/courses" text = "Tìm môn học" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
+                            <RedirectButton onClick = {() => router.push("/student/courses")} text = "Tìm môn học" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">
@@ -39,7 +41,7 @@ const LearningPathSection = () => {
                             <p className = "text-[1rem] text-[var(--color-primary)] w-full">Nếu bạn đã xác định rõ môn mình muốn học</p>
                         </div>
                         <div>
-                            <RedirectButton href = "/student/courses" text = "Tìm môn học" buttonBg = "var(--color-bg_white)" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
+                            <RedirectButton onClick = {() => router.push("/student/courses")} text = "Tìm môn học" buttonBg = "var(--color-bg_white)" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">
