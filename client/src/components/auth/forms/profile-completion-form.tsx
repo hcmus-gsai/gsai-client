@@ -1,13 +1,16 @@
 'use client';
-import {Button, Form, Input, Select, Radio, InputRef, Upload} from 'antd';
+import { Button, Form, Input, Select, Radio, InputRef, Upload } from 'antd';
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { FormTitle } from '../ui/form';
-import React, {useState, useRef, useEffect} from 'react';
-import { X ,XCircle} from "@deemlol/next-icons"
+import React, { useState, useRef, useEffect } from 'react';
+import { X, XCircle } from "@deemlol/next-icons"
+import { useRouter } from "next/navigation";
+import { useSignUpMutation } from '@/store/api/authApi';
+import jwt from 'jsonwebtoken';
 
 //use cloudinary to upload image
-import {CldUploadWidget} from "next-cloudinary";
+import { CldUploadWidget } from "next-cloudinary";
 
 
 export interface UploadState {
@@ -16,10 +19,6 @@ export interface UploadState {
     isValid: boolean;
     error: string | null;
 };
-
-
-
-
 
 
 const ProfileCompletionForm = () => {
@@ -34,10 +33,55 @@ const ProfileCompletionForm = () => {
     const province = Form.useWatch('province', formData);
     const role = Form.useWatch('role', formData);
     const identityCard = Form.useWatch('identityCard', formData);
+    const router = useRouter();
+    const [signUp] = useSignUpMutation()
 
-    const createProfileHandler = async() => {
-   
-    }
+    useEffect(() => {
+        const raw = sessionStorage.getItem('signUpTempData');
+        if (!raw) return;
+
+        const { email, password, remember } = JSON.parse(raw);
+        formData.setFieldsValue({ email, password, remember });
+    }, []);
+
+    const handleCreateProfile = async () => {
+        try {
+            const data = formData.getFieldsValue();
+            setIsLoading(true);
+
+            const payload = {
+                email: data.email,
+                password: data.password,
+                name: data.name,
+                gender: data.gender,
+                dob: data.dob,
+                location: data.location,
+                phone: data.phone,
+                role: data.role,
+            };
+
+            const { accessToken } = await signUp(payload).unwrap();
+            const decodedToken: any = jwt.decode(accessToken);
+
+            if (decodedToken) {
+                // notify.success('Đăng ký thành công!');
+                const role = decodedToken.role;
+
+                // Redirect based on role
+                if (role === 'student') {
+                    router.push('/student/home');
+                } else if (role === 'teacher') {
+                    router.push('/teacher/home');
+                } else {
+                    router.push('/');
+                }
+            }
+        } catch (error) {
+            console.error("Create profile failed:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const provinces = [
         "Hà Nội",
@@ -92,11 +136,11 @@ const ProfileCompletionForm = () => {
         isValid: false,
         error: null
     })
-    
+
     const handleProfileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        
+
         const file = event.target.files?.[0];
-        if(!file) {
+        if (!file) {
             return;
         }
         //Resource Reference: https://stackoverflow.com/questions/74973640/cloudinary-image-upload
@@ -121,7 +165,7 @@ const ProfileCompletionForm = () => {
             throw new Error("Failed to get signature");
         }
 
-        const {signature} = await signatureResponse.json();
+        const { signature } = await signatureResponse.json();
 
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
         const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
@@ -133,9 +177,9 @@ const ProfileCompletionForm = () => {
         currentFormData.append("signature", signature);
         currentFormData.append("timestamp", timestamp.toString());
         currentFormData.append("upload_preset", uploadPreset!);
-        
+
         const uploadResponse = await fetch(url, {
-            method: "POST", 
+            method: "POST",
             body: currentFormData
         });
 
@@ -175,10 +219,10 @@ const ProfileCompletionForm = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({paramsToSign}),
+            body: JSON.stringify({ paramsToSign }),
         });
 
-        if(!signatureResponse.ok) {
+        if (!signatureResponse.ok) {
             throw new Error("Failed to get signature");
         }
 
@@ -199,7 +243,7 @@ const ProfileCompletionForm = () => {
             body: currentFormData
         });
 
-        if(!uploadResponse.ok) {
+        if (!uploadResponse.ok) {
             throw new Error('Upload failed');
         }
 
@@ -221,57 +265,57 @@ const ProfileCompletionForm = () => {
 
     return (
         <Form
-            form = {formData}
-            name = "profile-completion"
-            layout = "vertical"
-            onFinish = {() => {}}
+            form={formData}
+            name="profile-completion"
+            layout="vertical"
+            onFinish={() => { handleCreateProfile(); }}
 
-            initialValues = {{
+            initialValues={{
                 email: "example@gmail.com",
                 phoneNumber: "+84 123 456 789",
                 province: "Hồ Chí Minh",
             }}
         >
-            <div className = "flex items-start justify-center w-full h-full pt-[2rem] gap-[1rem]">
-                <div className = "flex flex-col items-center justify-start h-full w-full">
-                    <Form.Item 
-                        name = "profileImage"
-                        rules = {[
+            <div className="flex items-start justify-center w-full h-full pt-[2rem] gap-[1rem]">
+                <div className="flex flex-col items-center justify-start h-full w-full">
+                    <Form.Item
+                        name="profileImage"
+                        rules={[
                             {
-                                required: true,
+                                required: false,
                                 message: 'Vui lòng tải lên ảnh đại diện'
                             }
                         ]}
-                        className = "w-full flex items-center justify-center"
+                        className="w-full flex items-center justify-center"
                     >
                         {!profileUpload.previewUrl ? (
                             <div
-                                onClick = {() => profileInputRef.current?.focus()}
-                                className = "w-[12rem] h-[12rem] flex items-center justify-center"
+                                onClick={() => profileInputRef.current?.focus()}
+                                className="w-[12rem] h-[12rem] flex items-center justify-center"
                             >
                                 <Input
-                                    type = "file"
-                                    ref = {profileInputRef}
-                                    accept = "image/*"
-                                    onChange = {handleProfileUpload}
-                                    className = "absolute w-full h-full cursor-pointer !rounded-full opacity-0 bg-red-200 z-10"
+                                    type="file"
+                                    ref={profileInputRef}
+                                    accept="image/*"
+                                    onChange={handleProfileUpload}
+                                    className="absolute w-full h-full cursor-pointer !rounded-full opacity-0 bg-red-200 z-10"
                                 />
-                                <Image 
-                                    src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0} 
-                                    className = "absolute w-full h-full object-cover rounded-full cursor-pointer"
+                                <Image
+                                    src={EmptyLayout} alt="Empty Layout" width={0} height={0}
+                                    className="absolute w-full h-full object-cover rounded-full cursor-pointer"
                                 />
                             </div>
-                        ):(
-                            <div className = "w-[12rem] h-[12rem] flex items-center justify-center">
-                                <Image 
-                                    src = {profileUpload.previewUrl}
-                                    alt = "Profile Image"
-                                    width = {0}
-                                    height = {0}
-                                    className = "w-full h-full object-cover rounded-full cursor-pointer"
+                        ) : (
+                            <div className="w-[12rem] h-[12rem] flex items-center justify-center">
+                                <Image
+                                    src={profileUpload.previewUrl}
+                                    alt="Profile Image"
+                                    width={0}
+                                    height={0}
+                                    className="w-full h-full object-cover rounded-full cursor-pointer"
                                 />
                                 <Button
-                                    onClick={()=>{
+                                    onClick={() => {
                                         setProfileUpload({
                                             fileObj: null,
                                             previewUrl: null,
@@ -279,45 +323,42 @@ const ProfileCompletionForm = () => {
                                             error: null
                                         });
                                     }}
-                                    className = "!absolute !top-[0.5rem] !right-[0.5rem] !bg-[var(--color-secondary)] !rounded-full !w-[2rem] !h-[2rem] !p-0 !z-10"
+                                    className="!absolute !top-[0.5rem] !right-[0.5rem] !bg-[var(--color-secondary)] !rounded-full !w-[2rem] !h-[2rem] !p-0 !z-10"
                                 >
-                                    <XCircle className = "!text-white !w-full !h-full"/>
+                                    <XCircle className="!text-white !w-full !h-full" />
                                 </Button>
 
                             </div>
-                        )}    
-                    </Form.Item>            
+                        )}
+                    </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Email<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "email"
-                        rules = {[
-                            {
-                                required: true,
-                                message: 'Vui lòng nhập email'
-                            }
-                        ]}
-                        className = "w-full"
+                        name="email"
+                        className="w-full"
                     >
-                        
-                        <Input 
-                            placeholder = "example@email.com"
-                            readOnly = {true}
-                            className = "form__input !h-[3.375rem] !w-full !text-[1rem]"
+
+                        <Input
+                            readOnly={true}
+                            className="form__input !h-[3.375rem] !w-full !text-[1rem]"
                         />
 
                     </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <Form.Item name="password" hidden>
+                        <Input type="hidden" />
+                    </Form.Item>
+
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Số điện thoại<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "phoneNumber"
-                        rules = {[
+                        name="phone"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng nhập số điện thoại'
@@ -327,160 +368,160 @@ const ProfileCompletionForm = () => {
                                 message: 'Số điện thoại không hợp lệ'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        <Input type = "number" placeholder = "+84 123 456 789"
-                            className = "form__input !h-[3.375rem] !w-full !text-[1rem]"
+                        <Input type="number" placeholder="+84 123 456 789"
+                            className="form__input !h-[3.375rem] !w-full !text-[1rem]"
                         />
                     </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Vai trò<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "role"
-                        rules = {[
+                        name="role"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng chọn vai trò'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
                         <Radio.Group
-                            buttonStyle = "solid"
-                            className = "!w-full !flex !items-center !justify-center !gap-[1rem]"
+                            buttonStyle="solid"
+                            className="!w-full !flex !items-center !justify-center !gap-[1rem]"
                         >
-                            <Radio.Button value="student" className = "!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Học sinh</Radio.Button>
-                            <Radio.Button value="teacher" className = "!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Giáo viên</Radio.Button>
+                            <Radio.Button value="student" className="!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Học sinh</Radio.Button>
+                            <Radio.Button value="teacher" className="!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Giáo viên</Radio.Button>
                         </Radio.Group>
-                    </Form.Item>                    
+                    </Form.Item>
                 </div>
 
-                <div className = "flex flex-col items-center justify-start h-full w-full">
-                    <div className = "mb-2 w-full">
+                <div className="flex flex-col items-center justify-start h-full w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Họ và tên<span className="text-red-500">*</span></p>
                     </div>
                     <Form.Item
-                        name = "name"
-                        rules = {[
+                        name="name"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng nhập họ và tên'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        
+
                         <Input
-                            placeholder = "Nguyen Van A"
-                            className = "form__input !h-[3.375rem] !w-full !text-[1rem]"
+                            placeholder="Nguyen Van A"
+                            className="form__input !h-[3.375rem] !w-full !text-[1rem]"
                         />
                     </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Giới tính<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "gender"
-                        rules = {[
+                        name="gender"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng chọn giới tính'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        
-                        <Radio.Group
-                            buttonStyle = "solid"
-                            className = "!w-full !flex !items-center !justify-center !gap-[1rem]"
-                        >
-                            <Radio.Button value="male" className = "!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Nam</Radio.Button>
-                            <Radio.Button value="female" className = "!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Nữ</Radio.Button>
-                        </Radio.Group>
-                    </Form.Item>  
 
-                    <div className = "mb-2 w-full">
+                        <Radio.Group
+                            buttonStyle="solid"
+                            className="!w-full !flex !items-center !justify-center !gap-[1rem]"
+                        >
+                            <Radio.Button value="male" className="!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Nam</Radio.Button>
+                            <Radio.Button value="female" className="!h-[3.375rem] !w-full !text-[1rem] !rounded-md !flex !items-center !justify-center">Nữ</Radio.Button>
+                        </Radio.Group>
+                    </Form.Item>
+
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Ngày sinh<span className="text-red-500">*</span></p>
-                    </div>  
+                    </div>
 
                     <Form.Item
-                        name = "birthday"
-                        rules = {[
+                        name="dob"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng nhập ngày sinh'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        
+
                         <Input
-                            type = "date" 
-                            placeholder = "Ngày sinh" 
-                            className = "form__input !h-[3.375rem] !w-full !text-[1rem]"
+                            type="date"
+                            placeholder="Ngày sinh"
+                            className="form__input !h-[3.375rem] !w-full !text-[1rem]"
                         />
 
                     </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Tỉnh<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "province"
-                        rules = {[
+                        name="location"
+                        rules={[
                             {
                                 required: true,
                                 message: 'Vui lòng chọn tỉnh/thành phố'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        
+
                         <Select
-                            options = {provinces.map((province) =>{
+                            options={provinces.map((province) => {
                                 return {
                                     value: province,
                                     label: province
                                 }
                             })}
-                            value = "Tỉnh" //Fix issue link: https://stackoverflow.com/questions/61244343/defaultvalue-of-input-not-working-correctly-on-ant-design
+                            value="Tỉnh" //Fix issue link: https://stackoverflow.com/questions/61244343/defaultvalue-of-input-not-working-correctly-on-ant-design
 
-                            className = "form__input !h-[3.375rem] !w-full !text-[1rem]"
+                            className="form__input !h-[3.375rem] !w-full !text-[1rem]"
                         />
                     </Form.Item>
 
-                    <div className = "mb-2 w-full">
+                    <div className="mb-2 w-full">
                         <p className="font-medium font-bold">Minh chứng<span className="text-red-500">*</span></p>
                     </div>
 
                     <Form.Item
-                        name = "identityCardImage"
-                        rules = {[
+                        name="identityCardImage"
+                        rules={[
                             {
-                                required: true,
+                                required: false,
                                 message: 'Vui lòng tải lên minh chứng'
                             }
                         ]}
-                        className = "w-full"
+                        className="w-full"
                     >
-                        
-                        {identityCardUpload.previewUrl? (
-                            <div className = "w-full h-[5rem]text-[1rem] cursor-pointer rounded-md flex items-center justify-start p-[0.75rem] cursor-pointer border border-gray-200">
-                                
+
+                        {identityCardUpload.previewUrl ? (
+                            <div className="w-full h-[5rem]text-[1rem] cursor-pointer rounded-md flex items-center justify-start p-[0.75rem] cursor-pointer border border-gray-200">
+
                                 <Image
-                                    src = {identityCardUpload.previewUrl}
-                                    alt = "Identity Card Image"
-                                    width = {0}
-                                    height = {0}
-                                    className = "w-full h-full object-cover"
+                                    src={identityCardUpload.previewUrl}
+                                    alt="Identity Card Image"
+                                    width={0}
+                                    height={0}
+                                    className="w-full h-full object-cover"
                                 />
                                 <Button
-                                    onClick = {() => {
+                                    onClick={() => {
                                         setIdentityCardUpload({
                                             fileObj: null,
                                             previewUrl: null,
@@ -488,44 +529,44 @@ const ProfileCompletionForm = () => {
                                             error: null
                                         });
                                     }}
-                                    className = "!absolute !top-[0.5rem] !right-[0.5rem] !bg-[var(--color-secondary)] !rounded-full !w-[2rem] !h-[2rem] !p-0 !z-10"
+                                    className="!absolute !top-[0.5rem] !right-[0.5rem] !bg-[var(--color-secondary)] !rounded-full !w-[2rem] !h-[2rem] !p-0 !z-10"
                                 >
-                                    <XCircle className = "!text-white !w-full !h-full"/>
+                                    <XCircle className="!text-white !w-full !h-full" />
                                 </Button>
                             </div>
-                        ):(
-                            <div className = "w-full h-[3.375rem] text-[1rem] cursor-pointer rounded-md flex items-center justify-start p-[0.75rem] cursor-pointer border border-gray-200 hover:border-[#4096ff]  transition-all duration-300">
-                                <label 
-                                    htmlFor = "identityCardImage"
-                                    className = "w-full h-full cursor-pointer"
+                        ) : (
+                            <div className="w-full h-[3.375rem] text-[1rem] cursor-pointer rounded-md flex items-center justify-start p-[0.75rem] cursor-pointer border border-gray-200 hover:border-[#4096ff]  transition-all duration-300">
+                                <label
+                                    htmlFor="identityCardImage"
+                                    className="w-full h-full cursor-pointer"
                                 >
                                     <Input
-                                        type = "file"
-                                        id = "identityCardImage"
-                                        accept = "application/png, application/jpeg"
-                                        onChange = {handleIdentityCardUpload}
-                                        className = "!hidden" 
+                                        type="file"
+                                        id="identityCardImage"
+                                        accept="application/png, application/jpeg"
+                                        onChange={handleIdentityCardUpload}
+                                        className="!hidden"
                                     />
-                                    <p className = "!text-[1rem] ">Tải lên minh chứng</p>
-                                </label>                       
+                                    <p className="!text-[1rem] ">Tải lên minh chứng</p>
+                                </label>
                             </div>
                         )}
                     </Form.Item>
 
-                    <div className = "w-full mt-2">
-                        <p className = "text-sm text-gray-500 w-full relative top-[-1rem]">&#8226; Giấy xác nhận hoặc thẻ học sinh/giáo viên có ghi rõ họ tên.</p>
-                        <p className = "text-sm text-gray-500 w-full relative top-[-1rem]">&#8226; Tải tệp lên dưới dạng .pdf hoặc .png.</p>
+                    <div className="w-full mt-2">
+                        <p className="text-sm text-gray-500 w-full relative top-[-1rem]">&#8226; Giấy xác nhận hoặc thẻ học sinh/giáo viên có ghi rõ họ tên.</p>
+                        <p className="text-sm text-gray-500 w-full relative top-[-1rem]">&#8226; Tải tệp lên dưới dạng .pdf hoặc .png.</p>
                     </div>
                 </div>
             </div>
 
             <Form.Item
-                className = "flex items-center justify-center"
+                className="flex items-center justify-center"
             >
                 <Button
-                    type = "primary"
-                    htmlType = "submit"
-                    className = "!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg_white)] !bg-[var(--color-secondary)] !rounded-full"
+                    type="primary"
+                    htmlType="submit"
+                    className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg_white)] !bg-[var(--color-secondary)] !rounded-full"
                 >
                     Lưu thông tin
                 </Button>
@@ -534,4 +575,4 @@ const ProfileCompletionForm = () => {
     )
 }
 
-export {ProfileCompletionForm};
+export { ProfileCompletionForm };
