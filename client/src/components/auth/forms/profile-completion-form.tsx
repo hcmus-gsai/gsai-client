@@ -6,7 +6,7 @@ import { FormTitle } from '../ui/form';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, XCircle } from "@deemlol/next-icons"
 import { useRouter } from "next/navigation";
-import { useSignUpMutation } from '@/store/api/authApi';
+import { useSignUpMutation } from '@/store/api/[module]/authApi';
 import jwt from 'jsonwebtoken';
 
 //use cloudinary to upload image

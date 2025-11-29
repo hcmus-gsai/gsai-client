@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { baseApi } from './api/baseApi';
 import authReducer from './slice/authSlice';
+import './api/[module]/courseApi'; // Import để đăng ký courseApi endpoints
 
 export const store = configureStore({
     reducer: {

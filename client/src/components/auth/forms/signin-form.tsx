@@ -3,7 +3,7 @@
 import {Form, Input, Button} from 'antd';
 import {useState} from 'react';
 import {useRouter} from "next/navigation";
-import { useSignInMutation } from '@/store/api/authApi';
+import { useSignInMutation } from '@/store/api/[module]/authApi';
 import jwt from 'jsonwebtoken';
 
 

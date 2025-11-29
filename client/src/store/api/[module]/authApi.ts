@@ -1,5 +1,5 @@
-import { baseApi } from './baseApi';
-import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, User } from '../../type/auth.type';
+import { baseApi } from '../baseApi';
+import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, User } from '../../../type/auth.type';
 import Cookies from "js-cookie";
 import { refresh } from 'next/cache';
 

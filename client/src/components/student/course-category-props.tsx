@@ -31,14 +31,29 @@ const CourseCategoryComponent = (
 }
 
 const CourseHighLightComponent = () => {
-    
+    //Các trường dữ liệu sẽ load từ database
+    const tuition_fee  = 0.0;
+    const duration = "3 tháng";
+
+    //===================================
     return (
         <div className = "mt-[18vh] grid grid-cols-4 items-center justify-center w-[calc(100%-12rem)] h-[10.625rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 flex items-center justify-center gap-2 px-[1.5rem]">
            
             <div className = "flex flex-col items-center w-full h-[54%] border-r-2 border-gray-200">
                 <div className = "w-[70%] h-full">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
-                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
+                    {
+                        tuition_fee === 0.0 ?(
+                            <>
+                            <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
+                            </>
+                        ):(
+                            <>
+                            <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học có phí</p>
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Phí: {tuition_fee} VNĐ</p>
+                            </>
+                        )
+                    }
                 </div>
             </div>
 
@@ -59,8 +74,8 @@ const CourseHighLightComponent = () => {
             
             <div className = "flex flex-col items-center w-full h-[54%]">
                 <div className = "w-[70%] h-full">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Lịch trình linh hoạt</p>
-                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành 5 giờ học mỗi tuần</p>
+                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {duration} học</p>
                 </div>
             </div>
         </div>

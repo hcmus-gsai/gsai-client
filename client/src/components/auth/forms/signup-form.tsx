@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Form, Input, Button, Checkbox, notification } from "antd";
 import Link from 'next/link';
 import { useState } from 'react';
-import { useCheckEmailMutation } from '../../../store/api/authApi';
+import { useCheckEmailMutation } from '../../../store/api/[module]/authApi';
 import {GoogleSignIn} from '../ui/form';
 import { sign } from 'crypto';
 
