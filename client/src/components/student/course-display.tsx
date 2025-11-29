@@ -76,13 +76,6 @@ const CourseDisplaySection = ({
                                 <p className = "text-[1rem] font-light text-[var(--color-primary)]">
                                     Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
                                 </p>
-
-                                {/* <div className="bg-gray-200 w-full h-[10px] rounded-full overflow-hidden">
-                                    <div
-                                        className="bg-[var(--color-secondary)] h-full rounded-full"
-                                        style={{ width: `${75}%` }}
-                                    ></div>
-                                </div> */}
                                 <Progress percent={75} showInfo = {false}/>
 
                             </div>

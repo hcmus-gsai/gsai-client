@@ -5,6 +5,7 @@ import { Button } from "antd";
 import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
 import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";
+// import AbstractNCurve from "@/../public/student/testAbstract.svg";
 
 import { CourseCategoryComponent, CourseHighLightComponent } from '@/components/student/course-category-props';
 import EmptyLayout from "@/../public/EmptyLayout.svg";
@@ -92,7 +93,7 @@ const StudentGreetingSection = (
                 />
             )}
 
-            <div className="w-full h-[70%] absolute top-0 left-0 z-[-1]">
+            <div className="w-full h-full absolute top-20 left-0 z-[-1]">
                 {hasCurveSpace ? (
                     <Image 
                         src = {AbstractNCurve} alt = "Curve Space Middle" width = {0} height = {0}
@@ -124,13 +125,15 @@ const StudentGreetingSection = (
                         <div className = "w-full flex items-center justify-start mb-[1rem]">
                             <Button className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">Thời gian biểu</Button>
                         </div>
-
-                        <p className = "text-[1rem] font-bold text-[var(--color-primary)]">{paticipants} người tham gia</p>
+                        
+                        {
+                            isCourse && (<p className = "text-[1rem] font-bold text-[var(--color-primary)]">{paticipants} người tham gia</p>)
+                        }
                     </div>
                 </div>
                 {
                     !isCourse ? (
-                        <div className = "w-full h-[242px] mt-[10vh] flex flex-col items-center justify-between">
+                        <div className = "w-full h-[242px] mt-[20vh] flex flex-col items-center justify-between">
                             <div className = "h-full w-full flex flex-col items-center justify-between z-10">
                                 <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
                             </div>

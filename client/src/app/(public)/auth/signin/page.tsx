@@ -21,7 +21,7 @@ export default function SignInPage() {
             <SignInForm/>
             <FormNavigation
                 href = "/auth/signup"
-                textHref = "Đăng kí"
+                textHref = "Đăng ký"
                 description = "Chưa có tài khoản?"
             />
         </FormLayout>

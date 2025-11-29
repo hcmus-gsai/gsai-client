@@ -43,10 +43,13 @@ export const authApi = baseApi.injectEndpoints({
         }),
 
         // Sign Out
-        signOut: builder.mutation<{ message: string }, void>({
-            query: () => ({
+        signOut: builder.mutation<{ message: string }, { refreshToken: string | null }>({
+            // Nhận arg đầu vào
+            query: ({ refreshToken }) => ({
                 url: '/auth/sign-out',
                 method: 'POST',
+                // Gửi token qua Body cho backend
+                body: { refreshToken },
             }),
             // Clear tokens after logout
             async onQueryStarted(arg, { queryFulfilled }) {

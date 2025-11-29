@@ -1,5 +1,6 @@
 import {Button} from "antd";
 import Image from "next/image";
+import starSVG from "@/../public/student/Star.svg"
 
 const CourseCategoryComponent = (
     {
@@ -37,14 +38,13 @@ const CourseHighLightComponent = () => {
 
     //===================================
     return (
-        <div className = "mt-[18vh] grid grid-cols-4 items-center justify-center w-[calc(100%-12rem)] h-[10.625rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 flex items-center justify-center gap-2 px-[1.5rem]">
-           
-            <div className = "flex flex-col items-center w-full h-[54%] border-r-2 border-gray-200">
-                <div className = "w-[70%] h-full">
+        <div className = "mt-[10.4rem] grid grid-cols-4 w-[calc(100%-12rem)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">
+            <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                <div className = "mt-7 w-[80%] h-full">
                     {
                         tuition_fee === 0.0 ?(
                             <>
-                            <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
+                            <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
                             </>
                         ):(
@@ -57,24 +57,31 @@ const CourseHighLightComponent = () => {
                 </div>
             </div>
 
-            <div className = "flex flex-col items-center w-full h-[54%] border-r-2 border-gray-200">
-                <div className = "h-full">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">5 đánh giá</p>
+            <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                <div className = "mt-7 h-full">
+                    <span className="flex mb-3">
+                        <p className = "text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
+                        
+                        <Image 
+                            src = {starSVG} alt = "Star Icon" width = {0} height = {0}
+                            className = "w-[1.4rem]"
+                        />
+                    </span>
+                    {/* <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">5.0 đánh giá</p> */}
                     <p className = "text-[1rem] font-light text-[var(--color-primary)]">5 đánh giá</p>
                 </div>
-                
             </div>
             
-            <div className = "flex flex-col items-center w-full h-[54%] border-r-2 border-gray-200">
-                <div className = "w-[70%] h-full">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
+            <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                <div className = "mt-7 w-[80%] h-full">
+                    <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
                     <p className = "text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
                 </div>
             </div>
             
-            <div className = "flex flex-col items-center w-full h-[54%]">
-                <div className = "w-[70%] h-full">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+            <div className = "flex flex-col items-center w-full">
+                <div className = "mt-7 w-[70%] h-full">
+                    <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
                     <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {duration} học</p>
                 </div>
             </div>

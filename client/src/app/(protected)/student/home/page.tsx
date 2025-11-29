@@ -35,9 +35,6 @@ export default function StudentHomePage() {
                 description = "Hãy kiểm tra thời gian biểu của bạn để hoàn thành công việc đúng hạn nhé!"
                 buttonText = "Thời gian biểu"
                 isCourse = {false}
-                // hasTopGradient = {false}
-                // hasMiddleGradient = {false}
-                // hasCurveSpace = {false}
             />
             <CourseDisplaySection title = "Môn học đã xem gần đây" hasExtended = {true}/>
             <CourseDisplaySection title = "Môn học phổ biến hiện nay"/>

@@ -1,15 +1,60 @@
 'use client';
 
+import '@ant-design/v5-patch-for-react-19';
 import React from "react";
 import Image from "next/image";
 import Epis from "@/../public/shared/EPIS.svg";
 import SearchIcon from "@/../public/shared/SearchIcon.svg";
 import UserIcon from "@/../public/shared/User.svg";
 import NotificationIcon from "@/../public/shared/Notification.svg";
-import { Menu, Input, Button, ConfigProvider } from "antd";
+import type { MenuProps } from 'antd';
+import { Menu, Input, Button, ConfigProvider, Dropdown } from "antd";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+
+import { useSignOutMutation } from '@/store/api/authApi';
+
 const StudentNavbar = () => {
     const router = useRouter();
+
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null; 
+    }
+
+    const [signOut] = useSignOutMutation();
+    const handleLogout = async () => {
+        // 1. Lấy refresh token từ storage
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // 2. Gọi hàm signOut và truyền token vào
+        // Dù refreshToken là null thì vẫn gọi để chạy logic onQueryStarted xóa dọn dẹp
+        await signOut({ refreshToken });
+        
+        // 3. Chuyển trang (nếu cần thiết, hoặc để RTK tự xử lý)
+        router.push('/auth/signin'); 
+    };
+
+    const items: MenuProps['items'] = [
+    {
+        key: '1',
+        label: (
+            <span onClick = {() => router.push("/student/home/profile")}>Trang cá nhân</span>
+        ),
+    },
+    {
+        key: '2',
+        label: (
+            <span onClick={handleLogout}>Đăng xuất</span>
+        ),
+    },
+    ];
+
     return (
         <nav
             className = "fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20"
@@ -24,11 +69,12 @@ const StudentNavbar = () => {
                                 />
                             </div>
                         </div>
+
                         <ConfigProvider
                             theme={{
                                 components: {
                                     Menu: {
-                                        itemPaddingInline: 20,   // optional left/right padding
+                                        itemPaddingInline: 10,   // optional left/right padding
                                     },
                                 },
                             }}
@@ -79,10 +125,16 @@ const StudentNavbar = () => {
                         />
                     </div>
 
-                    <div className = "flex items-center justify-center w-[3.5rem] h-full">
-                        <Image src = {UserIcon} alt = "User Icon" width = {0} height = {0}
-                            className = "object-cover !w-[1.5rem] !h-[1.5rem]"
-                        />
+                    <div className = "flex items-center justify-center w-[3.5rem] h-full" style={{}}>
+                        <Dropdown menu={{ items }} trigger={['click']} placement="bottomLeft" overlayStyle={{minWidth:"6rem"}}>
+                            <Button
+                                className = "!h-[3.5rem] !w-[3.5rem] !rounded-full !border-none !flex !items-center !justify-center"
+                            >
+                                <Image src = {UserIcon} alt = "User Icon" width = {0} height = {0}
+                                    className = "!w-[1.5rem] !h-[1.5rem]"
+                                />
+                            </Button>
+                        </Dropdown>
                     </div>
                 </div>
             </div>

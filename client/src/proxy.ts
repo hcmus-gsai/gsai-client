@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { refresh } from 'next/cache';
 
-export async function middleware(req: any) {
+export async function proxy(req: any) {
   console.log('Middleware triggered for:', req.nextUrl.pathname);
 
   const token = req.cookies.get('accessToken')?.value;

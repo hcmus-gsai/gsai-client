@@ -710,7 +710,7 @@ const ActivitySection = () => {
                     </div>
                 </div> */}
 
-            </div>
+            </div>  
         </section>
     )
 }

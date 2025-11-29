@@ -8,7 +8,10 @@ import { CourseDisplaySection } from "@/components/student/course-display";
 import {Card, Button} from "antd";
 import { QASection } from "@/components/student/qna";
 import {FooterSection} from "@/components/guest/ui/guest";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
+
+const VALID_CATEGORIES = ['Toán ứng dụng & thống kê', 'Cấu trúc dữ liệu & giải thuật', 'abc'];
+
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
         {
@@ -98,8 +101,12 @@ const CourseHighLight = () => {
         </div>
     )
 }
-export default function StudentCoursePage() {
-   
+export default function StudentCoursePage({ params }: { params: { category: string } }) {
+
+    console.log(params.category);
+    if (!VALID_CATEGORIES.includes(params.category)) {
+        notFound(); // Hàm này sẽ lập tức trả về trang 404
+    }
     return(
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             <StudentGreetingSection

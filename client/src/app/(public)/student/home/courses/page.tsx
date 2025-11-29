@@ -2,9 +2,9 @@
 
 import { CourseDisplaySection } from "@/components/student/course-display";
 import { LearningPathSection } from "@/components/student/learning-path";
-import {CourseCategorySection} from "@/components/student/course-category";
+import { CourseCategorySection } from "@/components/student/course-category";
 import { FooterSection } from "@/components/guest/ui/guest";
-import {QASection} from "@/components/student/qna";
+import { QASection } from "@/components/student/qna";
 
 export default function StudentCourseListPage() {
 

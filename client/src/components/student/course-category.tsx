@@ -44,66 +44,7 @@ const CourseCategorySection = () => {
             name: 'Lập trình',
             image: '/guest/Cate_8.svg'
         },
-        {
-            id: 9,
-            name: 'Lập trình',
-            image: '/guest/Cate_9.svg'
-        },
-        {
-            id: 10,
-            name: 'Lập trình',
-            image: '/guest/Cate_10.svg'
-        },
-        {
-            id: 11,
-            name: 'Lập trình',
-            image: '/guest/Cate_11.svg'
-        },
-        {
-            id: 12,
-            name: 'Lập trình',
-            image: '/guest/Cate_12.svg'
-        },
-        {
-            id: 13,
-            name: 'Lập trình',
-            image: '/guest/Cate_13.svg'
-        },
-        {
-            id: 14,
-            name: 'Lập trình',
-            image: '/guest/Cate_14.svg'
-        },
-        {
-            id: 15,
-            name: 'Lập trình',
-            image: '/guest/Cate_15.svg'
-        },
-        {
-            id: 16,
-            name: 'Lập trình',
-            image: '/guest/Cate_16.svg'
-        },
-        {
-            id: 17,
-            name: 'Lập trình',
-            image: '/guest/Cate_17.svg'
-        },
-        {
-            id: 18,
-            name: 'Lập trình',
-            image: '/guest/Cate_18.svg'
-        },
-        {
-            id: 19,
-            name: 'Lập trình',
-            image: '/guest/Cate_19.svg'
-        },
-        {
-            id: 20,
-            name: 'Lập trình',
-            image: '/guest/Cate_20.svg'
-        },
+        
     ]
 
     var columns = 5;
