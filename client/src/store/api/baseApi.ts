@@ -1,5 +1,11 @@
+'use client';
+
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { RootState } from '../store';
+import { signOut, setCredentials } from '../slice/authSlice';
+
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
@@ -7,57 +13,58 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3
 const baseQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL,
     credentials: 'include',
-    prepareHeaders: (headers) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            headers.set('Authorization', `Bearer ${token}`);
+    prepareHeaders: (headers, { getState }) => {
+        const state = getState() as RootState;
+        const accessToken = state.auth.accessToken;
+        if (accessToken) {
+            headers.set('Authorization', `Bearer ${accessToken}`);
         }
         return headers;
     },
     timeout: 10_000, // 10 seconds timeout
 });
 
-// Base query with automatic token refresh
+
 const baseQueryWithReauth: BaseQueryFn<
-    string | FetchArgs,
-    unknown,
-    FetchBaseQueryError
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-    let result = await baseQuery(args, api, extraOptions);
+  let result = await baseQuery(args, api, extraOptions);
 
-    if (result.error && result.error.status === 401) {
-        // Check if running on client side
-        if (typeof window !== 'undefined') {
-            const refreshToken = localStorage.getItem('refreshToken');
-            
-            if (refreshToken) {
-                const refreshResult = await baseQuery(
-                    {
-                        url: '/auth/refresh',
-                        method: 'POST',
-                        body: { refreshToken },
-                    },
-                    api,
-                    extraOptions
-                );
+  // Only attempt refresh if we get 401
+  if (result.error?.status === 401) {
+    console.log('Access token expired, attempting refresh...');
 
-                if (refreshResult.data) {
-                    const { accessToken } = refreshResult.data as { accessToken: string };
-                    localStorage.setItem('accessToken', accessToken);
-                    result = await baseQuery(args, api, extraOptions);
-                } else {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    window.location.href = '/auth/sign-in';
-                }
-            } else {
-                localStorage.removeItem('accessToken');
-                window.location.href = '/auth/sign-in';
-            }
-        }
+    const refreshResult = await baseQuery(
+      '/auth/refresh-token', // your refresh endpoint
+      api,
+      extraOptions
+    );
+
+    if (refreshResult.data) {
+      const user = (api.getState() as RootState).auth.user;
+
+      // Update credentials in Redux store
+      api.dispatch(
+        setCredentials({
+          user,
+          accessToken: (refreshResult.data as any).accessToken,
+          refreshToken: (refreshResult.data as any).refreshToken?.refreshToken, // if you rotate
+        })
+      );
+
+      // Retry original request with new token
+      result = await baseQuery(args, api, extraOptions);
+    } else {
+      // Refresh failed → logout
+      console.log('Refresh token failed or expired. Logging out...');
+      api.dispatch(signOut());
     }
+  }
 
-    return result;
+  // This line is CRITICAL — always return result
+  return result;
 };
 
 

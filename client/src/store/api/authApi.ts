@@ -1,6 +1,7 @@
 import { baseApi } from './baseApi';
 import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, User } from '../../type/auth.type';
 import Cookies from "js-cookie";
+import { refresh } from 'next/cache';
 
 export const authApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -21,25 +22,6 @@ export const authApi = baseApi.injectEndpoints({
                 method: 'POST',
                 body: credentials,
             }),
-            // Store tokens after successful signup
-            async onQueryStarted(arg, { queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    Cookies.set("accessToken", data.accessToken, {
-                        path: "/",
-                        expires: 7,          
-                        secure: true,
-                        sameSite: "strict",
-                    });
-                    Cookies.set("refreshToken", data.refreshToken, {
-                        expires: 30,          // 30 ngày
-                        secure: true,
-                        sameSite: "strict",
-                    });
-                } catch (error) {
-                    console.error('Sign up failed:', error);
-                }
-            },
             invalidatesTags: ['Auth'],
         }),
 
@@ -51,6 +33,13 @@ export const authApi = baseApi.injectEndpoints({
                 body: credentials,
             }),
             invalidatesTags: ['Auth'],
+        }),
+
+        refreshToken: builder.mutation({
+            query: () => ({
+                url: '/auth/refresh-token',
+                method: 'POST',
+            }),
         }),
 
         // Sign Out
@@ -93,6 +82,7 @@ export const {
     useCheckEmailMutation,
     useSignUpMutation,
     useSignInMutation,
+    useRefreshTokenMutation,
     useSignOutMutation,
     useGetProfileQuery,
     useForgetPasswordMutation,

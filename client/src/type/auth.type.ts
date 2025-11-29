@@ -10,12 +10,8 @@ export interface SignUpRequest {
 }
 
 export interface SignUpResponse {
-    user: {
-        id: string;
-        email: string;
-        name: string;
-        role: string;
-    };
+    userId: string;
+    role: string;
     accessToken: string;
     refreshToken: string;
     message: string;

@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { refresh } from 'next/cache';
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: any) {
   console.log('Middleware triggered for:', req.nextUrl.pathname);
+
   const token = req.cookies.get('accessToken')?.value;
 
   // Không có token → cho vào public routes
   const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
   if (!token) {
-    // if (publicPaths.includes(req.nextUrl.pathname)) return NextResponse.next();
-    // return NextResponse.redirect(new URL('/auth/signin', req.url));
-    return NextResponse.next();
+    if (publicPaths.includes(req.nextUrl.pathname)) 
+      return NextResponse.next();
+    return NextResponse.redirect(new URL('/auth/signin', req.url));
   }
 
   // Giải mã token

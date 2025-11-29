@@ -60,22 +60,17 @@ const ProfileCompletionForm = () => {
                 role: data.role,
             };
 
-            const { accessToken } = await signUp(payload).unwrap();
-            const decodedToken: any = jwt.decode(accessToken);
+            const { role } = await signUp(payload).unwrap();
 
-            if (decodedToken) {
-                // notify.success('Đăng ký thành công!');
-                const role = decodedToken.role;
-
-                // Redirect based on role
-                if (role === 'student') {
-                    router.push('/student/home');
-                } else if (role === 'teacher') {
-                    router.push('/teacher/home');
-                } else {
-                    router.push('/');
-                }
+            // Redirect based on role
+            if (role === 'student') {
+                router.push('/student/home');
+            } else if (role === 'teacher') {
+                router.push('/teacher/home');
+            } else {
+                router.push('/');
             }
+            
         } catch (error) {
             console.error("Create profile failed:", error);
         } finally {

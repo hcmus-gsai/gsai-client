@@ -23,22 +23,18 @@ const SignInForm = () => {
             const data = formData.getFieldsValue();
             setIsLoading(true);
 
-            const { accessToken } = await signIn({ email: data.email, password: data.password }).unwrap();
-            const decodedToken: any = jwt.decode(accessToken);
+            const { role } = await signIn({ email: data.email, password: data.password }).unwrap();
 
-            if (decodedToken) {
-                // notify.success('Đăng nhập thành công!');
-                const role = decodedToken.role;
 
-                // Redirect based on role
-                if (role === 'student') {
-                    router.push('/student/home');
-                } else if (role === 'teacher') {
-                    router.push('/teacher/home');
-                } else {
-                    router.push('/');
-                }
+            // Redirect based on role
+            if (role === 'student') {
+                router.push('/student/home');
+            } else if (role === 'teacher') {
+                router.push('/teacher/home');
+            } else {
+                router.push('/');
             }
+            
         }
         catch (error) {
             console.error('Sign in failed:', error);
