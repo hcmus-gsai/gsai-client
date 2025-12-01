@@ -51,13 +51,14 @@ const ProfileCompletionForm = () => {
 
             const payload = {
                 email: data.email,
-                password: data.password,
-                name: data.name,
+                password_hash: data.password,
+                role: data.role,
+                full_name: data.name,
+                phone_number: data.phone,
                 gender: data.gender,
                 dob: data.dob,
                 location: data.location,
-                phone: data.phone,
-                role: data.role,
+                avatar_url: data.avatar_url || undefined,
             };
 
             const { role } = await signUp(payload).unwrap();

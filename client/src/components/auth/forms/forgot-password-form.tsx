@@ -1,10 +1,8 @@
 'use client';
 import "@ant-design/v5-patch-for-react-19";
 import {Form, Input, Button, message} from "antd";
-import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getUser } from "@/lib/db/queries";
 //TRy using zod
 
 // import {z} from "zod";
@@ -20,46 +18,7 @@ const ForgotPasswordForm = () => {
     const [loading, setLoading] = useState(false);
 
     const finishHandler = async () => {
-        try {
-            setLoading(true);
-            const email = formData.getFieldValue('email');
-
-            if(!email) {
-                message.error("Vui lòng nhập email");
-                return;
-            }
-
-            // Kiểm tra email có tồn tại trong database không
-            const users = await getUser(email);
-            console.log(email);
-
-            if (!users || users.length === 0) {
-                message.error("Email không tồn tại trong hệ thống");
-                return;
-            }
-
-            const { data, error } = await authClient.requestPasswordReset({
-                email: email,
-                redirectTo: `/auth/reset-password`,
-            });
-
-            if (error) {
-                console.error("Password reset error:", error);
-                message.error(error.message || "Có lỗi xảy ra khi gửi email");
-                return;
-            }
-
-            message.success("Đã gửi link đặt lại mật khẩu đến email của bạn!");
-            // setTimeout(() => {
-            //     router.push("/auth/check-email");
-            // }, 1500);
-
-        } catch (error: any) {
-            console.error("Caught error:", error);
-            message.error(error.message || "Có lỗi xảy ra, vui lòng thử lại");
-        } finally {
-            setLoading(false);
-        }
+        
     }
 
     const handleLoginWithLink = async () => {

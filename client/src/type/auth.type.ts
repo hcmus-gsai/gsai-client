@@ -1,12 +1,13 @@
 export interface SignUpRequest {
     email: string;
-    password: string;
-    name: string;
+    password_hash: string;
+    role: string;
+    full_name: string;
+    phone_number: string;
     gender: string;
     dob: string;
     location: string;
-    phone: string;
-    role: string;
+    avatar_url?: string;
 }
 
 export interface SignUpResponse {
