@@ -14,7 +14,6 @@ export const authApi = baseApi.injectEndpoints({
             }),
         }),
 
-
         // Sign Up
         signUp: builder.mutation<SignUpResponse, SignUpRequest>({
             query: (credentials) => ({
@@ -43,24 +42,19 @@ export const authApi = baseApi.injectEndpoints({
         }),
 
         // Sign Out
-        signOut: builder.mutation<{ message: string }, { refreshToken: string | null }>({
-            // Nhận arg đầu vào
-            query: ({ refreshToken }) => ({
+        signOut: builder.mutation<void, void>({
+            query: () => ({
                 url: '/auth/sign-out',
                 method: 'POST',
-                // Gửi token qua Body cho backend
-                body: { refreshToken },
+                credentials: 'include', 
             }),
-            // Clear tokens after logout
             async onQueryStarted(arg, { queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                } finally {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
+                } catch (error) {
+                    console.warn("Logout error ignored", error);
                 }
             },
-            invalidatesTags: ['Auth'],
         }),
 
         // Get Profile (Protected Route)
@@ -85,7 +79,6 @@ export const {
     useCheckEmailMutation,
     useSignUpMutation,
     useSignInMutation,
-    useRefreshTokenMutation,
     useSignOutMutation,
     useGetProfileQuery,
     useForgetPasswordMutation,

@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { useSignOutMutation } from '@/store/api/[module]/authApi';
 
 const StudentNavbar = () => {
+    // Hook definition
     const router = useRouter();
 
     const [isMounted, setIsMounted] = useState(false);
@@ -23,18 +24,20 @@ const StudentNavbar = () => {
         setIsMounted(true);
     }, []);
 
+    const [signOut] = useSignOutMutation();
+
     if (!isMounted) {
         return null;
     }
 
-    const [signOut] = useSignOutMutation();
+    // Hook execution and API call
     const handleLogout = async () => {
         // 1. Lấy refresh token từ storage
         const refreshToken = localStorage.getItem('refreshToken');
 
         // 2. Gọi hàm signOut và truyền token vào
         // Dù refreshToken là null thì vẫn gọi để chạy logic onQueryStarted xóa dọn dẹp
-        await signOut({ refreshToken });
+        await signOut();
 
         // 3. Chuyển trang (nếu cần thiết, hoặc để RTK tự xử lý)
         router.push('/auth/signin');

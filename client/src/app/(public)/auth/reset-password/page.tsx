@@ -1,5 +1,5 @@
 'use client';
-import {useState} from "react";
+import {useState, Suspense} from "react";
 import {Typography} from "antd";
 import {RenamePasswordForm} from '@/components/auth/forms/reset-password-form';
 import Link from "next/link";
@@ -16,7 +16,9 @@ export default function ResendLinkPage() {
                 title = "Đặt lại mật khẩu"
                 description = "Đặt lại mật khẩu mới và lưu lại để không quên nhé!"
             />
-            <RenamePasswordForm/>
+            <Suspense fallback={<div>Đang tải form...</div>}>
+                <RenamePasswordForm/>
+            </Suspense>
         </FormLayout>
     )
 }
