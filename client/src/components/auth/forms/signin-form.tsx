@@ -5,7 +5,8 @@ import {Form, Input, Button} from 'antd';
 import {useState} from 'react';
 import {useRouter} from "next/navigation";
 import { useSignInMutation } from '@/store/api/[module]/authApi';
-import jwt from 'jsonwebtoken';
+import { useAppDispatch } from '@/store/hook';
+import { setCredentials } from '@/store/slice/authSlice';
 
 
 const SignInForm = () => {
@@ -14,6 +15,7 @@ const SignInForm = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [signIn] = useSignInMutation()
+    const dispatch = useAppDispatch();
 
     // const {notify} = useNotification();
 
@@ -24,8 +26,9 @@ const SignInForm = () => {
             const data = formData.getFieldsValue();
             setIsLoading(true);
 
-            const { role } = await signIn({ email: data.email, password: data.password }).unwrap();
+            const { role, accessToken, refreshToken } = await signIn({ email: data.email, password: data.password }).unwrap();
 
+            dispatch(setCredentials({accessToken, refreshToken }));
 
             // Redirect based on role
             if (role === 'student') {

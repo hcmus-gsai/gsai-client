@@ -63,46 +63,6 @@ const CourseDisplaySection = ({
     }
     return (
         <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
-            {
-                hasExtended && (
-                    <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem] mb-[2rem]">
-                        <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">Tiếp tục môn học</h1>
-                        <div className = "flex items-center justify-center w-full h-[114px] rounded-[20px] border-[1px] border-solid border-[#DCDCDC]">
-                            <div className = "flex flex-col items-start justify-center w-full h-full mr-auto pl-[1.5rem]">
-                                <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">
-                                    Tên môn học
-                                </p>
-                                
-                                <p className = "text-[1rem] font-light text-[var(--color-primary)]">
-                                    Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
-                                </p>
-                                <Progress percent={75} showInfo = {false}/>
-
-                            </div>
-                            <div className = "flex items-center justify-end relative w-full h-full ml-auto pr-[1.5rem] gap-[1.5rem]">
-                                <div>
-                                    <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Tên bài giảng</p>
-                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Video 2 phút</p>
-                                </div>
-                                <div>
-                                    <Button
-                                        type="primary"
-                                        onClick = {() => router.push(`/student/home/course/${courseSampleData[0].name.toLowerCase().replace(/ /g, '-')}/chapter-1/video-1  `)}
-                                        className = {`!border-1 !border-solid !w-[9rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-[#1363DF]`} 
-                                    >
-                                        <div className = "flex items-center justify-center relative w-[calc(100%-5rem)]">
-                                            <span className = {`text-[1rem] !text-white`}>Tiếp tục</span>
-                                        </div>
-                                    </Button>
-                                </div>
-                                <div>
-                                    Icon
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
             <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem]">
                 <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
                 <div className = "flex items-center justify-center w-full">

@@ -28,72 +28,17 @@ const StudentGreetingSection = (
     hasTopGradient?: boolean
     hasCurveSpace?: boolean
 }) => {
-    const learningCategory = [
-        {
-            id: 1,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 2,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 3,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 4,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 5,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 6,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 7,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        {
-            id: 8,
-            name: 'Lập trình',
-            image: '/images/learning-category-1.jpg'
-        },
-        // {
-        //     id: 9,
-        //     name: 'Lập trình',
-        //     image: '/images/learning-category-1.jpg'
-        // },
-        // {
-        //     id: 10,
-        //     name: 'Lập trình',
-        //     image: '/images/learning-category-1.jpg'
-        // },
-    ];
-
-    var columns = 4;
-    var paticipants = 10;
 
     return (
-        <section className = "w-full h-[100vh] flex flex-col">
+        <section className = "w-full flex flex-col">
             {hasTopGradient && (
                 <Image 
                     src = {AbstractTop} alt = "Curve Space Top" width = {0} height = {0}
-                    className = "absolute top-0 left-0 w-full h-auto z-10"
+                    className = "absolute top-0 left-0 w-full h-auto"
                 />
             )}
 
-            <div className="w-full h-full absolute top-20 left-0 z-[-1]">
+            <div className="w-full  absolute top-20 left-0 z-[-1]">
                 {hasCurveSpace ? (
                     <Image 
                         src = {AbstractNCurve} alt = "Curve Space Middle" width = {0} height = {0}
@@ -114,36 +59,11 @@ const StudentGreetingSection = (
                             <p className = {`${titleSize} font-bold text-[var(--color-primary)]`}>{title}</p>
                             <p className = "text-[1rem]  text-[var(--color-primary)]">{description}</p>
                         </div>
-                        {
-                            isCourse && (
-                                <div className = "w-full flex items-center justify-start  gap-[2.5rem] my-[1.25rem]">
-                                    <Image src = {EmptyLayout} alt = "Teacher Profile" width = {0} height = {0} className = "w-[50px] h-[50px] object-cover rounded-full"/>
-                                    <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Ths. Nguyễn Văn B</p>
-                                </div>
-                            )
-                        }
                         <div className = "w-full flex items-center justify-start mb-[1rem]">
                             <Button className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">Thời gian biểu</Button>
                         </div>
-                        
-                        {
-                            isCourse && (<p className = "text-[1rem] font-bold text-[var(--color-primary)]">{paticipants} người tham gia</p>)
-                        }
                     </div>
                 </div>
-                {
-                    !isCourse ? (
-                        <div className = "w-full h-[242px] mt-[20vh] flex flex-col items-center justify-between">
-                            <div className = "h-full w-full flex flex-col items-center justify-between z-10">
-                                <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
-                            </div>
-                            <CourseCategoryComponent columns = {columns} categories = {learningCategory}/>
-                        </div>
-                    ) : (
-                        <CourseHighLightComponent />
-                    )
-                }
-                
             </div>
         </section>
     )
