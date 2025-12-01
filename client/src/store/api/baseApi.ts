@@ -11,17 +11,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3
 
 // Base query with JWT token
 const baseQuery = fetchBaseQuery({
-    baseUrl: API_BASE_URL,
-    credentials: 'include',
-    prepareHeaders: (headers, { getState }) => {
-        const state = getState() as RootState;
-        const accessToken = state.auth.accessToken;
-        if (accessToken) {
-            headers.set('Authorization', `Bearer ${accessToken}`);
-        }
-        return headers;
-    },
-    timeout: 10_000, // 10 seconds timeout
+  baseUrl: API_BASE_URL,
+  credentials: 'include',
+  prepareHeaders: (headers, { getState }) => {
+    const state = getState() as RootState;
+    const accessToken = state.auth.accessToken;
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+    return headers;
+  },
+  timeout: 10_000, // 10 seconds timeout
 });
 
 
@@ -70,8 +70,8 @@ const baseQueryWithReauth: BaseQueryFn<
 
 // Create base API
 export const baseApi = createApi({
-    reducerPath: 'api',
-    baseQuery: baseQueryWithReauth,
-    tagTypes: ['Auth', 'User', 'Course'], 
-    endpoints: () => ({}),
+  reducerPath: 'api',
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['Auth', 'User', 'Course', 'Module', 'Lesson'],
+  endpoints: () => ({}),
 });

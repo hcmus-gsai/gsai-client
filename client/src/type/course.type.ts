@@ -79,35 +79,49 @@
 // }
 
 // export interface GetCourseVideoResponse extends CourseVideo {}
-export interface CourseLesson{
-    id: string;
-    name: string;
-    description: string;
-    
 
-}
-export interface CourseModule {
+export interface LessonInfo {
     id: string;
     name: string;
-    lessons: CourseLesson[];
+    estimatedTime: string;
+    type: 'video' | 'article' | 'quiz';
+    status: 'completed' | 'in-progress' | 'not-started';
+
+    startedAt?: string;
+    completedAt?: string;
+    deadline?: string;
+    grade?: number;
 }
-export interface CourseInfo{
+
+export interface ModuleInfo {
     id: string;
     name: string;
-    estimated_time: string;
+    status: 'completed' | 'in-progress' | 'not-started';
+
+    startedAt?: string;
+    completedAt?: string;
+
+    // Course lessons
+    lessons: LessonInfo[];
+}
+
+export interface CourseInfo {
+    id: string;
+    name: string;
+    estimatedTime: string;
     tags: string[];
 
-    teachers?:string[];
-    image_url?: string;
+    teachers?: string[];
+    imageUrl?: string;
     rating?: number;
-    description? :string;
+    description?: string;
     participants?: number;
     isFree?: boolean;
-    category?:string[];
+    category?: string[];
 
-    //Course module
+    // Course modules
+    modules: ModuleInfo[];
 }
-
 
 // export interface ChapterSection {
 //     id: string;

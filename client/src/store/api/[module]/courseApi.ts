@@ -24,7 +24,7 @@
 //                 if (params.search) searchParams.append('search', params.search);
 //                 if (params.limit) searchParams.append('limit', params.limit.toString());
 //                 if (params.offset) searchParams.append('offset', params.offset.toString());
-                
+
 //                 const queryString = searchParams.toString();
 //                 return `/course${queryString ? `?${queryString}` : ''}`;
 //             },
@@ -117,28 +117,59 @@
 //     useDeleteCourseMutation,
 // } = courseApi;
 
-import {baseApi} from '../baseApi';
-import {CourseInfo} from '../../../type/course.type';
+import { baseApi } from '../baseApi';
+import { CourseInfo, ModuleInfo, LessonInfo } from '../../../type/course.type';
 import { string } from 'better-auth';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
 
-        getCourses: builder.query<{courses: CourseInfo[]}, void>({
+        getCourses: builder.query<{ courses: CourseInfo[] }, void>({
             query: () => '/courses',
             providesTags: ['Course'],
         }),
 
         getCourseById: builder.query<CourseInfo, string>({
-            query : (id) => `/courses/${id}`,
+            query: (id) => '/courses/${id}',
             providesTags: (result, error, id) => [{ type: 'Course', id }],
         }),
 
-     
+        getCourseModules: builder.query<{ modules: ModuleInfo[] }, string>({
+            query: (courseId) => '/courses/${courseId}/modules',
+            providesTags: (result, error, courseId) => [
+                { type: 'Course', id: courseId },
+                'Module',
+            ],
+        }),
+
+        getCourseModuleById: builder.query<ModuleInfo, { courseId: string; moduleId: string }>({
+            query: ({ courseId, moduleId }) => '/courses/${courseId}/modules/${moduleId}',
+            providesTags: (result, error, { moduleId }) => [
+                { type: 'Module', id: moduleId },
+            ],
+        }),
+
+        getCourseLessons: builder.query<{ lessons: LessonInfo[] }, { courseId: string; moduleId: string }>({
+            query: ({ courseId, moduleId }) => '/courses/${courseId}/modules/${moduleId}/lessons',
+            providesTags: (result, error, { moduleId }) => [
+                { type: 'Module', id: moduleId },
+                'Lesson',
+            ],
+        }),
+
+        getCourseLessonById: builder.query<LessonInfo, { courseId: string; moduleId: string; lessonId: string }>({
+            query: ({ courseId, moduleId, lessonId }) =>
+                '/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}',
+            providesTags: (result, error, { lessonId }) => [{ type: 'Lesson', id: lessonId }],
+        }),
     }),
 });
 
 export const {
     useGetCoursesQuery,
     useGetCourseByIdQuery,
+    useGetCourseModulesQuery,
+    useGetCourseModuleByIdQuery,
+    useGetCourseLessonsQuery,
+    useGetCourseLessonByIdQuery,
 } = courseApi;
