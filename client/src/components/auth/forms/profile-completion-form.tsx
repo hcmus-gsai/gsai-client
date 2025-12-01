@@ -34,7 +34,7 @@ const ProfileCompletionForm = () => {
     const role = Form.useWatch('role', formData);
     const identityCard = Form.useWatch('identityCard', formData);
     const router = useRouter();
-    const [signUp] = useSignUpMutation()
+    const [signUp] = useSignUpMutation();
 
     useEffect(() => {
         const raw = sessionStorage.getItem('signUpTempData');
@@ -70,7 +70,7 @@ const ProfileCompletionForm = () => {
             } else {
                 router.push('/');
             }
-            
+
         } catch (error) {
             console.error("Create profile failed:", error);
         } finally {
@@ -559,9 +559,8 @@ const ProfileCompletionForm = () => {
                 className="flex items-center justify-center"
             >
                 <Button
-                    type="primary"
                     htmlType="submit"
-                    className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg_white)] !bg-[var(--color-secondary)] !rounded-full"
+                    className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)]"
                 >
                     Lưu thông tin
                 </Button>
