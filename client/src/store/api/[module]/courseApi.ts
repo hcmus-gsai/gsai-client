@@ -24,7 +24,7 @@
 //                 if (params.search) searchParams.append('search', params.search);
 //                 if (params.limit) searchParams.append('limit', params.limit.toString());
 //                 if (params.offset) searchParams.append('offset', params.offset.toString());
-
+                
 //                 const queryString = searchParams.toString();
 //                 return `/course${queryString ? `?${queryString}` : ''}`;
 //             },
