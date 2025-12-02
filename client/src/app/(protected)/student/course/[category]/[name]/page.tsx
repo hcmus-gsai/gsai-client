@@ -15,6 +15,7 @@ interface IChapterState {
 };
 
 const CourseModules = () => {
+    const router = useRouter();
 
     const params = useParams();
     const courseId = params.category as string;
@@ -126,6 +127,7 @@ const CourseModules = () => {
                                         <Card
                                             key={lesson.id}
                                             className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200"
+                                            onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
                                         >
                                             <div className="w-full flex flex-col items-start justify-start">
                                                 <p className="text-[1rem] font-bold text-[var(--color-primary)]">
