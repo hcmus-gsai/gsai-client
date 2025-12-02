@@ -7,13 +7,7 @@ import { StarFilled } from "@ant-design/icons";
 import { string } from "better-auth";
 import { useRouter } from "next/navigation";
 
-interface ICourse {
-    name: string;
-    teacher:string[];
-    estimated_time: string;
-    rating: number;
-    tags: string[];
-}
+import { EnrolledCourse } from '@/type/enrollment.type';
 
 export const CourseGrid = (
     {
@@ -22,7 +16,7 @@ export const CourseGrid = (
         maxItems,
         className = ""    
     }:{
-        courseData: ICourse[];
+        courseData: EnrolledCourse[];
         colWidth: number;
         maxItems: number;
         className ?: string;
@@ -37,34 +31,41 @@ export const CourseGrid = (
                         <Col span = {colWidth} key = {index} className = "!flex !items-center !justify-center">
                             <Card 
                                 className = "w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick = {()=>router.push(`/student/home/course/${c.name.toLowerCase().replace(/ /g, '-')}`)}
+                                onClick = {()=>router.push(`/student/home/course/${c.course_name.toLowerCase().replace(/ /g, '-')}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
-                                    <Image src = {EmptyLayout} alt = {c.name} width = {0} height = {0} 
+                                    <Image src = {c.thumbnail_url || EmptyLayout} alt = {c.course_name || "Empty Layout"} width = {0} height = {0} 
                                         className = "w-full h-full object-cover"                                                    
                                     />
-                                    <h3 className = "text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.name}</h3>
+                                    <h3 className = "text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
                                     
                                     <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
-                                        {c.teacher.join(', ')}
+                                        {c.duration}
                                     </p>
 
                                     <div className="flex items-center justify-center">
                                         <StarFilled className ="!text-yellow-400"/>
-                                        <span className = "font-bold text-gray-600 text-center ml-[2px]">{c.rating}</span>
+                                        <span className = "font-bold text-gray-600 text-center ml-[2px]">5</span>
                                     </div>
 
-                                    <p className = "text-[0.875rem] font-light text-gray-600 text-center">Thời lượng: {c.estimated_time}</p>
+                                    <p className = "text-[0.875rem] font-light text-gray-600 text-center">Thời lượng: {c.duration}</p>
                                     
                                     <div className = "flex items-center justify-center w-full gap-x-[0.5rem]">
                                         {
-                                            c.tags.map((t, idx) => {
+                                            c.category.toString().split(',').map((category, idx) => {
                                                 return (
-                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full w-[40%] h-[27px] px-[1rem] py-[0.5rem]">
-                                                        <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{t}</p>
+                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]">
+                                                        <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
                                                     </div>
                                                 )
                                             })
+                                            // c.category.map((category, idx) => {
+                                            //     return (
+                                            //         <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full w-[40%] h-[27px] px-[1rem] py-[0.5rem]">
+                                            //             <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
+                                            //         </div>
+                                            //     )
+                                            // })
                                         }
                                     </div>
                                 </div>

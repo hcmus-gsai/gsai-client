@@ -1,175 +1,174 @@
-// import { baseApi } from '../baseApi';
-// import {
-//     Course,
-//     CourseDetail,
-//     CourseChapter,
-//     CourseVideo,
-//     GetCoursesRequest,
-//     GetCoursesResponse,
-//     GetCourseDetailRequest,
-//     GetCourseDetailResponse,
-//     GetCourseChaptersRequest,
-//     GetCourseChaptersResponse,
-//     GetCourseVideoRequest,
-//     GetCourseVideoResponse,
-// } from '../../../type/course.type';
-
-// export const courseApi = baseApi.injectEndpoints({
-//     endpoints: (builder) => ({
-//         // Get all courses (with optional filters)
-//         getCourses: builder.query<GetCoursesResponse, GetCoursesRequest | void>({
-//             query: (params = {}) => {
-//                 const searchParams = new URLSearchParams();
-//                 if (params.category) searchParams.append('category', params.category);
-//                 if (params.search) searchParams.append('search', params.search);
-//                 if (params.limit) searchParams.append('limit', params.limit.toString());
-//                 if (params.offset) searchParams.append('offset', params.offset.toString());
-                
-//                 const queryString = searchParams.toString();
-//                 return `/course${queryString ? `?${queryString}` : ''}`;
-//             },
-//             providesTags: ['Course'],
-//         }),
-
-//         // Get course by ID
-//         getCourseById: builder.query<Course, number>({
-//             query: (id) => `/course/${id}`,
-//             providesTags: (result, error, id) => [{ type: 'Course', id }],
-//         }),
-
-//         // Get course detail by category and name
-//         getCourseDetail: builder.query<GetCourseDetailResponse, GetCourseDetailRequest>({
-//             query: ({ category, name }) => `/course/${category}/${name}`,
-//             providesTags: (result, error, { category, name }) => [
-//                 { type: 'Course', id: `${category}-${name}` },
-//             ],
-//         }),
-
-//         // Get courses by category
-//         getCoursesByCategory: builder.query<Course[], string>({
-//             query: (category) => `/course/category/${category}`,
-//             providesTags: (result, error, category) => [
-//                 { type: 'Course', id: `category-${category}` },
-//             ],
-//         }),
-
-//         // Get course chapters
-//         getCourseChapters: builder.query<GetCourseChaptersResponse, GetCourseChaptersRequest>({
-//             query: ({ category, courseName }) => `/course/${category}/${courseName}/chapters`,
-//             providesTags: (result, error, { category, courseName }) => [
-//                 { type: 'Course', id: `${category}-${courseName}-chapters` },
-//             ],
-//         }),
-
-//         // Get course video
-//         getCourseVideo: builder.query<GetCourseVideoResponse, GetCourseVideoRequest>({
-//             query: ({ category, courseName, videoId }) => 
-//                 `/course/${category}/${courseName}/video/${videoId}`,
-//             providesTags: (result, error, { category, courseName, videoId }) => [
-//                 { type: 'Course', id: `${category}-${courseName}-${videoId}` },
-//             ],
-//         }),
-
-//         // Create course (Admin/Teacher only)
-//         createCourse: builder.mutation<Course, Partial<Course>>({
-//             query: (body) => ({
-//                 url: '/course',
-//                 method: 'POST',
-//                 body,
-//             }),
-//             invalidatesTags: ['Course'],
-//         }),
-
-//         // Update course (Admin/Teacher only)
-//         updateCourse: builder.mutation<Course, { id: number; data: Partial<Course> }>({
-//             query: ({ id, data }) => ({
-//                 url: `/course/${id}`,
-//                 method: 'PUT',
-//                 body: data,
-//             }),
-//             invalidatesTags: (result, error, { id }) => [
-//                 { type: 'Course', id },
-//                 'Course',
-//             ],
-//         }),
-
-//         // Delete course (Admin/Teacher only)
-//         deleteCourse: builder.mutation<{ message: string }, number>({
-//             query: (id) => ({
-//                 url: `/course/${id}`,
-//                 method: 'DELETE',
-//             }),
-//             invalidatesTags: ['Course'],
-//         }),
-//     }),
-// });
-
-// // Export hooks for usage in components
-// export const {
-//     useGetCoursesQuery,
-//     useGetCourseByIdQuery,
-//     useGetCourseDetailQuery,
-//     useGetCoursesByCategoryQuery,
-//     useGetCourseChaptersQuery,
-//     useGetCourseVideoQuery,
-//     useCreateCourseMutation,
-//     useUpdateCourseMutation,
-//     useDeleteCourseMutation,
-// } = courseApi;
 
 import { baseApi } from '../baseApi';
-import { CourseInfo, ModuleInfo, LessonInfo } from '../../../type/course.type';
+import { CourseResponse, Course, SearchParams, CourseFilterParams } from '../../../type/course.type';
 import { string } from 'better-auth';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
 
-        getCourses: builder.query<{ courses: CourseInfo[] }, void>({
+        //POST: Create new course (optional thumbnail_url)
+
+        createCourse: builder.mutation<CourseResponse, Course>({
+            query: (course) => ({
+                url:  '/courses',
+                method: 'POST',
+                body: course,
+            }),
+            invalidatesTags: ['Course'],
+        }),
+
+        //GET: Get all course created by the the teacher (all teacher)
+        getCoursesByTeacher: builder.query<CourseResponse, void>({
+            query : () => '/courses/teacher',
+            providesTags: ['Course'],
+        }),
+
+        //GET: Get all course created by the current teacher user
+        getCoursesByTeacherId: builder.query<CourseResponse, string>({
+            query: (teacher_id) => `/courses/teacher/${teacher_id}`,
+            providesTags: ['Course'],
+        }),
+
+        //GET: Get course detailed by id
+
+        getCourseById: builder.query<CourseResponse, string>({
+            query:(course_id) => `/courses/${course_id}`,
+            providesTags: (result, error, id) => [{ type: 'Course', id }],
+        }),
+
+        //GET: get courses
+        getCourses: builder.query<CourseResponse, void>({
             query: () => '/courses',
             providesTags: ['Course'],
         }),
 
-        getCourseById: builder.query<CourseInfo, string>({
-            query: (id) => '/courses/${id}',
+        //PUT: update course by id
+
+        updateCourseInfo: builder.mutation<CourseResponse, {course_id:string, course: Partial<Course>}>({
+            query: ({course_id, course}) => ({
+                url: `/courses/${course_id}`,
+                method: 'PUT',
+                body: course,
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
+
+        }),
+
+        //PATCH: update course status
+        updateCourseStatus: builder.mutation<CourseResponse, {course_id:string, is_active:boolean}>({
+            query: ({course_id, is_active}) => ({
+                url: `/courses/${course_id}/status`,
+                method: 'PATCH',
+                body: {is_active},
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
+
+        }),
+
+        //DELETE: delete or deactivate course by id
+
+        deleteCourseById: builder.mutation<CourseResponse, string>({
+            query: (course_id) => ({
+                url: `/courses/${course_id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Course'],
+        }),
+
+
+        //POST: Update/upload course thumbnail
+        updateCourseThumbnail: builder.mutation<CourseResponse, {course_id:string, thumbnail_url:string}>({
+            query: ({course_id, thumbnail_url}) => ({
+                url: `/courses/${course_id}/thumbnail`,
+                method: 'POST',
+                body: {thumbnail_url},
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
+
+        }),
+
+        //DELETE: delete course thumbnail
+        deleteCourseThumbnail: builder.mutation<CourseResponse, {course_id:string}>({
+            query: ({course_id}) => ({
+                url: `/courses/${course_id}/thumbnail`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
+        }),
+
+
+        //GET: get course info
+
+        getCourseInfo: builder.query<CourseResponse, string>({
+            query: (course_id) => `/courses/${course_id}/info`,
             providesTags: (result, error, id) => [{ type: 'Course', id }],
         }),
 
-        getCourseModules: builder.query<{ modules: ModuleInfo[] }, string>({
-            query: (courseId) => '/courses/${courseId}/modules',
-            providesTags: (result, error, courseId) => [
-                { type: 'Course', id: courseId },
-                'Module',
-            ],
+        getCoursePreview: builder.query<any, string>({
+            query: (course_id) => `/courses/${course_id}/preview`,
         }),
 
-        getCourseModuleById: builder.query<ModuleInfo, { courseId: string; moduleId: string }>({
-            query: ({ courseId, moduleId }) => '/courses/${courseId}/modules/${moduleId}',
-            providesTags: (result, error, { moduleId }) => [
-                { type: 'Module', id: moduleId },
-            ],
+        // GET /courses/search - Search courses by keywords
+
+        searchCourses: builder.query<CourseResponse, SearchParams>({
+            query: (params) =>({
+                url: '/courses/search',
+                params: params,
+            }),
+            providesTags: ['Course'],
         }),
 
-        getCourseLessons: builder.query<{ lessons: LessonInfo[] }, { courseId: string; moduleId: string }>({
-            query: ({ courseId, moduleId }) => '/courses/${courseId}/modules/${moduleId}/lessons',
-            providesTags: (result, error, { moduleId }) => [
-                { type: 'Module', id: moduleId },
-                'Lesson',
-            ],
+        filterCourses: builder.query<CourseResponse, CourseFilterParams>({
+            query: (params) => ({
+              url: '/courses/filter',
+              params: params,
+            }),
+            providesTags: ['Course'],
         }),
 
-        getCourseLessonById: builder.query<LessonInfo, { courseId: string; moduleId: string; lessonId: string }>({
-            query: ({ courseId, moduleId, lessonId }) =>
-                '/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}',
-            providesTags: (result, error, { lessonId }) => [{ type: 'Lesson', id: lessonId }],
+        //GET: Get popular courses
+
+        getPopularCourses: builder.query<CourseResponse, { limit?: number } | void>({
+            query: (params) => ({
+                url: '/courses/popular',
+                params: { limit: params?.limit || 8 },
+            }),
+            providesTags: ['Course'],
+
         }),
+
+        //GET: get recommended courses
+        getRecommendedCourses: builder.query<CourseResponse, { limit?: number } | void>({
+            query: (params) => ({
+                url: '/courses/recommended',
+                params: { limit: params?.limit || 8 },
+            }),
+            providesTags: ['Course'],
+        }),
+
+
+        //GET: get free course
+        getFreeCourses: builder.query<CourseResponse, { limit?: number } | void>({
+            query: (params) => ({
+                url: '/courses/free',
+                params: { limit: params?.limit || 8 },
+            }),
+            providesTags: ['Course'],
+        }),
+
     }),
 });
 
 export const {
     useGetCoursesQuery,
     useGetCourseByIdQuery,
-    useGetCourseModulesQuery,
-    useGetCourseModuleByIdQuery,
-    useGetCourseLessonsQuery,
-    useGetCourseLessonByIdQuery,
+    useCreateCourseMutation,
+    useGetCoursesByTeacherQuery,
+    useGetCoursesByTeacherIdQuery,
+    useUpdateCourseInfoMutation,
+    useUpdateCourseStatusMutation,
+    useDeleteCourseByIdMutation,
+    useUpdateCourseThumbnailMutation,
+    useDeleteCourseThumbnailMutation,
+    
 } = courseApi;

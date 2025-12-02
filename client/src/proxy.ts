@@ -10,6 +10,7 @@ export async function proxy(req: any) {
   // Không có token → cho vào public routes
   const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
   if (!token) {
+
     if (publicPaths.includes(req.nextUrl.pathname)) 
       return NextResponse.next();
     return NextResponse.redirect(new URL('/auth/signin', req.url));

@@ -10,6 +10,10 @@ export const enrollmentApi = baseApi.injectEndpoints({
             providesTags: ['Enrollment'],
         }),
 
+        // getEnrollmentById: builder.query<EnrolledCourseResponse, void>({
+        //     query: (enrollment_id) =>  `/enrollments/student/${enrollment_id}`,
+        //     providesTags: ['Enrollment'],
+        // }),
         
     }),
 });

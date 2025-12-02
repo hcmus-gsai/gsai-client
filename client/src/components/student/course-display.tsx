@@ -7,6 +7,10 @@ import { CourseGrid } from "@/components/shared/course-grid";
 import {Button, Progress} from "antd";
 import {useRouter} from "next/navigation";
 
+//===
+import {useGetAllEnrollmentsQuery} from "@/store/api/[module]/enrollmentApi";
+import { EnrolledCourse } from '@/type/enrollment.type';
+//===
 const CourseDisplaySection = ({
     title,
     queryType = "",
@@ -18,45 +22,54 @@ const CourseDisplaySection = ({
 }) => {
 
     const router = useRouter();
-    const courseSampleData = [
-        {
-            id: 1,
-            image : '/images/course-1.jpg',
-            name: 'Toán ứng dụng & thống kê',
-            teacher: ['Vũ Quốc Hoàng', 'Nguyễn Văn Quang Huy', 'Nguyễn Ngọc Toàn', 'Phan Thị Phương Uyên'],
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['toán học', 'thống kê', 'kinh tế']
-        },
-        {
-            id: 2,
-            image : '/images/course-2.jpg',
-            name: 'Cấu trúc dữ liệu & giải thuật',
-            teacher: ['Nguyễn Thanh Phương', 'Nguyễn Thị Ngọc Thảo'],
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['toán học', 'cấu trúc dữ liệu', 'giải thuật']
-        },
+    // const courseSampleData = [
+    //     {
+    //         id: 1,
+    //         image : '/images/course-1.jpg',
+    //         name: 'Toán ứng dụng & thống kê',
+    //         teacher: ['Vũ Quốc Hoàng', 'Nguyễn Văn Quang Huy', 'Nguyễn Ngọc Toàn', 'Phan Thị Phương Uyên'],
+    //         estimated_time : '1 tháng',
+    //         rating: 5.0,
+    //         tags : ['toán học', 'thống kê', 'kinh tế']
+    //     },
+    //     {
+    //         id: 2,
+    //         image : '/images/course-2.jpg',
+    //         name: 'Cấu trúc dữ liệu & giải thuật',
+    //         teacher: ['Nguyễn Thanh Phương', 'Nguyễn Thị Ngọc Thảo'],
+    //         estimated_time : '1 tháng',
+    //         rating: 5.0,
+    //         tags : ['toán học', 'cấu trúc dữ liệu', 'giải thuật']
+    //     },
         
-        {
-            id: 3,
-            image : '/images/course-3.jpg',
-            name: 'Nhập môn công nghệ phần mềm',
-            teacher: ['Hồ Tuấn Thanh','Mai Anh Tuấn', 'Nguyễn Thị Minh Tuyền'],
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['công nghệ phần mềm', 'lập trình', 'thiết kế']
-        },
+    //     {
+    //         id: 3,
+    //         image : '/images/course-3.jpg',
+    //         name: 'Nhập môn công nghệ phần mềm',
+    //         teacher: ['Hồ Tuấn Thanh','Mai Anh Tuấn', 'Nguyễn Thị Minh Tuyền'],
+    //         estimated_time : '1 tháng',
+    //         rating: 5.0,
+    //         tags : ['công nghệ phần mềm', 'lập trình', 'thiết kế']
+    //     },
 
-        {
-            id: 4,
-            name: 'hệ thống thông tin',
-            teacher: ['Nguyễn Văn A'],
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-    ];
+    //     {
+    //         id: 4,
+    //         name: 'hệ thống thông tin',
+    //         teacher: ['Nguyễn Văn A'],
+    //         estimated_time : '1 tháng',
+    //         rating: 5.0,
+    //         tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
+    //     },
+    // ];
+
+
+    const {data: enrollmentsCourse, isLoading, error} = useGetAllEnrollmentsQuery();
+    
+    // const progressCourses = enrollmentsCourse?.data?.filter(
+    //     (enrollment: EnrolledCourse) => enrollment.completion_status === "in-progress"
+    // ) ?? [];
+    const data = enrollmentsCourse?.data ?? [];
+
     const [isExpanded, setIsExpanded] = useState(false);
     const handleExpand = () => {
         setIsExpanded(!isExpanded);
@@ -67,7 +80,7 @@ const CourseDisplaySection = ({
                 <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
                 <div className = "flex items-center justify-center w-full">
                     <CourseGrid 
-                        courseData = {courseSampleData} 
+                        courseData = {data} 
                         colWidth = {6} 
                         maxItems = {isExpanded ? 12 : 4} 
                     />
