@@ -1,16 +1,15 @@
 
 import { baseApi } from '../baseApi';
-import { CourseResponse, Course, SearchParams, CourseFilterParams } from '../../../type/course.type';
+import { CourseResponse, Course, SearchParams, CourseFilterParams, ModulesResponse, LessonsResponse } from '../../../type/course.type';
 import { string } from 'better-auth';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
 
         //POST: Create new course (optional thumbnail_url)
-
         createCourse: builder.mutation<CourseResponse, Course>({
             query: (course) => ({
-                url:  '/courses',
+                url: '/courses',
                 method: 'POST',
                 body: course,
             }),
@@ -19,7 +18,7 @@ export const courseApi = baseApi.injectEndpoints({
 
         //GET: Get all course created by the the teacher (all teacher)
         getCoursesByTeacher: builder.query<CourseResponse, void>({
-            query : () => '/courses/teacher',
+            query: () => '/courses/teacher',
             providesTags: ['Course'],
         }),
 
@@ -30,9 +29,8 @@ export const courseApi = baseApi.injectEndpoints({
         }),
 
         //GET: Get course detailed by id
-
         getCourseById: builder.query<CourseResponse, string>({
-            query:(course_id) => `/courses/${course_id}`,
+            query: (course_id) => `/courses/${course_id}`,
             providesTags: (result, error, id) => [{ type: 'Course', id }],
         }),
 
@@ -43,9 +41,8 @@ export const courseApi = baseApi.injectEndpoints({
         }),
 
         //PUT: update course by id
-
-        updateCourseInfo: builder.mutation<CourseResponse, {course_id:string, course: Partial<Course>}>({
-            query: ({course_id, course}) => ({
+        updateCourseInfo: builder.mutation<CourseResponse, { course_id: string, course: Partial<Course> }>({
+            query: ({ course_id, course }) => ({
                 url: `/courses/${course_id}`,
                 method: 'PUT',
                 body: course,
@@ -55,18 +52,17 @@ export const courseApi = baseApi.injectEndpoints({
         }),
 
         //PATCH: update course status
-        updateCourseStatus: builder.mutation<CourseResponse, {course_id:string, is_active:boolean}>({
-            query: ({course_id, is_active}) => ({
+        updateCourseStatus: builder.mutation<CourseResponse, { course_id: string, is_active: boolean }>({
+            query: ({ course_id, is_active }) => ({
                 url: `/courses/${course_id}/status`,
                 method: 'PATCH',
-                body: {is_active},
+                body: { is_active },
             }),
             invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
 
         }),
 
         //DELETE: delete or deactivate course by id
-
         deleteCourseById: builder.mutation<CourseResponse, string>({
             query: (course_id) => ({
                 url: `/courses/${course_id}`,
@@ -75,30 +71,27 @@ export const courseApi = baseApi.injectEndpoints({
             invalidatesTags: ['Course'],
         }),
 
-
         //POST: Update/upload course thumbnail
-        updateCourseThumbnail: builder.mutation<CourseResponse, {course_id:string, thumbnail_url:string}>({
-            query: ({course_id, thumbnail_url}) => ({
+        updateCourseThumbnail: builder.mutation<CourseResponse, { course_id: string, thumbnail_url: string }>({
+            query: ({ course_id, thumbnail_url }) => ({
                 url: `/courses/${course_id}/thumbnail`,
                 method: 'POST',
-                body: {thumbnail_url},
+                body: { thumbnail_url },
             }),
             invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
 
         }),
 
         //DELETE: delete course thumbnail
-        deleteCourseThumbnail: builder.mutation<CourseResponse, {course_id:string}>({
-            query: ({course_id}) => ({
+        deleteCourseThumbnail: builder.mutation<CourseResponse, { course_id: string }>({
+            query: ({ course_id }) => ({
                 url: `/courses/${course_id}/thumbnail`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
         }),
 
-
         //GET: get course info
-
         getCourseInfo: builder.query<CourseResponse, string>({
             query: (course_id) => `/courses/${course_id}/info`,
             providesTags: (result, error, id) => [{ type: 'Course', id }],
@@ -109,9 +102,8 @@ export const courseApi = baseApi.injectEndpoints({
         }),
 
         // GET /courses/search - Search courses by keywords
-
         searchCourses: builder.query<CourseResponse, SearchParams>({
-            query: (params) =>({
+            query: (params) => ({
                 url: '/courses/search',
                 params: params,
             }),
@@ -120,14 +112,13 @@ export const courseApi = baseApi.injectEndpoints({
 
         filterCourses: builder.query<CourseResponse, CourseFilterParams>({
             query: (params) => ({
-              url: '/courses/filter',
-              params: params,
+                url: '/courses/filter',
+                params: params,
             }),
             providesTags: ['Course'],
         }),
 
         //GET: Get popular courses
-
         getPopularCourses: builder.query<CourseResponse, { limit?: number } | void>({
             query: (params) => ({
                 url: '/courses/popular',
@@ -146,7 +137,6 @@ export const courseApi = baseApi.injectEndpoints({
             providesTags: ['Course'],
         }),
 
-
         //GET: get free course
         getFreeCourses: builder.query<CourseResponse, { limit?: number } | void>({
             query: (params) => ({
@@ -156,6 +146,17 @@ export const courseApi = baseApi.injectEndpoints({
             providesTags: ['Course'],
         }),
 
+        //GET: get modules of a course
+        getCourseModules: builder.query<ModulesResponse, string>({
+            query: (course_id) => `/courses/${course_id}/modules`,
+            providesTags: (result, error, id) => [{ type: 'Course', id }],
+        }),
+
+        //GET: get lessons of a module
+        getModuleLessons: builder.query<LessonsResponse, string>({
+            query: (module_id) => `/modules/${module_id}/lessons`,
+            providesTags: (result, error, id) => [{ type: 'Module', id }],
+        }),
     }),
 });
 
@@ -170,5 +171,7 @@ export const {
     useDeleteCourseByIdMutation,
     useUpdateCourseThumbnailMutation,
     useDeleteCourseThumbnailMutation,
-    
+    useGetCourseModulesQuery,
+    useGetModuleLessonsQuery,
+    useLazyGetModuleLessonsQuery,
 } = courseApi;
