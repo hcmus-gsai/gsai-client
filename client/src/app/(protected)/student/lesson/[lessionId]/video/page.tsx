@@ -1,12 +1,13 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 import {FooterSection} from "@/components/guest/ui/guest";
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import { ChevronDown, ChevronUp,X, Check, Plus, ChevronRight, Send, Mic, Menu} from "@deemlol/next-icons";
 import {Button, Card, Form, Input, Switch, Progress, Calendar} from "antd";
 
 //For Voice Recorder
 import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
+import {useTranscribeAudioMutation} from '@/store/api/[module]/voiceApi';
 
 interface IChapterState {
     id: number;
@@ -17,7 +18,6 @@ interface Message {
     sender: 'user' | 'ai';
     text: string;
 }
-
 
 const QuizContent = () => {
 
@@ -128,150 +128,14 @@ const QuizContent = () => {
     )
 }
 
-
-
 const ActivitySection = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
-
-    //===========Voice Recorder===========
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [transcription, setTranscription] = useState<string>("");
-    
-    const VoiceRecorder: React.FC<{
-        value?: Blob | null,
-        onChange?: (value: Blob | null) => void,
-    }> = (
-        {
-            value,
-            onChange,
-        }
-    ) => {
-        const [isRecording, setIsRecording] = useState(false);
-        const [isTranscribing, setIsTranscribing] = useState(false);
-    
-        const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-        const audioChunksRef = useRef<Blob[]>([]);
-        const startRecording = async() => {
-    
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-                const mediaRecorder = new MediaRecorder(stream);
-                mediaRecorderRef.current = mediaRecorder;
-                audioChunksRef.current = [];
-    
-                mediaRecorder.ondataavailable = (event: BlobEvent) => {
-                    if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                    }
-                };
-    
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunksRef.current, {type: 'audio/wav'});
-                    const url = URL.createObjectURL(audioBlob);
-                    setAudioUrl(url);
-            
-                    if (onChange) {
-                    onChange(audioBlob);
-                    }
-    
-                    stream.getTracks().forEach((track) => track.stop());
-                    
-                    setIsTranscribing(true);
-                    await transcribeAudio(audioBlob);
-                    setIsTranscribing(false);
-                };
-                mediaRecorder.start();
-                setIsRecording(true);
-    
-            }
-            catch(error) {
-                console.error("Error accessing microphone:", error);
-                alert("Không thể truy cập Micro. Vui lòng kiểm tra quyền.");
-            }
-        };
-    
-        const stopRecording = () => {
-            if (mediaRecorderRef.current) {
-                mediaRecorderRef.current.stop();
-                setIsRecording(false);
-            }
-        };
-    
-        const deleteRecording = () => {
-            setAudioUrl(null);
-            setTranscription("");
-            formData.setFieldValue('chatMessage', '');
-            if (onChange) {
-                onChange(null);
-            }
-        };
-        
-        const transcribeAudio = async (audioBlob: Blob) => {
-            const text = "Đây là văn bản được chuyển đổi từ giọng nói...";
-            setTranscription(text);
-            formData.setFieldValue('chatMessage', text);
-        };
-        return (
-            <>
-            
-            {
-                !isRecording && !audioUrl &&(
-                    <Button
-                        icon={<AudioOutlined className="text-xl text-gray-500" />} 
-                        onClick={startRecording}
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            hover:!bg-[var(--color-secondary)] 
-                            hover:!text-white 
-                            transition-all duration-400
-                            !shadow-none
-                        "
-                    />
-                )
-            }
-    
-            {
-                isRecording && (
-                    <Button
-                        icon={<BorderOutlined className="text-xl text-gray-500" />}                    
-                        onClick={stopRecording}
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            !bg-red-500
-                            !text-white
-                            !shadow-none
-                        "
-                    />
-                )
-            }
-    
-            {audioUrl && (
-                <>
-                    <Button 
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />} 
-                        onClick={deleteRecording} 
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            hover:!bg-[var(--color-secondary)] 
-                            hover:!text-white 
-                            transition-all duration-400
-                            !shadow-none
-                        "
-                    />
-                </>
-            )}
-            </>
-        )
+    //===========Extendable Navbar============//
+    const [extendableNavbar, setExtendableNavbar] = useState(true);
+    const toggleExtendableNavbar = () => {
+        setExtendableNavbar(!extendableNavbar);
     }
-
-    //====================================
-
     const chapters = [
         {
             id : 1,
@@ -437,6 +301,154 @@ const ActivitySection = () => {
             })
         )
     }
+    //=======================================//
+
+    //===========ASR Service============//
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const [transcribe, { data, isLoading, error }] = useTranscribeAudioMutation();
+    const [textAreaInputValue, setTextAreaInputValue] = useState<string>("");
+
+
+    useEffect(() => {
+        if (audioUrl) {
+        transcribe({ 
+            audioUrl: audioUrl,
+            message: "Yêu cầu transcribe"
+        }); 
+        }
+    }, [audioUrl, transcribe]);
+
+    useEffect(() => {
+        if (data?.text) {
+          setTextAreaInputValue(data.text);           
+        }
+    }, [data, setTextAreaInputValue]);
+
+
+    const VoiceRecorder: React.FC<{
+        value?: Blob | null,
+        onChange?: (value: Blob | null) => void,
+    }> = (
+        {
+            value,
+            onChange,
+        }
+    ) => {
+        const [isRecording, setIsRecording] = useState(false);
+    
+        const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+        const audioChunksRef = useRef<Blob[]>([]);
+        const startRecording = async() => {
+    
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+                const mediaRecorder = new MediaRecorder(stream);
+                mediaRecorderRef.current = mediaRecorder;
+                audioChunksRef.current = [];
+    
+                mediaRecorder.ondataavailable = (event: BlobEvent) => {
+                    if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                    }
+                };
+    
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunksRef.current, {type: 'audio/wav'});
+                    const url = URL.createObjectURL(audioBlob);
+                    setAudioUrl(url);
+            
+                    if (onChange) {
+                    onChange(audioBlob);
+                    }
+    
+                    stream.getTracks().forEach((track) => track.stop());
+                    
+                };
+                mediaRecorder.start();
+                setIsRecording(true);
+    
+            }
+            catch(error) {
+                console.error("Error accessing microphone:", error);
+                alert("Không thể truy cập Micro. Vui lòng kiểm tra quyền.");
+            }
+        };
+    
+        const stopRecording = () => {
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+                setIsRecording(false);
+            }
+        };
+    
+        const deleteRecording = () => {
+            setAudioUrl(null);
+            if (onChange) {
+                onChange(null);
+            }
+        };
+        
+        return (
+            <>
+            
+            {
+                !isRecording && !audioUrl &&(
+                    <Button
+                        icon={<AudioOutlined className="text-xl text-gray-500" />} 
+                        onClick={startRecording}
+                        className="
+                            flex items-center pl-0 
+                            !rounded-full !border-none 
+                            hover:!bg-[var(--color-secondary)] 
+                            hover:!text-white 
+                            transition-all duration-400
+                            !shadow-none
+                        "
+                    />
+                )
+            }
+    
+            {
+                isRecording && (
+                    <Button
+                        icon={<BorderOutlined className="text-xl text-gray-500" />}                    
+                        onClick={stopRecording}
+                        className="
+                            flex items-center pl-0 
+                            !rounded-full !border-none 
+                            !bg-red-500
+                            !text-white
+                            !shadow-none
+                        "
+                    />
+                )
+            }
+    
+            {audioUrl && (
+                <>
+                    <Button 
+                        type="text" 
+                        danger 
+                        icon={<DeleteOutlined />} 
+                        onClick={deleteRecording} 
+                        className="
+                            flex items-center pl-0 
+                            !rounded-full !border-none 
+                            hover:!bg-[var(--color-secondary)] 
+                            hover:!text-white 
+                            transition-all duration-400
+                            !shadow-none
+                        "
+                    />
+                </>
+            )}
+            </>
+        )
+    }
+
+    //====================================
+
+    //===========Video OCR Service============//
 
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -567,7 +579,8 @@ const ActivitySection = () => {
         }
     }
 
-    //Chatbot functionality
+    //===========Chatbot Service===============//
+
     const [messages, setMessages] = useState<Message[]>([]);
     const [row, setRow] = useState(1);
 
@@ -575,17 +588,9 @@ const ActivitySection = () => {
         const data = formData.getFieldsValue();
         console.log(data)
 
-        if (data.chatMessage) {
-            setMessages((prev) => [...prev, {sender : 'user', text: data.chatMessage}])
-        }
-        
-        if (audioUrl) {
-            setMessages((prev) => [...prev, {sender : 'user', text: `🎤 Audio message`}])
-        }
-        
-        formData.resetFields();
-        setAudioUrl(null);
-        setTranscription("");
+
+       
+        setMessages((prev) => [...prev, {sender : 'user', text: data.chatMessage}])
      
         // // Simulate AI response
         setTimeout(() => {
@@ -595,13 +600,12 @@ const ActivitySection = () => {
             ]);
         }, 800);
     }
+    //=======================================//
 
-    const [extendableNavbar, setExtendableNavbar] = useState(true);
-    const toggleExtendableNavbar = () => {
-        setExtendableNavbar(!extendableNavbar);
-    }
 
-    //ASR and OCR functionality
+    
+
+    //ASR and OCR Toggle
     const [enableASR, setEnableASR] = useState(false);
     const [enableOCR, setEnableOCR] = useState(false);
 
@@ -838,9 +842,7 @@ const ActivitySection = () => {
                             onFinish={handleMessageSubmit}
                         >
                             <Form.Item name="chatMessage" className="!mb-0 !flex-1">
-                                {audioUrl && (
-                                    <audio src={audioUrl} controls className="h-8 w-60 mt-2" />
-                                )}
+                                
                                 <Input.TextArea
                                     placeholder="Nhập câu hỏi"
                                     autoSize={{ minRows: 1, maxRows: 7 }}
@@ -858,8 +860,8 @@ const ActivitySection = () => {
                                             formData.submit();
                                         }
                                     }}
+                                    value = {textAreaInputValue}
                                 />
-                                
                             </Form.Item>
 
                             <Form.Item
