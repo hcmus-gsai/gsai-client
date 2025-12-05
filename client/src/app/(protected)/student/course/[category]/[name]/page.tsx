@@ -2,7 +2,6 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import { useParams, useRouter } from "next/navigation";
-import { StudentGreetingSection } from "@/components/student/greeting";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { Button, Card } from "antd";
 import { ChevronDown, ChevronUp, Check } from "@deemlol/next-icons"
@@ -13,6 +12,7 @@ import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLesson
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
 import Image from "next/image";
+
 interface IChapterState {
     id: string;
     isExtended: boolean;
@@ -20,32 +20,22 @@ interface IChapterState {
 
 const CourseModules = () => {
     const router = useRouter();
-
     const params = useParams();
     const courseId = params.category as string;
 
-    // Fetch course
+    // Fetch data (Giữ nguyên logic của bạn)
     const { data: courseRes } = useGetCourseByIdQuery(courseId);
     const course = courseRes?.data;
-
-    // Fetch modules
     const { data: modulesRes } = useGetCourseModulesQuery(courseId);
     const modules = modulesRes?.modules ?? [];
-
-    // Lazy fetch lessons
-    const [triggerGetLessons, { isFetching }] = useLazyGetModuleLessonsQuery();
-
-    // Get lessons of module
+    const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
     const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
-
-    // State toggle for module
     const [chapterState, setChapterState] = useState<IChapterState[]>([]);
 
-    // Init chapterState after load modules
     useEffect(() => {
         if (modules.length > 0) {
             setChapterState(
-                modules.map((m) => ({
+                modules.map((m:any) => ({
                     id: String(m.id),
                     isExtended: false,
                 }))
@@ -53,18 +43,14 @@ const CourseModules = () => {
         }
     }, [modules]);
 
-    // Toggle
     const handleToggleChapter = async (id: string) => {
         setChapterState((prev) =>
             prev.map((cs) =>
                 cs.id === id ? { ...cs, isExtended: !cs.isExtended } : cs
             )
         );
-
-        // Fetch if not available
         if (!lessonsMap[id]) {
             const res = await triggerGetLessons(id).unwrap();
-
             setLessonsMap((prev) => ({
                 ...prev,
                 [id]: res.lesson,
@@ -73,106 +59,95 @@ const CourseModules = () => {
     };
 
     return (
-        <section className="flex-1 flex flex-col items-center justify-start">
+        // Mobile: w-full, Desktop: flex-1
+        <section className="w-full md:flex-1 flex flex-col items-center justify-start">
             <div className="w-full mb-[1.5rem]">
-                <p className="text-6xl font-semibold mb-4">{course?.course_name}</p>
-                <div className="flex gap-3 mb-6">
-                    <Button
-                        className="!text-[var(--color-secondary)] !bg-[var(--color-neutral)] !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] !rounded-full !border-white"
-                    >
+                {/* Responsive Text: Mobile 3xl, Desktop 6xl */}
+                <p className="text-3xl md:text-6xl font-semibold mb-4 text-[var(--color-primary)]">
+                    {course?.course_name}
+                </p>
+                
+                {/* Buttons wrapper: Wrap khi màn hình nhỏ */}
+                <div className="flex flex-wrap gap-3 mb-6">
+                    <Button className="!text-[var(--color-secondary)] !bg-[var(--color-neutral)] !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] !rounded-full !border-white">
                         Bài giảng
                     </Button>
-                    <Button
-                        className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white"
-                    >
+                    <Button className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white">
                         Quiz
                     </Button>
-                    <Button
-                        className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white"
-                    >
+                    <Button className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white">
                         Điểm
                     </Button>
                 </div>
+
                 <div className="w-full flex flex-col gap-2">
-                    <p className="text-[1rem] font-light text-[var(--color-primary)]">
+                    <p className="text-[0.875rem] md:text-[1rem] font-light text-[var(--color-primary)]">
                         Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
                     </p>
-                    <div className="bg-[var(--color-secondary)] w-full h-[10px] rounded-full">
-                    </div>
+                    <div className="bg-[var(--color-secondary)] w-full h-[10px] rounded-full"></div>
                 </div>
             </div>
 
-            <div className="w-full mt-[2rem] mb-[2rem]">
-                {modules.map((module) => (
+            <div className="w-full mt-[1rem] md:mt-[2rem] mb-[2rem]">
+                {modules.map((module:any) => (
                     <div key={module.id}>
                         <div className="flex items-center flex-col justify-center gap-2">
                             <div className="w-full flex flex-col items-center justify-center gap-2">
                                 <div className="w-full flex items-center justify-center gap-2">
                                     <div className="flex items-center justify-start gap-2 mr-auto">
                                         <Button onClick={() => handleToggleChapter(module.id)} className="!bg-transparent !border-none !p-0 !m-0">
-                                            {chapterState.find((cs) => cs.id === module.id)?.isExtended ? <ChevronUp width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
+                                            {chapterState.find((cs) => cs.id === module.id)?.isExtended ? 
+                                                <ChevronUp width={24} height={24} className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : 
+                                                <ChevronDown width={24} height={24} className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />
+                                            }
                                         </Button>
-                                        <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">{module.module_name}</p>
-                                    </div>  
+                                        {/* Module Name Responsive */}
+                                        <p className="text-lg md:text-[1.5rem] font-bold text-[var(--color-primary)] line-clamp-1">
+                                            {module.module_name}
+                                        </p>
+                                    </div>
                                     <div className="flex items-center justify-start gap-2 ml-auto">
-                                        <Check width={32} height={32} className="!rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-2" />
-                                        {/* <p className="text-[1rem] font-bold text-[var(--color-secondary)]">{module.status}</p> */}
+                                        <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
                                     </div>
                                 </div>
-                                <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem]">
-                                    <p className="text-[1rem] font-light text-[var(--color-primary)]">Đã hoàn thành</p>
-                                    <p className="text-[1rem] font-light text-[var(--color-primary)]">Đã hoàn thành</p>
-                                    <p className="text-[1rem] font-light text-[var(--color-primary)]">Đã hoàn thành</p>
+                                <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem] overflow-x-auto no-scrollbar">
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Đã hoàn thành</p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Video: 2/3</p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Quiz: 1/1</p>
                                 </div>
                             </div>
-                            <div 
-                                className={`w-full flex flex-col items-start justify-start gap-[1.25rem] overflow-hidden transition-all duration-300 ease-all mb-[1rem] ${
-                                    chapterState.find(cs => cs.id === module.id)?.isExtended 
-                                        ? 'max-h-[2000px] opacity-100 mt-[1rem]' 
-                                        : 'max-h-0 opacity-0 mt-0'
-                                }`}
-                            >
-                                {(lessonsMap[module.id] ?? []).map((lesson, index) => (
-                                    <Card
-                                        key={lesson.id}
-                                        className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
-                                        style={{
-                                            transform: chapterState.find(cs => cs.id === module.id)?.isExtended 
-                                                ? 'translateY(0)' 
-                                                : 'translateY(-10px)',
-                                            opacity: chapterState.find(cs => cs.id === module.id)?.isExtended ? 1 : 0,
-                                            transitionProperty: 'transform, opacity',
-                                            transitionDuration: '0.3s',
-                                            transitionTimingFunction: 'ease',
-                                            transitionDelay: chapterState.find(cs => cs.id === module.id)?.isExtended 
-                                                ? `${index * 50}ms` 
-                                                : '0ms'
-                                        }}
-                                        onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
-                                    >
-                                        <div className="w-full flex flex-col items-start justify-start">
-                                            <p className="text-[1rem] font-bold text-[var(--color-primary)]">
-                                                {lesson.lesson_name}
-                                            </p>
-
-                                            <div className="w-full flex items-center justify-start gap-2">
-                                                <p className="text-[1rem] font-light text-[var(--color-primary)]">
-                                                    {lesson.type === "video"
-                                                        ? "Video"
-                                                        : lesson.type === "quiz"
-                                                            ? "Quiz"
-                                                            : "Bài đọc"}
-                                                </p>
-
-                                                <p className="text-[1rem] font-light text-[var(--color-primary)]">
-                                                    {lesson.estimated_completion_time}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
+                            
+                            {/* Animation Wrapper */}
+                            <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${
+                                chapterState.find(cs => cs.id === module.id)?.isExtended ? "grid-rows-[1fr] mt-[1rem]" : "grid-rows-[0fr] mt-0"
+                            }`}>
+                                <div className="overflow-hidden">
+                                     <div className="flex flex-col gap-[1.25rem] pb-4">
+                                        {(lessonsMap[module.id] ?? []).map((lesson, index) => (
+                                            <Card
+                                                key={lesson.id}
+                                                className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
+                                                onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
+                                                styles={{ body: { width: '100%', padding: '16px' } }}
+                                            >
+                                                <div className="w-full flex flex-col items-start justify-start">
+                                                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">
+                                                        {lesson.lesson_name}
+                                                    </p>
+                                                    <div className="w-full flex items-center justify-start gap-2 mt-1">
+                                                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
+                                                            {lesson.type === "video" ? "Video" : lesson.type === "quiz" ? "Quiz" : "Bài đọc"}
+                                                        </p>
+                                                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
+                                                            {lesson.estimated_completion_time}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-
                         </div>
                     </div>
                 ))}
@@ -180,134 +155,76 @@ const CourseModules = () => {
         </section>
     );
 }
-const CourseSchedule = () => {
 
+const CourseSchedule = () => {
     const events = [
-        {
-            id: 1,
-            name: "Thi cuối kì",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 2,
-            name: "Bài tập lớn",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 3,
-            name: "Bài tập lớn",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 4,
-            name: "Bài tập toán ứng dụng 2",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 5,
-            name: "Thi cuối kì",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 6,
-            name: "Bài tập lớn",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 7,
-            name: "Bài tập lớn",
-            deadline: "23:59 15/12/2025",
-        },
-        {
-            id: 8,
-            name: "Bài tập toán ứng dụng 2",
-            deadline: "23:59 15/12/2025",
-        }
+        { id: 1, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
+        { id: 2, name: "Bài tập lớn", deadline: "23:59 15/12/2025" },
+        { id: 3, name: "Bài tập lớn", deadline: "23:59 15/12/2025" },
+        { id: 4, name: "Toán ứng dụng 2", deadline: "23:59 15/12/2025" },
+        { id: 5, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
     ]
+    
     return (
-        <section className="w-[25%] flex flex-col items-start justify-start">
-            <div className="w-full h-full flex flex-col items-start justify-start gap-[2rem]">
+        // Mobile: w-full, Desktop: w-[25%]
+        <section className="w-full md:w-[25%] flex flex-col items-start justify-start">
+            <div className="w-full h-full flex flex-col items-start justify-start gap-[1.5rem] md:gap-[2rem]">
 
                 <Card className="w-full !rounded-[20px] !border !border-gray-300">
-                    <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[0.5rem]">Lịch học</p>
-                    <p className = "text-[0.875rem] mb-[0.5rem]">Tôi cam kết sẽ học 3 ngày mỗi tuần để hoàn thành môn học này.</p>
-                    <div className="w-full flex items-center justify-between mb-[0.5rem]">
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T2
-                        </Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T3</Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T4</Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T5</Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T6</Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >T7</Button>
-                        <Button
-                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
-                        >CN</Button>
+                    <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[0.5rem]">Lịch học</p>
+                    <p className="text-[0.875rem] mb-[0.5rem]">Tôi cam kết sẽ học 3 ngày mỗi tuần.</p>
+                    
+                    {/* Day Buttons: Justify between để dàn đều */}
+                    <div className="w-full flex items-center justify-between mb-[0.5rem] gap-1">
+                        {['T2','T3','T4','T5','T6','T7','CN'].map(day => (
+                            <Button key={day} className="!w-[32px] !h-[32px] md:!w-[38px] md:!h-[38px] !p-0 !min-w-0 !rounded-full !border !border-gray-300 !text-[0.75rem] md:!text-[1rem] font-bold text-[var(--color-primary)] flex items-center justify-center">
+                                {day}
+                            </Button>
+                        ))}
                     </div>
-                    <p className = "text-[1rem] font-bold text-[var(--color-secondary)]">Điều chỉnh lịch học</p>
+                    <p className="text-[1rem] font-bold text-[var(--color-secondary)] cursor-pointer">Điều chỉnh lịch học</p>
                 </Card>
 
                 <Card
                     className="w-full h-[350px] !rounded-[20px] !border !border-gray-300 shadow-sm"
-                    styles={{ 
-                        body: { 
-                            height: '100%', 
-                            display: 'flex', 
+                    styles={{
+                        body: {
+                            height: '100%',
+                            display: 'flex',
                             flexDirection: 'column',
-                            padding: '24px' 
-                        } 
+                            padding: '24px'
+                        }
                     }}
                 >
                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">
                         Sự kiện sắp tới
                     </p>
-                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2">
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
                         {events.map((e) => (
                             <Card
                                 key={e.id}
-                                className="
-                                    w-full h-[80px] rounded-[20px]
-                                    !border !border-gray-300
-                                    [&_.ant-card-body]:!flex [&_.ant-card-body]:!items-center [&_.ant-card-body]:!justify-start [&_.ant-card-body]:!gap-2
-                                "
-                                styles={{ body: { padding: '12px' } }} 
+                                className="w-full min-h-[80px] rounded-[20px] !border !border-gray-300 shrink-0"
+                                styles={{ body: { padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' } }}
                             >
-                                <div>
-                                    <div className = "bg-[var(--color-neutral)] w-[56px] h-[56px] rounded-full flex items-center justify-center">
-                                        <Image src={ComputingIcon} alt="Computing Icon" width={24} height={24} />
-                                    </div>
+                                <div className="bg-[var(--color-neutral)] w-[48px] h-[48px] rounded-full flex-shrink-0 flex items-center justify-center">
+                                    <Image src={ComputingIcon} alt="Icon" width={20} height={20} />
                                 </div>
-                                <div>
-                                    <p className="text-[1rem] font-bold text-[var(--color-primary)] truncate">
+                                <div className="flex-1 min-w-0"> {/* min-w-0 giúp truncate hoạt động trong flex */}
+                                    <p className="text-[0.875rem] md:text-[1rem] font-bold text-[var(--color-primary)] truncate">
                                         {e.name}
                                     </p>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="flex items-center justify-start gap-2">
-                                            <Image src={ClockIcon} alt="Clock Icon" width={24} height={24} />
-                                            <p className="text-[0.875rem] font-light text-[var(--color-primary)]">
-                                                {e.deadline}
+                                    <div className="flex items-center justify-between gap-1 mt-1">
+                                        <div className="flex items-center gap-1">
+                                            <Image src={ClockIcon} alt="Clock" width={16} height={16} />
+                                            <p className="text-[0.75rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                               15/12
                                             </p>
                                         </div>
-                                        
-                                        <p className="text-[0.875rem] font-light text-[var(--color-primary)]">
+                                        <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
                                             23:59
                                         </p>
                                     </div>
-
                                 </div>
-                                
-                                
                             </Card>
                         ))}
                     </div>
@@ -319,8 +236,20 @@ const CourseSchedule = () => {
 
 export default function CourseDetailPage() {
     return (
-        <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <div className="w-[calc(100%-12rem)] mx-auto h-full flex items-start justify-center mt-[10rem] gap-[2rem]">
+        <main className="w-full grow flex min-h-screen flex-col overflow-x-hidden bg-white">
+            {/* CONTAINER CHÍNH */}
+            <div className="
+                w-full px-4 md:px-0 md:w-[calc(100%-12rem)] 
+                mx-auto h-full 
+                flex flex-col-reverse md:flex-row 
+                items-start justify-center 
+                mt-[6rem] md:mt-[10rem] 
+                gap-[2rem]
+            ">
+                {/* flex-col-reverse:
+                   - Mobile: CourseSchedule (Item 2) lên đầu, CourseModules (Item 1) xuống dưới.
+                   - Desktop (md:flex-row): Modules bên Trái, Schedule bên Phải.
+                */}
                 <CourseModules />
                 <CourseSchedule />
             </div>
