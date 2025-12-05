@@ -75,7 +75,7 @@ const CourseModules = () => {
     return (
         <section className="flex-1 flex flex-col items-center justify-start">
             <div className="w-full mb-[1.5rem]">
-                <p className="text-3xl font-semibold mb-4">{course?.course_name}</p>
+                <p className="text-6xl font-semibold mb-4">{course?.course_name}</p>
                 <div className="flex gap-3 mb-6">
                     <Button
                         className="!text-[var(--color-secondary)] !bg-[var(--color-neutral)] !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] !rounded-full !border-white"
@@ -113,7 +113,7 @@ const CourseModules = () => {
                                             {chapterState.find((cs) => cs.id === module.id)?.isExtended ? <ChevronUp width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
                                         </Button>
                                         <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">{module.module_name}</p>
-                                    </div>
+                                    </div>  
                                     <div className="flex items-center justify-start gap-2 ml-auto">
                                         <Check width={32} height={32} className="!rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-2" />
                                         {/* <p className="text-[1rem] font-bold text-[var(--color-secondary)]">{module.status}</p> */}
@@ -125,35 +125,52 @@ const CourseModules = () => {
                                     <p className="text-[1rem] font-light text-[var(--color-primary)]">Đã hoàn thành</p>
                                 </div>
                             </div>
-                            <div className="w-full flex flex-col items-start justify-start gap-[1.25rem]">
-                                {chapterState.find(cs => cs.id === module.id)?.isExtended &&
-                                    (lessonsMap[module.id] ?? []).map((lesson) => (
-                                        <Card
-                                            key={lesson.id}
-                                            className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200"
-                                            onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
-                                        >
-                                            <div className="w-full flex flex-col items-start justify-start">
-                                                <p className="text-[1rem] font-bold text-[var(--color-primary)]">
-                                                    {lesson.lesson_name}
+                            <div 
+                                className={`w-full flex flex-col items-start justify-start gap-[1.25rem] overflow-hidden transition-all duration-300 ease-all mb-[1rem] ${
+                                    chapterState.find(cs => cs.id === module.id)?.isExtended 
+                                        ? 'max-h-[2000px] opacity-100 mt-[1rem]' 
+                                        : 'max-h-0 opacity-0 mt-0'
+                                }`}
+                            >
+                                {(lessonsMap[module.id] ?? []).map((lesson, index) => (
+                                    <Card
+                                        key={lesson.id}
+                                        className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
+                                        style={{
+                                            transform: chapterState.find(cs => cs.id === module.id)?.isExtended 
+                                                ? 'translateY(0)' 
+                                                : 'translateY(-10px)',
+                                            opacity: chapterState.find(cs => cs.id === module.id)?.isExtended ? 1 : 0,
+                                            transitionProperty: 'transform, opacity',
+                                            transitionDuration: '0.3s',
+                                            transitionTimingFunction: 'ease',
+                                            transitionDelay: chapterState.find(cs => cs.id === module.id)?.isExtended 
+                                                ? `${index * 50}ms` 
+                                                : '0ms'
+                                        }}
+                                        onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
+                                    >
+                                        <div className="w-full flex flex-col items-start justify-start">
+                                            <p className="text-[1rem] font-bold text-[var(--color-primary)]">
+                                                {lesson.lesson_name}
+                                            </p>
+
+                                            <div className="w-full flex items-center justify-start gap-2">
+                                                <p className="text-[1rem] font-light text-[var(--color-primary)]">
+                                                    {lesson.type === "video"
+                                                        ? "Video"
+                                                        : lesson.type === "quiz"
+                                                            ? "Quiz"
+                                                            : "Bài đọc"}
                                                 </p>
 
-                                                <div className="w-full flex items-center justify-start gap-2">
-                                                    <p className="text-[1rem] font-light text-[var(--color-primary)]">
-                                                        {lesson.type === "video"
-                                                            ? "Video"
-                                                            : lesson.type === "quiz"
-                                                                ? "Quiz"
-                                                                : "Bài đọc"}
-                                                    </p>
-
-                                                    <p className="text-[1rem] font-light text-[var(--color-primary)]">
-                                                        {lesson.estimated_completion_time}
-                                                    </p>
-                                                </div>
+                                                <p className="text-[1rem] font-light text-[var(--color-primary)]">
+                                                    {lesson.estimated_completion_time}
+                                                </p>
                                             </div>
-                                        </Card>
-                                    ))}
+                                        </div>
+                                    </Card>
+                                ))}
                             </div>
 
                         </div>
