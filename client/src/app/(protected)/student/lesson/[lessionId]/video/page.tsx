@@ -611,16 +611,21 @@ const ActivitySection = () => {
 
     
     return (
-        <section className = "w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem]">
+        <section className = "w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem] mb-[2rem]">
             <div className = "w-full flex items-start justify-center gap-[1.5rem]">
                 {/* Toggle Button - shows when navbar is collapsed */}
-                <Button 
-                    onClick={toggleExtendableNavbar}
-                    className={`!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full transition-all duration-300 ${
-                        extendableNavbar ? '!opacity-0 !scale-0 !w-0 !min-w-0 !p-0 !m-0' : '!opacity-100 !scale-100'
-                    }`}
-                    icon={<Menu className = "!w-[16px] !h-[16px] !text-[var(--color-bg-white)]" />}
-                />
+                {
+                    !extendableNavbar && (
+                        <Button 
+                            onClick={toggleExtendableNavbar}
+                            className={`!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full transition-all duration-300 ${
+                                extendableNavbar ? '!opacity-0 !scale-0 !w-0 !min-w-0 !p-0 !m-0' : '!opacity-100 !scale-100'
+                            }`}
+                            icon={<Menu className = "!w-[16px] !h-[16px] !text-[var(--color-bg-white)]" />}
+                        />
+                    )
+                }
+                
                 
                 {/* Extendable Navbar with smooth transition */}
                 <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${
@@ -628,6 +633,7 @@ const ActivitySection = () => {
                         ? 'w-[24%] opacity-100' 
                         : 'w-0 opacity-0 !p-0 !border-0'
                 }`}>
+                    
                     <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
                         <div className = "w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
                             <p className = "text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">Toán ứng dụng và thống kê</p>
