@@ -30,7 +30,7 @@ const StudentGreetingSection = (
 }) => {
 
     return (
-        <section className = "w-full flex flex-col">
+        <section className = "w-full flex flex-col relative">
             {hasTopGradient && (
                 <Image 
                     src = {AbstractTop} alt = "Curve Space Top" width = {0} height = {0}

@@ -7,8 +7,12 @@ import { FooterSection } from "@/components/guest/ui/guest";
 import { Button, Card } from "antd";
 import { ChevronDown, ChevronUp, Check } from "@deemlol/next-icons"
 import { useState, useEffect } from 'react';
+
 import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
 
+import ClockIcon from "@/../public/student/ClockIcon.svg";
+import ComputingIcon from "@/../public/student/ComputingIcon.svg";
+import Image from "next/image";
 interface IChapterState {
     id: string;
     isExtended: boolean;
@@ -69,7 +73,7 @@ const CourseModules = () => {
     };
 
     return (
-        <section className="w-[60%] flex flex-col items-center justify-start">
+        <section className="flex-1 flex flex-col items-center justify-start">
             <div className="w-full mb-[1.5rem]">
                 <p className="text-3xl font-semibold mb-4">{course?.course_name}</p>
                 <div className="flex gap-3 mb-6">
@@ -183,52 +187,114 @@ const CourseSchedule = () => {
             deadline: "23:59 15/12/2025",
         },
         {
-            id: 1,
+            id: 5,
             name: "Thi cuối kì",
             deadline: "23:59 15/12/2025",
         },
         {
-            id: 2,
+            id: 6,
             name: "Bài tập lớn",
             deadline: "23:59 15/12/2025",
         },
         {
-            id: 3,
+            id: 7,
             name: "Bài tập lớn",
             deadline: "23:59 15/12/2025",
         },
         {
-            id: 4,
+            id: 8,
             name: "Bài tập toán ứng dụng 2",
             deadline: "23:59 15/12/2025",
         }
     ]
     return (
-        <section className="w-[20%] flex flex-col items-start justify-start">
+        <section className="w-[25%] flex flex-col items-start justify-start">
             <div className="w-full h-full flex flex-col items-start justify-start gap-[2rem]">
 
-                <Card className="w-full !rounded-[20px] !border !border-gray-300" title="Lịch học">
-                    <p>Tôi cam kết sẽ học 3 ngày mỗi tuần để hoàn thành môn học này.</p>
-                    <p>Điều chỉnh lịch học</p>
+                <Card className="w-full !rounded-[20px] !border !border-gray-300">
+                    <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[0.5rem]">Lịch học</p>
+                    <p className = "text-[0.875rem] mb-[0.5rem]">Tôi cam kết sẽ học 3 ngày mỗi tuần để hoàn thành môn học này.</p>
+                    <div className="w-full flex items-center justify-between mb-[0.5rem]">
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T2
+                        </Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T3</Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T4</Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T5</Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T6</Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >T7</Button>
+                        <Button
+                            className="!w-[38px] !h-[38px] !rounded-full !border !border-gray-300 !text-[1rem] font-bold text-[var(--color-primary)]"
+                        >CN</Button>
+                    </div>
+                    <p className = "text-[1rem] font-bold text-[var(--color-secondary)]">Điều chỉnh lịch học</p>
                 </Card>
 
-                <div
-                    className="w-full h-[350px] !rounded-[20px] !border !border-gray-300 
-                                [&_.ant-card-body]:!p-0"
+                <Card
+                    className="w-full h-[350px] !rounded-[20px] !border !border-gray-300 shadow-sm"
+                    styles={{ 
+                        body: { 
+                            height: '100%', 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            padding: '24px' 
+                        } 
+                    }}
                 >
-                    <p className="text-[1.5rem] font-bold text-[var(--color-primary)] p-2">Sự kiện sắp tới</p>
-                    <div className="overflow-y-auto h-[calc(100%-40px)] flex flex-col gap-2">
+                    <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">
+                        Sự kiện sắp tới
+                    </p>
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2">
                         {events.map((e) => (
-                            <Card key={e.id} className="w-full h-[80px] rounded-[20px] !border !border-gray-300 !p-2">
-                                <p>{e.name}</p>
-                                <p>{e.deadline}</p>
+                            <Card
+                                key={e.id}
+                                className="
+                                    w-full h-[80px] rounded-[20px]
+                                    !border !border-gray-300
+                                    [&_.ant-card-body]:!flex [&_.ant-card-body]:!items-center [&_.ant-card-body]:!justify-start [&_.ant-card-body]:!gap-2
+                                "
+                                styles={{ body: { padding: '12px' } }} 
+                            >
+                                <div>
+                                    <div className = "bg-[var(--color-neutral)] w-[56px] h-[56px] rounded-full flex items-center justify-center">
+                                        <Image src={ComputingIcon} alt="Computing Icon" width={24} height={24} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[1rem] font-bold text-[var(--color-primary)] truncate">
+                                        {e.name}
+                                    </p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center justify-start gap-2">
+                                            <Image src={ClockIcon} alt="Clock Icon" width={24} height={24} />
+                                            <p className="text-[0.875rem] font-light text-[var(--color-primary)]">
+                                                {e.deadline}
+                                            </p>
+                                        </div>
+                                        
+                                        <p className="text-[0.875rem] font-light text-[var(--color-primary)]">
+                                            23:59
+                                        </p>
+                                    </div>
+
+                                </div>
+                                
+                                
                             </Card>
                         ))}
-
-
                     </div>
-
-                </div>
+                </Card>
             </div>
         </section>
     );
@@ -237,7 +303,7 @@ const CourseSchedule = () => {
 export default function CourseDetailPage() {
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <div className="w-full h-full flex items-start justify-center mt-[10rem] gap-[2rem]">
+            <div className="w-[calc(100%-12rem)] mx-auto h-full flex items-start justify-center mt-[10rem] gap-[2rem]">
                 <CourseModules />
                 <CourseSchedule />
             </div>

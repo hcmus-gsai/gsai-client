@@ -304,101 +304,108 @@ const CourseDisplaySection = () => {
 }
 
 const FooterSection = ({
-    hasRegisterBox = true
-}:{
+    hasRegisterBox = true,
+}: {
     hasRegisterBox?: boolean;
 }) => {
     return (
-        <section className = "w-full flex flex-col items-center justify-center border-t border-gray-200 ">
-            {
-                hasRegisterBox && (
-                    <div className = "flex flex-col items-center justify-center gap-4 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-md p-[2rem]  mt-[4rem] w-[78%]">
-                        <div className = "flex flex-col items-center justify-center text-center w-full">
-                            <h1 className = "text-[2.5rem] text-[var(--color-primary)] w-[calc(100%-120px)]">Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai của bạn ngay hôm nay</h1>
-                            <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center">
-                                Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
-                            </p>
-                        </div>
-                        
-                        <Button
-                            className = "!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                        >
-                            Tham gia
-                        </Button>
+        <section className="w-full flex flex-col items-center justify-center border-t border-gray-200 bg-white">
+            {hasRegisterBox && (
+                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-2xl p-6 md:p-[2rem] mt-10 md:mt-[4rem] w-[90%] md:w-[78%] border border-blue-50">
+                    <div className="flex flex-col items-center justify-center text-center w-full">
+                        {/* Title Responsive: Nhỏ trên mobile, lớn trên desktop */}
+                        <h1 className="text-2xl md:text-[2.5rem] font-bold text-[var(--color-primary)] w-full md:w-[80%] leading-tight mb-2">
+                            Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai ngay hôm nay
+                        </h1>
+                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] text-center px-2">
+                            Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
+                        </p>
                     </div>
-                )
-            }
-           
-            <div className = "grid grid-cols-4 gap-4 justify-center items-start pt-10 py-12 w-[calc(100%-12rem)]">
-                <div className = "flex flex-col justify-center items-center">
-                    <div>
-                        <div className = "w-[80px]">
-                            {/* <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">AT AI.Tutor</h1> */}
-                            <Image src = {Epis} alt = "Epis Logo" width = {0} height = {0} className = "w-full h-full object-contain" />
-                        </div>
-                        <div>
-                            <p className = "text-[var(--color-primary)] mb-[1rem]"><span className = "font-bold text-[var(--color-primary)]">Văn phòng</span>: 227 Nguyễn Văn Cừ, phường Chợ Quán, quận 5, TP.HCM</p> 
-                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Số điện thoại</span>: +84 123 456 789</p>
-                            <p className = "text-[var(--color-primary)]"><span className = "font-bold text-[var(--color-primary)]">Email</span>: info@email.com</p>
-                        </div>
+
+                    <Button
+                        type="primary"
+                        className="!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-5 md:!py-6 !rounded-[50px] !text-base md:!text-[20px] !h-auto"
+                    >
+                        Tham gia
+                    </Button>
+                </div>
+            )}
+
+            {/* MAIN GRID: Mobile: 1 cột, Tablet: 2 cột, Desktop: 4 cột */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[calc(100%-12rem)]">
+                
+                {/* Column 1: Logo & Info */}
+                <div className="flex flex-col justify-start items-center md:items-start text-center md:text-left">
+                    <div className="w-[80px] mb-4">
+                         <Image src = {Epis} alt = "Epis Logo" width={0} height={0} className="w-full h-auto object-contain" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[var(--color-primary)] text-sm md:text-base">
+                            <span className="font-bold">Văn phòng</span>: 227 Nguyễn Văn Cừ, Quận 5, TP.HCM
+                        </p>
+                        <p className="text-[var(--color-primary)] text-sm md:text-base">
+                            <span className="font-bold">Số điện thoại</span>: +84 123 456 789
+                        </p>
+                        <p className="text-[var(--color-primary)] text-sm md:text-base">
+                            <span className="font-bold">Email</span>: info@email.com
+                        </p>
                     </div>
                 </div>
 
-                <div className = "flex flex-col justify-center items-center ">
-                    <div>
-                        <div>
-                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Liên kết nhanh</h1>
-                        </div>
-                        <div>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Chi phí</p>
-                            <p className = "text-[var(--color-primary)]">Học sinh</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Giáo viên</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Môn học</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Liên hệ</p>
-                        </div>
+                {/* Column 2: Liên kết nhanh */}
+                <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                    <h1 className="text-lg font-bold text-[var(--color-primary)] mb-4">
+                        Liên kết nhanh
+                    </h1>
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Chi phí</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Học sinh</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Giáo viên</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Môn học</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Liên hệ</p>
                     </div>
                 </div>
 
-                <div className = "flex flex-col justify-center items-center">
-                    <div>
-                        <div>
-                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Khác</h1>
-                        </div>
-                        <div>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Cách hoạt động</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Điều khoản & Điều lệ</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Chính sách bảo mật</p>
-                        </div>
+                {/* Column 3: Khác */}
+                <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                    <h1 className="text-lg font-bold text-[var(--color-primary)] mb-4">
+                        Khác
+                    </h1>
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Cách hoạt động</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Điều khoản & Điều lệ</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Chính sách bảo mật</p>
                     </div>
                 </div>
 
-                <div className = "flex flex-col justify-center items-center">
-                    <div>
-                        <div>
-                            <h1 className = "text-[1rem] font-bold text-[var(--color-primary)]">Về GSAI</h1>
-                        </div>
-                        <div>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Giới thiệu</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Tầm nhìn</p>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Ban điều hành</p>
-                        </div>
+                {/* Column 4: Về GSAI */}
+                <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                    <h1 className="text-lg font-bold text-[var(--color-primary)] mb-4">
+                        Về GSAI
+                    </h1>
+                    <div className="flex flex-col gap-2">
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Giới thiệu</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Tầm nhìn</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Ban điều hành</p>
                     </div>
                 </div>
             </div>
-            <footer className = "h-[100px] flex items-center justify-between w-[calc(100%-12rem)]">
-                <div>
+
+            {/* BOTTOM BAR */}
+            <footer className="py-6 md:h-[100px] flex flex-col-reverse md:flex-row items-center justify-between w-full px-6 md:px-0 md:w-[calc(100%-12rem)] border-t border-gray-100 md:border-none gap-4 md:gap-0">
+                <div className="text-sm md:text-base text-gray-500">
                     <p>©2025 All rights reserved</p>
                 </div>
-                <div className = "flex items-center justify-center gap-2">
-                    <FacebookFilled style={{ fontSize: '20px' }}/>
-                    <InstagramFilled style={{ fontSize: '20px' }}/>
-                    <YoutubeFilled style={{ fontSize: '20px' }}/>
-                    <MailOutlined style={{ fontSize: '20px' }}/>
+                <div className="flex items-center justify-center gap-4 text-[var(--color-primary)]">
+                    <FacebookFilled className="text-2xl cursor-pointer hover:text-blue-600 transition-colors" />
+                    <InstagramFilled className="text-2xl cursor-pointer hover:text-pink-600 transition-colors" />
+                    <YoutubeFilled className="text-2xl cursor-pointer hover:text-red-600 transition-colors" />
+                    <MailOutlined className="text-2xl cursor-pointer hover:text-gray-600 transition-colors" />
                 </div>
             </footer>
         </section>
-    )
-}
+    );
+};
 
 const FunctionSection = (
     {
