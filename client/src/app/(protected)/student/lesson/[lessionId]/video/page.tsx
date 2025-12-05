@@ -613,20 +613,24 @@ const ActivitySection = () => {
     return (
         <section className = "w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem]">
             <div className = "w-full flex items-start justify-center gap-[1.5rem]">
-                {
-                    !extendableNavbar && (
-                        <Button 
-                            onClick={toggleExtendableNavbar}
-                            className = "!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full "
-                            icon={<Menu className = "!w-[16px] !h-[16px] !text-[var(--color-bg_white)]" />}
-                        />
-                    )
-                }
-                {extendableNavbar && (
-                    <nav className = "w-[24%] h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-y-auto relative transition-all duration-300">
-                        
-                        <div className = "w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem] ">
-                            <p className = "text-[1rem] font-bold text-[var(--color-secondary)]">Toán ứng dụng và thống kê</p>
+                {/* Toggle Button - shows when navbar is collapsed */}
+                <Button 
+                    onClick={toggleExtendableNavbar}
+                    className={`!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full transition-all duration-300 ${
+                        extendableNavbar ? '!opacity-0 !scale-0 !w-0 !min-w-0 !p-0 !m-0' : '!opacity-100 !scale-100'
+                    }`}
+                    icon={<Menu className = "!w-[16px] !h-[16px] !text-[var(--color-bg-white)]" />}
+                />
+                
+                {/* Extendable Navbar with smooth transition */}
+                <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${
+                    extendableNavbar 
+                        ? 'w-[24%] opacity-100' 
+                        : 'w-0 opacity-0 !p-0 !border-0'
+                }`}>
+                    <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className = "w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                            <p className = "text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">Toán ứng dụng và thống kê</p>
                         </div>
                         <Button 
                             onClick={toggleExtendableNavbar}
@@ -634,14 +638,14 @@ const ActivitySection = () => {
                             icon={<X className = "!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
                         />
                         
-                        <div>
+                        <div className="overflow-y-auto max-h-[60vh]">
                             {chapters.map((c)=>(
                             <div key={c.id} className = "w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
                                 <div className = "flex items-center flex-col justify-center gap-2">
                                     <div className = "w-full flex flex-col items-center justify-center gap-2">
                                         <div className = "w-full flex items-center justify-center gap-2">
                                             <div className  = "w-full flex items-center justify-start gap-2">
-                                                <div className = "text-[0.875rem] font-bold text-[var(--color-primary)]">{c.name}</div>
+                                                <div className = "text-[0.875rem] font-bold text-[var(--color-primary)] whitespace-nowrap">{c.name}</div>
                                                 <div className = "ml-auto">
                                                     <Button onClick = {() => handleToggleChapter(c.id)} className = "!border-none !p-0 !m-0">
                                                         {chapterState.find((cs) => cs.id === c.id)?.isExtended ? <ChevronDown width = {32} height = {32} className = "!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"/> : <ChevronRight width = {32} height = {32} className = "!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"/>}
@@ -650,40 +654,41 @@ const ActivitySection = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div 
-                                        className = {`w-full flex flex-col items-start justify-start gap-[1.25rem] overflow-hidden transition-all duration-300 ease-in-out ${
-                                            chapterState.find((cs) => cs.id === c.id)?.isExtended 
-                                                ? 'max-h-[500px] opacity-100 mt-[1rem]' 
-                                                : 'max-h-0 opacity-0 mt-0'
-                                        }`}
-                                    >
-                                        {c.subItem.map((si)=>(
-                                            <Card key={si.id}
-                                                className="!w-full !h-[2.5625rem] !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
-                                            >
-                                                <div className = "w-full flex flex-col items-start justify-start">
-                                                    <p className ="text-[0.75rem] font-bold text-[var(--color-primary) line-clamp-1">{si.name}</p>
-                                                    <div className = "w-full flex items-center justify-start gap-2">
-                                                        <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                            {si.type === 'video' 
-                                                                ? 'Video' 
-                                                                : si.type === 'quiz' 
-                                                                ? 'Quiz' 
-                                                                : 'Bài tập'
-                                                            }
-                                                        </p>
-                                                        <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">{si.duration}</p>
-                                                    </div>
-                                                </div>
-                                            </Card>
-                                        ))}
+                                    {/* Chapter content with smooth transition */}
+                                    <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${
+                                        chapterState.find((cs) => cs.id === c.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"
+                                    }`}>
+                                        <div className="overflow-hidden">
+                                            <div className="flex flex-col gap-[0.5rem]">
+                                                {c.subItem.map((si)=>(
+                                                    <Card key={si.id}
+                                                        className="!w-full !h-[2.5625rem] !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
+                                                    >
+                                                        <div className = "w-full flex flex-col items-start justify-start">
+                                                            <p className ="text-[0.75rem] font-bold text-[var(--color-primary)] line-clamp-1">{si.name}</p>
+                                                            <div className = "w-full flex items-center justify-start gap-2">
+                                                                <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">
+                                                                    {si.type === 'video' 
+                                                                        ? 'Video' 
+                                                                        : si.type === 'quiz' 
+                                                                        ? 'Quiz' 
+                                                                        : 'Bài tập'
+                                                                    }
+                                                                </p>
+                                                                <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">{si.duration}</p>
+                                                            </div>
+                                                        </div>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                         </div>
-                    </nav>
-                )}
+                    </div>
+                </nav>
 
                 <div className = "flex-1 flex flex-col gap-[0.5rem]">
                     <div
