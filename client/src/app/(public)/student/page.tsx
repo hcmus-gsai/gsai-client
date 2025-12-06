@@ -5,7 +5,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { GreetingSection, FunctionSection, WorkFlowSection, CourseDisplaySection, FooterSection } from "@/components/guest/ui/guest";
+import { GreetingSection, FunctionSection, WorkFlowSection, CourseDisplaySection, TestimonialSection, FooterSection } from "@/components/guest/ui/guest";
 import Link from "next/link";
 import GradientTopLeft from "@/../public/guest/gradient_top_left.svg";
 import GradientTopRight from "@/../public/guest/gradient_top_right.svg";
@@ -23,7 +23,7 @@ export default function StudentLandingPage() {
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             <nav className="flex flex-col items-center bg-primary h-10 text-white">
-                <div className="w-[78%] flex h-full items-center justify-between">
+                <div className="w-[var(--global-width)] flex h-full items-center justify-between">
                     <div>
                         <Link href="/student" className="mr-15 text-white">
                             Học sinh
@@ -84,6 +84,7 @@ export default function StudentLandingPage() {
             />
             <WorkFlowSection />
             <CourseDisplaySection />
+            <TestimonialSection />
             <FooterSection />
 
             <div className="relative">

@@ -44,7 +44,7 @@ const ProfileModal = ({isOpen, onClose, children}:{
 const LearningProgress = () =>{
 
     return (
-        <div className = "w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem]">
+        <div className = "w-[var(--global-width)] flex flex-col items-center justify-center mt-[10rem]">
             <div className = "w-full flex items-center justify-center bg-red-200">
                 <div className = "w-[64%] flex-col items-start justify-center">
                     <div>

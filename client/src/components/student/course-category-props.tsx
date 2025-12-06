@@ -17,7 +17,7 @@ const CourseCategoryComponent = (
     }
 ) => {
     return (
-        <div className = {`grid gap-x-5 w-[calc(100%-12rem)] h-full gap-y-[2rem]`}
+        <div className = {`grid gap-x-5 w-[var(--global-width)] h-full gap-y-[2rem]`}
              style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}  
         >
             {        categories.map((item) => (
@@ -45,7 +45,7 @@ const CourseHighLightComponent = () => {
 
     //===================================
     return (
-        <div className = "mt-[10.4rem] grid grid-cols-4 w-[calc(100%-12rem)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">
+        <div className = "mt-[10.4rem] grid grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">
             <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
                 <div className = "mt-7 w-[80%] h-full">
                     {

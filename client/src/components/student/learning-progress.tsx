@@ -30,7 +30,7 @@ const LearningProgressSection = () => {
 
     return (
         <section className="w-full h-[242px] mt-[20vh]  mb-[5vh] flex flex-col items-center justify-between">
-            <div className="flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem] mb-[2rem]">
+            <div className="flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem] mb-[2rem]">
                 {!inProgressEnrollments || inProgressEnrollments.length === 0 ? (
                     <h1 className="text-[2.5rem] font-bold w-full text-[var(--color-primary)]">
                         Bạn chưa đăng ký môn nào cả, hãy khám phá ngay!

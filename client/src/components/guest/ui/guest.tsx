@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {useEffect, useState} from 'react';
-import {useRouter} from "next/navigation";
+import {useRouter, usePathname} from "next/navigation";
 import {Button, Menu, Row, Col, Card} from "antd";
 
 import Image from "next/image";
@@ -55,7 +55,7 @@ const GreetingSection = () => {
     
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className="flex w-[78%] items-center justify-between h-[4.8125rem]">
+            <div className="flex w-[var(--global-width)] items-center justify-between h-[4.8125rem]">
                 <div className = "flex flex-1 items-center justify-start gap-2">
                     <div className = "text-2xl font-bold">
                         <p className = "!text-[var(--color-bg_white)]"><span className = "!text-[var(--color-bg_white)]">AT</span> AI.Tutor</p>
@@ -209,13 +209,13 @@ const CourseDisplaySection = () => {
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "flex flex-col items-center justify-center w-[78%]">
+            <div className = "flex flex-col items-center justify-center w-[var(--global-width)]">
                 <div className = "text-center">
                     <h1 className = "text-[3rem] font-bold">Môn học phổ biến hiện nay</h1>
                     <p className = "text-[1.25rem] font-light text-gray-600 text-center">Chọn môn học đúng hướng, nâng tầm hồ sơ tương lai!</p>
                 </div>
             </div>
-            <div className = "flex items-center justify-center w-[78%]">
+            <div className = "flex items-center justify-center w-[var(--global-width)]">
                 <Menu 
                     mode = "horizontal"
                     defaultSelectedKeys={["home"]}
@@ -257,7 +257,7 @@ const CourseDisplaySection = () => {
                 />
             </div>
 
-            <div className = "w-[78%] h-full flex items-center justify-center">
+            <div className = "w-[var(--global-width)] h-full flex items-center justify-center">
                 <Row gutter = {[16,16]} className = "mx-auto">
                     {
                         courseSampleData.map((c, idx) => {
@@ -296,7 +296,7 @@ const CourseDisplaySection = () => {
 
             <StyledButton
                 name = "Xem tất cả"
-                buttonClassName = "!bg-black !text-white hover:!bg-[var(--color-bg_white)] hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
+                buttonClassName = "mt-8 !bg-black !text-white hover:!bg-[var(--color-bg_white)] hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
                 iconClassName = "!rotate-315 !text-[var(--color-bg_white)] !hover:!text-black"
             />
         </section>
@@ -308,10 +308,13 @@ const FooterSection = ({
 }: {
     hasRegisterBox?: boolean;
 }) => {
+    const pathname = usePathname();
+    const isPageA = pathname === '/student' || pathname === '/teacher';
+    
     return (
-        <section className="w-full flex flex-col items-center justify-center border-t border-gray-200 bg-white">
+        <section className={`w-full flex flex-col items-center justify-center ${isPageA ? "" : "border-t border-gray-200"}`}>
             {hasRegisterBox && (
-                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-2xl p-6 md:p-[2rem] mt-10 md:mt-[4rem] w-[90%] md:w-[78%] border border-blue-50">
+                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-2xl p-6 md:p-[2rem] mt-10 md:mt-[4rem] w-[90%] md:w-[var(--global-width)] border border-blue-50">
                     <div className="flex flex-col items-center justify-center text-center w-full">
                         {/* Title Responsive: Nhỏ trên mobile, lớn trên desktop */}
                         <h1 className="text-2xl md:text-[2.5rem] font-bold text-[var(--color-primary)] w-full md:w-[80%] leading-tight mb-2">
@@ -324,7 +327,7 @@ const FooterSection = ({
 
                     <Button
                         type="primary"
-                        className="!bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-5 md:!py-6 !rounded-[50px] !text-base md:!text-[20px] !h-auto"
+                        className="w-[12rem] !bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-5 md:!py-3 !rounded-[30px] !text-base md:!text-[20px] !h-auto"
                     >
                         Tham gia
                     </Button>
@@ -332,7 +335,7 @@ const FooterSection = ({
             )}
 
             {/* MAIN GRID: Mobile: 1 cột, Tablet: 2 cột, Desktop: 4 cột */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[calc(100%-12rem)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[var(--global-width)]">
                 
                 {/* Column 1: Logo & Info */}
                 <div className="flex flex-col justify-start items-center md:items-start text-center md:text-left">
@@ -392,7 +395,7 @@ const FooterSection = ({
             </div>
 
             {/* BOTTOM BAR */}
-            <footer className="py-6 md:h-[100px] flex flex-col-reverse md:flex-row items-center justify-between w-full px-6 md:px-0 md:w-[calc(100%-12rem)] border-t border-gray-100 md:border-none gap-4 md:gap-0">
+            <footer className="py-6 md:h-[100px] flex flex-col-reverse md:flex-row items-center justify-between w-full px-6 md:px-0 md:w-[var(--global-width)] border-t border-gray-100 md:border-none gap-4 md:gap-0">
                 <div className="text-sm md:text-base text-gray-500">
                     <p>©2025 All rights reserved</p>
                 </div>
@@ -557,7 +560,7 @@ const WorkFlowSection = () => {
         <section
             className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
         >
-            <div className="w-[78%] h-full py-19 grid grid-cols-12">
+            <div className="w-[var(--global-width)] h-full py-19 grid grid-cols-12">
                 <div className="col-span-7 flex flex-col">
                     <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
 

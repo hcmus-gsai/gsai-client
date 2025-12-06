@@ -7,6 +7,8 @@
   --color-neutral: #DFF6FF;
   --color-bg-white: #FFFFFF;
   --color-bg_white_soft: #FAFAFA;
+
+  --global-width: calc(100% - 12rem);
 }
 
 /* ::-webkit-scrollbar {

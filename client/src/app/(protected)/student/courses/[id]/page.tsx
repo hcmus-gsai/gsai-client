@@ -51,7 +51,7 @@ const CourseSyllabusSection = () => {
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
-            <div className = "w-[calc(100%-12rem)] h-full flex items-center justify-center flex flex-col gap-[3rem]">
+            <div className = "w-[var(--global-width)] h-full flex items-center justify-center flex flex-col gap-[3rem]">
                 <div className = "w-full">
                     <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Bạn sẽ học được</p></div>
                     <div className = "w-full grid grid-cols-2 grid-rows-2 gap-2">

@@ -63,7 +63,7 @@ const StudentGreetingSection = (
             </div>
             
             <div className = "w-full h-full flex flex-col items-center z-10">
-                <div className = "w-[calc(100%-12rem)] h-[242px] mt-[15vh] mb-[3rem] flex items-center justify-between">
+                <div className = "w-[var(--global-width)] h-[242px] mt-[15vh] mb-[3rem] flex items-center justify-between">
                     <div className = "h-full w-[546px] flex flex-col items-start justify-between">
                         <div className = {`flex flex-col items-start justify-between w-full ${isCourse ? '' : 'mb-[5.0625rem]'}`}>                    
                             <p className = {`${titleSize} font-bold text-[var(--color-primary)]`}>{title}</p>

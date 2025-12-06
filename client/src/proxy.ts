@@ -28,9 +28,9 @@ export async function proxy(req: any) {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
     }
 
-    if (path.startsWith('/teacher') && role !== 'teacher') {
-      return NextResponse.redirect(new URL('/auth/signin', req.url));
-    }
+    // if (path.startsWith('/teacher') && role !== 'teacher') {
+    //   return NextResponse.redirect(new URL('/auth/signin', req.url));
+    // }
 
     return NextResponse.next();
   } catch (err) {

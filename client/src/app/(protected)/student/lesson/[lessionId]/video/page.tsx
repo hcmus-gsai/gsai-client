@@ -202,7 +202,7 @@ const ActivitySection = () => {
 
 
     return (
-        <section className="w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem] mb-[2rem]">
+        <section className="w-[var(--global-width)] flex flex-col items-center justify-center mt-[10rem] mb-[2rem]">
             <div className="w-full flex items-start justify-center gap-[1.5rem]">
                 {/* Toggle Button - shows when navbar is collapsed */}
                 {

@@ -62,7 +62,7 @@ const StudentNavbar = () => {
         <nav
             className="fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20"
         >
-            <div className="w-[calc(100%-12rem)] flex items-center justify-between">
+            <div className="w-[var(--global-width)] flex items-center justify-between">
                 <div className="flex items-center justify-start w-full h-[3.5rem]">
                     <div className="flex items-center justify-start w-[32vw] h-full">
                         <div className="flex items-center justify-start w-[121px]">

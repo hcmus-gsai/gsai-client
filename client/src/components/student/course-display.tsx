@@ -78,7 +78,7 @@ const CourseDisplaySection = ({
     }
     return (
         <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
-            <div className = "flex flex-col items-center justify-center w-[calc(100%-12rem)] gap-[1.5rem]">
+            <div className = "flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem]">
                 <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
                 <div className = "flex items-center justify-center w-full">
                     <CourseGrid 
@@ -88,7 +88,7 @@ const CourseDisplaySection = ({
                     />
                 </div>
             </div>
-            <div className = "flex items-center justify-center w-[calc(100%-12rem)] py-[2rem]">
+            <div className = "flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                 
                 <RedirectButton 
                     onClick = {handleExpand}

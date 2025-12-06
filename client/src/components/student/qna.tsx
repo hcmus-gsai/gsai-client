@@ -14,7 +14,7 @@ const QASection = () => {
         <section
             className="w-full h-[90vh] flex flex-col items-center justify-between bg-white"
         >
-            <div className="h-full w-[calc(100%-12rem)] py-19 flex flex-col">
+            <div className="h-full w-[var(--global-width)] py-19 flex flex-col">
                 <p className="text-[3.8vw] font-semibold mb-8">Câu hỏi thường gặp</p>
 
                 <div className="grid grid-cols-2 gap-4">

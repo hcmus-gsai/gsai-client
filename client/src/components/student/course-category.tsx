@@ -51,7 +51,7 @@ const CourseCategorySection = () => {
     
     return (
         <section className = "w-full min-h-[242px] grow flex flex-col items-center justify-between my-[8rem]">   
-            <div className = "h-full w-[calc(100%-12rem)] flex flex-col items-center justify-between mb-[1rem]">
+            <div className = "h-full w-[var(--global-width)] flex flex-col items-center justify-between mb-[1rem]">
                 <p className = "w-full text-left text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
             </div>
             <CourseCategoryComponent columns = {columns} categories = {learningCategory}/>
