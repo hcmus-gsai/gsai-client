@@ -1,13 +1,13 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import {FooterSection} from "@/components/guest/ui/guest";
-import React, {useState, useRef, useEffect} from 'react';
-import { ChevronDown, ChevronUp,X, Check, Plus, ChevronRight, Send, Mic, Menu} from "@deemlol/next-icons";
-import {Button, Card, Form, Input, Switch, Progress, Calendar} from "antd";
+import { FooterSection } from "@/components/guest/ui/guest";
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu } from "@deemlol/next-icons";
+import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
 
 //For Voice Recorder
 import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
-import {useTranscribeAudioMutation} from '@/store/api/[module]/voiceApi';
+import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
 
 interface IChapterState {
     id: number;
@@ -24,30 +24,30 @@ const QuizContent = () => {
     const [isCompleted, setIsCompleted] = useState(true);
 
     return (
-        <div className = "flex-1">
-            <div className = "w-full flex items-center justify-start mb-[1rem]">
-                <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Bài tập toán ứng dụng 1</p>
+        <div className="flex-1">
+            <div className="w-full flex items-center justify-start mb-[1rem]">
+                <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">Bài tập toán ứng dụng 1</p>
             </div>
 
             <Card
-                className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-neutral)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
+                className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-neutral)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
             >
-                <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Thông tin chi tiết</p>
-                <div className = "flex items-start justify-between gap-[1rem]">
-                    <div className = "w-full flex items-start justify-start gap-[0.5rem]">
+                <p className="text-[1rem] font-bold text-[var(--color-primary)]">Thông tin chi tiết</p>
+                <div className="flex items-start justify-between gap-[1rem]">
+                    <div className="w-full flex items-start justify-start gap-[0.5rem]">
                         <div>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Hết hạn vào</p>
-                            <p className = "text-[0.875rem] text-[var(--color-primary)]">T4 12/11/2025, 23:59</p>
+                            <p className="text-[1rem] text-[var(--color-primary)]">Hết hạn vào</p>
+                            <p className="text-[0.875rem] text-[var(--color-primary)]">T4 12/11/2025, 23:59</p>
                         </div>
                         <div>
-                            <p className = "text-[1rem] text-[var(--color-primary)]">Thời gian</p>
-                            <p className = "text-[0.875rem] text-[var(--color-primary)]">30 phút</p>
+                            <p className="text-[1rem] text-[var(--color-primary)]">Thời gian</p>
+                            <p className="text-[0.875rem] text-[var(--color-primary)]">30 phút</p>
                         </div>
                     </div>
 
-                    <div className = "">
+                    <div className="">
                         <Button
-                            className = "!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white"
+                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white"
                         >
                             Bắt đầu
                         </Button>
@@ -56,63 +56,63 @@ const QuizContent = () => {
 
             </Card>
 
-            {!isCompleted? (
+            {!isCompleted ? (
                 <Card
-                    className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
+                    className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
                 >
-                    <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
-                    <p className = "text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Điểm cao nhát sẽ được ghi nhớ.</p>
-                    <p className = "text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 100/100</p>
+                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
+                    <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Điểm cao nhát sẽ được ghi nhớ.</p>
+                    <p className="text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 100/100</p>
                 </Card>
             ) : (
                 <Card
-                    className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
+                    className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
                 >
-                    <p className = "text-[1rem] font-bold text-[var(--color-primary)]">Điểm của bạn</p>
-                    <div className = "w-full flex items-center justify-between gap-[1rem]">
-                        <Progress 
-                            percent = {75}
-                            type = "circle"
-                            size = {200}
+                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm của bạn</p>
+                    <div className="w-full flex items-center justify-between gap-[1rem]">
+                        <Progress
+                            percent={75}
+                            type="circle"
+                            size={200}
                             strokeWidth={12}
-                            strokeLinecap ="square"
-                            format = {() => (
+                            strokeLinecap="square"
+                            format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className = "text-[1rem] font-bold text-[var(--color-primary)]">Trả lời đúng</div>
-                                    <div className = "text-[1.5rem] font-bold text-[var(--color-secondary)]">
+                                    <div className="text-[1rem] font-bold text-[var(--color-primary)]">Trả lời đúng</div>
+                                    <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
                                         4 / 15
                                     </div>
                                 </div>
                             )}
-                            
-                        />
-                        
 
-                        <Progress 
-                            percent = {75} 
-                            type = "circle"
-                            size = {200}
+                        />
+
+
+                        <Progress
+                            percent={75}
+                            type="circle"
+                            size={200}
                             strokeWidth={12}
-                            strokeLinecap ="square"
-                            format = {() => (
+                            strokeLinecap="square"
+                            format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className = "text-[2.5rem] font-bold text-[var(--color-secondary)]">
+                                    <div className="text-[2.5rem] font-bold text-[var(--color-secondary)]">
                                         2.67
                                     </div>
                                 </div>
                             )}
                         />
 
-                        <Progress 
-                            percent = {75} 
-                            type = "circle"
-                            size = {200}
+                        <Progress
+                            percent={75}
+                            type="circle"
+                            size={200}
                             strokeWidth={12}
-                            strokeLinecap ="square"
-                            format = {() => (
+                            strokeLinecap="square"
+                            format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className = "text-[1rem] font-bold text-[var(--color-primary)]">Thời gian</div>
-                                    <div className = "text-[1.5rem] font-bold text-[var(--color-secondary)]">
+                                    <div className="text-[1rem] font-bold text-[var(--color-primary)]">Thời gian</div>
+                                    <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
                                         29:28
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@ const QuizContent = () => {
             )
             }
 
-           
+
         </div>
     )
 }
@@ -138,70 +138,70 @@ const ActivitySection = () => {
     }
     const chapters = [
         {
-            id : 1,
-            name : "Chương 1: Đại số tuyến tính",
+            id: 1,
+            name: "Chương 1: Đại số tuyến tính",
             status: "Hoàn thành",
             subItem: [
                 {
                     id: 'st1',
-                    name : 'Hệ phương trình tuyến tính',
-                    type : 'video',
+                    name: 'Hệ phương trình tuyến tính',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st2',
-                    name : 'Vector',
-                    type : 'video',
+                    name: 'Vector',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st3',
-                    name : 'Hệ phương trình tuyến tính',
-                    type : 'video',
+                    name: 'Hệ phương trình tuyến tính',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st4',
-                    name : 'Vector',
-                    type : 'video',
+                    name: 'Vector',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 }
             ]
         },
         {
-            id : 2,
-            name : "Chương 2: Giải tích",
+            id: 2,
+            name: "Chương 2: Giải tích",
             status: "Chưa hoàn thành",
             subItem: [
                 {
                     id: 'st1',
-                    name : 'Vi tích phân',
-                    type : 'Bài đọc',
+                    name: 'Vi tích phân',
+                    type: 'Bài đọc',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st2',
-                    name : 'Tích phân',
-                    type : 'video',
+                    name: 'Tích phân',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st3',
-                    name : 'Bài tập toán ứng dụng 1',
-                    type : 'Quiz',
+                    name: 'Bài tập toán ứng dụng 1',
+                    type: 'Quiz',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st4',
-                    name : 'Đạo hàm',
-                    type : 'video',
+                    name: 'Đạo hàm',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 }
@@ -209,70 +209,70 @@ const ActivitySection = () => {
         },
 
         {
-            id : 3,
-            name : "Chương 3: Xác suất thống kê",
+            id: 3,
+            name: "Chương 3: Xác suất thống kê",
             status: "Chưa hoàn thành",
             subItem: [
                 {
                     id: 'st1',
-                    name : 'Xác suất',
-                    type : 'Bài đọc',
+                    name: 'Xác suất',
+                    type: 'Bài đọc',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st2',
-                    name : 'Thống kê',
-                    type : 'video',
+                    name: 'Thống kê',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st3',
-                    name : 'Bài tập xác suất thống kê',
-                    type : 'Quiz',
+                    name: 'Bài tập xác suất thống kê',
+                    type: 'Quiz',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st4',
-                    name : 'Bài tập thống kê',
-                    type : 'video',
+                    name: 'Bài tập thống kê',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 }
             ]
         },
         {
-            id : 4,
-            name : "Chương 4: Phương trình vi phân",
+            id: 4,
+            name: "Chương 4: Phương trình vi phân",
             status: "Chưa hoàn thành",
             subItem: [
                 {
                     id: 'st1',
-                    name : 'Phương trình vi phân',
-                    type : 'Bài đọc',
+                    name: 'Phương trình vi phân',
+                    type: 'Bài đọc',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st2',
-                    name : 'Phương trình vi phân',
-                    type : 'video',
+                    name: 'Phương trình vi phân',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st3',
-                    name : 'Bài tập phương trình vi phân',
-                    type : 'Quiz',
+                    name: 'Bài tập phương trình vi phân',
+                    type: 'Quiz',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 },
                 {
                     id: 'st4',
-                    name : 'Bài tập phương trình vi phân',
-                    type : 'video',
+                    name: 'Bài tập phương trình vi phân',
+                    type: 'video',
                     duration: '10:00',
                     status: 'Hoàn thành',
                 }
@@ -281,7 +281,7 @@ const ActivitySection = () => {
     ]
 
     const [chapterState, setChapterState] = useState<IChapterState[]>([
-        ...chapters.map((c)=>{
+        ...chapters.map((c) => {
             return {
                 id: c.id,
                 isExtended: false,
@@ -292,159 +292,89 @@ const ActivitySection = () => {
     const handleToggleChapter = (id: number) => {
 
         setChapterState(
-            chapterState.map((cs)=>{
-                return cs.id === id ?{
+            chapterState.map((cs) => {
+                return cs.id === id ? {
                     ...cs,
                     isExtended: !cs.isExtended
                 }
-                : cs;
+                    : cs;
             })
         )
     }
     //=======================================//
 
     //===========ASR Service============//
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
-    const [transcribe, { data, isLoading, error }] = useTranscribeAudioMutation();
+    const [permission, setPermission] = useState(false);
+    const [recording, setRecording] = useState(false);
+    const [stream, setStream] = useState<MediaStream | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+    const [transcribeAudio] = useTranscribeAudioMutation();
     const [textAreaInputValue, setTextAreaInputValue] = useState<string>("");
 
-
-    useEffect(() => {
-        if (audioUrl) {
-        transcribe({ 
-            audioUrl: audioUrl,
-            message: "Yêu cầu transcribe"
-        }); 
+    const requestMicrophoneAccess = async () => {
+        try {
+            const streamData = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            });
+            setPermission(true);
+            setStream(streamData);
+            alert("Cho phép truy cập Micro thành công!");
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
         }
-    }, [audioUrl, transcribe]);
-
-    useEffect(() => {
-        if (data?.text) {
-          setTextAreaInputValue(data.text);           
-        }
-    }, [data, setTextAreaInputValue]);
-
-
-    const VoiceRecorder: React.FC<{
-        value?: Blob | null,
-        onChange?: (value: Blob | null) => void,
-    }> = (
-        {
-            value,
-            onChange,
-        }
-    ) => {
-        const [isRecording, setIsRecording] = useState(false);
-    
-        const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-        const audioChunksRef = useRef<Blob[]>([]);
-        const startRecording = async() => {
-    
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-                const mediaRecorder = new MediaRecorder(stream);
-                mediaRecorderRef.current = mediaRecorder;
-                audioChunksRef.current = [];
-    
-                mediaRecorder.ondataavailable = (event: BlobEvent) => {
-                    if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                    }
-                };
-    
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunksRef.current, {type: 'audio/wav'});
-                    const url = URL.createObjectURL(audioBlob);
-                    setAudioUrl(url);
-            
-                    if (onChange) {
-                    onChange(audioBlob);
-                    }
-    
-                    stream.getTracks().forEach((track) => track.stop());
-                    
-                };
-                mediaRecorder.start();
-                setIsRecording(true);
-    
-            }
-            catch(error) {
-                console.error("Error accessing microphone:", error);
-                alert("Không thể truy cập Micro. Vui lòng kiểm tra quyền.");
-            }
-        };
-    
-        const stopRecording = () => {
-            if (mediaRecorderRef.current) {
-                mediaRecorderRef.current.stop();
-                setIsRecording(false);
-            }
-        };
-    
-        const deleteRecording = () => {
-            setAudioUrl(null);
-            if (onChange) {
-                onChange(null);
-            }
-        };
-        
-        return (
-            <>
-            
-            {
-                !isRecording && !audioUrl &&(
-                    <Button
-                        icon={<AudioOutlined className="text-xl text-gray-500" />} 
-                        onClick={startRecording}
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            hover:!bg-[var(--color-secondary)] 
-                            hover:!text-white 
-                            transition-all duration-400
-                            !shadow-none
-                        "
-                    />
-                )
-            }
-    
-            {
-                isRecording && (
-                    <Button
-                        icon={<BorderOutlined className="text-xl text-gray-500" />}                    
-                        onClick={stopRecording}
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            !bg-red-500
-                            !text-white
-                            !shadow-none
-                        "
-                    />
-                )
-            }
-    
-            {audioUrl && (
-                <>
-                    <Button 
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />} 
-                        onClick={deleteRecording} 
-                        className="
-                            flex items-center pl-0 
-                            !rounded-full !border-none 
-                            hover:!bg-[var(--color-secondary)] 
-                            hover:!text-white 
-                            transition-all duration-400
-                            !shadow-none
-                        "
-                    />
-                </>
-            )}
-            </>
-        )
     }
+
+    const handleAudioRecording = async () => {
+        if (!permission) {
+            await requestMicrophoneAccess();
+            return;
+        }
+
+        if (!recording && stream) {
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunksRef.current.push(e.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+                const audioFile = new File([audioBlob], "recording.webm", { type: "audio/webm" });
+
+                const formData = new FormData();
+                formData.append("file", audioFile);
+                console.log("formData:", formData);
+
+                try {
+                    const { transcript } = await transcribeAudio(formData).unwrap();
+                    console.log("Transcription:", transcript);
+
+                    setMessages(prev => [...prev, {
+                        sender: "user",
+                        text: transcript
+                    }]);
+                } catch (error) {
+                    console.error(error);
+                    setMessages(prev => [...prev, {
+                        sender: "ai",
+                        text: "Transcription failed"
+                    }]);
+                }
+            };
+
+            mediaRecorder.start();
+            setRecording(true);
+            console.log("Recording started...");
+        } else if (recording && mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setRecording(false);
+            console.log("Recording stopped.");
+        }
+    };
 
     //====================================
 
@@ -469,17 +399,17 @@ const ActivitySection = () => {
         }
         else {
             document.exitFullscreen();
-        }        
+        }
     }
 
     const togglePlayPause = () => {
         const videoState = videoRef.current;
-        if(!videoState) {
+        if (!videoState) {
             console.error('Video element not found');
             return;
         }
 
-        if (videoState.paused){
+        if (videoState.paused) {
             videoState.play();
             setIsPlaying(true);
         }
@@ -584,14 +514,14 @@ const ActivitySection = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [row, setRow] = useState(1);
 
-    const handleMessageSubmit = async() => {
+    const handleMessageSubmit = async () => {
         const data = formData.getFieldsValue();
         console.log(data)
 
 
-       
-        setMessages((prev) => [...prev, {sender : 'user', text: data.chatMessage}])
-     
+
+        setMessages((prev) => [...prev, { sender: 'user', text: data.chatMessage }])
+
         // // Simulate AI response
         setTimeout(() => {
             setMessages((prev) => [
@@ -603,109 +533,106 @@ const ActivitySection = () => {
     //=======================================//
 
 
-    
+
 
     //ASR and OCR Toggle
     const [enableASR, setEnableASR] = useState(false);
     const [enableOCR, setEnableOCR] = useState(false);
 
-    
+
     return (
-        <section className = "w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem] mb-[2rem]">
-            <div className = "w-full flex items-start justify-center gap-[1.5rem]">
+        <section className="w-[calc(100%-12rem)] flex flex-col items-center justify-center mt-[10rem] mb-[2rem]">
+            <div className="w-full flex items-start justify-center gap-[1.5rem]">
                 {/* Toggle Button - shows when navbar is collapsed */}
                 {
                     !extendableNavbar && (
-                        <Button 
+                        <Button
                             onClick={toggleExtendableNavbar}
-                            className={`!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full transition-all duration-300 ${
-                                extendableNavbar ? '!opacity-0 !scale-0 !w-0 !min-w-0 !p-0 !m-0' : '!opacity-100 !scale-100'
-                            }`}
-                            icon={<Menu className = "!w-[16px] !h-[16px] !text-[var(--color-bg-white)]" />}
+                            className={`!w-[32px] !h-[32px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border !border-gray-200 !rounded-full transition-all duration-300 ${extendableNavbar ? '!opacity-0 !scale-0 !w-0 !min-w-0 !p-0 !m-0' : '!opacity-100 !scale-100'
+                                }`}
+                            icon={<Menu className="!w-[16px] !h-[16px] !text-[var(--color-bg-white)]" />}
                         />
                     )
                 }
-                
-                
+
+
                 {/* Extendable Navbar with smooth transition */}
-                <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${
-                    extendableNavbar 
-                        ? 'w-[24%] opacity-100' 
-                        : 'w-0 opacity-0 !p-0 !border-0'
-                }`}>
-                    
+                <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar
+                    ? 'w-[24%] opacity-100'
+                    : 'w-0 opacity-0 !p-0 !border-0'
+                    }`}>
+
                     <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
-                        <div className = "w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
-                            <p className = "text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">Toán ứng dụng và thống kê</p>
+                        <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                            <p className="text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">Toán ứng dụng và thống kê</p>
                         </div>
-                        <Button 
+                        <Button
                             onClick={toggleExtendableNavbar}
-                            className = "!absolute !top-4 !right-4 !w-[32px] !h-[32px] !flex !items-center !justify-center !border-none !bg-transparent hover:!bg-gray-100 !rounded-full !transition-colors"
-                            icon={<X className = "!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
+                            className="!absolute !top-4 !right-4 !w-[32px] !h-[32px] !flex !items-center !justify-center !border-none !bg-transparent hover:!bg-gray-100 !rounded-full !transition-colors"
+                            icon={<X className="!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
                         />
-                        
+
                         <div className="overflow-y-auto max-h-[60vh]">
-                            {chapters.map((c)=>(
-                            <div key={c.id} className = "w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
-                                <div className = "flex items-center flex-col justify-center gap-2">
-                                    <div className = "w-full flex flex-col items-center justify-center gap-2">
-                                        <div className = "w-full flex items-center justify-center gap-2">
-                                            <div className  = "w-full flex items-center justify-start gap-2">
-                                                <div className = "text-[0.875rem] font-bold text-[var(--color-primary)] whitespace-nowrap">{c.name}</div>
-                                                <div className = "ml-auto">
-                                                    <Button onClick = {() => handleToggleChapter(c.id)} className = "!border-none !p-0 !m-0">
-                                                        {chapterState.find((cs) => cs.id === c.id)?.isExtended ? <ChevronDown width = {32} height = {32} className = "!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"/> : <ChevronRight width = {32} height = {32} className = "!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"/>}
-                                                    </Button>
+                            {chapters.map((c) => (
+                                <div key={c.id} className="w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                                    <div className="flex items-center flex-col justify-center gap-2">
+                                        <div className="w-full flex flex-col items-center justify-center gap-2">
+                                            <div className="w-full flex items-center justify-center gap-2">
+                                                <div className="w-full flex items-center justify-start gap-2">
+                                                    <div className="text-[0.875rem] font-bold text-[var(--color-primary)] whitespace-nowrap">{c.name}</div>
+                                                    <div className="ml-auto">
+                                                        <Button onClick={() => handleToggleChapter(c.id)} className="!border-none !p-0 !m-0">
+                                                            {chapterState.find((cs) => cs.id === c.id)?.isExtended ? <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : <ChevronRight width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Chapter content with smooth transition */}
+                                        <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${chapterState.find((cs) => cs.id === c.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"
+                                            }`}>
+                                            <div className="overflow-hidden">
+                                                <div className="flex flex-col gap-[0.5rem]">
+                                                    {c.subItem.map((si) => (
+                                                        <Card key={si.id}
+                                                            className="!w-full !h-[2.5625rem] !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
+                                                        >
+                                                            <div className="w-full flex flex-col items-start justify-start">
+                                                                <p className="text-[0.75rem] font-bold text-[var(--color-primary)] line-clamp-1">{si.name}</p>
+                                                                <div className="w-full flex items-center justify-start gap-2">
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
+                                                                        {si.type === 'video'
+                                                                            ? 'Video'
+                                                                            : si.type === 'quiz'
+                                                                                ? 'Quiz'
+                                                                                : 'Bài tập'
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{si.duration}</p>
+                                                                </div>
+                                                            </div>
+                                                        </Card>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Chapter content with smooth transition */}
-                                    <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${
-                                        chapterState.find((cs) => cs.id === c.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"
-                                    }`}>
-                                        <div className="overflow-hidden">
-                                            <div className="flex flex-col gap-[0.5rem]">
-                                                {c.subItem.map((si)=>(
-                                                    <Card key={si.id}
-                                                        className="!w-full !h-[2.5625rem] !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
-                                                    >
-                                                        <div className = "w-full flex flex-col items-start justify-start">
-                                                            <p className ="text-[0.75rem] font-bold text-[var(--color-primary)] line-clamp-1">{si.name}</p>
-                                                            <div className = "w-full flex items-center justify-start gap-2">
-                                                                <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                                    {si.type === 'video' 
-                                                                        ? 'Video' 
-                                                                        : si.type === 'quiz' 
-                                                                        ? 'Quiz' 
-                                                                        : 'Bài tập'
-                                                                    }
-                                                                </p>
-                                                                <p className ="text-[0.75rem] font-light text-[var(--color-primary)]">{si.duration}</p>
-                                                            </div>
-                                                        </div>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                         </div>
                     </div>
                 </nav>
 
-                <div className = "flex-1 flex flex-col gap-[0.5rem]">
+                <div className="flex-1 flex flex-col gap-[0.5rem]">
                     <div
-                        className = "relative w-full h-full aspect-video rounded-lg overflow-hidden shadow-lg cursor-pointer group"
+                        className="relative w-full h-full aspect-video rounded-lg overflow-hidden shadow-lg cursor-pointer group"
                         onDoubleClick={toggleFullScreen}
                         ref={videoContainerRef}
                     >
                         <video
                             id='video'
                             ref={videoRef}
-                            className = "w-full h-full object-contain"
+                            className="w-full h-full object-contain"
                             src="/student/sample_video.mp4"
                             controls={false}
                             autoPlay={false}
@@ -715,35 +642,35 @@ const ActivitySection = () => {
                             onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                             onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                         />
-                        
-                        <div className = "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 
-                            <div className = "w-full mb-3">
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+                            <div className="w-full mb-3">
                                 <input
                                     type="range"
                                     min={0}
                                     max={duration}
                                     value={currentTime}
                                     step="0.1"
-                                    className = "w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)] hover:h-2 transition-all"
+                                    className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)] hover:h-2 transition-all"
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateVideoProgress(e)}
                                 />
                             </div>
 
-                            <div className = "flex items-center justify-between">
-                                <div className = "flex items-center gap-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
                                     <button
                                         aria-label={isPlaying ? "Pause" : "Play"}
-                                        className = "text-white hover:text-[var(--color-secondary)] transition-colors p-1"
+                                        className="text-white hover:text-[var(--color-secondary)] transition-colors p-1"
                                         onClick={togglePlayPause}
                                     >
                                         {
                                             isPlaying ? (
-                                                <svg className = "w-8 h-8 fill-current" focusable="false" aria-hidden="true" viewBox="0 0 32 32">
+                                                <svg className="w-8 h-8 fill-current" focusable="false" aria-hidden="true" viewBox="0 0 32 32">
                                                     <path d="M8 4h6v24H8V4zm10 0h6v24h-6V4z"></path>
                                                 </svg>
                                             ) : (
-                                                <svg className = "w-8 h-8 fill-current" focusable="false" aria-hidden="true" viewBox="0 0 32 32">
+                                                <svg className="w-8 h-8 fill-current" focusable="false" aria-hidden="true" viewBox="0 0 32 32">
                                                     <path d="M6 4l20 12-20 12V4z"></path>
                                                 </svg>
                                             )
@@ -752,7 +679,7 @@ const ActivitySection = () => {
 
                                     <button
                                         aria-label="Mute"
-                                        className = "text-white hover:text-[var(--color-secondary)] transition-colors p-1"
+                                        className="text-white hover:text-[var(--color-secondary)] transition-colors p-1"
                                         onClick={toggleVolume}
                                         ref={volumeRef}
                                     >
@@ -765,8 +692,8 @@ const ActivitySection = () => {
                                         }
                                     </button>
 
-                                    <div className = "relative group/volume">
-                                        <div className = "absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover/volume:opacity-100 transition-opacity whitespace-nowrap">
+                                    <div className="relative group/volume">
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover/volume:opacity-100 transition-opacity whitespace-nowrap">
                                             {Math.round(volumeLevel * 100)}%
                                         </div>
                                         <input
@@ -776,24 +703,24 @@ const ActivitySection = () => {
                                             step={0.01}
                                             value={volumeLevel}
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateVolumeLevel(e)}
-                                            className = "w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)]"
+                                            className="w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)]"
                                         />
                                     </div>
 
-                                    <div className = "flex items-center gap-2 ml-2">
-                                        <button 
-                                            aria-label="Seek backward 10 seconds" 
-                                            className = "px-2 py-1 text-white text-xs font-semibold bg-white/10 hover:bg-white/20 rounded transition-colors"
+                                    <div className="flex items-center gap-2 ml-2">
+                                        <button
+                                            aria-label="Seek backward 10 seconds"
+                                            className="px-2 py-1 text-white text-xs font-semibold bg-white/10 hover:bg-white/20 rounded transition-colors"
                                             onClick={() => handleSeek(-10)}
                                         >
                                             -10s
                                         </button>
-                                        <div className = "text-white text-sm font-medium min-w-[80px] text-center">
+                                        <div className="text-white text-sm font-medium min-w-[80px] text-center">
                                             {formatTime(currentTime)} / {formatTime(duration)}
                                         </div>
-                                        <button 
-                                            aria-label="Seek forward 10 seconds" 
-                                            className = "px-2 py-1 text-white text-xs font-semibold bg-white/10 hover:bg-white/20 rounded transition-colors"
+                                        <button
+                                            aria-label="Seek forward 10 seconds"
+                                            className="px-2 py-1 text-white text-xs font-semibold bg-white/10 hover:bg-white/20 rounded transition-colors"
                                             onClick={() => handleSeek(10)}
                                         >
                                             +10s
@@ -801,14 +728,14 @@ const ActivitySection = () => {
                                     </div>
                                 </div>
 
-                                <div className = "flex items-center gap-3">
+                                <div className="flex items-center gap-3">
                                     <button
                                         aria-label="Fullscreen"
-                                        className = "text-white hover:text-[var(--color-secondary)] transition-colors p-1"
+                                        className="text-white hover:text-[var(--color-secondary)] transition-colors p-1"
                                         onClick={toggleFullScreen}
                                     >
-                                        <svg className = "w-6 h-6 fill-current" viewBox="0 0 24 24">
-                                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                                        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                                         </svg>
                                     </button>
                                 </div>
@@ -816,73 +743,74 @@ const ActivitySection = () => {
                         </div>
                     </div>
 
-                    <div className = "w-full flex items-center justify-center gap-[1rem] mt-[1rem] mb-[1.5rem]">
-                        <div className = "flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
-                            <p className = "text-white">ASR</p>
-                            <Switch 
-                                checked = {enableASR} checkedChildren = "Bật" unCheckedChildren = "Tắt" value = {enableASR} onChange = {() => setEnableASR(!enableASR)} 
+                    <div className="w-full flex items-center justify-center gap-[1rem] mt-[1rem] mb-[1.5rem]">
+                        <div className="flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
+                            <p className="text-white">ASR</p>
+                            <Switch
+                                checked={enableASR} checkedChildren="Bật" unCheckedChildren="Tắt" value={enableASR} onChange={() => setEnableASR(!enableASR)}
                             />
                         </div>
-                        <div className = "flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
-                            <p className = "text-white">OCR</p>
-                            <Switch checked = {enableOCR} checkedChildren = "Bật" unCheckedChildren = "Tắt" value = {enableOCR} onChange = {() => setEnableOCR(!enableOCR)} />
+                        <div className="flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
+                            <p className="text-white">OCR</p>
+                            <Switch checked={enableOCR} checkedChildren="Bật" unCheckedChildren="Tắt" value={enableOCR} onChange={() => setEnableOCR(!enableOCR)} />
                         </div>
-                        
+
                     </div>
                 </div>
 
 
-                <div className = "w-[24%] h-[487px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] border border-gray-200 p-[0.5rem]">
+                <div className="w-[24%] h-[487px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] border border-gray-200 p-[0.5rem]">
                     <div className='flex-1 w-full flex flex-col items-start justify-start gap-[1rem] overflow-y-auto border-b border-gray-200  p-[0.5rem]'>
                         {messages.map((msg, index) => (
                             msg.sender === 'user' ? (
                                 <div key={index} className="ml-auto flex items-center justify-end bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]">
-                                    <p className = "text-white">{msg.text}</p>
+                                    <p className="text-white">{msg.text}</p>
                                 </div>
                             ) : (
                                 <div key={index} className="flex items-center justify-start w-full">
-                                    <p className = "text-[var(--color-primary)]">{msg.text}</p>
+                                    <p className="text-[var(--color-primary)]">{msg.text}</p>
                                 </div>
                             )
                         ))}
                     </div>
-                    <div className = "w-full flex justify-center items-center mt-[1rem]">
+                    <div className="w-full flex justify-center items-center mt-[1rem]">
                         <Form
-                            form = {formData}
-                            className = {`w-full flex justify-between items-center !bg-[var(--color-white)] !border !border-gray-200 !px-[1rem] !py-[0.5rem] ${row > 2 ? 'rounded-[20px]' : 'rounded-full'}`}
+                            form={formData}
+                            className={`w-full flex justify-between items-center !bg-[var(--color-white)] !border !border-gray-200 !px-[1rem] !py-[0.5rem] ${row > 2 ? 'rounded-[20px]' : 'rounded-full'}`}
                             onFinish={handleMessageSubmit}
                         >
                             <Form.Item name="chatMessage" className="!mb-0 !flex-1">
-                                
+
                                 <Input.TextArea
                                     placeholder="Nhập câu hỏi"
                                     autoSize={{ minRows: 1, maxRows: 7 }}
-                                    onResize = {(size) =>{
+                                    onResize={(size) => {
                                         const detectedRows = Math.round(size.height / 24);
                                         setRow(detectedRows);
                                     }}
                                     classNames={{
                                         textarea: "!border-none !w-full !outline-none focus:!shadow-none focus:!outline-none focus:!border-none"
                                     }}
-                                    
-                                    onKeyDown = {(e)=>{
+
+                                    onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
                                             formData.submit();
                                         }
                                     }}
-                                    value = {textAreaInputValue}
+                                    value={textAreaInputValue}
                                 />
                             </Form.Item>
 
-                            <Form.Item
-                                name = "userVoice" className="!mb-0"
+                            <Button
+                                onClick={handleAudioRecording}
+                                className="!border-none !shadow-none"
                             >
-                                <VoiceRecorder />                                
-                            </Form.Item>
+                                {recording ? <BorderOutlined /> : <AudioOutlined />}
+                            </Button>
                         </Form>
                     </div>
-                </div> 
+                </div>
 
             </div>
         </section>
@@ -896,11 +824,11 @@ export default function LecturePage({
 }) {
     const { lessonId } = params;
 
-    return(
+    return (
 
         <main className="w-full grow flex flex-col items-center justify-center min-h-screen overflow-x-clip">
             <ActivitySection />
-            <FooterSection hasRegisterBox = {false}/>
+            <FooterSection hasRegisterBox={false} />
         </main>
     )
 }

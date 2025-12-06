@@ -1,19 +1,18 @@
-import { baseApi } from '../baseApi'; 
-import { TranscribeRequest, TranscribeResponse } from '@/type/voice.type';
-
+import { baseApi } from '../baseApi';
+import { TranscribeResponse } from '@/type/voice.type';
 
 export const voiceApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        transcribeAudio: builder.mutation<TranscribeResponse, TranscribeRequest>({
-            query: (body) => ({
+        transcribeAudio: builder.mutation<TranscribeResponse, FormData>({
+            query: (formData) => ({
                 url: '/voice/transcribe',
                 method: 'POST',
-                body,
+                body: formData,
             }),
         }),
-    })
-})
+    }),
+});
 
-export const { 
-    useTranscribeAudioMutation 
+export const {
+    useTranscribeAudioMutation
 } = voiceApi;
