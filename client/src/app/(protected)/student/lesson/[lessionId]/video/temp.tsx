@@ -14,7 +14,7 @@ import QuizSection from './components/quizSection';
 import ChatbotSection from './components/chatbotSection';
 
 // Modules API import
-import { useGetModulesByCourseIdQuery } from '@/store/api/[module]/moduleApi';
+// import { useGetModulesByCourseIdQuery } from '@/store/api/[module]/moduleApi';
 
 interface IChapterState {
     id: number;

@@ -329,15 +329,11 @@ export default function PersonalProfilePage() {
                             <div className = "w-[25%] ml-auto p-2">Email</div>
                             <div className = "w-[75%] mr-auto text-right p-2">example@gmail.com</div>
                         </div>
-
                     </div>
-
                 </div>
-               
             </div>
 
             <LearningProgress />
-
             <FooterSection hasRegisterBox = {false}/>
         </section>
     )

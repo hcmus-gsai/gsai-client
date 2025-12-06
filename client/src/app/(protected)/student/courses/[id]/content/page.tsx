@@ -246,6 +246,9 @@ export default function CourseDetailPage() {
                 mt-[6rem] md:mt-[10rem] 
                 gap-[2rem]
             ">
+            {/* Duc code here */}
+            {/* <div className="w-full px-4 md:px-0 md:w-[calc(100%-12rem)] mx-auto h-full flex flex-col-reverse md:flex-row items-start justify-center mt-[6rem] md:mt-[10rem] gap-[2rem]"> */}
+
                 {/* flex-col-reverse:
                    - Mobile: CourseSchedule (Item 2) lên đầu, CourseModules (Item 1) xuống dưới.
                    - Desktop (md:flex-row): Modules bên Trái, Schedule bên Phải.

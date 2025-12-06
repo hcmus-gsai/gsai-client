@@ -1,7 +1,8 @@
 import {Button} from "antd";
 import Image from "next/image";
 import starSVG from "@/../public/student/Star.svg"
-
+import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+import { useParams } from "next/navigation";
 const CourseCategoryComponent = (
     {
         columns,
@@ -33,8 +34,14 @@ const CourseCategoryComponent = (
 
 const CourseHighLightComponent = () => {
     //Các trường dữ liệu sẽ load từ database
-    const tuition_fee  = 0.0;
-    const duration = "3 tháng";
+    const {id} = useParams();
+    const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
+    const courseData = courseInfo?.data;
+    const tuition_fee = courseData?.tuition_fee;
+    const duration = courseData?.duration;
+    console.log('This is course data: ', courseData);
+    console.log('This is course data tuition_fee: ', tuition_fee);
+    console.log('This is course data duration: ', duration);
 
     //===================================
     return (

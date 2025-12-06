@@ -8,9 +8,10 @@ import { CourseDisplaySection } from "@/components/student/course-display";
 import {Card, Button} from "antd";
 import { QASection } from "@/components/student/qna";
 import {FooterSection} from "@/components/guest/ui/guest";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import {useGetAllEnrollmentsQuery } from "@/store/api/[module]/enrollmentApi";
-
+import {useGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
+// import {useGetProfileQuery} from "@/store/api/[module]/userApi";
 
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
@@ -41,6 +42,12 @@ const CourseSyllabusSection = () => {
         'Scikit-learn',
         'Thống kê'
     ]
+    //Duc code here
+    // const { category } = await params;
+
+    // if (!VALID_CATEGORIES.includes(params.category)) {
+    //     notFound(); // Hàm này sẽ lập tức trả về trang 404
+    // }
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
@@ -77,21 +84,28 @@ const CourseSyllabusSection = () => {
 export default function StudentCoursePage() {
 
 
+
     const {id} = useParams();
-    const {data: enrollmentsCourse, isLoading, error} = useGetAllEnrollmentsQuery();
+    const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
+    const courseData = courseInfo?.data;
+
+    // console.log('This is course data: ', courseData);
+    // const {data: enrollmentsCourse, isLoading, error} = useGetAllEnrollmentsQuery();
     
     // Tìm course từ enrollments dựa trên course id từ URL
-    const course = enrollmentsCourse?.data?.find((c) => c.id === id);
-    
+    // const course = enrollmentsCourse?.data?.find((c) => c.id === id);
+    //Get teacher name from teacher id
+
+
 
 
     
     return(
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             <StudentGreetingSection
-                title = {course?.course_name || ""}
+                title = {courseData?.course_name || ""}
                 titleSize = "text-[2.5rem]"
-                description = {course?.description || ""}
+                description = {courseData?.course_description || ""}
                 buttonText = "Tham gia ngay"
                 isCourse = {true}
                 hasTopGradient = {false}

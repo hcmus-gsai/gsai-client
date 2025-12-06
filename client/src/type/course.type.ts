@@ -8,10 +8,10 @@ export interface Course {
     id: string;
     course_code: string;
     course_name: string;
-    complete_status: string;
+    is_active: string;
 
     //More fields
-    description: string;
+    course_description: string;
     teacher_id: string;
     duration: string;
     thumbnail_url: string,
