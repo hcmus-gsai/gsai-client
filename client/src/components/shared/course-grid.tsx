@@ -22,6 +22,7 @@ export const CourseGrid = (
         className ?: string;
     }
 ) => {
+    // console.log(courseData);
     const router = useRouter();
     return (
         <Row gutter = {[16,16]} className = {`w-[100%] mx-auto ${className}`}>
@@ -31,7 +32,7 @@ export const CourseGrid = (
                         <Col span = {colWidth} key = {index} className = "!flex !items-center !justify-center">
                             <Card 
                                 className = "w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick = {()=>router.push(`/student/home/course/${c.course_name.toLowerCase().replace(/ /g, '-')}`)}
+                                onClick = {()=>router.push(`/student/courses/${c.id}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
                                     <Image src = {c.thumbnail_url || EmptyLayout} alt = {c.course_name || "Empty Layout"} width = {0} height = {0} 

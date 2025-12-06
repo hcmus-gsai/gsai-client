@@ -38,12 +38,6 @@ export default function StudentHomePage() {
             <CourseDisplaySection title = "Trải nghiệm các khóa học miễn phí"/>
             <QASection />
 
-            
-            {/* <CourseDisplaySection title = "Môn học đã xem gần đây" hasExtended = {true}/>
-            <CourseDisplaySection title = "Môn học phổ biến hiện nay"/>
-            <CourseDisplaySection title = "Môn học dành riêng cho bạn"/>
-            <LearningPathSection />
-            <CourseDisplaySection title = "Trải nghiệm các khóa học miễn phí"/> */}
             <FooterSection hasRegisterBox = {false}/> 
             
         </main>

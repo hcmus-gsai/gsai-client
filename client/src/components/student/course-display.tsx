@@ -69,6 +69,8 @@ const CourseDisplaySection = ({
     //     (enrollment: EnrolledCourse) => enrollment.completion_status === "in-progress"
     // ) ?? [];
     const data = enrollmentsCourse?.data ?? [];
+    console.log(data);
+
 
     const [isExpanded, setIsExpanded] = useState(false);
     const handleExpand = () => {

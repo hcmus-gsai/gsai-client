@@ -80,12 +80,9 @@ const LearningProgressSection = () => {
                                     <div>
                                         <Button
                                             type="primary"
-                                            onClick={() => router.push(`/student/course/${course.id}/content`)}
+                                            onClick={() => router.push(`/student/courses/${course.id}/content`)}
                                             className="!border-1 !border-solid !w-[9rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-[#1363DF] hover:!bg-white hover:!text-[#1363DF] hover:!border-[#1363DF]"
                                         >
-                                            {/* <div className="flex items-center justify-center relative w-[calc(100%-5rem)]">
-                                                <span className="text-[1rem] !text-white">Tiếp tục</span>
-                                            </div> */}
                                             Tiếp tục
                                         </Button>
                                     </div>
