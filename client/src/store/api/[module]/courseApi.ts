@@ -157,6 +157,12 @@ export const courseApi = baseApi.injectEndpoints({
             query: (module_id) => `/modules/${module_id}/lessons`,
             providesTags: (result, error, id) => [{ type: 'Module', id }],
         }),
+
+        //GET: Get course id by lesson id
+        getCoursesByLessonId: builder.query<CourseResponse, string>({
+            query: (lesson_id) => `/courses/lesson/${lesson_id}`,
+            providesTags: ['Course'],
+        }),
     }),
 });
 
@@ -174,4 +180,5 @@ export const {
     useGetCourseModulesQuery,
     useGetModuleLessonsQuery,
     useLazyGetModuleLessonsQuery,
+    useGetCoursesByLessonIdQuery,
 } = courseApi;

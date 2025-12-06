@@ -37,7 +37,7 @@ const StudentGreetingSection = (
 
     const {data: course, isLoading, error} = useGetCourseByIdQuery(id as string);
     const courseData = course?.data;
-    console.log('This is course data: ', courseData);
+    // console.log('This is course data: ', courseData);
 
     return (
         <section className = "w-full flex flex-col relative">

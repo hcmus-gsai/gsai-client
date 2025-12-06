@@ -2,381 +2,68 @@
 import '@ant-design/v5-patch-for-react-19';
 import { FooterSection } from "@/components/guest/ui/guest";
 import React, { useState, useRef, useEffect } from 'react';
+import { useParams, useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu } from "@deemlol/next-icons";
-import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
+import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";   
 
-//For Voice Recorder
-import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
-import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
+// Section imports
+import QuizSection from './components/quizSection';
+import ChatbotSection from './components/chatbotSection';
+
+// Redux imports
+import { useGetCourseModulesQuery, useLazyGetModuleLessonsQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
 
 interface IChapterState {
-    id: number;
+    id: string;
     isExtended: boolean;
 }
 
-interface Message {
-    sender: 'user' | 'ai';
-    text: string;
-}
-
-const QuizContent = () => {
-
-    const [isCompleted, setIsCompleted] = useState(true);
-
-    return (
-        <div className="flex-1">
-            <div className="w-full flex items-center justify-start mb-[1rem]">
-                <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">Bài tập toán ứng dụng 1</p>
-            </div>
-
-            <Card
-                className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-neutral)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-            >
-                <p className="text-[1rem] font-bold text-[var(--color-primary)]">Thông tin chi tiết</p>
-                <div className="flex items-start justify-between gap-[1rem]">
-                    <div className="w-full flex items-start justify-start gap-[0.5rem]">
-                        <div>
-                            <p className="text-[1rem] text-[var(--color-primary)]">Hết hạn vào</p>
-                            <p className="text-[0.875rem] text-[var(--color-primary)]">T4 12/11/2025, 23:59</p>
-                        </div>
-                        <div>
-                            <p className="text-[1rem] text-[var(--color-primary)]">Thời gian</p>
-                            <p className="text-[0.875rem] text-[var(--color-primary)]">30 phút</p>
-                        </div>
-                    </div>
-
-                    <div className="">
-                        <Button
-                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white"
-                        >
-                            Bắt đầu
-                        </Button>
-                    </div>
-                </div>
-
-            </Card>
-
-            {!isCompleted ? (
-                <Card
-                    className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-                >
-                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
-                    <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Điểm cao nhát sẽ được ghi nhớ.</p>
-                    <p className="text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 100/100</p>
-                </Card>
-            ) : (
-                <Card
-                    className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-                >
-                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm của bạn</p>
-                    <div className="w-full flex items-center justify-between gap-[1rem]">
-                        <Progress
-                            percent={75}
-                            type="circle"
-                            size={200}
-                            strokeWidth={12}
-                            strokeLinecap="square"
-                            format={() => (
-                                <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className="text-[1rem] font-bold text-[var(--color-primary)]">Trả lời đúng</div>
-                                    <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
-                                        4 / 15
-                                    </div>
-                                </div>
-                            )}
-
-                        />
-
-
-                        <Progress
-                            percent={75}
-                            type="circle"
-                            size={200}
-                            strokeWidth={12}
-                            strokeLinecap="square"
-                            format={() => (
-                                <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className="text-[2.5rem] font-bold text-[var(--color-secondary)]">
-                                        2.67
-                                    </div>
-                                </div>
-                            )}
-                        />
-
-                        <Progress
-                            percent={75}
-                            type="circle"
-                            size={200}
-                            strokeWidth={12}
-                            strokeLinecap="square"
-                            format={() => (
-                                <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
-                                    <div className="text-[1rem] font-bold text-[var(--color-primary)]">Thời gian</div>
-                                    <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
-                                        29:28
-                                    </div>
-                                </div>
-                            )}
-                        />
-                    </div>
-                </Card>
-            )
-            }
-
-
-        </div>
-    )
-}
-
 const ActivitySection = () => {
-    const formInstance = Form.useForm();
-    const formData = formInstance[0];
     //===========Extendable Navbar============//
     const [extendableNavbar, setExtendableNavbar] = useState(true);
     const toggleExtendableNavbar = () => {
         setExtendableNavbar(!extendableNavbar);
     }
-    const chapters = [
-        {
-            id: 1,
-            name: "Chương 1: Đại số tuyến tính",
-            status: "Hoàn thành",
-            subItem: [
-                {
-                    id: 'st1',
-                    name: 'Hệ phương trình tuyến tính',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st2',
-                    name: 'Vector',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st3',
-                    name: 'Hệ phương trình tuyến tính',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st4',
-                    name: 'Vector',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                }
-            ]
-        },
-        {
-            id: 2,
-            name: "Chương 2: Giải tích",
-            status: "Chưa hoàn thành",
-            subItem: [
-                {
-                    id: 'st1',
-                    name: 'Vi tích phân',
-                    type: 'Bài đọc',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st2',
-                    name: 'Tích phân',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st3',
-                    name: 'Bài tập toán ứng dụng 1',
-                    type: 'Quiz',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st4',
-                    name: 'Đạo hàm',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                }
-            ]
-        },
 
-        {
-            id: 3,
-            name: "Chương 3: Xác suất thống kê",
-            status: "Chưa hoàn thành",
-            subItem: [
-                {
-                    id: 'st1',
-                    name: 'Xác suất',
-                    type: 'Bài đọc',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st2',
-                    name: 'Thống kê',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st3',
-                    name: 'Bài tập xác suất thống kê',
-                    type: 'Quiz',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st4',
-                    name: 'Bài tập thống kê',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                }
-            ]
-        },
-        {
-            id: 4,
-            name: "Chương 4: Phương trình vi phân",
-            status: "Chưa hoàn thành",
-            subItem: [
-                {
-                    id: 'st1',
-                    name: 'Phương trình vi phân',
-                    type: 'Bài đọc',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st2',
-                    name: 'Phương trình vi phân',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st3',
-                    name: 'Bài tập phương trình vi phân',
-                    type: 'Quiz',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                },
-                {
-                    id: 'st4',
-                    name: 'Bài tập phương trình vi phân',
-                    type: 'video',
-                    duration: '10:00',
-                    status: 'Hoàn thành',
-                }
-            ]
-        },
-    ]
+    const router = useRouter();
+    const params = useParams();
+    const lessonId = params.lessionId as string;
 
-    const [chapterState, setChapterState] = useState<IChapterState[]>([
-        ...chapters.map((c) => {
-            return {
-                id: c.id,
-                isExtended: false,
-            }
-        })
-    ])
+    const { data: courseRes } = useGetCoursesByLessonIdQuery(lessonId);
+    const course = courseRes?.data;
+    const { data: modulesRes } = useGetCourseModulesQuery(course ? course.id : '');
+    const modules = modulesRes?.modules ?? [];
+    const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
+    const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
+    const [chapterState, setChapterState] = useState<IChapterState[]>([]);
 
-    const handleToggleChapter = (id: number) => {
-
-        setChapterState(
-            chapterState.map((cs) => {
-                return cs.id === id ? {
-                    ...cs,
-                    isExtended: !cs.isExtended
-                }
-                    : cs;
-            })
-        )
-    }
-    //=======================================//
-
-    //===========ASR Service============//
-    const [permission, setPermission] = useState(false);
-    const [recording, setRecording] = useState(false);
-    const [stream, setStream] = useState<MediaStream | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const chunksRef = useRef<Blob[]>([]);
-    const [transcribeAudio] = useTranscribeAudioMutation();
-    const [textAreaInputValue, setTextAreaInputValue] = useState<string>("");
-
-    const requestMicrophoneAccess = async () => {
-        try {
-            const streamData = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: false
-            });
-            setPermission(true);
-            setStream(streamData);
-            alert("Cho phép truy cập Micro thành công!");
-        } catch (error) {
-            console.error("Error accessing microphone:", error);
+    useEffect(() => {
+        if (modules.length > 0) {
+            setChapterState(
+                modules.map((m:any) => ({
+                    id: String(m.id),
+                    isExtended: false,
+                }))
+            );
         }
-    }
+    }, [modules]);
 
-    const handleAudioRecording = async () => {
-        if (!permission) {
-            await requestMicrophoneAccess();
-            return;
-        }
-
-        if (!recording && stream) {
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
-            chunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunksRef.current.push(e.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-                const audioFile = new File([audioBlob], "recording.webm", { type: "audio/webm" });
-
-                const formData = new FormData();
-                formData.append("file", audioFile);
-                console.log("formData:", formData);
-
-                try {
-                    const { transcript } = await transcribeAudio(formData).unwrap();
-                    console.log("Transcription:", transcript);
-
-                    setMessages(prev => [...prev, {
-                        sender: "user",
-                        text: transcript
-                    }]);
-                } catch (error) {
-                    console.error(error);
-                    setMessages(prev => [...prev, {
-                        sender: "ai",
-                        text: "Transcription failed"
-                    }]);
-                }
-            };
-
-            mediaRecorder.start();
-            setRecording(true);
-            console.log("Recording started...");
-        } else if (recording && mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop();
-            setRecording(false);
-            console.log("Recording stopped.");
+    const handleToggleChapter = async (id: string) => {
+        setChapterState((prev) =>
+            prev.map((cs) =>
+                cs.id === id ? { ...cs, isExtended: !cs.isExtended } : cs
+            )
+        );
+        if (!lessonsMap[id]) {
+            const res = await triggerGetLessons(id).unwrap();
+            setLessonsMap((prev) => ({
+                ...prev,
+                [id]: res.lesson,
+            }));
         }
     };
 
-    //====================================
+    //=======================================//
 
     //===========Video OCR Service============//
 
@@ -509,32 +196,6 @@ const ActivitySection = () => {
         }
     }
 
-    //===========Chatbot Service===============//
-
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [row, setRow] = useState(1);
-
-    const handleMessageSubmit = async () => {
-        const data = formData.getFieldsValue();
-        console.log(data)
-
-
-
-        setMessages((prev) => [...prev, { sender: 'user', text: data.chatMessage }])
-
-        // // Simulate AI response
-        setTimeout(() => {
-            setMessages((prev) => [
-                ...prev,
-                { sender: "ai", text: "This is the AI's response." },
-            ]);
-        }, 800);
-    }
-    //=======================================//
-
-
-
-
     //ASR and OCR Toggle
     const [enableASR, setEnableASR] = useState(false);
     const [enableOCR, setEnableOCR] = useState(false);
@@ -564,7 +225,7 @@ const ActivitySection = () => {
 
                     <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
                         <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
-                            <p className="text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">Toán ứng dụng và thống kê</p>
+                            <p className="text-[1rem] font-bold text-[var(--color-secondary)] whitespace-nowrap">{course?.course_name}</p>
                         </div>
                         <Button
                             onClick={toggleExtendableNavbar}
@@ -573,42 +234,44 @@ const ActivitySection = () => {
                         />
 
                         <div className="overflow-y-auto max-h-[60vh]">
-                            {chapters.map((c) => (
-                                <div key={c.id} className="w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                            {modules.map((module:any) => (
+                                <div key={module.id} className="w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
                                     <div className="flex items-center flex-col justify-center gap-2">
                                         <div className="w-full flex flex-col items-center justify-center gap-2">
                                             <div className="w-full flex items-center justify-center gap-2">
                                                 <div className="w-full flex items-center justify-start gap-2">
-                                                    <div className="text-[0.875rem] font-bold text-[var(--color-primary)] whitespace-nowrap">{c.name}</div>
+                                                    <div className="text-[0.875rem] font-bold text-[var(--color-primary)] whitespace-nowrap">{module.module_name}</div>
                                                     <div className="ml-auto">
-                                                        <Button onClick={() => handleToggleChapter(c.id)} className="!border-none !p-0 !m-0">
-                                                            {chapterState.find((cs) => cs.id === c.id)?.isExtended ? <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : <ChevronRight width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
+                                                        <Button onClick={() => handleToggleChapter(module.id)} className="!border-none !p-0 !m-0">
+                                                            {chapterState.find((cs) => cs.id === module.id)?.isExtended ? <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> : <ChevronRight width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
                                                         </Button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         {/* Chapter content with smooth transition */}
-                                        <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${chapterState.find((cs) => cs.id === c.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"
-                                            }`}>
+                                        <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${chapterState.find((cs) => cs.id === module.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"}`}>
                                             <div className="overflow-hidden">
                                                 <div className="flex flex-col gap-[0.5rem]">
-                                                    {c.subItem.map((si) => (
-                                                        <Card key={si.id}
+                                                    {(lessonsMap[module.id] ?? []).map((lesson, index) => (
+                                                        console.log("Lesson Data:", lesson),
+                                                        <Card 
+                                                            key={lesson.id}
                                                             className="!w-full !h-[2.5625rem] !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
+                                                            onClick={() => { router.push(`/student/l/${lesson.id}/${lesson.type}`); }}
                                                         >
                                                             <div className="w-full flex flex-col items-start justify-start">
-                                                                <p className="text-[0.75rem] font-bold text-[var(--color-primary)] line-clamp-1">{si.name}</p>
+                                                                <p className="text-[0.75rem] font-bold text-[var(--color-primary)] line-clamp-1">{lesson.lesson_name}</p>
                                                                 <div className="w-full flex items-center justify-start gap-2">
                                                                     <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                                        {si.type === 'video'
+                                                                        {lesson.type === 'video'
                                                                             ? 'Video'
-                                                                            : si.type === 'quiz'
+                                                                            : lesson.type === 'quiz'
                                                                                 ? 'Quiz'
                                                                                 : 'Bài tập'
                                                                         }
                                                                     </p>
-                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{si.duration}</p>
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
                                                                 </div>
                                                             </div>
                                                         </Card>
@@ -754,63 +417,10 @@ const ActivitySection = () => {
                             <p className="text-white">OCR</p>
                             <Switch checked={enableOCR} checkedChildren="Bật" unCheckedChildren="Tắt" value={enableOCR} onChange={() => setEnableOCR(!enableOCR)} />
                         </div>
-
                     </div>
                 </div>
 
-
-                <div className="w-[24%] h-[487px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] border border-gray-200 p-[0.5rem]">
-                    <div className='flex-1 w-full flex flex-col items-start justify-start gap-[1rem] overflow-y-auto border-b border-gray-200  p-[0.5rem]'>
-                        {messages.map((msg, index) => (
-                            msg.sender === 'user' ? (
-                                <div key={index} className="ml-auto flex items-center justify-end bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]">
-                                    <p className="text-white">{msg.text}</p>
-                                </div>
-                            ) : (
-                                <div key={index} className="flex items-center justify-start w-full">
-                                    <p className="text-[var(--color-primary)]">{msg.text}</p>
-                                </div>
-                            )
-                        ))}
-                    </div>
-                    <div className="w-full flex justify-center items-center mt-[1rem]">
-                        <Form
-                            form={formData}
-                            className={`w-full flex justify-between items-center !bg-[var(--color-white)] !border !border-gray-200 !px-[1rem] !py-[0.5rem] ${row > 2 ? 'rounded-[20px]' : 'rounded-full'}`}
-                            onFinish={handleMessageSubmit}
-                        >
-                            <Form.Item name="chatMessage" className="!mb-0 !flex-1">
-
-                                <Input.TextArea
-                                    placeholder="Nhập câu hỏi"
-                                    autoSize={{ minRows: 1, maxRows: 7 }}
-                                    onResize={(size) => {
-                                        const detectedRows = Math.round(size.height / 24);
-                                        setRow(detectedRows);
-                                    }}
-                                    classNames={{
-                                        textarea: "!border-none !w-full !outline-none focus:!shadow-none focus:!outline-none focus:!border-none"
-                                    }}
-
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            formData.submit();
-                                        }
-                                    }}
-                                    value={textAreaInputValue}
-                                />
-                            </Form.Item>
-
-                            <Button
-                                onClick={handleAudioRecording}
-                                className="!border-none !shadow-none"
-                            >
-                                {recording ? <BorderOutlined /> : <AudioOutlined />}
-                            </Button>
-                        </Form>
-                    </div>
-                </div>
+                <ChatbotSection />
 
             </div>
         </section>
