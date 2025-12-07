@@ -34,6 +34,7 @@ import workFlowPic from "../../../../public/guest/workflowPic.svg";
 import testimonialPic from "../../../../public/guest/testimonialPic.svg";
 
 import { RedirectButton } from '@/components/shared/redirect-button'
+import WhiteEpisLogo from "../../../../public/student/WhiteEpisLogo.svg";
 
 type FunctionBlock = {
     title: string;
@@ -58,7 +59,7 @@ const GreetingSection = () => {
             <div className="flex w-[var(--global-width)] items-center justify-between h-[4.8125rem]">
                 <div className = "flex flex-1 items-center justify-start gap-2">
                     <div className = "text-2xl font-bold">
-                        <p className = "!text-[var(--color-bg_white)]"><span className = "!text-[var(--color-bg_white)]">AT</span> AI.Tutor</p>
+                        <Image src = {WhiteEpisLogo} alt = "Epis Logo" width = {0} height = {0} className = "w-full h-full object-cover" />
                     </div>
                 </div>
                 <div className = "flex flex-1 items-center justify-center gap-2 ">
@@ -92,8 +93,8 @@ const GreetingSection = () => {
             </div>
             <div className = "mx-auto w-full h-full flex flex-col items-center justify-center w-[calc(100vh-40px)]">
                 <div className = "flex items-center justify-center gap-4">
-                    <div className = "text-[4rem] font-bold leading-tight">
-                        <p className = "text-center !text-[var(--color-primary)]">Chào Mừng Đến Với GSAI</p>
+                    <div className = "text-7xl font-bold leading-tight">
+                        <p className = "text-center !text-[var(--color-primary)]">Chào Mừng Đến Với EPIS</p>
                     </div>
                 </div>
                 <div className = "flex flex-col justify-center items-center">

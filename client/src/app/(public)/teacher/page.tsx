@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
+import '@ant-design/v5-patch-for-react-19';
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { GreetingSection, FunctionSection, WorkFlowSection, TestimonialSection, QASection, FooterSection } from "@/components/guest/ui/guest";
 
 import GradientTopLeft from "@/../public/guest/gradient_top_left.svg";
@@ -11,16 +14,40 @@ import GradientBottomRight from "@/../public/guest/gradient_bottom_right.svg";
 
 export default function TeacherLandingPage() {
     const [searchTerm, setSearchTerm] = useState("");
+    const [isClient, setIsClient] = useState(false)
+    const path = usePathname();
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     return (
       <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
         <nav className="flex flex-col items-center bg-primary h-10 text-white">
-            <div className="w-[78%] flex h-full items-center justify-between">
+            <div className="w-[var(--global-width)] flex h-full items-center justify-between">
                 <div>
-                    <Link href="/student" className="mr-15 text-white">
+                    <Link
+                        href="/student"
+                        className={`
+                        text-white 
+                        mr-15
+                        relative 
+                        pb-1
+                        after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-white after:transition-all
+                        ${path === "/student" ? "after:w-full" : "after:w-0 hover:after:w-full"}
+                        `}
+                    >
                         Học sinh
                     </Link>
-                    <Link href="/teacher" className="text-white">
+                    <Link
+                        href="/teacher"
+                        className={`
+                        text-white 
+                        relative 
+                        pb-1
+                        after:absolute after:left-0 after:bottom-0 after:h-[2px] after:bg-white after:transition-all
+                        ${path === "/teacher" ? "after:w-full" : "after:w-0 hover:after:w-full"}
+                        `}
+                    >
                         Giáo viên
                     </Link>
                 </div>
