@@ -9,7 +9,8 @@ import UserIcon from "@/../public/shared/User.svg";
 import NotificationIcon from "@/../public/shared/Notification.svg";
 import type { MenuProps } from 'antd';
 import { Menu, Input, Button, ConfigProvider, Dropdown } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+
 import { useState, useEffect } from 'react';
 
 import { useSignOutMutation } from '@/store/api/[module]/authApi';
@@ -17,9 +18,13 @@ import { useSignOutMutation } from '@/store/api/[module]/authApi';
 const StudentNavbar = () => {
     // Hook definition
     const router = useRouter();
+    const pathname = usePathname();
 
     const [isMounted, setIsMounted] = useState(false);
-
+    const selectedKey = pathname.startsWith("/student/home") ? "homepage" :
+    pathname.startsWith("/student/courses") ? "courses" :
+    pathname.startsWith("/student/about") ? "about" :
+    "";
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -47,7 +52,7 @@ const StudentNavbar = () => {
         {
             key: '1',
             label: (
-                <span onClick={() => router.push("/student/home/profile")}>Trang cá nhân</span>
+                <span onClick={() => router.push("/student/profile")}>Trang cá nhân</span>
             ),
         },
         {
@@ -84,7 +89,7 @@ const StudentNavbar = () => {
                         >
                             <Menu
                                 mode="horizontal"
-                                defaultSelectedKeys={["homepage"]}
+                                selectedKeys={[selectedKey]}
                                 items={[
                                     {
                                         key: "homepage", label: <div className="!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center px-3">
@@ -98,7 +103,7 @@ const StudentNavbar = () => {
                                     },
                                     {
                                         key: "about", label: <div className="!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center ">
-                                            <span className="cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>
+                                            <span onClick={() => router.push("/student/about")} className="cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>
                                         </div>
                                     }
                                 ]}

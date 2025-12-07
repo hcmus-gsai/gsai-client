@@ -3,6 +3,7 @@ import Image from "next/image";
 import starSVG from "@/../public/student/Star.svg"
 import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
 import { useParams } from "next/navigation";
+
 const CourseCategoryComponent = (
     {
         columns,
@@ -20,7 +21,7 @@ const CourseCategoryComponent = (
         <div className = {`grid gap-x-5 w-[var(--global-width)] h-full gap-y-[2rem]`}
              style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}  
         >
-            {        categories.map((item) => (
+            {categories.map((item) => (
                 <div key = {item.id} className = "flex items-center justify-center">
                     <Button className = "!w-full !h-[3.5rem] !p-0 !rounded-full !flex !items-center !justify-center !shadow-none hover:!shadow-[5px_5px_10px_var(--color-neutral)] transition duration-300">
                         <Image src = {item.image} alt = {item.name} width = {0} height = {0} className = "object-cover"/>

@@ -5,50 +5,71 @@ const TagDisplaySession = () => {
     const learningCategory = [
         {
             id: 1,
-            name: 'Lập trình',
+            name: 'Lập trình Web',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 2,
-            name: 'Lập trình',
+            name: 'Khoa học Dữ liệu',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 3,
-            name: 'Lập trình',
+            name: 'Trí tuệ Nhân tạo',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 4,
-            name: 'Lập trình',
+            name: 'Lập trình Mobile',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 5,
-            name: 'Lập trình',
+            name: 'Phân tích Hệ thống',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 6,
-            name: 'Lập trình',
+            name: 'Thiết kế UI/UX',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 7,
-            name: 'Lập trình',
+            name: 'An ninh Mạng',
             image: '/images/learning-category-1.jpg'
         },
         {
             id: 8,
-            name: 'Lập trình',
+            name: 'Điện toán Đám mây',
             image: '/images/learning-category-1.jpg'
         },
-    ];
+        {
+            id: 9,
+            name: 'Hệ thống phân tán',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 10,
+            name: 'Công nghệ Blockchain',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 11,
+            name: 'Hệ thống HPC',
+            image: '/images/learning-category-1.jpg'
+        },
+        {
+            id: 12,
+            name: 'Hệ thống IoT',
+            image: '/images/learning-category-1.jpg'
+        },
 
+    ];
+    
     var columns = 4;
 
     return (
-        <div className = "w-full absolute top-[15vh] flex flex-col items-center justify-between z-10">
+        <div className = "relative w-full top-[15vh] mb-[200px] flex flex-col items-center justify-between z-10">
             <div className = "h-full w-full mb-[5vh] flex flex-col items-center justify-between ">
                 <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Top lĩnh vực học tập phổ biến</p>
             </div>

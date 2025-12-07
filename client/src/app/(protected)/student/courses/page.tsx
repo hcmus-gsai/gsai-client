@@ -17,21 +17,9 @@ export default function StudentHomePage() {
     return(
 
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <section className = "w-full flex flex-col">
-                <Image src = {AbstractTop} alt = "Curve Space Top" width = {0} height = {0}
-                    className = " top-0 left-0 w-full h-auto z-[0]"
-                />
-                
-                <div className="w-full absolute top-0 left-0 z-[-1]">
-                    <Image 
-                        src = {AbstractNCurve} alt = "Curve Space Middle" width = {0} height = {0}
-                        className = "w-full h-auto"
-                    />
-                    <TagDisplaySession/>
-                
-                </div>
-                
-            </section>
+            
+            <TagDisplaySession/>
+
             <LearningPathSection />
             <CourseDisplaySection title = "Môn học phổ biến hiện nay"/>
             <CourseDisplaySection title = "Môn học dành riêng cho bạn"/>
