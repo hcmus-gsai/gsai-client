@@ -103,7 +103,7 @@ const StudentNavbar = () => {
                                     },
                                     {
                                         key: "about", label: <div className="!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center ">
-                                            <span onClick={() => router.push("/student/about")} className="cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>
+                                            <span  className="cursor-pointer text-[var(--color-primary)] font-bold">Về Epis</span>
                                         </div>
                                     }
                                 ]}

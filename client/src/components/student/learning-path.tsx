@@ -10,9 +10,9 @@ const LearningPathSection = () => {
 
     return (
         <section className = "w-full h-[50vh] flex flex-col items-center">
-            <div className = "flex w-[var(--global-width)] gap-[1.25rem]">
+            <div className = "flex h-full w-[var(--global-width)] gap-[1.25rem]">
                 <div
-                    className = "w-[full] h-[22.875rem] rounded-[20px] flex items-center justify-center px-[1.875rem] py-[2.5rem]" style= {{backgroundColor: "rgba(19, 99, 223, 0.14)"}}
+                    className = "w-[full] h-[82%] rounded-[20px] flex items-center justify-center px-[1.875rem] py-[2.5rem]" style= {{backgroundColor: "rgba(19, 99, 223, 0.14)"}}
                 >
                     <div className = "flex flex-col h-full w-full">
                         <div className = "flex flex-col items-center justify-start h-full grow">
@@ -32,7 +32,7 @@ const LearningPathSection = () => {
                 </div>
 
                 <div
-                    className = "w-[full] h-[22.875rem] rounded-[20px] flex items-center justify-center px-[1.875rem] py-[2.5rem]" style= {{backgroundColor: "rgba(19, 99, 223, 0.14)"}}
+                    className = "w-[full] h-[82%] rounded-[20px] flex items-center justify-center px-[1.875rem] py-[2.5rem]" style= {{backgroundColor: "rgba(19, 99, 223, 0.14)"}}
                 >
                     <div className = "flex flex-col h-full w-full">
                         <div className = "flex flex-col items-center justify-start h-full w-full">
