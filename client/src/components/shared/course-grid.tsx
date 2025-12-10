@@ -8,6 +8,7 @@ import { string } from "better-auth";
 import { useRouter } from "next/navigation";
 
 import { EnrolledCourse } from '@/type/enrollment.type';
+import {Course} from '@/type/course.type';
 
 export const CourseGrid = (
     {
@@ -16,13 +17,15 @@ export const CourseGrid = (
         maxItems,
         className = ""    
     }:{
-        courseData: EnrolledCourse[];
+        courseData: Course[];
         colWidth: number;
         maxItems: number;
         className ?: string;
     }
 ) => {
     const router = useRouter();
+    
+    if (!courseData) return null;
     
     return (
         <Row gutter = {[16,16]} className = {`w-[100%] mx-auto ${className}`}>
@@ -32,16 +35,20 @@ export const CourseGrid = (
                         <Col span = {colWidth} key = {index} className = "!flex !items-center !justify-center">
                             <Card 
                                 className = "w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick = {()=>router.push(`/student/courses/${c.id}`)}
+                                onClick = {()=>router.push(`/student/courses/${c.course_id}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
-                                    <Image src = {c.thumbnail_url || EmptyLayout} alt = {c.course_name || "Empty Layout"} width = {0} height = {0} 
-                                        className = "w-full h-full object-cover"                                                    
+                                    <Image 
+                                        src = {c.thumbnail_url || EmptyLayout} 
+                                        alt = {c.course_name || "Empty Layout"} 
+                                        width = {300} 
+                                        height = {200} 
+                                        className = "w-full h-auto object-cover rounded-lg"                                                    
                                     />
                                     <h3 className = "text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
                                     
                                     <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
-                                        {c.duration}
+                                        bởi {c.teacher_name}
                                     </p>
 
                                     <div className="flex items-center justify-center">
@@ -60,7 +67,6 @@ export const CourseGrid = (
                                                     </div>
                                                 )
                                             })
-                                            
                                         }
                                     </div>
                                 </div>

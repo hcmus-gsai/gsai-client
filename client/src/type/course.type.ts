@@ -4,7 +4,7 @@ export interface CourseResponse {
 }
 
 export interface Course {
-    id: string;
+    course_id: string;
     course_code: string;
     course_name: string;
     course_description: string;

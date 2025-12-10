@@ -12,7 +12,7 @@ export const courseApi = baseApi.injectEndpoints({
 
         getCourseById: builder.query<CourseResponse, string>({
             query: (course_id) => `/courses/${course_id}`,
-            providesTags: ['Course'],
+            providesTags: (result, error, course_id) => [{ type: 'Course', id: course_id }],
         }),
         
         getCourseModules: builder.query<ModuleResponse, string>({
@@ -30,6 +30,7 @@ export const courseApi = baseApi.injectEndpoints({
 export const {
     useGetCoursesQuery,
     useGetCourseByIdQuery,
+    useLazyGetCourseByIdQuery,
     useGetCourseModulesQuery,
     useGetCoursesByLessonIdQuery,
 } = courseApi;

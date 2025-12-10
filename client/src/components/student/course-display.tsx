@@ -9,6 +9,8 @@ import {useRouter} from "next/navigation";
 
 //===
 import {useGetAllEnrollmentsQuery} from "@/store/api/[module]/enrollmentApi";
+import {Course} from "@/type/course.type";
+import {useLazyGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
 //===
 const CourseDisplaySection = ({
     title,
@@ -21,9 +23,31 @@ const CourseDisplaySection = ({
 }) => {
 
     const {data: enrollmentsDataResponse} = useGetAllEnrollmentsQuery();
-    console.log('This is course data response: ', enrollmentsDataResponse);
     const courseData = enrollmentsDataResponse?.data || [];
-    console.log('This is course data: ', courseData);
+    const [coursesInfo, setCoursesInfo] = useState<Course[]>([]);
+    
+    const [getCourseById] = useLazyGetCourseByIdQuery();
+
+    useEffect(() => {
+        const fetchCoursesInfo = async () => {
+            if (courseData.length === 0) return;
+            
+            const coursePromises = courseData.map((course) => 
+                getCourseById(course.id).unwrap()
+            );
+            
+            try {
+                const results = await Promise.all(coursePromises);
+                const courses = results.map((res) => res.data);
+                
+                setCoursesInfo(courses);
+            } catch (error) {
+                console.error('Error fetching courses info:', error);
+            }
+        };
+
+        fetchCoursesInfo();
+    }, [courseData, getCourseById]);
 
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -36,7 +60,7 @@ const CourseDisplaySection = ({
                 <h1 className = "text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
                 <div className = "flex items-center justify-center w-full">
                     <CourseGrid 
-                        courseData = {courseData} 
+                        courseData = {coursesInfo} 
                         colWidth = {6} 
                         maxItems = {isExpanded ? 12 : 4} 
                     />

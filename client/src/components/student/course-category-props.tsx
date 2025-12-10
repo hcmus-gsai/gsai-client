@@ -27,7 +27,9 @@ const CourseCategoryComponent = (
                     <Button className = "!w-full !h-[3.5rem] !p-0 !rounded-full !flex !items-center !justify-center !shadow-none hover:!shadow-[5px_5px_10px_var(--color-neutral)] transition duration-300"
                     onClick = {() => router.push(`/student/category/${item.name.toLowerCase().replace(/ /g, '-')}`)}
                     >
-                        <Image src = {item.image} alt = {item.name} width = {0} height = {0} className = "object-cover"/>
+                        <Image src = {item.image} alt = {item.name}  width = {0} height = {0} 
+                            style={{ width: '0px', height: '0px' }}
+                        />
                         <p className = "text-[1rem] font-semibold text-[var(--color-primary)]">{item.name}</p>
                     </Button>
                 </div>
@@ -75,8 +77,8 @@ const CourseHighLightComponent = () => {
                         <p className = "text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
                         
                         <Image 
-                            src = {starSVG} alt = "Star Icon" width = {0} height = {0}
-                            className = "w-[1.4rem]"
+                            src = {starSVG} alt = "Star Icon" width = {24} height = {24}
+                            className = "w-[1.4rem] h-auto"
                         />
                     </span>
                     {/* <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">5.0 đánh giá</p> */}
