@@ -1,18 +1,25 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import { StudentGreetingSection } from "@/components/student/greeting";
+import { useState } from 'react';
 import {useRouter} from "next/navigation";
 import Image from "next/image";
 import { CourseDisplaySection } from "@/components/student/course-display";
 
-import {Card, Button} from "antd";
+import {Card, Button, Form} from "antd";
 import { QASection } from "@/components/student/qna";
 import {FooterSection} from "@/components/guest/ui/guest";
 import { useParams, notFound } from "next/navigation";
-import {useGetAllEnrollmentsQuery } from "@/store/api/[module]/enrollmentApi";
+import { RightOutlined  } from "@ant-design/icons";
 import {useGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
-// import {useGetProfileQuery} from "@/store/api/[module]/userApi";
 
+import AbstractTop from "@/../public/student/AbstractTop.svg";
+import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
+import starSVG from "@/../public/student/Star.svg";
+import EmptyLayout from "@/../public/EmptyLayout.svg";
+import { CourseHighLightComponent } from "@/components/student/course-category-props";
+
+import { Course } from '@/type/course.type';
+import { XCircle } from "@deemlol/next-icons";
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
         {
@@ -80,37 +87,198 @@ const CourseSyllabusSection = () => {
     )
 }
 
+const CourseRegisterModal = ({isOpen, onClose, children}:{
+    isOpen: boolean,
+    onClose: () => void,
+    children: React.ReactNode,
+}) => {
+
+    if (!isOpen) {
+        return null;
+    }
+
+    return (
+        <div className ="fixed inset-0 bg-black/40 bg-opacity-40 z-50 flex items-center justify-center" onClick={onClose}>
+            <div className = "relative bg-[var(--color-white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
+                <Button 
+                    className = "!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md !absolute !top-2 !right-2"
+                    onClick = {onClose}
+                >
+                    <XCircle className = "!text-white !w-full !h-full"/>
+                </Button>
+                {children}
+            </div>
+        </div>
+    )
+}
+
+const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId: string}) => {
+
+    const router = useRouter();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const handleRegisterCourse = () => {
+        setIsModalOpen(true);
+    }
+
+
+    return (
+        <>
+        {isModalOpen && (
+            <CourseRegisterModal isOpen={isModalOpen} onClose={closeModal}>
+                <p className = "text-[1.5rem] font-bold text-[var(--color-primary)] text-center mb-[1rem]">Xác nhận đăng kí môn học</p>
+                <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center mb-[2rem]">Bạn có chắc chắn muốn đăng ký môn học này không? Hãy xác nhận để bắt đầu học ngay!</p>
+                <div className = "w-full flex items-center justify-center gap-2">
+                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]">Hủy</Button>
+                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]">Đăng ký ngay</Button>
+                </div>
+            </CourseRegisterModal>
+        )}
+        
+        
+        
+        <section className = "w-full flex flex-col relative">
+            <div className="w-full  absolute top-0 left-0 z-[-1]">
+                <Image 
+                    src = {AbstractMiddle} alt = "Curve Space Middle" width = {0} height = {0}
+                    className = "w-full h-auto"
+                />
+            </div>
+            
+            <div className = "w-full h-full flex flex-col items-center z-10">
+                <div className = "w-[var(--global-width)] h-[242px] mt-[5vh] mb-[3rem] flex items-center justify-between">
+                    <div className = "h-full w-[546px] flex flex-col items-start justify-between">
+                        <div className = {`flex flex-col items-start justify-between w-full mb-[2rem]`}>                    
+                            <p className = {`text-[3.5rem] font-bold text-[var(--color-primary)]`}>{courseData?.course_name}</p>
+                            <p className = "text-[1rem]  text-[var(--color-primary)] mb-[2rem]">{courseData?.course_description}</p>
+                            <div className = "flex items-center justify-center gap-2">
+                                <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
+                                    <Image
+                                        src={EmptyLayout}
+                                        alt="Empty Layout"
+                                        width={0}
+                                        height={0}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <p className = "text-[1rem] text-[var(--color-primary)]">{courseData?.teacher_name}</p>
+                            </div> 
+                        </div>
+                        <div className = "w-full flex items-center justify-start mb-[1.5rem]">
+                            
+                            {courseData.is_enrolled ? (
+                                <Button 
+                                onClick = {() => router.push(`/student/courses/${courseId}/content`)} className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                    Đi đến môn học
+                                </Button>
+                            ):(
+                                <Button
+                                onClick = {handleRegisterCourse} 
+                                className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                    Tham gia ngay
+                                </Button>
+                            )}
+                        </div>
+
+                        <p className = "text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>  
+
+                    </div>
+                    
+                </div>
+                {/*<CourseHighlightComponent/> */}
+
+                <div className = "mt-[22vh] grid grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">
+                    <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                        <div className = "mt-7 w-[80%] h-full">
+                            {
+                                courseData?.tuition_fee === 0.0 ?(
+                                    <>
+                                    <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
+                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
+                                    </>
+                                ):(
+                                    <>
+                                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học có phí</p>
+                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Phí: {courseData?.tuition_fee} VNĐ</p>
+                                    </>
+                                )
+                            }
+                        </div>
+                    </div>
+
+                    <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                        <div className = "mt-7 h-full">
+                            <span className="flex mb-3">
+                                <p className = "text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
+                                
+                                <Image 
+                                    src = {starSVG} alt = "Star Icon" width = {0} height = {0}
+                                    className = "w-[1.4rem]"
+                                />
+                            </span>
+                            {/* <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">5.0 đánh giá</p> */}
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">5 đánh giá</p>
+                        </div>
+                    </div>
+                    
+                    <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
+                        <div className = "mt-7 w-[80%] h-full">
+                            <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
+                        </div>
+                    </div>
+                    
+                    <div className = "flex flex-col items-center w-full">
+                        <div className = "mt-7 w-[70%] h-full">
+                            <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </>
+    )
+
+}
 
 export default function StudentCoursePage() {
 
-
-
+    
+    const router = useRouter();
     const {id} = useParams();
     const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
+    console.log('This is course data: ', courseData);
 
-    // console.log('This is course data: ', courseData);
-    // const {data: enrollmentsCourse, isLoading, error} = useGetAllEnrollmentsQuery();
-    
-    // Tìm course từ enrollments dựa trên course id từ URL
-    // const course = enrollmentsCourse?.data?.find((c) => c.id === id);
-    //Get teacher name from teacher id
+    if (isLoading) {
+        return <div className="w-full min-h-screen flex items-center justify-center">Đang tải...</div>;
+    }
 
-
-
-
+    if (error || !courseData) {
+        return <div className="w-full min-h-screen flex items-center justify-center">Không tìm thấy khóa học</div>;
+    }
     
     return(
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <StudentGreetingSection
-                title = {courseData?.course_name || ""}
+            {/* <StudentGreetingSection
+                title = {courseInfo?.data?.course_name || ""}
                 titleSize = "text-[2.5rem]"
-                description = {courseData?.course_description || ""}
+                description = { ""}
                 buttonText = "Tham gia ngay"
                 isCourse = {true}
                 hasTopGradient = {false}
                 hasCurveSpace = {false}
-            />
+            /> */}
+            <section className = "w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
+                <div className = "w-[var(--global-width)] h-full flex items-center justify-start"> 
+                    Môn học <span className = "ml-2 mr-2"><RightOutlined className = "text-[var(--color-primary)]" /></span> {courseData?.category}
+                </div>
+            </section>
+            
+            <CourseInfoSection courseData = {courseData} courseId = {id as string} />
             <CourseSyllabusSection />
 
             <CourseDisplaySection 

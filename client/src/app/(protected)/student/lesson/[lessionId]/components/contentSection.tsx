@@ -6,7 +6,8 @@ import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from "next/navigation";
-import { useGetCourseModulesQuery, useLazyGetModuleLessonsQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
+import { useGetCourseModulesQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
+import { useLazyGetModuleLessonsQuery } from "@/store/api/[module]/moduleApi";
 
 interface IChapterState {
     id: string;

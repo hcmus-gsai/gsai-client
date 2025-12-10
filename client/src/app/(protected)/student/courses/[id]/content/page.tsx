@@ -7,7 +7,10 @@ import { Button, Card } from "antd";
 import { ChevronDown, ChevronUp, Check } from "@deemlol/next-icons"
 import { useState, useEffect } from 'react';
 
-import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
+// import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
+
+import {useGetCourseByIdQuery, useGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
+import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
 
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
@@ -21,16 +24,25 @@ interface IChapterState {
 const CourseModules = () => {
     const router = useRouter();
     const {id} = useParams();
-    const courseId = id as string;
+    
 
     // Fetch data (Giữ nguyên logic của bạn)
-    const { data: courseRes } = useGetCourseByIdQuery(courseId);
+    // const { data: courseRes } = useGetCourseByIdQuery(courseId);
+    // const course = courseRes?.data;
+    // const { data: modulesRes } = useGetCourseModulesQuery(courseId);
+    // const modules = modulesRes?.modules ?? [];
+    // const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
+    // const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
+    // const [chapterState, setChapterState] = useState<IChapterState[]>([]);
+    const {data: courseRes} = useGetCourseByIdQuery(id as string);
     const course = courseRes?.data;
-    const { data: modulesRes } = useGetCourseModulesQuery(courseId);
-    const modules = modulesRes?.modules ?? [];
+    const {data: moduleRes} = useGetCourseModulesQuery(id as string);
+    const modules = moduleRes?.modules ?? [];
     const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
-    const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
     const [chapterState, setChapterState] = useState<IChapterState[]>([]);
+    const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
+
+    
 
     useEffect(() => {
         if (modules.length > 0) {

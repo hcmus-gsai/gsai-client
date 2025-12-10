@@ -11,7 +11,7 @@ import { CourseCategoryComponent, CourseHighLightComponent } from '@/components/
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+// import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
 ;
 const StudentGreetingSection = (
 {
@@ -35,8 +35,8 @@ const StudentGreetingSection = (
     const router = useRouter();
     const {id} = useParams();
 
-    const {data: course, isLoading, error} = useGetCourseByIdQuery(id as string);
-    const courseData = course?.data;
+    // const {data: course, isLoading, error} = useGetCourseByIdQuery(id as string);
+    // const courseData = course?.data;
     // console.log('This is course data: ', courseData);
 
     return (

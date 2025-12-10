@@ -22,8 +22,8 @@ export const CourseGrid = (
         className ?: string;
     }
 ) => {
-    // console.log(courseData);
     const router = useRouter();
+    
     return (
         <Row gutter = {[16,16]} className = {`w-[100%] mx-auto ${className}`}>
             {
@@ -55,12 +55,7 @@ export const CourseGrid = (
                                         {
                                             c.category.toString().split(',').map((category, idx) => {
                                                 return (
-                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation(); 
-                                                            router.push(`/student/category/${category}`);
-                                                        }}
-                                                    >
+                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]">
                                                         <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
                                                     </div>
                                                 )

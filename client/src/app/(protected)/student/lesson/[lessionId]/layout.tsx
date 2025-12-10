@@ -1,8 +1,8 @@
 import ContentSection from "./components/contentSection";
 import { FooterSection } from "@/components/guest/ui/guest";
 
-import { useGetCourseModulesQuery, useLazyGetModuleLessonsQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
-
+import { useGetCourseModulesQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
+import { useLazyGetModuleLessonsQuery } from "@/store/api/[module]/moduleApi";
 interface IChapterState {
     id: string;
     isExtended: boolean;

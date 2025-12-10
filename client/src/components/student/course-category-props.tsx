@@ -1,8 +1,8 @@
 import {Button} from "antd";
 import Image from "next/image";
 import starSVG from "@/../public/student/Star.svg"
-import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
-import { useParams } from "next/navigation";
+// import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+import { useRouter, useParams } from "next/navigation";
 
 const CourseCategoryComponent = (
     {
@@ -17,13 +17,16 @@ const CourseCategoryComponent = (
         }[];
     }
 ) => {
+    const router = useRouter();
     return (
         <div className = {`grid gap-x-5 w-[var(--global-width)] h-full gap-y-[2rem]`}
              style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}  
         >
             {categories.map((item) => (
                 <div key = {item.id} className = "flex items-center justify-center">
-                    <Button className = "!w-full !h-[3.5rem] !p-0 !rounded-full !flex !items-center !justify-center !shadow-none hover:!shadow-[5px_5px_10px_var(--color-neutral)] transition duration-300">
+                    <Button className = "!w-full !h-[3.5rem] !p-0 !rounded-full !flex !items-center !justify-center !shadow-none hover:!shadow-[5px_5px_10px_var(--color-neutral)] transition duration-300"
+                    onClick = {() => router.push(`/student/category/${item.name.toLowerCase().replace(/ /g, '-')}`)}
+                    >
                         <Image src = {item.image} alt = {item.name} width = {0} height = {0} className = "object-cover"/>
                         <p className = "text-[1rem] font-semibold text-[var(--color-primary)]">{item.name}</p>
                     </Button>
@@ -36,14 +39,15 @@ const CourseCategoryComponent = (
 const CourseHighLightComponent = () => {
     //Các trường dữ liệu sẽ load từ database
     const {id} = useParams();
-    const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
-    const courseData = courseInfo?.data;
-    const tuition_fee = courseData?.tuition_fee;
-    const duration = courseData?.duration;
-    console.log('This is course data: ', courseData);
-    console.log('This is course data tuition_fee: ', tuition_fee);
-    console.log('This is course data duration: ', duration);
-
+    // const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
+    // const courseData = courseInfo?.data;
+    // const tuition_fee = courseData?.tuition_fee;
+    // const duration = courseData?.duration;
+    // console.log('This is course data: ', courseData);
+    // console.log('This is course data tuition_fee: ', tuition_fee);
+    // console.log('This is course data duration: ', duration);
+    const tuition_fee = 0.0
+    const duration = 0.0
     //===================================
     return (
         <div className = "mt-[10.4rem] grid grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">

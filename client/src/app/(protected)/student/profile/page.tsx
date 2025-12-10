@@ -1,13 +1,16 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Image from 'next/image';
 import { FooterSection } from "@/components/guest/ui/guest";
 import {InputRef, Input, Button, Form, Radio, Select, Card, Calendar, Progress} from 'antd';
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { XCircle } from "@deemlol/next-icons";
 import { EditOutlined } from "@ant-design/icons";
+
+import {useGetUserProfileQuery, useUpdateUserProfileMutation} from '@/store/api/[module]/userApi';
+
 export interface IUploadState {
     fileObj: File | null;
     previewUrl:  string  | null;
@@ -27,8 +30,8 @@ const ProfileModal = ({isOpen, onClose, children}:{
     }
 
     return (
-        <div className ="fixed inset-0 bg-black/40 bg-opacity-40  flex items-center justify-center" onClick={onClose}>
-            <div className = "relative bg-[var(--color-bg_white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
+        <div className ="fixed inset-0 bg-black/40 bg-opacity-40 z-50 flex items-center justify-center" onClick={onClose}>
+            <div className = "relative bg-[var(--color-bg-white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
                 <Button 
                     className = "!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md !absolute !top-2 !right-2"
                     onClick = {onClose}
@@ -118,6 +121,11 @@ const LearningProgress = () =>{
 
 
 export default function PersonalProfilePage() {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
     const [profileUpload, setProfileUpload] = useState<IUploadState>({
         fileObj: null,
         previewUrl: null,
@@ -153,14 +161,47 @@ export default function PersonalProfilePage() {
         }
     }
 
+    const {data: profile, isLoading, error} = useGetUserProfileQuery();
+    const [updateUserProfile, {isLoading: isUpdating}] = useUpdateUserProfileMutation();
+
+    const name = profile?.full_name || '';
+    const dob = profile?.dob || '';
+    const gender = profile?.gender || '';
+    const location = profile?.location || '';
+    const phone_number = profile?.phone_number || '';
+    const email = profile?.email || '';
+
+    const handleUpdateUserProfile = async (values: any) => {
+        try {
+            // Map form field names to API field names
+            const payload = {
+                full_name: values.name,
+                dob: values.birthday,
+                gender: values.gender,
+                location: values.province,
+                phone_number: values.phoneNumber,
+                avatar_url: values.avatar_url,
+            };
+            const response = await updateUserProfile(payload).unwrap();
+            console.log('This is response: ', response);
+            console.log('This is payload: ', payload);
+        }
+        catch(error) {
+            console.error("Failed to update user profile", error);
+        }
+    }
+    console.log('This is profileUpload: ', profileUpload.previewUrl);
+
+
     return (
-        <section className = "w-full flex flex-col items-center justify-center mt-[5rem]">
-            <div className = "w-full flex items-center justify-center">
+        <>
+        <section className = "w-full flex flex-col items-center justify-center mt-[5rem] mb-[10rem]">
+            <div className = "flex items-center justify-start w-[var(--global-width)]">
                 <p className = "text-[3.5rem] font-bold text-[var(--color-primary)]">Hồ sơ của tôi</p>
             </div>
 
-            <div className = "flex items-center justify-center w-full h-[90%] gap-4">
-                <div className = "w-[460px] h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)]">
+            <div className = "flex items-center justify-between h-[90%] gap-4 w-[var(--global-width)]">
+                <div className = "w-[40%] h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)]">
                     <div
                         className = "w-full h-full flex items-center justify-center"
                     >
@@ -201,7 +242,7 @@ export default function PersonalProfilePage() {
                     </div>
                 </div>
 
-                <div className = "w-[648px] h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] p-4">
+                <div className = "!w-[60%] !h-[410px] !flex !flex-col !items-center !justify-center !bg-[var(--color-bg_white)] !rounded-[20px] !shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] !p-[30px] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4">
                     <div className = "w-full h-[10%] flex items-center justify-center">
                         <p className = "text-[1.5rem] font-bold text-[var(--color-primary)] w-full text-left">Thông tin cá nhân</p>
                         <Button 
@@ -217,12 +258,13 @@ export default function PersonalProfilePage() {
                                 layout = "vertical"
                                 className = "w-full"
                                 initialValues = {{
-                                    name: "Nguyễn Văn A",
-                                    birthday: "12/12/1990",
-                                    gender: "Nam",
-                                    province: "thành phố Hồ Chí Minh",
-                                    phoneNumber: "0909090909"
+                                    name: name,
+                                    birthday: dob,
+                                    gender: gender,
+                                    province: location,
+                                    phoneNumber: phone_number
                                 }}
+                                onFinish = {handleUpdateUserProfile}
                             >
                                 <div className = "mb-2">
                                     <p className="font-medium font-bold">Họ và tên<span className="text-red-500">*</span></p>
@@ -289,7 +331,7 @@ export default function PersonalProfilePage() {
                                     className = "w-full"
                                     name = "email"
                                 >
-                                    <Input placeholder = "example@gmail.com" disabled/>
+                                    <Input placeholder = {email} disabled/>
                                 </Form.Item>
                                 <Form.Item
                                     className = "w-full flex items-center justify-center"
@@ -304,37 +346,40 @@ export default function PersonalProfilePage() {
                         </ProfileModal>
                        
                     </div>
-                    <div className = "w-full h-full flex flex-col items-center justify-center">
+                    <div className = "w-full h-[2px] flex flex-col items-center justify-center bg-gray-200 my-[1rem]">
+                    </div>
+
+                    <div className = "w-full h-full flex flex-col items-center justify-start">
                         <div className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Họ và tên</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">Nguyễn Văn A</div>
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Họ và tên</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{name}</div>
                         </div>
                         <div  className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Ngày sinh</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">12/12/1990</div>
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Ngày sinh</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{dob}</div>
                         </div>
                         <div className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Giới tính</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">Nam</div>  
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Giới tính</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{gender === 'male' ? 'Nam' : 'Nữ'}</div>  
                         </div>
                         <div className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Tỉnh</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">Hà Nội</div> 
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Tỉnh</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{location}</div> 
                         </div>
                         <div className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Số điện thoại</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">0909090909</div>
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Số điện thoại</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{phone_number}</div>
                         </div>
                         <div className = "flex items-center justify-center gap-2 w-full">
-                            <div className = "w-[25%] ml-auto p-2">Email</div>
-                            <div className = "w-[75%] mr-auto text-right p-2">example@gmail.com</div>
+                            <div className = "w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Email</div>
+                            <div className = "w-[75%] mr-auto text-right p-2">{email}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <LearningProgress />
-            <FooterSection hasRegisterBox = {false}/>
         </section>
+        <FooterSection hasRegisterBox = {false}/>
+        </>
     )
 }
