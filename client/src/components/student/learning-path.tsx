@@ -25,8 +25,11 @@ const LearningPathSection = () => {
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">
-                        <Image src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0}
+                        {/* <Image src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0}
                             className = "w-full h-full object-cover rounded-[20px]"
+                        /> */}
+                        <Image src={EmptyLayout} alt="Empty Layout" width={24} height={24}
+                            className="object-cover !w-full !h-full !h-auto rounded-[20px]"
                         />
                     </div>
                 </div>
@@ -45,8 +48,11 @@ const LearningPathSection = () => {
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">
-                        <Image src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0}
+                        {/* <Image src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0}
                             className = "w-full h-full object-cover rounded-[20px]"
+                        /> */}
+                        <Image src={EmptyLayout} alt="Empty Layout" width={24} height={24}
+                            className="object-cover !w-full !h-full !h-auto rounded-[20px]"
                         />
                     </div>
                 </div>

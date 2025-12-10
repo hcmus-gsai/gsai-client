@@ -9,7 +9,13 @@ import { CourseDisplaySection } from "@/components/student/course-display";
 import { QASection } from "@/components/student/qna";
 import {LearningPathSection} from "@/components/student/learning-path";
 
+import { useState, useEffect } from 'react';
+
 export default function StudentHomePage() {
+    const [isClient, setIsClient] = useState(false)
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
     return(
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             <StudentGreetingSection
