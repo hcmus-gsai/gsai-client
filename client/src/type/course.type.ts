@@ -4,7 +4,8 @@ export interface CourseResponse {
 }
 
 export interface Course {
-    course_id: string;
+    id: string;
+    course_id?: string; // alias cho id (backward compatibility)
     course_code: string;
     course_name: string;
     course_description: string;

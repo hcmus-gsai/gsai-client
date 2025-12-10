@@ -44,80 +44,6 @@ const ProfileModal = ({isOpen, onClose, children}:{
     )
 }
 
-const LearningProgress = () =>{
-
-    return (
-        <div className = "w-[var(--global-width)] flex flex-col items-center justify-center mt-[10rem]">
-            <div className = "w-full flex items-center justify-center bg-red-200">
-                <div className = "w-[64%] flex-col items-start justify-center">
-                    <div>
-                        <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Xin chào Văn A!</p>
-                        <p className = "text-[1rem] text-[var(--color-primary)]">Bạn có một bài quiz sẽ hết hạn hôm nay. Hãy xem lại thời gian biểu và hoàn thành ngay nhé!</p>
-                    </div>
-                    <div className = "flex flex-wrap items-center bg-green-200">
-                        <Card
-                            className = "!flex-basis-calc[(50%-0.5rem)]"
-                        >
-                            <div>
-                                <p>Tình trạng học tập</p>
-                                <p>Đang học (33%)</p>
-                                <p>Đã hoàn thành (67%)</p>
-                                <Progress 
-                                    percent = {33} 
-                                    type = "circle"
-                                    size = {100}
-                                    strokeWidth={12}
-                                    strokeLinecap ="square"
-                                />
-                            </div>
-                        </Card>
-
-                        <Card
-                            className = "!flex-basis-calc[(50%-0.5rem)]"
-                        >
-                            <div>
-                                <p>Kỷ lục học liên tiếp</p>
-                                <Image src = {EmptyLayout} alt = "Empty Layout" width = {0} height = {0}/>
-                                <p>ngày</p>
-                            </div>
-                        </Card>
-
-                        <Card
-                            className = "!flex-basis-[100%]"
-                        >
-
-                        </Card>
-                    </div>
-
-                </div>
-                <div className = "w-[36%] flex items-center justify-center bg-blue-200">
-                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Lịch học</p>
-                </div>
-            </div>
-            <div>
-                <Card
-                    className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-                >
-
-                </Card>
-
-                <Card
-                    className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-                >
-
-                </Card>
-
-                <Card
-                    className = "!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
-                >
-
-                </Card>
-            </div>
-        </div>
-    )
-
-    
-}
 
 
 export default function PersonalProfilePage() {
@@ -190,7 +116,7 @@ export default function PersonalProfilePage() {
             console.error("Failed to update user profile", error);
         }
     }
-    console.log('This is profileUpload: ', profileUpload.previewUrl);
+    // console.log('This is profileUpload: ', profileUpload.previewUrl);
 
 
     return (

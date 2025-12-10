@@ -12,8 +12,15 @@ import { QASection } from "@/components/student/qna";
 import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";    
 
+import { useState, useEffect } from 'react';
 
 export default function StudentHomePage() {
+    const [isClient, setIsClient] = useState(false)
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+
     return(
 
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">

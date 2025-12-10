@@ -61,6 +61,12 @@ const StudentNavbar = () => {
                 <span onClick={handleLogout}>Đăng xuất</span>
             ),
         },
+        {
+            key : '3',
+            label : (
+                <span onClick = {() => router.push("/student/learning-progress")}>Quá trình</span>
+            )
+        }
     ];
 
     return (
