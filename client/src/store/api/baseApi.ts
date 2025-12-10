@@ -20,7 +20,7 @@ const baseQuery = fetchBaseQuery({
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
     return headers;
-  }, 
+  },
   timeout: 10_000, // 10 seconds timeout
 });
 
@@ -72,6 +72,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Auth', 'User', 'Course', 'Module', 'Lesson', 'Enrollment'],
+  tagTypes: ['Auth', 'User', 'Course', 'Module', 'Lesson', 'Enrollment', 'Quiz'],
   endpoints: () => ({}),
 });
