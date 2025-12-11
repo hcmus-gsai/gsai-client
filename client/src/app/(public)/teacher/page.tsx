@@ -62,7 +62,7 @@ export default function TeacherLandingPage() {
                     width={800}
                     height={800}
                     className="opacity-100"
-                    priority
+                    style={{ width: "auto", height: "auto" }}
                 />
             </div>
             <div className="absolute top-0 right-0 -z-10 pointer-events-none">
@@ -72,7 +72,7 @@ export default function TeacherLandingPage() {
                     width={800}
                     height={800}
                     className="opacity-100"
-                    priority
+                    style={{ width: "auto", height: "auto" }}
                 />
             </div>
         </div> 
@@ -114,7 +114,7 @@ export default function TeacherLandingPage() {
                     width={800}
                     height={800}
                     className="opacity-100"
-                    priority
+                    style={{ width: "auto", height: "auto" }}
                 />
             </div>
 
@@ -125,7 +125,7 @@ export default function TeacherLandingPage() {
                     width={800}
                     height={800}
                     className="opacity-100"
-                    priority
+                    style={{ width: "auto", height: "auto" }}
                 />
             </div>
         </div>

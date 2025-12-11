@@ -22,7 +22,6 @@ const ChatbotSection = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const [transcribeAudio] = useTranscribeAudioMutation();
-    const [textAreaInputValue, setTextAreaInputValue] = useState<string>("");
 
     const requestMicrophoneAccess = async () => {
         try {
@@ -95,16 +94,38 @@ const ChatbotSection = () => {
     const formData = formInstance[0];
     const [messages, setMessages] = useState<Message[]>([]);
     const [row, setRow] = useState(1);
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    // Load messages từ sessionStorage sau khi hydration hoàn tất
+    useEffect(() => {
+        const saved = sessionStorage.getItem('chatMessages');
+        if (saved) {
+            setMessages(JSON.parse(saved));
+        }
+        setIsHydrated(true);
+    }, []);
+
+    // Lưu messages vào sessionStorage (chỉ sau khi đã hydrate)
+    useEffect(() => {
+        if (isHydrated) {
+            sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+        }
+    }, [messages, isHydrated]);
+
 
     const handleMessageSubmit = async() => {
         const data = formData.getFieldsValue();
-        console.log(data)
+        console.log(data);
 
+        
 
+        if (!data.chatMessage?.trim()) return;
         
         setMessages((prev) => [...prev, {sender : 'user', text: data.chatMessage}])
         
-        // // Simulate AI response
+        formData.resetFields(['chatMessage']);
+        setRow(1);
+        
         setTimeout(() => {
             setMessages((prev) => [
                 ...prev,
@@ -132,7 +153,7 @@ const ChatbotSection = () => {
             <div className="w-full flex justify-center items-center mt-[1rem]">
                 <Form
                     form={formData}
-                    className={`w-full flex justify-between items-center !bg-[var(--color-white)] !border !border-gray-200 !px-[1rem] !py-[0.5rem] ${row > 2 ? 'rounded-[20px]' : 'rounded-full'}`}
+                    className={`w-full flex justify-between items-end !bg-[var(--color-white)] !border !border-gray-200 !px-[0.5rem] !py-[0.5rem] ${row >= 2 ? 'rounded-[20px]' : 'rounded-full'}`}
                     onFinish={handleMessageSubmit}
                 >
                     <Form.Item name="chatMessage" className="!mb-0 !flex-1">
@@ -154,16 +175,14 @@ const ChatbotSection = () => {
                                     formData.submit();
                                 }
                             }}
-                            value={textAreaInputValue}
                         />
                     </Form.Item>
 
                     <Button
                         onClick={handleAudioRecording}
-                        className="!border-none !shadow-none"
-                    >
-                        {recording ? <BorderOutlined /> : <AudioOutlined />}
-                    </Button>
+                        className="!rounded-full !hover:bg-[var(--color-secondary)] border-none !shadow-none"
+                        icon = {recording ? <BorderOutlined /> : <AudioOutlined />}
+                    />
                 </Form>
             </div>
         </div>
