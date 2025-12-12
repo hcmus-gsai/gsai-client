@@ -8,7 +8,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from "next/navigation";
 import { useGetCourseModulesQuery, useGetCoursesByLessonIdQuery } from "@/store/api/[module]/courseApi";
 import { useLazyGetModuleLessonsQuery } from "@/store/api/[module]/moduleApi";
-
+import { useAppDispatch, useAppSelector } from '@/store/hook';
+import { setModuleId } from '@/store/slice/lessonSlice';
 interface IChapterState {
     id: string;
     isExtended: boolean;
@@ -18,48 +19,55 @@ interface IChapterState {
 const ContentSection = () => {
 
     //===========Extendable Navbar============//
-        const [extendableNavbar, setExtendableNavbar] = useState(true);
-        const toggleExtendableNavbar = () => {
-            setExtendableNavbar(!extendableNavbar);
-        }
-    
-        const router = useRouter();
-        const params = useParams();
-        const lessonId = params.lessionId as string;
-    
-        const { data: courseRes } = useGetCoursesByLessonIdQuery(lessonId);
-        const course = courseRes?.data;
-        const { data: modulesRes } = useGetCourseModulesQuery(course ? course.id : '');
-        const modules = modulesRes?.modules ?? [];
-        const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
-        const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
-        const [chapterState, setChapterState] = useState<IChapterState[]>([]);
-    
-        useEffect(() => {
-            if (modules.length > 0) {
-                setChapterState(
-                    modules.map((m:any) => ({
-                        id: String(m.id),
-                        isExtended: false,
-                    }))
-                );
-            }
-        }, [modules]);
-    
-        const handleToggleChapter = async (id: string) => {
-            setChapterState((prev) =>
-                prev.map((cs) =>
-                    cs.id === id ? { ...cs, isExtended: !cs.isExtended } : cs
-                )
+    const [extendableNavbar, setExtendableNavbar] = useState(true);
+    const toggleExtendableNavbar = () => {
+        setExtendableNavbar(!extendableNavbar);
+    }
+
+    const dispatch = useAppDispatch();
+    const moduleId = useAppSelector((state) => state.lesson.moduleId);
+    const router = useRouter();
+    const params = useParams();
+    const lessonId = params.lessionId as string;
+
+    const { data: courseRes } = useGetCoursesByLessonIdQuery(lessonId, {
+        skip: !lessonId,
+    });
+    const course = courseRes?.data;
+
+    const { data: modulesRes } = useGetCourseModulesQuery(course?.id ?? '', {
+        skip: !course?.id,
+    });
+    const modules = modulesRes?.modules ?? [];
+    const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
+    const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
+    const [chapterState, setChapterState] = useState<IChapterState[]>([]);
+
+    useEffect(() => {
+        if (modules.length > 0) {
+            setChapterState(
+                modules.map((m:any) => ({
+                    id: String(m.id),
+                    isExtended: false,
+                }))
             );
-            if (!lessonsMap[id]) {
-                const res = await triggerGetLessons(id).unwrap();
-                setLessonsMap((prev) => ({
-                    ...prev,
-                    [id]: res.lesson,
-                }));
-            }
-        };
+        }
+    }, [modules]);
+
+    const handleToggleChapter = async (id: string) => {
+        setChapterState((prev) =>
+            prev.map((cs) =>
+                cs.id === id ? { ...cs, isExtended: !cs.isExtended } : cs
+            )
+        );
+        if (!lessonsMap[id]) {
+            const res = await triggerGetLessons(id).unwrap();
+            setLessonsMap((prev) => ({
+                ...prev,
+                [id]: res.lesson,
+            }));
+        }
+    };
 
     return (
         <>
@@ -121,7 +129,10 @@ const ContentSection = () => {
                                                     <Card 
                                                         key={lesson.id}
                                                         className="!w-full !min-h-[2.5625rem] !h-auto !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
-                                                        onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
+                                                        onClick={() => { 
+                                                            dispatch(setModuleId(module.id as string));
+                                                            router.push(`/student/lesson/${lesson.id}/${lesson.type}`); 
+                                                        }}
                                                     >
                                                         <div className="w-full flex flex-col items-start justify-start">
                                                             <p className="text-[0.75rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">{lesson.lesson_name}</p>

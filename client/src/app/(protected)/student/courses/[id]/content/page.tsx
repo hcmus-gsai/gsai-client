@@ -11,6 +11,8 @@ import { useState, useEffect } from 'react';
 
 import {useGetCourseByIdQuery, useGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
+import { useAppDispatch } from "@/store/hook";
+import { setModuleId } from "@/store/slice/lessonSlice";
 
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
@@ -22,27 +24,26 @@ interface IChapterState {
 };
 
 const CourseModules = () => {
-    const router = useRouter();
-    const {id} = useParams();
     
 
-    // Fetch data (Giữ nguyên logic của bạn)
-    // const { data: courseRes } = useGetCourseByIdQuery(courseId);
-    // const course = courseRes?.data;
-    // const { data: modulesRes } = useGetCourseModulesQuery(courseId);
-    // const modules = modulesRes?.modules ?? [];
-    // const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
-    // const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
-    // const [chapterState, setChapterState] = useState<IChapterState[]>([]);
-    const {data: courseRes} = useGetCourseByIdQuery(id as string);
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const dispatch = useAppDispatch();
+    const {id} = useParams();
+
+    
+    
+    const {data: courseRes} = useGetCourseByIdQuery(id as string, {
+        skip: !id,
+    });
     const course = courseRes?.data;
-    const {data: moduleRes} = useGetCourseModulesQuery(id as string);
+    const {data: moduleRes} = useGetCourseModulesQuery(id as string, {
+        skip: !id,
+    });
     const modules = moduleRes?.modules ?? [];
     const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
     const [chapterState, setChapterState] = useState<IChapterState[]>([]);
     const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
-
-    
 
     useEffect(() => {
         if (modules.length > 0) {
@@ -139,7 +140,12 @@ const CourseModules = () => {
                                             <Card
                                                 key={lesson.id}
                                                 className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
-                                                onClick={() => { router.push(`/student/lesson/${lesson.id}/${lesson.type}`); }}
+                                                onClick={() => { 
+                                                    dispatch(setModuleId(module.id));
+                                                    // Lưu moduleId vào sessionStorage để persist khi refresh
+                                                    sessionStorage.setItem('currentModuleId', module.id);
+                                                    router.push(`/student/lesson/${lesson.id}/${lesson.type}`); 
+                                                }}
                                                 styles={{ body: { width: '100%', padding: '16px' } }}
                                             >
                                                 <div className="w-full flex flex-col items-start justify-start">
@@ -247,6 +253,13 @@ const CourseSchedule = () => {
 }
 
 export default function CourseDetailPage() {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+    if (!isClient) {
+        return <div>Loading...</div>;
+    }
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-hidden bg-white">
             {/* CONTAINER CHÍNH */}

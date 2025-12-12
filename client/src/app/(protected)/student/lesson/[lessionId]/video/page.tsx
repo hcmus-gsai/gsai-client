@@ -6,15 +6,22 @@ import { Switch } from "antd";
 
 // Section imports
 import ChatbotSection from '../components/chatbotSection';
+import { useAppSelector } from '@/store/hook';
 
 export default function LectureVideoPage() {
     //===========Video OCR Service============//
-
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    // const [isClient, setIsClient] = useState(false);
+    
+    // useEffect(() => {
+    //     setIsClient(true);
+    // }, []);
+
+    
 
     const toggleFullScreen = () => {
         const ele = videoContainerRef.current;
@@ -142,6 +149,8 @@ export default function LectureVideoPage() {
     //ASR and OCR Toggle
     const [enableASR, setEnableASR] = useState(false);
     const [enableOCR, setEnableOCR] = useState(false);
+
+    
 
     return (
         <>

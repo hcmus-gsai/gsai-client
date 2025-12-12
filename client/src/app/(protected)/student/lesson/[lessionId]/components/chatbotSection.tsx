@@ -8,13 +8,26 @@ import {Button, Card, Form, Input, Switch, Progress, Calendar} from "antd";
 //For Voice Recorder
 import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
 import {useTranscribeAudioMutation} from '@/store/api/[module]/voiceApi';
+import {useSendMessageMutation, useGetChatHistoryQuery} from '@/store/api/[module]/chatApi';
+import {ContentType} from '@/type/chat.type';
+import {useParams} from 'next/navigation';
+import { useAppSelector } from '@/store/hook';
 
 interface Message {
-    sender: 'user' | 'ai';
+    sender: 'user' | 'bot';
     text: string;
 }
 
 const ChatbotSection = () => {
+
+    const [sendMessage] = useSendMessageMutation();
+    const moduleId = useAppSelector((state) => state.lesson.moduleId);
+    const { data: historyData, isLoading, isFetching } = useGetChatHistoryQuery({
+        module_id: moduleId as string,
+        limit: 10,
+        offset: 0
+    });
+    
     //===========ASR Service============//
     const [permission, setPermission] = useState(false);
     const [recording, setRecording] = useState(false);
@@ -71,7 +84,7 @@ const ChatbotSection = () => {
                 } catch (error) {
                     console.error(error);
                     setMessages(prev => [...prev, {
-                        sender: "ai",
+                        sender: "bot",
                         text: "Transcription failed"
                     }]);
                 }
@@ -95,20 +108,33 @@ const ChatbotSection = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [row, setRow] = useState(1);
     const [isHydrated, setIsHydrated] = useState(false);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
-    // Load messages từ sessionStorage sau khi hydration hoàn tất
+    
     useEffect(() => {
-        const saved = sessionStorage.getItem('chatMessages');
-        if (saved) {
-            setMessages(JSON.parse(saved));
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight - chatContainerRef.current.clientHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [messages]);
+
+    useEffect(() => {
+        if (historyData?.messages && historyData.messages.length > 0) {
+            // Chuyển đổi từ ChatMessage[] sang Message[]
+            const loadedMessages: Message[] = historyData.messages.map((msg) => ({
+                sender: msg.sender_type === 'user' ? 'user' : 'bot',
+                text: msg.message_text || ''
+            }));
+            setMessages(loadedMessages);
         }
         setIsHydrated(true);
-    }, []);
+    }, [historyData]);
 
-    // Lưu messages vào sessionStorage (chỉ sau khi đã hydrate)
     useEffect(() => {
         if (isHydrated) {
-            sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+            // sessionStorage.setItem('chatMessages', JSON.stringify(messages));
         }
     }, [messages, isHydrated]);
 
@@ -126,18 +152,45 @@ const ChatbotSection = () => {
         formData.resetFields(['chatMessage']);
         setRow(1);
         
-        setTimeout(() => {
+        // Gọi API để gửi message đến chatbot
+        
+        if (!moduleId) {
             setMessages((prev) => [
                 ...prev,
-                { sender: "ai", text: "This is the AI's response." },
+                { sender: "bot", text: "Không tìm thấy module. Vui lòng quay lại trang khóa học và chọn bài học." },
             ]);
-        }, 800);
+            return;
+        }
+        
+        try {
+            const response = await sendMessage({
+                module_id: moduleId,
+                content_type: ContentType.TEXT,
+                message_text: data.chatMessage,
+            }).unwrap();
+            
+            console.log(response);
+            
+            // Thêm response từ bot vào messages
+            setMessages((prev) => [
+                ...prev,
+                { sender: "bot", text: response.bot_response.message_text },
+            ]);
+        } catch (error) {
+            console.error("Error sending message:", error);
+            setMessages((prev) => [
+                ...prev,
+                { sender: "bot", text: "Có lỗi xảy ra, vui lòng thử lại." },
+            ]);
+        }
     }
     //=======================================//
     
     return (
         <div className="w-[24%] h-[487px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] border border-gray-200 p-[0.5rem]">
-            <div className='flex-1 w-full flex flex-col items-start justify-start gap-[1rem] overflow-y-auto border-b border-gray-200  p-[0.5rem]'>
+            <div
+            ref = {chatContainerRef} 
+            className='flex-1 w-full flex flex-col items-start justify-start gap-[1rem] overflow-y-auto border-b border-gray-200  p-[0.5rem]'>
                 {messages.map((msg, index) => (
                     msg.sender === 'user' ? (
                         <div key={index} className="ml-auto flex items-center justify-end bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]">
@@ -149,6 +202,7 @@ const ChatbotSection = () => {
                         </div>
                     )
                 ))}
+                
             </div>
             <div className="w-full flex justify-center items-center mt-[1rem]">
                 <Form
