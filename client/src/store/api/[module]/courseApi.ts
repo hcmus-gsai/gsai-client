@@ -1,6 +1,6 @@
 
 import { baseApi } from '../baseApi';
-import { CourseResponse} from '../../../type/course.type';
+import { CourseListResponse, CourseQueryParams, CourseResponse} from '../../../type/course.type';
 import { ModuleResponse} from '../../../type/module.type';
 
 export const courseApi = baseApi.injectEndpoints({
@@ -24,7 +24,21 @@ export const courseApi = baseApi.injectEndpoints({
             query: (lesson_id) => `/courses/lesson/${lesson_id}`,
             providesTags: ['Course'],
         }),
-    })     
+
+        seachCourses: builder.query<CourseListResponse, CourseQueryParams>({
+            query: (params) => ({
+                url: '/courses/search',    
+                params,
+            }),
+            providesTags: (result) => 
+                result
+                ? [
+                    ...result.data.map(({ id }) => ({ type: 'Course' as const, id })),
+                    { type: 'Course', id: 'LIST' },
+                ]
+                : [{ type: 'Course', id: 'LIST' }],
+        }),
+    }),
 });
 
 export const {
@@ -33,4 +47,6 @@ export const {
     useLazyGetCourseByIdQuery,
     useGetCourseModulesQuery,
     useGetCoursesByLessonIdQuery,
+    useSeachCoursesQuery,
+    useLazySeachCoursesQuery,
 } = courseApi;
