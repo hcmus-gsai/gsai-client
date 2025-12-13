@@ -22,11 +22,18 @@ const ChatbotSection = () => {
 
     const [sendMessage] = useSendMessageMutation();
     const moduleId = useAppSelector((state) => state.lesson.moduleId);
-    const { data: historyData, isLoading, isFetching } = useGetChatHistoryQuery({
-        module_id: moduleId as string,
-        limit: 10,
-        offset: 0
-    });
+    
+    // Skip query nếu moduleId chưa có (tránh gọi API với moduleId undefined)
+    const { data: historyData, isLoading, isFetching } = useGetChatHistoryQuery(
+        {
+            module_id: moduleId as string,
+            limit: 50,
+            offset: 0
+        },
+        {
+            skip: !moduleId
+        }
+    );
     
     //===========ASR Service============//
     const [permission, setPermission] = useState(false);
@@ -111,37 +118,44 @@ const ChatbotSection = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
     
+    // Ref để track xem đã load history lần đầu chưa
+    const isInitialLoad = useRef(true);
+
+    // Scroll xuống cuối khi có tin nhắn mới
     useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({
-                top: chatContainerRef.current.scrollHeight - chatContainerRef.current.clientHeight,
-                behavior: 'smooth'
-            });
+        if (chatContainerRef.current && messages.length > 0) {
+            // Dùng setTimeout để đảm bảo DOM đã render xong
+            setTimeout(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTo({
+                        top: chatContainerRef.current.scrollHeight,
+                        // Lần đầu load history thì scroll instant, sau đó mới smooth
+                        behavior: isInitialLoad.current ? 'instant' : 'smooth'
+                    });
+                    isInitialLoad.current = false;
+                }
+            }, 50);
         }
     }, [messages]);
 
+    // Load history từ API - chỉ load 1 lần khi có data và chưa có messages
+    const hasLoadedHistory = useRef(false);
+    
     useEffect(() => {
-        if (historyData?.messages && historyData.messages.length > 0) {
-            // Chuyển đổi từ ChatMessage[] sang Message[]
+        if (historyData?.messages && historyData.messages.length > 0 && !hasLoadedHistory.current) {
             const loadedMessages: Message[] = historyData.messages.map((msg) => ({
                 sender: msg.sender_type === 'user' ? 'user' : 'bot',
                 text: msg.message_text || ''
             }));
             setMessages(loadedMessages);
+            hasLoadedHistory.current = true;
         }
         setIsHydrated(true);
     }, [historyData]);
 
-    useEffect(() => {
-        if (isHydrated) {
-            // sessionStorage.setItem('chatMessages', JSON.stringify(messages));
-        }
-    }, [messages, isHydrated]);
-
 
     const handleMessageSubmit = async() => {
         const data = formData.getFieldsValue();
-        console.log(data);
 
         
 
@@ -189,21 +203,21 @@ const ChatbotSection = () => {
     return (
         <div className="w-[24%] h-[487px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] border border-gray-200 p-[0.5rem]">
             <div
-            ref = {chatContainerRef} 
+            ref={chatContainerRef}
             className='flex-1 w-full flex flex-col items-start justify-start gap-[1rem] overflow-y-auto border-b border-gray-200  p-[0.5rem]'>
                 {messages.map((msg, index) => (
                     msg.sender === 'user' ? (
-                        <div key={index} className="ml-auto flex items-center justify-end bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]">
+                        <div key={index} className="w-auto max-w-[80%] ml-auto flex items-center justify-end bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]">
                             <p className="text-white">{msg.text}</p>
                         </div>
                     ) : (
-                        <div key={index} className="flex items-center justify-start w-full">
-                            <p className="text-[var(--color-primary)]">{msg.text}</p>
+                        <div key={index} className="w-auto max-w-[80%] flex items-center justify-start bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
+                            <p className="text-[var(--color-primary)] text-wrap">{msg.text}</p>
                         </div>
                     )
                 ))}
-                
             </div>
+            
             <div className="w-full flex justify-center items-center mt-[1rem]">
                 <Form
                     form={formData}
