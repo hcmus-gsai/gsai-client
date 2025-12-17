@@ -21,3 +21,19 @@ export interface OptionResponse {
     is_correct: boolean;
     order_index: number;
 }
+
+export interface AnswerSubmit {
+    question_id: string;
+    student_answer_text?: string;
+    selected_option_ids?: string;
+}
+
+export interface QuizSubmitResponse {
+    attempt: any;
+    responses: any[];
+}
+
+export interface GradeResponse {
+    updatedAttempt: any;
+    responses: any[];
+}

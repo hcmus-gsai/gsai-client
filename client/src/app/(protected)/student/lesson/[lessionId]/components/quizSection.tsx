@@ -16,10 +16,6 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
     return (
         <div className="flex-1">
-            <div className="w-full flex items-center justify-start mb-[1rem]">
-                <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">{quiz?.lesson_name}</p>
-            </div>
-
             <Card
                 className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-neutral)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
             >
@@ -36,15 +32,25 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={() => router.push(`/student/quiz/${quiz?.quiz_id}`)}
-                        className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white"
-                    >
-                        Bắt đầu
-                    </Button>
+                    {!isCompleted ? (
+                        <Button
+                            onClick={() => router.push(`/student/quiz/${quiz?.quiz_id}`)}
+                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white !border !border-[var(--color-secondary)]
+                                    hover:!bg-neutral hover:!text-[var(--color-secondary)]"
+                        >
+                            Bắt đầu
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => router.push(`/student/quiz/${quiz?.quiz_id}`)}
+                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-neutral)] !text-[var(--color-secondary)] !border !border-[var(--color-secondary)]
+                                    hover:!bg-[var(--color-secondary)] hover:!text-white"
+                        >
+                            Làm lại
+                        </Button>
+                    )}
                 </div>
-
-            </Card>
+            </Card >
 
             {!isCompleted ? (
                 <Card
@@ -114,7 +120,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
             }
 
 
-        </div>
+        </div >
     )
 }
 
