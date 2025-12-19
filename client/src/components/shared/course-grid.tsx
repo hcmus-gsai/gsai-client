@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 
 import { EnrolledCourse } from '@/type/enrollment.type';
 import {Course} from '@/type/course.type';
+import { useAppDispatch } from "@/store/hook";
+import { setTitle } from "@/store/slice/courseDisplaySlice";
 
 export const CourseGrid = (
     {
@@ -24,6 +26,7 @@ export const CourseGrid = (
     }
 ) => {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     
     if (!courseData) return null;
     
@@ -35,7 +38,7 @@ export const CourseGrid = (
                         <Col span = {colWidth} key = {index} className = "!flex !items-center !justify-center">
                             <Card 
                                 className = "w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick = {()=>router.push(`/student/courses/${c.course_id}`)}
+                                onClick = {()=>router.push(`/student/courses/${c.id}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
                                     {/* <Image 
@@ -69,7 +72,16 @@ export const CourseGrid = (
                                         {
                                             c.category.toString().split(',').map((category, idx) => {
                                                 return (
-                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]">
+                                                    <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]"
+                                                        
+                                                    onClick = {
+                                                            (e) => {
+                                                                e.stopPropagation();
+                                                                dispatch(setTitle(category));
+                                                                router.push(`/student/category/${category.toLowerCase().replace(/ /g, '-')}`);
+                                                            }
+                                                        }
+                                                    >
                                                         <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
                                                     </div>
                                                 )

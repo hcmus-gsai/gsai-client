@@ -14,6 +14,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from 'react';
 
 import { useSignOutMutation } from '@/store/api/[module]/authApi';
+import CourseSearch from '@/components/course/course-search';
 
 const StudentNavbar = () => {
     // Hook definition
@@ -122,7 +123,7 @@ const StudentNavbar = () => {
                             />
                         </ConfigProvider>
                     </div>
-                    <div className="flex items-center justify-center w-[22.75rem] h-full">
+                    {/* <div className="flex items-center justify-center w-[22.75rem] h-full">
                         <div className="flex items-center justify-start w-[18.75rem] h-full">
                             <Input
                                 placeholder="Tìm kiếm môn học ở đây..."
@@ -138,7 +139,8 @@ const StudentNavbar = () => {
                                 />
                             </Button>
                         </div>
-                    </div>
+                    </div> */}
+                    <CourseSearch />
                 </div>
                 <div className="flex items-center justify-end w-full h-[3.5rem]">
                     <div className="flex items-center justify-center w-[3.5rem] h-full">

@@ -142,8 +142,6 @@ const CourseModules = () => {
                                                 className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
                                                 onClick={() => { 
                                                     dispatch(setModuleId(module.id));
-                                                    // Lưu moduleId vào sessionStorage để persist khi refresh
-                                                    sessionStorage.setItem('currentModuleId', module.id);
                                                     router.push(`/student/lesson/${lesson.id}/${lesson.type}`); 
                                                 }}
                                                 styles={{ body: { width: '100%', padding: '16px' } }}

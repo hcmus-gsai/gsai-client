@@ -18,3 +18,22 @@ export interface Course {
     teacher_name: string;
     is_enrolled: boolean;
 }
+
+
+
+export interface CourseQueryParams {
+  name?: string;
+  category?: string;
+  minTuitionFee?: number;
+  maxTuitionFee?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
+
+export interface CourseListResponse {
+    message: string;
+    data: Course[];
+}
+

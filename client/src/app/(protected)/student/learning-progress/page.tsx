@@ -1,30 +1,216 @@
 'use client';
 import "@ant-design/v5-patch-for-react-19";
 import Image from "next/image";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {Card, Progress, Input, Calendar, ConfigProvider, theme, Button} from "antd";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { FooterSection } from "@/components/guest/ui/guest";
 import StreakLogo from "@/../public/student/StreakLogo.svg";
 import UpperPointer from "@/../public/student/UpperPointer.svg";
 import LowerPointer from "@/../public/student/LowerPointer.svg";
-import { UpOutlined, DownOutlined } from "@ant-design/icons";
+import { UpOutlined, DownOutlined, CalendarOutlined } from "@ant-design/icons";
+import { DatePicker } from "antd";
 import dayjs from "dayjs";
-import "dayjs/locale/vi"; // Import ngôn ngữ tiếng Việt
-import updateLocale from "dayjs/plugin/updateLocale"; // Import plugin updateLocale
-import localeData from "dayjs/plugin/localeData";
-import viVN from "antd/locale/vi_VN"; 
+
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
 import { useGetUserProfileQuery } from "@/store/api/[module]/userApi";
 import VideoIcon from "@/../public/student/VideoIcon.svg";
 import MoreIcon from "@/../public/student/MoreIcon.svg";
-dayjs.extend(updateLocale);
-dayjs.extend(localeData);
+import staticMethods from "antd/es/message";
+// import { date } from "better-auth";
+import { useAppSelector, useAppDispatch } from "@/store/hook";
+const CustomCalendar = () => {
+    const [chosenDate, setChosenDate] = useState<Date | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
-dayjs.updateLocale("vi", {
-  weekStart: 1, 
-});
+    const tasks = useAppSelector((state) => state.task.tasks);
+
+    const getTasksForDate = (date: Date) => {
+        return tasks.filter(task => new Date(task.dueDate).toDateString() === date.toDateString());
+    }
+
+    const calendar_info = {
+        weekDays: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
+    }
+
+    const calendar_dates = useMemo(()=>{
+
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        const days = [];
+        const first = new Date(currentYear, currentMonth, 1);
+        const last = new Date(currentYear, currentMonth + 1, 0);
+        const startDate = new Date(first);
+        const dayOfWeek = first.getDay();
+        const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startDate.setDate(startDate.getDate() - offset);
+        
+        const temp = new Date(startDate);
+
+        while (temp <= last || temp.getDay() !== 1){
+            const dayTasks = getTasksForDate(temp);
+            const completedCnt = dayTasks.filter(
+                task => task.status === 'completed'
+            ).length;
+            
+            const overdueCnt = dayTasks.filter(
+                task => task.status === 'overdue'
+            ).length;
+            
+            const pendingCnt = dayTasks.filter(
+                task => task.status === 'pending'
+            ).length;
+            
+            days.push({
+                date: new Date(temp),
+                checkCurrentDay : temp.toDateString() === new Date().toDateString(),
+                checkCurrentMonth: temp.getMonth() == currentMonth,
+                taskCount: dayTasks.length,
+                completedCnt,
+                overdueCnt,
+                pendingCnt,
+                tasks: dayTasks,
+            });
+            temp.setDate(temp.getDate() + 1);
+
+        }
+
+
+        return days;
+    },[currentDate, tasks ])
+
+    return (
+        <div className="flex flex-col h-full bg-white text-gray-800 overflow-hidden w-full rounded-[20px]">            
+            <div className="flex flex-col items-start justify-between p-4 border-b border-gray-200 gap-[1rem]">
+                <div className="w-full flex items-center justify-between">
+                    <Button
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))}
+                        className="
+                            !p-2
+                            rounded-[20px]
+                            !shadow-none
+                            !border-none
+                            !text-gray-600
+                            hover:!bg-gray-200
+                            hover:!text-gray-800
+                            transition-colors
+                            duration-200
+                        "
+                    >
+                        Trước
+                    </Button>
+                    
+                    <div className="text-[1rem] font-bold text-gray-900 min-w-[160px] text-center">
+                        {currentDate.toLocaleString('default', { month: 'long' }) === 'January' 
+                        ? 'Tháng 1' : currentDate.toLocaleString('default', { month: 'long' }) === 'February' 
+                        ? 'Tháng 2' : currentDate.toLocaleString('default', { month: 'long' }) === 'March' 
+                        ? 'Tháng 3' : currentDate.toLocaleString('default', { month: 'long' }) === 'April' 
+                        ? 'Tháng 4' : currentDate.toLocaleString('default', { month: 'long' }) === 'May' 
+                        ? 'Tháng 5' : currentDate.toLocaleString('default', { month: 'long' }) === 'June' 
+                        ? 'Tháng 6' : currentDate.toLocaleString('default', { month: 'long' }) === 'July' 
+                        ? 'Tháng 7' : currentDate.toLocaleString('default', { month: 'long' }) === 'August' 
+                        ? 'Tháng 8' : currentDate.toLocaleString('default', { month: 'long' }) === 'September' 
+                        ? 'Tháng 9' : currentDate.toLocaleString('default', { month: 'long' }) === 'October' 
+                        ? 'Tháng 10' : currentDate.toLocaleString('default', { month: 'long' }) === 'November' 
+                        ? 'Tháng 11' : 
+                          'Tháng 12'},
+                        {currentDate.getFullYear()}
+                    </div>
+                    
+                    <Button
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))}
+                        className="
+                            !p-2
+                            rounded-[20px]
+                            !shadow-none
+                            !border-none
+                            !text-gray-600
+                            hover:!bg-gray-200
+                            hover:!text-gray-800
+                            transition-colors
+                            duration-200
+                        "
+                    >
+                       Sau
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-[0.5rem]">
+                    <Button
+                        className="!px-4 !py-2 !bg-secondary !hover:bg-secondary/80 !text-white rounded-[20px] !shadow-sm !font-medium !transition-colors !text-sm !border-none" 
+                        onClick={() => setCurrentDate(new Date())}
+                    >
+                        Hôm nay
+                    </Button>
+                    
+                    
+                    <DatePicker
+                        open = {showDatePicker}
+                        onOpenChange = {setShowDatePicker}
+                        value = {dayjs(currentDate)}
+                        onChange = {(date) => {
+                            if (date) {
+                                setCurrentDate(date.toDate());
+                                setChosenDate(date.toDate());
+                            }
+                            setShowDatePicker(false);
+                        }}
+                        style={{ width: 0, height: 0, padding: 0, border: 'none', visibility: 'hidden', position: 'absolute' }}
+
+                    />
+                    <Button
+                        className="!p-2 !bg-gray-100 hover:!bg-gray-200 !text-gray-600 rounded-[20px] !shadow-none !border-none"
+                        onClick={() => setShowDatePicker(true)}
+                        icon={<CalendarOutlined />}
+                    />
+                </div>
+            </div>
+            
+            <div className = "flex flex-col flex-1 overflow-hidden w-full">
+                <div className = "grid grid-cols-7 gap-2">
+                    {calendar_info.weekDays.map(day => (
+                        <div key={day} className="py-2 text-center text-xs font-tracking-wider text-gray-500">
+                            {day}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-7 auto-rows-fr flex-1 gap-[1px]">
+                    
+
+                    {calendar_dates.map((day: any, index: number)=>{
+                        const isSelected = chosenDate && day.date.toDateString() === chosenDate.toDateString();
+
+                        return (
+                            <div
+                                key = {index}
+                                onClick = {() => setChosenDate(day.date)}
+                                className={`
+                                    relative flex flex-col h-[40px] w-full cursor-pointer transition-all duration-200 rounded-[5px]
+                                    ${!day.checkCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white'}
+                            
+                                    ${isSelected ? 'ring-2 ring-inset ring-secondary' : 'hover:bg-gray-100'}
+                                `}
+                            >
+                                <div className={`
+                                    flex items-center justify-center w-full h-full rounded-[5px]
+                                    ${day.checkCurrentDay ? 'bg-secondary text-white shadow-md' : ''}
+                                `}>
+                                    {day.date.getDate()}
+                                </div>
+                            </div>
+                        )
+                    })}
+
+                </div>
+            </div>
+        </div>
+
+    )
+}
+
 export default function LearningProgressPage() {
     const [isClient, setIsClient] = useState(false);
 
@@ -40,23 +226,7 @@ export default function LearningProgressPage() {
         { id: 5, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
     ]
 
-    const [currentDate, setCurrentDate] = useState(dayjs());
-
-    const headerRender = ({ value, onChange }: any) => {
-        const current = value.clone();
-        
-        return (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 8px 16px 8px" }}>
-            <span style={{ fontSize: "16px", fontWeight: "700", color: "#1f2937" }}>
-              Tháng {current.format("M, YYYY")}
-            </span>
-            <div style={{ display: "flex", gap: "12px", color: "#4b5563" }}>
-              <UpOutlined style={{ fontSize: '12px', cursor: 'pointer' }} onClick={() => onChange(current.subtract(1, 'month'))}/>
-              <DownOutlined style={{ fontSize: '12px', cursor: 'pointer' }} onClick={() => onChange(current.add(1, 'month'))}/>
-            </div>
-          </div>
-        );
-    };
+    
 
     const {data: profile, isLoading, error} = useGetUserProfileQuery();
 
@@ -78,7 +248,6 @@ export default function LearningProgressPage() {
     const [activeTab, setActiveTab] = useState("all");
     const courseListRef = useRef<HTMLDivElement>(null);
 
-    // Scroll lên đầu div khi filter thay đổi
     useEffect(() => {
         if (courseListRef.current) {
             courseListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -97,8 +266,8 @@ export default function LearningProgressPage() {
           onClick={() => setActiveTab(id)}
           className={`!px-4 !py-1.5 !rounded-full !text-sm !font-medium !transition-colors ${
             activeTab === id
-              ? "!bg-blue-100 !text-blue-600" // Style khi được chọn (Active)
-              : "!bg-gray-100 !text-gray-500 hover:!bg-gray-200" // Style mặc định
+              ? "!bg-blue-100 !text-blue-600" 
+              : "!bg-gray-100 !text-gray-500 hover:!bg-gray-200"
           }`}
         >
           {label}
@@ -109,73 +278,58 @@ export default function LearningProgressPage() {
     return (
         <>
 
-        <section className = "w-full flex flex-col items-center justify-center mt-[10rem]">
-            <div className = "w-[var(--global-width)] flex items-start justify-center gap-[1rem]">
-                <div className = "w-[64%] flex-col items-start justify-center">
-                    <div>
+        <section className = "h-full w-full flex flex-col items-center justify-center mt-[10rem]">
+            <div className = "w-[var(--global-width)] flex items-stretch justify-between gap-[1rem]">
+                <div className ="flex-1 flex flex-col items-start justify-start">
+                    <div className = "mb-[1rem]">
                         <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Xin chào {name}!</p>
                         <p className = "text-[1rem] text-[var(--color-primary)]">Bạn có một bài quiz sẽ hết hạn hôm nay. Hãy xem lại thời gian biểu và hoàn thành ngay nhé!</p>
                     </div>
-                    <div className = "grid grid-cols-[64%_34%] grid-rows-[auto_auto] gap-[1rem]">
-                        
-                        <div className = "flex flex-col items-center justify-center bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                            <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Tình trạng học tập</p>
-                            <div className = "flex item-center justify-center w-full">
-                                <div className = "flex items-end justify-end">
-                                    <p className = "text-[0.875rem] text-[var(--color-primary)]">Đã hoàn thành (67%)</p>
-                                    <Image src={LowerPointer} alt="Lower Pointer" width={36} height={36}
-                                        className = "relative bottom-5 object-cover !w-[3rem] !h-auto"
+                    <div className = "flex-1 flex flex-col w-full gap-[1rem]">
+                        <div className = "w-full grid grid-cols-[64%_34%] grid-rows-[auto_auto] gap-[1rem]">
+                            <div className = "flex flex-col items-center justify-center bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+                                <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Tình trạng học tập</p>
+                                <div className = "flex item-center justify-center w-full">
+                                    <div className = "flex items-end justify-end">
+                                        <p className = "text-[0.875rem] text-[var(--color-primary)]">Đã hoàn thành (67%)</p>
+                                        <Image src={LowerPointer} alt="Lower Pointer" width={36} height={36}
+                                            className = "relative bottom-5 object-cover !w-[3rem] !h-auto"
+                                        />
+                                    </div>
+                                    
+                                    <Progress percent = {67} type = "circle" size = {100} strokeWidth={12} strokeLinecap ="square" />
+
+                                    <div className = "flex items-start justify-start">
+                                        <Image src={UpperPointer} alt="Upper Pointer" width={36} height={36}
+                                            className="relative top-2 object-cover !w-[3rem] !h-auto"
+                                        />
+                                        <p className = "text-[0.875rem] text-[var(--color-primary)]">Đang học (33%)</p>
+                                    </div>
+                                </div>                            
+                            </div>
+
+                            <div className = "flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+                                <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Kỷ lục học liên tiếp</p>
+
+                                <div className = "flex flex-col items-center justify-start">
+                                    <Image src={StreakLogo} alt="Streak Logo" width={48} height={48}
+                                        className="object-cover !w-[4rem] !h-auto"
                                     />
+                                    <p className = "text-[1rem] text-[var(--color-primary)]">ngày</p>
+
                                 </div>
-                                
-                                <Progress percent = {67} type = "circle" size = {100} strokeWidth={12} strokeLinecap ="square" />
-
-                                <div className = "flex items-start justify-start">
-                                    <Image src={UpperPointer} alt="Upper Pointer" width={36} height={36}
-                                        className="relative top-2 object-cover !w-[3rem] !h-auto"
-                                    />
-                                    <p className = "text-[0.875rem] text-[var(--color-primary)]">Đang học (33%)</p>
-                                </div>
-                            </div>                            
-                        </div>
-
-                        <div className = "flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                            <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Kỷ lục học liên tiếp</p>
-
-                            <div className = "flex flex-col items-center justify-start">
-                                <Image src={StreakLogo} alt="Streak Logo" width={48} height={48}
-                                    className="object-cover !w-[4rem] !h-auto"
-                                />
-                                <p className = "text-[1rem] text-[var(--color-primary)]">ngày</p>
                             </div>
                         </div>
-
-                        <div className = "col-span-2 h-[50vh] bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+                        <div className = "w-full flex-1 min-h-[200px] bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
                             <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Giờ học trung bình tuần qua</p>
                         </div>
                     </div>
 
                 </div>
-                <div className = "w-[36%] h-[full] flex flex-col items-center justify-start">
+                <div className = "w-[26%] flex flex-col items-center justify-start">
 
-                    <div className = "flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                        <ConfigProvider
-                            locale={viVN} 
-                            theme={{
-                                token: {
-                                colorPrimary: "#2563eb",
-                                fontFamily: "Inter, sans-serif",
-                                },
-                            }}
-                        >
-                            <Calendar
-                                fullscreen={false}
-                                value = {currentDate}
-                                onChange = {setCurrentDate}
-                                headerRender={headerRender}
-                            />
-
-                        </ConfigProvider>
+                    <div className = "w-full flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+                        <CustomCalendar/>
 
                         <div className = "bg-gray-200 w-full h-[1px] mt-1[rem] mb-[1rem]">
 

@@ -2,6 +2,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import QuizContent from '../components/quizSection';
 import { useParams } from 'next/navigation';
+import QuizAIContent from '../components/quizAISection';
 
 export default function LectureQuizPage() {
 
@@ -9,6 +10,7 @@ export default function LectureQuizPage() {
 
     return (
         <div className="flex-1 flex flex-col gap-[0.5rem]">
+            <QuizAIContent lessonId={lessionId as string} />
             <QuizContent lessonId={lessionId as string} />
         </div>
     )

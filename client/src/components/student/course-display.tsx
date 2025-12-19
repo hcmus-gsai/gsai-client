@@ -11,6 +11,9 @@ import {useRouter} from "next/navigation";
 import {useGetAllEnrollmentsQuery} from "@/store/api/[module]/enrollmentApi";
 import {Course} from "@/type/course.type";
 import {useLazyGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
+// import { setTitle } from '@/store/slice/courseDisplaySlice';
+// import { useAppDispatch } from '@/store/hook';
+import {useSearchCoursesQuery, useLazySearchCoursesQuery} from "@/store/api/[module]/courseApi";
 //===
 const CourseDisplaySection = ({
     title,
@@ -21,39 +24,35 @@ const CourseDisplaySection = ({
     queryType?:string;
     hasExtended?:boolean;
 }) => {
-
-    const {data: enrollmentsDataResponse} = useGetAllEnrollmentsQuery();
-    const courseData = enrollmentsDataResponse?.data || [];
-    const [coursesInfo, setCoursesInfo] = useState<Course[]>([]);
     
-    const [getCourseById] = useLazyGetCourseByIdQuery();
+    const router = useRouter();
+    // const dispatch = useAppDispatch();
 
-    useEffect(() => {
-        const fetchCoursesInfo = async () => {
-            if (courseData.length === 0) return;
-            
-            const coursePromises = courseData.map((course) => 
-                getCourseById(course.id).unwrap()
-            );
-            
-            try {
-                const results = await Promise.all(coursePromises);
-                const courses = results.map((res) => res.data);
-                
-                setCoursesInfo(courses);
-            } catch (error) {
-                console.error('Error fetching courses info:', error);
+    const {data: searchCoursesData} = useSearchCoursesQuery({
+        limit: 4,
+        sortBy: 'created_at',
+        sortOrder: 'ASC'
+    })
+
+    
+
+    const [coursesInfo, setCoursesInfo] = useState<Course[]>([]);
+    useEffect(()=> {
+        if (searchCoursesData) {
+            if (title.toLowerCase().includes("miễn phí")) {
+                setCoursesInfo(searchCoursesData.data.filter((course) => course.tuition_fee === 0));
+            } else {
+                setCoursesInfo(searchCoursesData.data);
             }
-        };
+        }
+    }, [searchCoursesData]);
 
-        fetchCoursesInfo();
-    }, [courseData, getCourseById]);
+    // const handleRedirect = () => {
+    //     dispatch(setTitle(title));
+    //     router.push(`/student/category/${title.toLowerCase().replace(/ /g, '-')}`);
+    // }
 
 
-    const [isExpanded, setIsExpanded] = useState(false);
-    const handleExpand = () => {
-        setIsExpanded(!isExpanded);
-    }
     return (
         <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
             <div className = "flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem]">
@@ -62,15 +61,31 @@ const CourseDisplaySection = ({
                     <CourseGrid 
                         courseData = {coursesInfo} 
                         colWidth = {6} 
-                        maxItems = {isExpanded ? 12 : 4} 
+                        maxItems = {4} 
                     />
                 </div>
             </div>
             <div className = "flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                 
-                <RedirectButton 
+                {/* <RedirectButton 
                     onClick = {handleExpand}
                     text = {isExpanded ? "Thu gọn" : "Xem tất cả"} 
+                    buttonBg = "white" 
+                    buttonText = "var(--color-secondary)"
+                    buttonBorder = "#1363DF"
+                    iconBg = "var(--color-secondary)"
+                    iconText = "var(--color-bg_white)"
+                /> */}
+
+                {/* <Button
+                    onClick = {handleRedirect}
+                    type = "primary"
+                >
+                    Xem tất cả
+                </Button> */}
+                <RedirectButton
+                    title = {title}
+                    text = "Xem tất cả"
                     buttonBg = "white" 
                     buttonText = "var(--color-secondary)"
                     buttonBorder = "#1363DF"
