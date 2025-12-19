@@ -25,7 +25,7 @@ export const courseApi = baseApi.injectEndpoints({
             providesTags: ['Course'],
         }),
 
-        seachCourses: builder.query<CourseListResponse, CourseQueryParams>({
+        searchCourses: builder.query<CourseListResponse, CourseQueryParams>({
             query: (params) => ({
                 url: '/courses/search',    
                 params,
@@ -38,6 +38,11 @@ export const courseApi = baseApi.injectEndpoints({
                 ]
                 : [{ type: 'Course', id: 'LIST' }],
         }),
+
+        getAllCategories: builder.query<{ message: string; data: string[] }, void>({
+            query: () => '/courses/categories',
+            providesTags: ['Course'],
+        }),
     }),
 });
 
@@ -47,6 +52,7 @@ export const {
     useLazyGetCourseByIdQuery,
     useGetCourseModulesQuery,
     useGetCoursesByLessonIdQuery,
-    useSeachCoursesQuery,
-    useLazySeachCoursesQuery,
+    useSearchCoursesQuery,
+    useLazySearchCoursesQuery,
+    useGetAllCategoriesQuery,
 } = courseApi;

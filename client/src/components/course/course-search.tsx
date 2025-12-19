@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Input, Button } from 'antd';
 import SearchIcon from '@/../public/shared/SearchIcon.svg';
 import { useRouter } from 'next/navigation';
-import { useLazySeachCoursesQuery } from '@/store/api/[module]/courseApi';
+import { useLazySearchCoursesQuery } from '@/store/api/[module]/courseApi';
 import { set } from 'better-auth';
 
 interface CourseSearchProps {
@@ -22,7 +22,7 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
   const [
     triggerSearch,
     { data: searchResult, isFetching },
-  ] = useLazySeachCoursesQuery();
+  ] = useLazySearchCoursesQuery();
 
   // Debounce search (500ms)
   useEffect(() => {

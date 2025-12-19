@@ -3,11 +3,12 @@
 import {Button} from "antd";
 import {ArrowRightOutlined} from "@ant-design/icons";
 import {useRouter} from "next/navigation";
-
+import { useAppDispatch } from "@/store/hook";
+import { setTitle } from "@/store/slice/courseDisplaySlice";
 
 
 export const RedirectButton = ({
-    onClick,
+    title,
     text,
     buttonBg,
     buttonText,
@@ -15,8 +16,8 @@ export const RedirectButton = ({
     iconBg,
     iconText,
 }:{
-    onClick?: () => void;
-    text: string;
+    title?: string;
+    text?: string;
     buttonBg?: string;
     buttonText?: string;
     buttonBorder?: string;
@@ -25,13 +26,21 @@ export const RedirectButton = ({
     iconText?:string;
 }) => {
 
+    //When the button is click, the page will be redirected to the specified category
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    const handleRedirect = () => {
+        dispatch(setTitle(title || ''));
+        router.push(`/student/category/${title?.toLowerCase().replace(/ /g, '-')}`);
+    }
+
     
     return (
         <Button
             type="primary"
             className = {`!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent`} 
             style={{ border: `1px solid ${buttonBorder}` }}
-            onClick = {onClick}
+            onClick = {handleRedirect}
         >
             <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
                 <span className = {`text-[1rem] !text-[${buttonText}]`}>{text}</span>
