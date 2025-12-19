@@ -1,27 +1,170 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 
-import React, { useState, useRef, useEffect } from 'react';
 import { Switch } from "antd";   
+
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useParams, notFound } from "next/navigation";
 
 // Section imports
 import ChatbotSection from '../components/chatbotSection';
 import { useAppSelector } from '@/store/hook';
+import { useGetVideoGenJobByIdQuery } from '@/store/api/[module]/ocrApi';
+
+interface OCRItem {
+    bbox: [number, number, number, number];
+    text: string;
+}
+
+interface ContentItem {
+    id: number;
+    text: string;
+}
+
+const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    const top = rect.top - (containerRect?.top || 0);
+    const left = rect.left - (containerRect?.left || 0);
+
+    return (
+        <>
+        {/* 1. Backdrop: z-index thấp hơn Popover nhưng cao hơn OCR boxes */}
+        <div 
+            className="absolute inset-0 z-[40] cursor-default"
+            onClick={(e) => {
+                e.stopPropagation(); 
+                onClose();
+            }} 
+        />
+        
+        {/* 2. Popover Content: z-index cao hơn Backdrop */}
+        <div 
+            className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200  pointer-events-auto"
+            style={{ 
+            top: top + rect.height + 10,
+            left: Math.max(10, left),
+            minWidth: '220px',
+            }}
+            onClick={(e) => e.stopPropagation()} // Quan trọng: chặn click lọt xuống video
+        >
+            <div className="flex justify-between items-start mb-2">
+            <span className="font-bold text-blue-600 text-xs uppercase tracking-wider">Thông tin OCR</span>
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                }} 
+                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            >
+                ✕
+            </button>
+            </div>
+            <p className="text-sm text-gray-700">{data.text}</p>
+        </div>
+        </>
+    );
+};
 
 export default function LectureVideoPage() {
+    const {lessionId} = useParams();
+    const { data, isLoading, error } = useGetVideoGenJobByIdQuery(lessionId as string);
+    const jobDetail = data?.videoGenJob;
+    // console.log('Video Generation Job Detail:', jobDetail);
+
+    const ocrJson = jobDetail?.ocr_json;
+    // console.log('OCR JSON Data:', ocrJson);
+    const parsedOcrData = useMemo(() => {
+        if (!ocrJson || typeof ocrJson !== 'string') return [];
+        try {
+            const rawData = JSON.parse(ocrJson);
+            if (!Array.isArray(rawData)) return [];
+        
+            // Gọi hàm sửa lại renderTime
+            let accumulatedTime = 0;
+            return rawData.map((item) => {
+                accumulatedTime += item.renderTime;
+                return {
+                    ...item,
+                    renderTime: accumulatedTime 
+                };
+            });
+        } catch (e) {
+            console.error("Lỗi parse OCR JSON:", e);
+            return [];
+        }
+    }, [ocrJson]);
+
     //===========Video OCR Service============//
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    // const [isClient, setIsClient] = useState(false);
-    
-    // useEffect(() => {
-    //     setIsClient(true);
-    // }, []);
 
+    const [activeBoxes, setActiveBoxes] = useState<OCRItem[]>([]);
+    const [selectedItem, setSelectedItem] = useState<{ item: ContentItem, rect: DOMRect } | null>(null);
+
+    const getOCRForTime = (time: number) => {
+        if (!Array.isArray(parsedOcrData)) return [];
+        // console.log('Parsed OCR Data: ', parsedOcrData);
+
+        // Tìm frame cuối cùng mà có renderTime <= thời gian hiện tại
+        let closestFrame = parsedOcrData[0];
+        for (const frame of parsedOcrData) {
+            if (frame.renderTime >= time) {
+                closestFrame = frame;
+                break;
+            }
+        }
+
+        // console.log('Closest Frame at time: ', closestFrame);
+
+        return closestFrame?.data || [];
+    };
     
+    const handlePause = () => {
+        setIsPlaying(false); // Cập nhật icon Play/Pause
+        if (videoRef.current) {
+            const boxes = getOCRForTime(videoRef.current.currentTime);
+            setActiveBoxes(boxes); // Hiển thị các ô đỏ
+        }
+    };
+
+    const handlePlay = () => {
+        setIsPlaying(true);
+        setActiveBoxes([]); // Xóa các ô đỏ khi video chạy
+    };
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const handleDoubleClick = (e: MouseEvent) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        };
+
+        video.addEventListener("dblclick", handleDoubleClick);
+
+        return () => {
+            video.removeEventListener("dblclick", handleDoubleClick);
+        };
+    }, []);
+
+    const handleItemClick = (e: React.MouseEvent, item: ContentItem) => {
+        e.stopPropagation();
+        
+        // Lấy thông tin vị trí của phần tử vừa click
+        const rect = e.currentTarget.getBoundingClientRect();
+        
+        // Nếu video đang fullscreen, tọa độ cần tính toán tương đối với container
+        setSelectedItem({ item, rect });
+    };
+
+    const closePopover = () => {
+        setSelectedItem(null);
+        console.log('Popover closed');
+    }
 
     const toggleFullScreen = () => {
         const ele = videoContainerRef.current;
@@ -57,6 +200,7 @@ export default function LectureVideoPage() {
     }
 
     const updateVideoProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // e.stopPropagation();
         const newProgress = parseFloat(e.target.value);
 
         if (!videoRef.current) {
@@ -150,8 +294,6 @@ export default function LectureVideoPage() {
     const [enableASR, setEnableASR] = useState(false);
     const [enableOCR, setEnableOCR] = useState(false);
 
-    
-
     return (
         <>
             <div className="flex-1 flex flex-col gap-[0.5rem]">
@@ -168,11 +310,57 @@ export default function LectureVideoPage() {
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
+                        onPlay={handlePlay} 
+                        onPause={handlePause}
                         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                     />
+                    
+                    {/* Lớp phủ Bounding Boxes */}
+                    <div className="video-ocr-overlay" style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none', 
+                        overflow: 'hidden'
+                    }}>
+                        {!isPlaying && activeBoxes.map((item, index) => {
+                            const [x, y, w, h] = item.bbox;
+                            return (
+                                <div
+                                    key={index}
+                                    className="ocr-box"
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${x * 100}%`,
+                                        top: `${y * 100}%`,
+                                        width: `${w * 100}%`,
+                                        height: `${h * 100}%`,
+                                        border: '2px solid red',
+                                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                        cursor: 'pointer',
+                                        pointerEvents: 'auto', // Cho phép click vào chính cái box
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Ngăn trigger play/pause video
+                                        handleItemClick(e, { id: 1, text: item.text });
+                                    }}
+                                    title={item.text}
+                                />
+                            );
+                        })}
+
+                        {selectedItem && (
+                            <ContentPopover 
+                                data={selectedItem.item} 
+                                rect={selectedItem.rect} 
+                                containerRef={videoContainerRef}
+                                onClose={closePopover} 
+                            />
+                        )}
+                    </div>
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 
@@ -184,6 +372,8 @@ export default function LectureVideoPage() {
                                 value={currentTime}
                                 step="0.1"
                                 className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)] hover:h-2 transition-all"
+                                onClick={(e) => e.stopPropagation()} 
+                                onMouseDown={(e) => e.stopPropagation()}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateVideoProgress(e)}
                             />
                         </div>

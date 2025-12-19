@@ -1,5 +1,5 @@
 import {baseApi} from '../baseApi';
-import {SendMessageRequest, SendMessageResponse} from '../../../type/chat.type';
+import { SendMessageRequest, SendMessageResponse } from '../../../type/chat.type';
 import { ChatHistoryRequest, ChatHistoryResponse } from '../../../type/chat.type';
 export const chatApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
