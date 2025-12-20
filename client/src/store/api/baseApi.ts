@@ -21,7 +21,7 @@ const baseQuery = fetchBaseQuery({
     }
     return headers;
   },
-  timeout: 10_000, // 10 seconds timeout
+  timeout: 180_000, // 3 minutes timeout (chatbot API may take 60-90s on cold start)
 });
 
 
