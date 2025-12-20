@@ -134,7 +134,7 @@ const ChatbotSection = () => {
                     });
                     isInitialLoad.current = false;
                 }
-            }, 50);
+            }, 600000);
         }
     }, [messages]);
 
