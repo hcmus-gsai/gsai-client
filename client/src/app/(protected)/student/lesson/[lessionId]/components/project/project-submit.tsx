@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { 
   useLazyGetSubmissionQuery,
   useSubmitProjectMutation,
-  useUpdateSubmittedProjectMutation
+  useUpdateSubmissionMutation
  } from "@/store/api/[module]/projectApi";
 
 /* ===== Types ===== */
@@ -125,7 +125,7 @@ const LectureProjSubmit: React.FC = () => {
     useSubmitProjectMutation();
 
   const [updateProject, { isLoading: isUpdating }] =
-    useUpdateSubmittedProjectMutation();
+    useUpdateSubmissionMutation();
 
 
   useEffect(() => {
@@ -177,13 +177,13 @@ const LectureProjSubmit: React.FC = () => {
       if (submission.submissionLink) {
         // UPDATE
         await updateProject({
-          lesson_id: lessionId as string,
+          lessonId: lessionId as string,
           github_url: repoLink,
         }).unwrap();
       } else {
         // SUBMIT
         await submitProject({
-          lesson_id: lessionId as string,
+          lessonId: lessionId as string,
           github_url: repoLink,
         }).unwrap();
       }
