@@ -1,26 +1,12 @@
-/* 'use client';
+'use client';
 
-import React from 'react';
-
-const LectureProjSubmit = () => {
-    return (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="text-lg font-semibold mb-2">Nộp bài</h3>
-            <p className="text-gray-500">
-                Khu vực nộp bài (upload file, deadline, trạng thái chấm điểm…)
-            </p>
-        </div>
-    );
-};
-
-export default LectureProjSubmit; */
-
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useLazyGetSubmissionQuery } from "@/store/api/[module]/projectApi";
 
 /* ===== Types ===== */
 type SubmissionData = {
-  due: string | null;
+  due: string;
   submissionStatus: string;
   gradingStatus: string;
   timeRemaining: string;
@@ -29,22 +15,40 @@ type SubmissionData = {
   submissionTime: string | null;
 };
 
+/* ===== Date formatter ===== */
+const formatDate = (dateInput?: string | number | Date | null): string => {
+  if (!dateInput) return "—";
+
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 const LectureProjSubmit: React.FC = () => {
-  
-    /* ===== Helpers ===== */
-  const nowString = () =>
-    new Date().toLocaleString("en-GB", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const { lessionId } = useParams();
+
+  /* ===== API ===== */
+  const [getSubmission, { data, isLoading, isError }] =
+    useLazyGetSubmissionQuery();
+
+  useEffect(() => {
+    if (lessionId) {
+      getSubmission(lessionId as string);
+    }
+  }, [lessionId, getSubmission]);
 
   /* ===== State ===== */
   const [submission, setSubmission] = useState<SubmissionData>({
-    due: nowString(),
+    due: "—",
     submissionStatus: "No submission",
     gradingStatus: "Not graded",
     timeRemaining: "—",
@@ -56,33 +60,48 @@ const LectureProjSubmit: React.FC = () => {
   const [repoLink, setRepoLink] = useState("");
   const [isEditing, setIsEditing] = useState(true);
 
+  /* ===== Sync API → UI ===== */
+  useEffect(() => {
+    if (!data) return;
 
+    setSubmission({
+      due: formatDate(data.due),
+      submissionStatus: data.submission_status ?? "No submission",
+      gradingStatus: data.grading_status ?? "Not graded",
+      timeRemaining: "—", // backend chưa trả
+      lastModified: formatDate(data.last_modified),
+      submissionLink: data.submission || null,
+      submissionTime: formatDate(data.last_modified),
+    });
 
-  /* ===== Handlers ===== */
+    setRepoLink(data.submission || "");
+    setIsEditing(!data.submission);
+  }, [data]);
+
+  /* ===== Handlers (placeholder) ===== */
   const handleSubmit = () => {
     if (!repoLink.trim()) return;
 
-    setSubmission({
-      due: nowString(),
+    const now = formatDate(new Date());
+
+    setSubmission((prev) => ({
+      ...prev,
       submissionStatus: "Submitted for grading",
       gradingStatus: "Not graded",
-      timeRemaining: "Assignment was submitted early",
-      lastModified: nowString(),
+      lastModified: now,
       submissionLink: repoLink,
-      submissionTime: nowString(),
-    });
+      submissionTime: now,
+    }));
 
     setIsEditing(false);
   };
 
   const handleEdit = () => {
-    setRepoLink(submission.submissionLink ?? "");
     setIsEditing(true);
   };
 
   return (
     <div style={{ marginTop: 24 }}>
-      
       {/* ===== STATUS TABLE ===== */}
       <table
         style={{
@@ -96,6 +115,7 @@ const LectureProjSubmit: React.FC = () => {
             <td style={labelStyle}>Due</td>
             <td style={valueStyle}>{submission.due}</td>
           </tr>
+
           <tr>
             <td style={labelStyle}>Submission status</td>
             <td style={valueStyle}>{submission.submissionStatus}</td>
@@ -120,16 +140,13 @@ const LectureProjSubmit: React.FC = () => {
             <td style={labelStyle}>Submission</td>
             <td style={valueStyle}>
               {submission.submissionLink ? (
-                <>
-                  <a
-                    href={submission.submissionLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {submission.submissionLink}
-                  </a>
-                  {" "}– {submission.submissionTime}
-                </>
+                <a
+                  href={submission.submissionLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {submission.submissionLink}
+                </a>
               ) : (
                 <em>No submission</em>
               )}
@@ -138,7 +155,7 @@ const LectureProjSubmit: React.FC = () => {
         </tbody>
       </table>
 
-      {/* ===== SUBMIT / EDIT SECTION ===== */}
+      {/* ===== SUBMIT / EDIT ===== */}
       <div
         style={{
           marginTop: 24,
@@ -158,11 +175,7 @@ const LectureProjSubmit: React.FC = () => {
               placeholder="https://github.com/username/project-repo"
               value={repoLink}
               onChange={(e) => setRepoLink(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                marginBottom: 12,
-              }}
+              style={{ width: "100%", padding: "8px 10px", marginBottom: 12 }}
             />
 
             <button onClick={handleSubmit} style={buttonPrimary}>
@@ -173,6 +186,15 @@ const LectureProjSubmit: React.FC = () => {
           <button onClick={handleEdit} style={buttonSecondary}>
             Edit submission
           </button>
+        )}
+
+        {isLoading && (
+          <p style={{ marginTop: 8 }}>Loading submission…</p>
+        )}
+        {isError && (
+          <p style={{ marginTop: 8, color: "red" }}>
+            Failed to load submission
+          </p>
         )}
       </div>
     </div>
@@ -186,7 +208,6 @@ const labelStyle: React.CSSProperties = {
   backgroundColor: "#f5f5f5",
   fontWeight: 500,
   border: "1px solid #ddd",
-  verticalAlign: "top",
 };
 
 const valueStyle: React.CSSProperties = {
@@ -212,4 +233,3 @@ const buttonSecondary: React.CSSProperties = {
 };
 
 export default LectureProjSubmit;
-
