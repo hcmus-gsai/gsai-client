@@ -2,7 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useLazyGetSubmissionQuery } from "@/store/api/[module]/projectApi";
+import { 
+  useLazyGetSubmissionQuery,
+  useSubmitProjectMutation,
+  useUpdateSubmittedProjectMutation
+ } from "@/store/api/[module]/projectApi";
 
 /* ===== Types ===== */
 type SubmissionData = {
@@ -33,12 +37,96 @@ const formatDate = (dateInput?: string | number | Date | null): string => {
   });
 };
 
+type TimeParts = {
+  years: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+const diffToParts = (diffMs: number): TimeParts => {
+  const abs = Math.abs(diffMs);
+
+  const seconds = Math.floor(abs / 1000) % 60;
+  const minutes = Math.floor(abs / (1000 * 60)) % 60;
+  const hours = Math.floor(abs / (1000 * 60 * 60)) % 24;
+  const days = Math.floor(abs / (1000 * 60 * 60 * 24)) % 365;
+  const years = Math.floor(abs / (1000 * 60 * 60 * 24 * 365));
+
+  return { years, days, hours, minutes, seconds };
+};
+
+const formatParts = (parts: TimeParts): string => {
+  const units: [number, string][] = [
+    [parts.years, "year"],
+    [parts.days, "day"],
+    [parts.hours, "hour"],
+    [parts.minutes, "min"],
+    [parts.seconds, "sec"],
+  ];
+
+  const nonZero = units.filter(([v]) => v > 0).slice(0, 2);
+
+  if (nonZero.length === 0) return "0 secs";
+
+  return nonZero
+    .map(([v, label]) => `${v} ${label}${v > 1 ? "s" : ""}`)
+    .join(" ");
+};
+
+const calculateTimeRemaining = (
+  due: string | null,
+  submittedAt: string | null
+): string => {
+  if (!due) return "—";
+
+  const dueDate = new Date(due);
+  const now = new Date();
+  const submittedDate = submittedAt ? new Date(submittedAt) : null;
+
+  // ===== CHƯA NỘP =====
+  if (!submittedDate) {
+    const diff = dueDate.getTime() - now.getTime();
+    const parts = diffToParts(diff);
+
+    // 1️⃣ Chưa nộp & còn hạn
+    if (diff > 0) {
+      return `${formatParts(parts)} remaining`;
+    }
+
+    // 2️⃣ Chưa nộp & quá hạn
+    return `Assignment is overdue by: ${formatParts(parts)}`;
+  }
+
+  // ===== ĐÃ NỘP =====
+  const diff = dueDate.getTime() - submittedDate.getTime();
+  const parts = diffToParts(diff);
+
+  // 3️⃣ Nộp trước hạn
+  if (diff > 0) {
+    return `Assignment was submitted ${formatParts(parts)} early`;
+  }
+
+  // 4️⃣ Nộp sau hạn
+  return `Assignment was submitted ${formatParts(parts)} late`;
+};
+
+
+
 const LectureProjSubmit: React.FC = () => {
   const { lessionId } = useParams();
 
   /* ===== API ===== */
   const [getSubmission, { data, isLoading, isError }] =
     useLazyGetSubmissionQuery();
+
+  const [submitProject, { isLoading: isSubmitting }] =
+    useSubmitProjectMutation();
+
+  const [updateProject, { isLoading: isUpdating }] =
+    useUpdateSubmittedProjectMutation();
+
 
   useEffect(() => {
     if (lessionId) {
@@ -68,7 +156,10 @@ const LectureProjSubmit: React.FC = () => {
       due: formatDate(data.due),
       submissionStatus: data.submission_status ?? "No submission",
       gradingStatus: data.grading_status ?? "Not graded",
-      timeRemaining: "—", // backend chưa trả
+      timeRemaining: calculateTimeRemaining(
+        data.due,
+        data.last_modified ?? null
+      ),
       lastModified: formatDate(data.last_modified),
       submissionLink: data.submission || null,
       submissionTime: formatDate(data.last_modified),
@@ -79,25 +170,29 @@ const LectureProjSubmit: React.FC = () => {
   }, [data]);
 
   /* ===== Handlers (placeholder) ===== */
-  const handleSubmit = () => {
-    if (!repoLink.trim()) return;
+  const handleSave = async () => {
+    if (!repoLink.trim() || !lessionId) return;
 
-    const now = formatDate(new Date());
+    try {
+      if (submission.submissionLink) {
+        // UPDATE
+        await updateProject({
+          lesson_id: lessionId as string,
+          github_url: repoLink,
+        }).unwrap();
+      } else {
+        // SUBMIT
+        await submitProject({
+          lesson_id: lessionId as string,
+          github_url: repoLink,
+        }).unwrap();
+      }
 
-    setSubmission((prev) => ({
-      ...prev,
-      submissionStatus: "Submitted for grading",
-      gradingStatus: "Not graded",
-      lastModified: now,
-      submissionLink: repoLink,
-      submissionTime: now,
-    }));
-
-    setIsEditing(false);
-  };
-
-  const handleEdit = () => {
-    setIsEditing(true);
+      setIsEditing(false);
+      getSubmission(lessionId as string);
+    } catch (err) {
+      console.error("Submit failed:", err);
+    }
   };
 
   return (
@@ -167,7 +262,6 @@ const LectureProjSubmit: React.FC = () => {
         <h3 style={{ marginBottom: 12 }}>
           {submission.submissionLink ? "Edit submission" : "Add submission"}
         </h3>
-
         {isEditing ? (
           <>
             <input
@@ -178,29 +272,26 @@ const LectureProjSubmit: React.FC = () => {
               style={{ width: "100%", padding: "8px 10px", marginBottom: 12 }}
             />
 
-            <button onClick={handleSubmit} style={buttonPrimary}>
-              Save submission
+            <button
+              onClick={handleSave}
+              style={buttonPrimary}
+              disabled={isSubmitting || isUpdating}
+            >
+              {isSubmitting || isUpdating ? "Saving..." : "Save submission"}
             </button>
           </>
         ) : (
-          <button onClick={handleEdit} style={buttonSecondary}>
+          <button onClick={() => setIsEditing(true)} style={buttonSecondary}>
             Edit submission
           </button>
         )}
 
-        {isLoading && (
-          <p style={{ marginTop: 8 }}>Loading submission…</p>
-        )}
-        {isError && (
-          <p style={{ marginTop: 8, color: "red" }}>
-            Failed to load submission
-          </p>
-        )}
+        {isLoading && <p>Loading submission…</p>}
+        {isError && <p style={{ color: "red" }}>Failed to load submission</p>}
       </div>
     </div>
   );
 };
-
 /* ===== Styles ===== */
 const labelStyle: React.CSSProperties = {
   width: "30%",
