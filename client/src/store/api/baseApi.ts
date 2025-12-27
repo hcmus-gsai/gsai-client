@@ -21,7 +21,7 @@ const baseQuery = fetchBaseQuery({
     }
     return headers;
   },
-  timeout: 10_000, // 10 seconds timeout
+  timeout: 180_000, // 3 minutes timeout (chatbot API may take 60-90s on cold start)
 });
 
 
@@ -72,6 +72,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Auth', 'User', 'Course', 'Module', 'Lesson', 'Enrollment', 'Quiz', 'ChatModule', 'IVideoGenJob'],
+  tagTypes: ['Auth', 'User', 'Course', 'Module', 'Lesson', 'Enrollment', 'Quiz', 'ChatModule', 'IVideoGenJob', 'Document'],
   endpoints: () => ({}),
 });

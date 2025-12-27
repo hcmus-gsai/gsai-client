@@ -23,44 +23,64 @@ interface ContentItem {
 
 const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
-    const top = rect.top - (containerRect?.top || 0);
-    const left = rect.left - (containerRect?.left || 0);
+    if (!containerRect) return null;
+
+    // 1. Tính toán vị trí tương đối của Box so với Video Container
+    const relativeTop = rect.top - containerRect.top;
+    const relativeLeft = rect.left - containerRect.left;
+    
+    // 2. Tính điểm giữa (Center) của OCR Box
+    const centerX = relativeLeft + rect.width / 2
 
     return (
         <>
-        {/* 1. Backdrop: z-index thấp hơn Popover nhưng cao hơn OCR boxes */}
-        <div 
-            className="absolute inset-0 z-[40] cursor-default"
-            onClick={(e) => {
-                e.stopPropagation(); 
-                onClose();
-            }} 
-        />
-        
-        {/* 2. Popover Content: z-index cao hơn Backdrop */}
-        <div 
-            className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200  pointer-events-auto"
-            style={{ 
-            top: top + rect.height + 10,
-            left: Math.max(10, left),
-            minWidth: '220px',
-            }}
-            onClick={(e) => e.stopPropagation()} // Quan trọng: chặn click lọt xuống video
-        >
-            <div className="flex justify-between items-start mb-2">
-            <span className="font-bold text-blue-600 text-xs uppercase tracking-wider">Thông tin OCR</span>
-            <button 
+            {/* 1. Backdrop: z-index thấp hơn Popover nhưng cao hơn OCR boxes */}
+            <div 
+                className="absolute inset-0 z-[40] cursor-default"
                 onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); 
                     onClose();
                 }} 
-                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            />
+            
+            {/* 2. Popover Content: z-index cao hơn Backdrop */}
+            <div 
+                className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200  pointer-events-auto"
+                style={{ 
+                    top: relativeTop + rect.height + 12,
+                    left: `${centerX}px`,
+                    transform: 'translateX(-50%)',
+                    minWidth: '220px',
+                    maxWidth: '300px'
+                }}
+                onClick={(e) => e.stopPropagation()} // Quan trọng: chặn click lọt xuống video
             >
-                ✕
-            </button>
+                {/*<div className="flex justify-between items-start mb-2">
+                <span className="font-bold text-blue-600 text-xs uppercase tracking-wider">Thông tin OCR</span>
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                    }} 
+                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                >
+                    ✕
+                </button>
+                </div>
+                <p className="text-sm text-gray-700">{data.text}</p>*/}
+                <div 
+                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 
+                                border-l-[8px] border-l-transparent 
+                                border-r-[8px] border-r-transparent 
+                                border-b-[8px] border-b-white/95" 
+                />
+
+                <div className="flex justify-between items-start mb-2">
+                    <span className="font-bold text-blue-600 text-[10px] uppercase tracking-tighter">Chi tiết nội dung</span>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">✕</button>
+                </div>
+                <p className="text-sm text-gray-700 leading-snug">{data.text}</p>
             </div>
-            <p className="text-sm text-gray-700">{data.text}</p>
-        </div>
         </>
     );
 };
@@ -104,11 +124,38 @@ export default function LectureVideoPage() {
     const [activeBoxes, setActiveBoxes] = useState<OCRItem[]>([]);
     const [selectedItem, setSelectedItem] = useState<{ item: ContentItem, rect: DOMRect } | null>(null);
 
+    const [videoDisplayRect, setVideoDisplayRect] = useState({ width: 0, height: 0, left: 0, top: 0 });
+
+    const calculateVideoDisplaySize = () => {
+        const video = videoRef.current;
+        const container = videoContainerRef.current;
+        if (!video || !container) return;
+
+        const videoRatio = video.videoWidth / video.videoHeight;
+        const containerRatio = container.clientWidth / container.clientHeight;
+
+        let width, height, left, top;
+
+        if (containerRatio > videoRatio) {
+            // Video bị giới hạn bởi chiều cao (Pillarboxing - trống 2 bên)
+            height = container.clientHeight;
+            width = height * videoRatio;
+            top = 0;
+            left = (container.clientWidth - width) / 2;
+        } else {
+            // Video bị giới hạn bởi chiều rộng (Letterboxing - trống trên dưới)
+            width = container.clientWidth;
+            height = width / videoRatio;
+            left = 0;
+            top = (container.clientHeight - height) / 2;
+        }
+
+        setVideoDisplayRect({ width, height, left, top });
+    };
+
     const getOCRForTime = (time: number) => {
         if (!Array.isArray(parsedOcrData)) return [];
         // console.log('Parsed OCR Data: ', parsedOcrData);
-
-        // Tìm frame cuối cùng mà có renderTime <= thời gian hiện tại
         let closestFrame = parsedOcrData[0];
         for (const frame of parsedOcrData) {
             if (frame.renderTime >= time) {
@@ -116,7 +163,6 @@ export default function LectureVideoPage() {
                 break;
             }
         }
-
         // console.log('Closest Frame at time: ', closestFrame);
 
         return closestFrame?.data || [];
@@ -145,9 +191,13 @@ export default function LectureVideoPage() {
         };
 
         video.addEventListener("dblclick", handleDoubleClick);
+        video.addEventListener('loadedmetadata', calculateVideoDisplaySize);
+        window.addEventListener('resize', calculateVideoDisplaySize);
 
         return () => {
             video.removeEventListener("dblclick", handleDoubleClick);
+            video?.removeEventListener('loadedmetadata', calculateVideoDisplaySize);
+            window.removeEventListener('resize', calculateVideoDisplaySize);
         };
     }, []);
 
@@ -156,9 +206,16 @@ export default function LectureVideoPage() {
         
         // Lấy thông tin vị trí của phần tử vừa click
         const rect = e.currentTarget.getBoundingClientRect();
-        
-        // Nếu video đang fullscreen, tọa độ cần tính toán tương đối với container
-        setSelectedItem({ item, rect });
+        const containerRect = videoContainerRef.current?.getBoundingClientRect();
+
+        if (containerRect) {
+            // Lưu trữ cả tọa độ của phần tử click và container để tính toán logic "Center"
+            setSelectedItem({ 
+                item, 
+                rect,
+                // Thêm containerRect vào state nếu cần hoặc xử lý trong Popover
+            });
+        }
     };
 
     const closePopover = () => {
@@ -319,10 +376,10 @@ export default function LectureVideoPage() {
                     {/* Lớp phủ Bounding Boxes */}
                     <div className="video-ocr-overlay" style={{
                         position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
+                        left: `${videoDisplayRect.left}px`,
+                        top: `${videoDisplayRect.top}px`,
+                        width: `${videoDisplayRect.width}px`,
+                        height: `${videoDisplayRect.height}px`,
                         pointerEvents: 'none', 
                         overflow: 'hidden'
                     }}>
