@@ -18,6 +18,8 @@ export default function LectureDocPage() {
     }, [lessionId, getDocument]);
     console.log('Document: ', document);
 
+    console.log('Document URL: ', document?.file_url);
+
     return (
         <>
             <div className="flex-1 flex flex-col gap-[0.5rem]">
@@ -31,12 +33,12 @@ export default function LectureDocPage() {
                             <p>Error: {(error as Error).message}</p>
                         </div>
                     ) : document ? (
-                        <iframe
-                            src={document.file_url}
-                            className="w-full rounded-lg border border-gray-200"
-                            style={{ height: 'calc(100vh - 17rem)' }}
-                            title="Document Viewer"
-                        />
+                        <object data={document?.file_url} type="application/pdf" width="100%" height="100%"
+                        style={{ height: 'calc(100vh - 17rem)' }}
+                        className="w-full h-full object-contain"
+                        >
+
+                        </object>
                     ) : null}
                 </div>
             </div>
