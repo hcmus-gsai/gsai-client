@@ -22,7 +22,7 @@ export default function StudentHomePage() {
                 title = "Công việc hôm nay"
                 isCourse = {false}
                 description = "Hãy kiểm tra thời gian biểu của bạn để hoàn thành công việc đúng hạn nhé!"
-                buttonText = "Thời gian biểu"
+                buttonText = "Quá trình học"
             />
             <LearningProgressSection />
             <FooterSection hasRegisterBox = {false}/> 

@@ -35,9 +35,6 @@ const StudentGreetingSection = (
     const router = useRouter();
     const {id} = useParams();
 
-    // const {data: course, isLoading, error} = useGetCourseByIdQuery(id as string);
-    // const courseData = course?.data;
-    // console.log('This is course data: ', courseData);
 
     return (
         <section className = "w-full flex flex-col relative">
@@ -85,7 +82,7 @@ const StudentGreetingSection = (
                         </div>
                         <div className = "w-full flex items-center justify-start mb-[2rem]">
                             <Button 
-                                onClick = {() => router.push(`/student/courses/${id}/content`)}
+                                onClick = {() => router.push(`/student/learning-progress`)}
                                 className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]"
                             >
                                 {buttonText}
