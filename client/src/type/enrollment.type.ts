@@ -9,7 +9,7 @@ export interface EnrolledCourse {
     course_name: string;
     completion_status: string;
 
-    //Reamin fields
+    //Remaining fields
 
     description: string,
     teacher_id: string,

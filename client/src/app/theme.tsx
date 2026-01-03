@@ -11,6 +11,8 @@ export default function ThemeProvider({
   const theme = {
     token: {
       colorPrimary: '#1677ff', // xanh chuẩn của Ant Design
+      colorSecondary: '#1363DF',
+      fontFamily: "var(--font-manrope), 'Manrope', system-ui, sans-serif",
     },
   };
 

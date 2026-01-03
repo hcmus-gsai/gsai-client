@@ -20,6 +20,7 @@ import { CourseHighLightComponent } from "@/components/student/course-category-p
 
 import { Course } from '@/type/course.type';
 import { XCircle } from "@deemlol/next-icons";
+import { useEnrollInCourseMutation } from '@/store/api/[module]/enrollmentApi';
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
         {
@@ -57,11 +58,11 @@ const CourseSyllabusSection = () => {
     // }
 
     return (
-        <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
+        <section className = "w-full h-[80vh] flex flex-col items-center justify-center">
             <div className = "w-[var(--global-width)] h-full flex items-center justify-center flex flex-col gap-[3rem]">
                 <div className = "w-full">
-                    <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Bạn sẽ học được</p></div>
-                    <div className = "w-full grid grid-cols-2 grid-rows-2 gap-2">
+                    <div><p className = "text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Bạn sẽ học được</p></div>
+                    <div className = "w-full grid grid-cols-2 grid-rows-2 gap-[1rem]">
                         {achievableKnowledge.slice(0,4).map((knowledge) => (
                             <Card key = {knowledge.title} className = "!pr-[1.5rem] !border-gray-200 hover:shadow-[10px_10px_10px_var(--color-neutral)] transition-all duration-300 !rounded-[20px]">
                                 <p className = "text-[1.25rem] font-bold text-[var(--color-primary)]">{knowledge.title}</p>
@@ -119,8 +120,20 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
+    const [enrollInCourse, {isLoading: isEnrolling}] = useEnrollInCourseMutation();
+
     const handleRegisterCourse = () => {
         setIsModalOpen(true);
+    }
+
+    const handleConfirmRegisterCourse = async () => {
+        try {
+            await enrollInCourse(courseId).unwrap();
+            // router.refresh();
+        }
+        catch (error) {
+            console.error('Đăng ký thất bại:', error);
+        }
     }
 
 
@@ -131,8 +144,15 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
                 <p className = "text-[1.5rem] font-bold text-[var(--color-primary)] text-center mb-[1rem]">Xác nhận đăng kí môn học</p>
                 <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center mb-[2rem]">Bạn có chắc chắn muốn đăng ký môn học này không? Hãy xác nhận để bắt đầu học ngay!</p>
                 <div className = "w-full flex items-center justify-center gap-2">
-                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]">Hủy</Button>
-                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]">Đăng ký ngay</Button>
+                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
+                        onClick = {closeModal}
+                    >Hủy</Button>
+                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
+                        onClick = {handleConfirmRegisterCourse}
+                        loading = {isEnrolling}
+                    >
+                        Đăng ký ngay
+                    </Button>
                 </div>
             </CourseRegisterModal>
         )}
@@ -149,7 +169,7 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
             
             <div className = "w-full h-full flex flex-col items-center z-10">
                 <div className = "w-[var(--global-width)] h-[242px] mt-[5vh] mb-[3rem] flex items-center justify-between">
-                    <div className = "h-full w-[546px] flex flex-col items-start justify-between">
+                    <div className = "h-full w-[60%] flex flex-col items-start justify-between">
                         <div className = {`flex flex-col items-start justify-between w-full mb-[2rem]`}>                    
                             <p className = {`text-[3.5rem] font-bold text-[var(--color-primary)]`}>{courseData?.course_name}</p>
                             <p className = "text-[1rem]  text-[var(--color-primary)] mb-[2rem]">{courseData?.course_description}</p>
@@ -170,13 +190,13 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
                             
                             {courseData.is_enrolled ? (
                                 <Button 
-                                onClick = {() => router.push(`/student/courses/${courseId}/content`)} className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                onClick = {() => router.push(`/student/courses/${courseId}/content`)} className = "!w-[10vw] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
                                     Đi đến môn học
                                 </Button>
                             ):(
                                 <Button
                                 onClick = {handleRegisterCourse} 
-                                className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                className = "!w-[10vw] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
                                     Tham gia ngay
                                 </Button>
                             )}
@@ -191,9 +211,9 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
 
                 <div className = "mt-[22vh] grid grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px]  border-2 border-gray-200 py-3">
                     <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
-                        <div className = "mt-7 w-[80%] h-full">
+                        <div className = "mt-7 w-[80%] h-full text-center">
                             {
-                                courseData?.tuition_fee === 0.0 ?(
+                                Number(courseData?.tuition_fee) === 0 ?(
                                     <>
                                     <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
                                     <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
@@ -224,14 +244,14 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
                     </div>
                     
                     <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
-                        <div className = "mt-7 w-[80%] h-full">
+                        <div className = "mt-7 w-[80%] h-full text-center">
                             <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
                         </div>
                     </div>
                     
                     <div className = "flex flex-col items-center w-full">
-                        <div className = "mt-7 w-[70%] h-full">
+                        <div className = "mt-7 w-[70%] h-full text-center">
                             <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
                         </div>

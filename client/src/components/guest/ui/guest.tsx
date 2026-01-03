@@ -1,7 +1,8 @@
 'use client';
+import '@ant-design/v5-patch-for-react-19';
 
 import Link from "next/link";
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import {useRouter, usePathname} from "next/navigation";
 import {Button, Menu, Row, Col, Card} from "antd";
 
@@ -35,6 +36,8 @@ import testimonialPic from "../../../../public/guest/testimonialPic.svg";
 
 import { RedirectButton } from '@/components/shared/redirect-button'
 import WhiteEpisLogo from "../../../../public/student/WhiteEpisLogo.svg";
+import { Sliders } from '@deemlol/next-icons';
+import { Special_Gothic_Condensed_One } from 'next/font/google';
 
 type FunctionBlock = {
     title: string;
@@ -55,7 +58,7 @@ const GreetingSection = () => {
     const router = useRouter();
     
     return (
-        <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
+        <section className = "w-full h-[80vh] flex flex-col items-center justify-center">
             <div className="flex w-[var(--global-width)] items-center justify-between h-[4.8125rem]">
                 <div className = "flex flex-1 items-center justify-start gap-2">
                     <div className = "text-2xl font-bold">
@@ -80,33 +83,62 @@ const GreetingSection = () => {
                 </div>
                 <div className = "flex flex-1 items-center justify-end gap-2">
                     <div className = "flex items-center justify-center gap-2">
-                        <RedirectButton
-                            onClick = {() => router.push("/auth/signin")}
+                        {/* <RedirectButton
+                            title = "auth/signin"
                             text = "Tham gia ngay"
                             buttonText = "var(--color-bg_white)"
                             buttonBorder = "white"
                             iconBg = "var(--color-bg-white)"
                             iconText = "var(--color-secondary)"
-                        />
+                        /> */}
+                        <Button
+                            type="primary"
+                            className = {`!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent`} 
+                            style={{ border: `1px solid white` }}
+                            onClick = {() => router.push("/auth/signin")}
+                        >
+                            <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
+                                <span className = {`text-[1rem] !text-white`}>Tham gia ngay</span>
+                            </div>
+
+                            <div className = {`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem]`} style={{backgroundColor: `white`}}>
+                                <span className="flex items-center justify-center rounded-full p-2 w-full h-full">
+                                    <ArrowRightOutlined className={`!-rotate-45 !text-[var(--color-secondary)]`} />
+                                </span>
+                            </div>
+                        </Button>
+
+                        {/* <Button
+                            type="primary"
+                            className = "!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent !border-white"
+                            onClick = {() => router.push("/auth/signin")}
+                        >
+                            <span className = "text-[1rem] text-white">Tham gia ngay</span>
+                            <div className = "ml-2 flex items-center justify-center w-[2rem] h-[2rem] bg-white rounded-full">
+                                <ArrowRightOutlined className="!-rotate-45 !text-[var(--color-secondary)]" />
+                            </div>
+                        </Button> */}
                     </div>
                 </div>
             </div>
-            <div className = "mx-auto w-full h-full flex flex-col items-center justify-center w-[calc(100vh-40px)]">
+            <div className = "mx-auto w-full h-full flex flex-col items-center justify-center gap-8 w-[calc(100vh-40px)]">
                 <div className = "flex items-center justify-center gap-4">
                     <div className = "text-7xl font-bold leading-tight">
                         <p className = "text-center !text-[var(--color-primary)]">Chào Mừng Đến Với EPIS</p>
                     </div>
                 </div>
-                <div className = "flex flex-col justify-center items-center">
-                    <div className = "text-[1rem] font-light text-gray-600 text-center">
+                <div className = "flex flex-col justify-center items-center gap-4">
+                    <div className = "text-[1rem] font-medium text-gray-600 text-center">
                         <p>Bạn đang gặp khó khăn trong quá trình học tập của mình?</p>
                         <p>Bạn cần một gia sư đồng hành cùng mình?</p>
                         <p>Đừng lo lắng.</p>
                     </div>
-                    <div className = "flex items-center justify-center mt-4">
+                    <div className = "flex items-center justify-center">
                         <Button 
                             type = "default"
-                            className = "!bg-black !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]">
+                            className = "!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
+                            onClick = {() => router.push("/auth/signin")}
+                        >
                                 Khám phá ngay
                         </Button>
                     </div>
@@ -207,6 +239,7 @@ const CourseDisplaySection = () => {
             tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
         },
     ];
+    const router = useRouter();
 
     return (
         <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
@@ -309,17 +342,18 @@ const FooterSection = ({
 }: {
     hasRegisterBox?: boolean;
 }) => {
+    const router = useRouter();
     const pathname = usePathname();
     const isPageA = pathname === '/student' || pathname === '/teacher';
     
     return (
         <section className={`w-full flex flex-col items-center justify-center ${isPageA ? "" : "border-t border-gray-200"}`}>
             {hasRegisterBox && (
-                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(168,220,255,0.6)] rounded-2xl p-6 md:p-[2rem] mt-10 md:mt-[4rem] w-[90%] md:w-[var(--global-width)] border border-blue-50">
+                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(19,99,223,0.25)] rounded-2xl p-6 md:p-[6rem] mt-10 md:mt-[4rem] w-[90%] md:w-[var(--global-width)] border border-blue-50 mb-10 md:mb-20">
                     <div className="flex flex-col items-center justify-center text-center w-full">
                         {/* Title Responsive: Nhỏ trên mobile, lớn trên desktop */}
                         <h1 className="text-2xl md:text-[2.5rem] font-bold text-[var(--color-primary)] w-full md:w-[80%] leading-tight mb-2">
-                            Đăng ký học cùng gia sư AI và chuẩn bị hành trang cho tương lai ngay hôm nay
+                            Đăng ký học cùng EPIS và chuẩn bị hành trang cho tương lai ngay hôm nay
                         </h1>
                         <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] text-center px-2">
                             Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
@@ -327,8 +361,10 @@ const FooterSection = ({
                     </div>
 
                     <Button
+                        onClick={() => router.push('/auth/signin')}
                         type="primary"
-                        className="w-[12rem] !bg-blue-500 !text-white hover:!bg-white hover:!text-black !px-8 !py-5 md:!py-3 !rounded-[30px] !text-base md:!text-[20px] !h-auto"
+                        className="!bg-[var(--color-secondary)] w-[12rem] !text-white hover:!bg-white hover:!text-black hover:!border-[var(--color-secondary)] !px-8 !py-5 md:!py-3 !rounded-[30px] !text-base md:!text-[20px] !h-auto"
+                        // className = "!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
                     >
                         Tham gia
                     </Button>
@@ -653,17 +689,51 @@ const WorkFlowSection = () => {
 };
 
 const TestimonialSection = () => {
+
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const slides = useMemo(() => {
+        return [
+            {
+                name: 'TS.Lê Ngọc Thành',
+                subject: 'Khai thác dữ liệu đồ thị',
+                description: 'Epis giúp việc học của tôi tiện lợi hơn nhờ khả năng hỏi và trò chuyện trực tiếp với AI.',
+            },
+            {
+                name: 'TS.Lê Ngọc Thành',
+                subject: 'Cấu trúc dữ liệu và giải thuật',
+                description: 'Epis giúp việc học của tôi tiếp cận cấu trúc dữ liệu và giải thuật một cách dễ dàng hơn.',
+            },
+            {
+                name: 'TS.Nguyễn Tiến Đạt',
+                subject: 'Nhập môn hệ thống thông tin',
+                description: 'Epis là công cụ hỗ trợ học tập hiệu quả cho sinh viên.',
+            },
+        ]
+
+    }, [currentSlide])
+
+    const nextSlide = () => {
+        setCurrentSlide(
+            (prev) => (prev === slides.length - 1 ? 0: prev + 1)
+        )
+    }
+
+    const prevSlide = () =>{
+        setCurrentSlide(
+            (prev) => (prev === 0 ? slides.length - 1 : prev - 1)
+        )
+    }
     
     return (
         <section
-            className="w-full h-[90vh]"
+            className="w-full min-h-[90vh] flex items-center justify-center py-16 md:py-24"
             style={{ backgroundColor: "#FAFAFA" }}
         >
-            <div className="w-full h-full py-19 px-38 flex flex-col">
-                <p className="text-[3.8vw] font-semibold mb-8">Giáo viên nói gì về GSAI</p>
+            <div className="w-[var(--global-width)] flex flex-col">
+                <p className="text-[3.8vw] font-semibold mb-8">Giáo viên nói gì về EPIS</p>
 
-                <div className="flex h-full">
-                    <div className="grow">
+                <div className="flex h-[50vh]">
+                    <div className="grow w-full">
                         <Card 
                             className="w-full h-full" 
                             style={{ borderRadius: "20px", backgroundColor: "#06283D", color:"white", padding: "2vw" }}
@@ -673,37 +743,51 @@ const TestimonialSection = () => {
                                 },
                             }}
                         >
-                            <div className="h-full flex flex-col justify-between items-center">
-                                <div className="flex text-[2vw] orde-first">
-                                    <p>Tên giáo viên</p>
-                                    <p>.</p>
-                                    <p>Môn học</p>
+                            <div className="w-full h-full flex flex-col justify-between items-center">
+                                <div 
+                                    key={currentSlide}
+                                    className="flex text-[1.5vw] order-first gap-2 items-center justify-center w-full"
+                                    style={{ animation: "fadeSlideIn 0.4s ease-out" }}
+                                >
+                                    <p>{slides[currentSlide].name}</p>
+                                    <p className="">•</p>
+                                    <p className="text-gray-500">{slides[currentSlide].subject}</p>
                                 </div>
 
-                                <p className="text-center text-[2vw]">“Epis giúp việc học của tôi tiện lợi hơn nhờ khả năng hỏi và trò chuyện trực tiếp với AI.”</p>
+                                <p 
+                                    key={`desc-${currentSlide}`}
+                                    className="text-center text-[2vw]"
+                                    style={{ animation: "fadeSlideIn 0.4s ease-out 0.1s both" }}
+                                >
+                                    "{slides[currentSlide].description}"
+                                </p>
 
                                 <div className="flex order-last">
                                     <Button 
-                                        className="mr-3" 
-                                        style={{ width: "3.5vw", height: "3.5vw", borderRadius: "calc(infinity * 1px)" }} type="primary">
-                                        <ArrowLeftOutlined />
-                                    </Button>
+                                        onClick={prevSlide}
+                                        className="mr-3 transition-transform duration-200 hover:scale-110 active:scale-95" 
+                                        style={{ width: "3.5vw", height: "3.5vw", borderRadius: "50%" }} 
+                                        type="primary"
+                                        icon={<ArrowLeftOutlined />}
+                                    />
 
                                     <Button 
-                                        className="mr-3" 
-                                        style={{ width: "3.5vw", height: "3.5vw", borderRadius: "calc(infinity * 1px)" }} type="primary">
-                                        <ArrowRightOutlined />
-                                    </Button>
+                                        onClick={nextSlide}
+                                        className="mr-3 transition-transform duration-200 hover:scale-110 active:scale-95" 
+                                        style={{ width: "3.5vw", height: "3.5vw", borderRadius: "50%" }} 
+                                        type="primary"
+                                        icon={<ArrowRightOutlined />}
+                                    />
                                 </div>
                             </div>
                         </Card>
                     </div>
 
-                    <div className="ml-5 w-[70%] h-full">
+                    <div className="ml-5 w-[70%] rounded-[20px] h-full overflow-hidden">
                         <Image
                             src={testimonialPic}
                             alt="workflow pic"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-cover"
                         />
                     </div>
                 </div>

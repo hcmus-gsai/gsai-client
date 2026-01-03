@@ -25,9 +25,6 @@ const CourseDisplaySection = ({
     hasExtended?:boolean;
 }) => {
     
-    const router = useRouter();
-    // const dispatch = useAppDispatch();
-
     const {data: searchCoursesData} = useSearchCoursesQuery({
         limit: 4,
         sortBy: 'created_at',
@@ -39,19 +36,14 @@ const CourseDisplaySection = ({
     const [coursesInfo, setCoursesInfo] = useState<Course[]>([]);
     useEffect(()=> {
         if (searchCoursesData) {
+            console.log('This is searchCoursesData: ', searchCoursesData);
             if (title.toLowerCase().includes("miễn phí")) {
-                setCoursesInfo(searchCoursesData.data.filter((course) => course.tuition_fee === 0));
+                setCoursesInfo(searchCoursesData.data.filter((course) => Number(course.tuition_fee) === 0));
             } else {
                 setCoursesInfo(searchCoursesData.data);
             }
         }
     }, [searchCoursesData]);
-
-    // const handleRedirect = () => {
-    //     dispatch(setTitle(title));
-    //     router.push(`/student/category/${title.toLowerCase().replace(/ /g, '-')}`);
-    // }
-
 
     return (
         <section className = "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
@@ -67,22 +59,6 @@ const CourseDisplaySection = ({
             </div>
             <div className = "flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                 
-                {/* <RedirectButton 
-                    onClick = {handleExpand}
-                    text = {isExpanded ? "Thu gọn" : "Xem tất cả"} 
-                    buttonBg = "white" 
-                    buttonText = "var(--color-secondary)"
-                    buttonBorder = "#1363DF"
-                    iconBg = "var(--color-secondary)"
-                    iconText = "var(--color-bg_white)"
-                /> */}
-
-                {/* <Button
-                    onClick = {handleRedirect}
-                    type = "primary"
-                >
-                    Xem tất cả
-                </Button> */}
                 <RedirectButton
                     title = {title}
                     text = "Xem tất cả"

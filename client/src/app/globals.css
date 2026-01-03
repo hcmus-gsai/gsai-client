@@ -6,9 +6,37 @@
   --color-accent: #47B5FF;
   --color-neutral: #DFF6FF;
   --color-bg-white: #FFFFFF;
-  --color-bg_white_soft: #FAFAFA;
+  --color-bg-white-soft: #FAFAFA;
 
   --global-width: calc(100% - 12rem);
+  --font-family-sans: var(--font-manrope), system-ui, sans-serif;
+}
+
+* {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+}
+
+/* Slide animations */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 /* ::-webkit-scrollbar {

@@ -21,7 +21,7 @@ const LearningPathSection = () => {
                             <p className = "text-[1rem] text-[var(--color-primary)] w-full">Nếu bạn đã xác định rõ môn mình muốn học</p>
                         </div>
                         <div>
-                            <RedirectButton onClick = {() => router.push("/student/courses")} text = "Tìm môn học" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
+                            <RedirectButton title = "Tìm môn học" text = "Tìm môn học" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">
@@ -44,7 +44,7 @@ const LearningPathSection = () => {
                             <p className = "text-[1rem] text-[var(--color-primary)] w-full">Nếu bạn đã xác định rõ môn mình muốn học</p>
                         </div>
                         <div>
-                            <RedirectButton onClick = {() => router.push("/student/courses")} text = "Tìm môn học" buttonBg = "var(--color-bg_white)" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
+                            <RedirectButton title = "Tìm môn học" text = "Tìm môn học" buttonBg = "var(--color-bg_white)" buttonText = "var(--color-secondary)" buttonBorder = "blue" iconBg = "var(--color-secondary)" iconText = "var(--color-bg_white)"/>
                         </div>
                     </div>
                     <div className = "flex flex-col order-last w-[70%] h-full">

@@ -270,13 +270,14 @@ export default function LectureVideoPage() {
     }
 
     const volumeRef = useRef<HTMLButtonElement | null>(null);
+    const volumeSliderRef = useRef<HTMLDivElement | null>(null);
     const [isMuted, setIsMuted] = useState(false);
+    const [isVolumeDragging, setIsVolumeDragging] = useState(false);
 
     const [volumeLevel, setVolumeLevel] = useState(1);
     const [prevVolumeLevel, setPrevVolumeLevel] = useState(1);
 
-    const updateVolumeLevel = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newVolume = parseFloat(e.target.value);
+    const updateVolumeLevelDirect = (newVolume: number) => {
         setVolumeLevel(newVolume);
 
         if (videoRef.current) {
@@ -288,8 +289,61 @@ export default function LectureVideoPage() {
         } else {
             setIsMuted(false);
         }
+    };
 
-    }
+    const handleVolumeSliderInteraction = (clientX: number) => {
+        if (!volumeSliderRef.current) return;
+        
+        const rect = volumeSliderRef.current.getBoundingClientRect();
+        const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        updateVolumeLevelDirect(percent);
+    };
+
+    const handleVolumeMouseDown = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        setIsVolumeDragging(true);
+        handleVolumeSliderInteraction(e.clientX);
+    };
+
+    const handleVolumeTouchStart = (e: React.TouchEvent) => {
+        e.stopPropagation();
+        setIsVolumeDragging(true);
+        handleVolumeSliderInteraction(e.touches[0].clientX);
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (isVolumeDragging) {
+                e.preventDefault();
+                handleVolumeSliderInteraction(e.clientX);
+            }
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (isVolumeDragging) {
+                handleVolumeSliderInteraction(e.touches[0].clientX);
+            }
+        };
+
+        const handleEnd = () => {
+            setIsVolumeDragging(false);
+        };
+
+        if (isVolumeDragging) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleEnd);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleEnd);
+        };
+    }, [isVolumeDragging]);
 
     const toggleVolume = () => {
         if (!videoRef.current) {
@@ -346,6 +400,112 @@ export default function LectureVideoPage() {
             videoRef.current.currentTime = duration;
         }
     }
+
+    // Custom Video Slider
+    const sliderRef = useRef<HTMLDivElement | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragPercent, setDragPercent] = useState<number | null>(null);
+
+    const getSliderPercent = (clientX: number): number => {
+        if (!sliderRef.current) return 0;
+        const rect = sliderRef.current.getBoundingClientRect();
+        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    };
+
+    const getDuration = (): number => {
+        return duration > 0 ? duration : (videoRef.current?.duration || 0);
+    };
+
+    const handleSliderMouseDown = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const percent = getSliderPercent(e.clientX);
+        const currentDuration = getDuration();
+        
+        setIsDragging(true);
+        setDragPercent(percent * 100);
+        
+        if (currentDuration > 0 && videoRef.current) {
+            const newTime = percent * currentDuration;
+            videoRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+        }
+    };
+
+    const handleSliderTouchStart = (e: React.TouchEvent) => {
+        e.stopPropagation();
+        
+        const percent = getSliderPercent(e.touches[0].clientX);
+        const currentDuration = getDuration();
+        
+        setIsDragging(true);
+        setDragPercent(percent * 100);
+        
+        if (currentDuration > 0 && videoRef.current) {
+            const newTime = percent * currentDuration;
+            videoRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+        }
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !sliderRef.current) return;
+            e.preventDefault();
+            
+            const percent = getSliderPercent(e.clientX);
+            const currentDuration = getDuration();
+            
+            setDragPercent(percent * 100);
+            
+            if (currentDuration > 0 && videoRef.current) {
+                const newTime = percent * currentDuration;
+                videoRef.current.currentTime = newTime;
+                setCurrentTime(newTime);
+            }
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            if (!isDragging || !sliderRef.current) return;
+            
+            const percent = getSliderPercent(e.touches[0].clientX);
+            const currentDuration = getDuration();
+            
+            setDragPercent(percent * 100);
+            
+            if (currentDuration > 0 && videoRef.current) {
+                const newTime = percent * currentDuration;
+                videoRef.current.currentTime = newTime;
+                setCurrentTime(newTime);
+            }
+        };
+
+        const handleEnd = () => {
+            setIsDragging(false);
+            setDragPercent(null);
+        };
+
+        if (isDragging) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchmove', handleTouchMove);
+            document.addEventListener('touchend', handleEnd);
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleEnd);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleEnd);
+        };
+    }, [isDragging, duration]);
+
+    // Progress percent: dùng dragPercent khi đang kéo, ngược lại dùng currentTime
+    const actualDuration = getDuration();
+    const progressPercent = dragPercent !== null 
+        ? dragPercent 
+        : (actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0);
 
     //ASR and OCR Toggle
     const [enableASR, setEnableASR] = useState(false);
@@ -421,17 +581,29 @@ export default function LectureVideoPage() {
 
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 
-                        <div className="w-full mb-3">
-                            <input
-                                type="range"
-                                min={0}
-                                max={duration}
-                                value={currentTime}
-                                step="0.1"
-                                className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)] hover:h-2 transition-all"
-                                onClick={(e) => e.stopPropagation()} 
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateVideoProgress(e)}
+                        {/* Custom Video Slider */}
+                        <div 
+                            ref={sliderRef}
+                            className="w-full mb-3 relative h-3 group/slider cursor-pointer select-none flex items-center"
+                            onMouseDown={handleSliderMouseDown}
+                            onTouchStart={handleSliderTouchStart}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Track background (chưa xem) */}
+                            <div className="absolute left-0 right-0 h-1 group-hover/slider:h-[6px] bg-gray-500/60 rounded-full transition-all duration-150" />
+                            
+                            {/* Progress bar (đã xem) */}
+                            <div 
+                                className="absolute left-0 h-1 group-hover/slider:h-[6px] bg-[var(--color-secondary)] rounded-full transition-all duration-75"
+                                style={{ width: `${progressPercent}%` }}
+                            />
+                            
+                            {/* Thumb (nút kéo) */}
+                            <div 
+                                className="absolute w-3 h-3 group-hover/slider:w-4 group-hover/slider:h-4 bg-white rounded-full shadow-md transition-all duration-150 pointer-events-none"
+                                style={{ 
+                                    left: `calc(${progressPercent}% - ${progressPercent > 50 ? '8px' : '4px'})`,
+                                }}
                             />
                         </div>
 
@@ -471,18 +643,34 @@ export default function LectureVideoPage() {
                                 </button>
 
                                 <div className="relative group/volume">
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover/volume:opacity-100 transition-opacity whitespace-nowrap">
+                                    {/* Tooltip hiển thị % âm lượng */}
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover/volume:opacity-100 transition-opacity whitespace-nowrap">
                                         {Math.round(volumeLevel * 100)}%
                                     </div>
-                                    <input
-                                        type="range"
-                                        min={0}
-                                        max={1}
-                                        step={0.01}
-                                        value={volumeLevel}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateVolumeLevel(e)}
-                                        className="w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[var(--color-secondary)]"
-                                    />
+                                    
+                                    {/* Custom Volume Slider */}
+                                    <div 
+                                        ref={volumeSliderRef}
+                                        className="w-20 h-3 relative cursor-pointer select-none flex items-center"
+                                        onMouseDown={handleVolumeMouseDown}
+                                        onTouchStart={handleVolumeTouchStart}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {/* Track background */}
+                                        <div className="absolute left-0 right-0 h-1 bg-gray-500/60 rounded-full" />
+                                        
+                                        {/* Volume level bar */}
+                                        <div 
+                                            className="absolute left-0 h-1 bg-white rounded-full transition-all duration-75"
+                                            style={{ width: `${volumeLevel * 100}%` }}
+                                        />
+                                        
+                                        {/* Thumb */}
+                                        <div 
+                                            className="absolute w-3 h-3 bg-white rounded-full shadow-md transition-all duration-75 pointer-events-none"
+                                            style={{ left: `calc(${volumeLevel * 100}% - 6px)` }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center gap-2 ml-2">
