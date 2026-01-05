@@ -1,18 +1,37 @@
+"use client";
+
 import '@ant-design/v5-patch-for-react-19';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
-import { useGetQuizByLessonIdQuery } from '@/store/api/[module]/quizApi';
+import { useGetQuizByLessonIdQuery, useGetLatestQuizAttemptQuery } from '@/store/api/[module]/quizApi';
 import { useRouter } from 'next/dist/client/components/navigation';
 
 const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
-    localStorage.setItem("lessonId", lessonId);
-
     const router = useRouter();
-    const [isCompleted, setIsCompleted] = useState(true);
 
     const { data: quizRes } = useGetQuizByLessonIdQuery(lessonId);
     const quiz = quizRes;
+
+    const { data: latestAttempt } = useGetLatestQuizAttemptQuery(
+        quiz?.quiz_id!, {
+        skip: !quiz?.quiz_id,
+    });
+
+    const [isCompleted, setIsCompleted] = useState(false);
+    useEffect(() => {
+        if (latestAttempt?.status === 'graded') {
+            setIsCompleted(true);
+        } else {
+            setIsCompleted(false);
+        }
+    }, [latestAttempt]);
+
+    const formatTime = (s: number) => ({
+        hours: Math.floor(s / 3600),
+        minutes: Math.floor((s % 3600) / 60),
+        seconds: s % 60,
+    });
 
     return (
         <div className="flex-1">
@@ -34,7 +53,12 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
                     {!isCompleted ? (
                         <Button
-                            onClick={() => router.push(`/student/quiz/${quiz?.quiz_id}`)}
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    localStorage.setItem("lessonId", lessonId);
+                                }
+                                router.push(`/student/quiz/${quiz?.quiz_id}`);
+                            }}
                             className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white !border !border-[var(--color-secondary)]
                                     hover:!bg-neutral hover:!text-[var(--color-secondary)]"
                         >
@@ -57,7 +81,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                     className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
                 >
                     <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
-                    <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Điểm cao nhát sẽ được ghi nhớ.</p>
+                    <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Kết quả cao nhất sẽ được ghi nhớ.</p>
                     <p className="text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 100/100</p>
                 </Card>
             ) : (
@@ -67,7 +91,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                     <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm của bạn</p>
                     <div className="w-full flex items-center justify-between gap-[1rem]">
                         <Progress
-                            percent={75}
+                            percent={(latestAttempt?.correct_count! / latestAttempt?.total_questions!) * 100}
                             type="circle"
                             size={200}
                             strokeWidth={12}
@@ -76,7 +100,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[1rem] font-bold text-[var(--color-primary)]">Trả lời đúng</div>
                                     <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
-                                        4 / 15
+                                        {latestAttempt?.correct_count} / {latestAttempt?.total_questions}
                                     </div>
                                 </div>
                             )}
@@ -85,7 +109,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
 
                         <Progress
-                            percent={75}
+                            percent={latestAttempt?.score_percentage! * 100}
                             type="circle"
                             size={200}
                             strokeWidth={12}
@@ -93,14 +117,14 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                             format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[2.5rem] font-bold text-[var(--color-secondary)]">
-                                        2.67
+                                        {(latestAttempt?.score_percentage! * 100).toFixed(2)}
                                     </div>
                                 </div>
                             )}
                         />
 
                         <Progress
-                            percent={75}
+                            percent={(latestAttempt?.time_used! / (quiz?.duration! * 60)) * 100}
                             type="circle"
                             size={200}
                             strokeWidth={12}
@@ -109,7 +133,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[1rem] font-bold text-[var(--color-primary)]">Thời gian</div>
                                     <div className="text-[1.5rem] font-bold text-[var(--color-secondary)]">
-                                        29:28
+                                        {formatTime(latestAttempt?.time_used || 0).hours}:{formatTime(latestAttempt?.time_used || 0).minutes}:{formatTime(latestAttempt?.time_used || 0).seconds}
                                     </div>
                                 </div>
                             )}

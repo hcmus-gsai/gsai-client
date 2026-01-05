@@ -1,10 +1,10 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import { Button } from 'antd';
+import { Button, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGetQuizQuestionsByQuizIdQuery, useGetQuizByLessonIdQuery, useSubmitQuizMutation, useGradeQuizAttemptMutation } from '@/store/api/[module]/quizApi';
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'next/navigation';;
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 
 const QuizSection = () => {
 
@@ -12,22 +12,32 @@ const QuizSection = () => {
     const [lessonId, setLessonId] = useState<string | null>(null);
 
     useEffect(() => {
-        const id = localStorage.getItem("lessonId");
-        if (id) setLessonId(id);
+        const storedLessonId = localStorage.getItem("lessonId");
+        if (storedLessonId) setLessonId(storedLessonId);
     }, []);
 
-    const { data: quizRes } = useGetQuizByLessonIdQuery(lessonId!, { skip: !lessonId });
+    const { data: quizRes, isLoading } = useGetQuizByLessonIdQuery(lessonId!, { skip: !lessonId });
     const quiz = quizRes;
+    const TOTAL_TIME = quiz?.duration ? quiz.duration * 60 : 0;
 
     // Handle Submit
-    type ModalType = 'confirm' | 'auto' | null;
+    type ModalType = 'confirm' | 'auto' | 'retry' | null;
     const [modalType, setModalType] = useState<ModalType>(null);
     const [submitQuiz] = useSubmitQuizMutation();
     const [gradeQuiz] = useGradeQuizAttemptMutation();
+    const [grade, setGrade] = useState<any>([]);
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [timeUsed, setTimeUsed] = useState<number | null>(null);
+    const [attempt, setAttempt] = useState<any>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
         try {
+            setIsSubmitting(true);
             setModalType(null);
+
+            const used = TOTAL_TIME - timeLeft;
+            setTimeUsed(used);
 
             const payload = Object.entries(answers).map(
                 ([question_id, selected_option_id]) => ({
@@ -36,21 +46,43 @@ const QuizSection = () => {
                     student_answer_text: "",
                 })
             );
-            console.log('Submitting payload:', payload);
 
-            const res = await submitQuiz({
+            const submitQuizRes = await submitQuiz({
                 quiz_id: quiz?.quiz_id as string,
-                answers: payload
+                answers: payload,
+                time_used: used,
             }).unwrap();
 
-            console.log('Submit response:', res);
+            const gradeQuizRes = await gradeQuiz({ attempt_id: submitQuizRes.id }).unwrap();
 
-            await gradeQuiz({ attempt_id: res.attempt.id }).unwrap();
-        }
-        catch (error) {
-            console.error("Failed to submit quiz:", error);
+            setAttempt(submitQuizRes);
+            setGrade(gradeQuizRes);
+            setIsCompleted(true);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsSubmitting(false);
         }
     };
+
+    const responseMap = useMemo(() => {
+        if (!grade) return {};
+        return Object.fromEntries(
+            grade.map((r: any) => [r.quession_id, r])
+        );
+    }, [grade]);
+
+    // Handle retry after completion
+    const handleRetry = () => {
+        setAnswers({});
+        setIsCompleted(false);
+        setGrade({});
+
+        if (quiz?.duration) {
+            setTimeLeft(TOTAL_TIME);
+            hasSubmittedRef.current = false;
+        }
+    }
 
     // Time Remaining
     const [timeLeft, setTimeLeft] = useState(0);
@@ -59,7 +91,6 @@ const QuizSection = () => {
     useEffect(() => {
         if (!quiz?.duration) return;
 
-        const TOTAL_TIME = quiz.duration * 60;
         setTimeLeft(TOTAL_TIME);
         hasSubmittedRef.current = false;
 
@@ -89,12 +120,18 @@ const QuizSection = () => {
 
     // Questions Info
     const { quizId } = useParams();
-    const { data: questionRes } = useGetQuizQuestionsByQuizIdQuery(quizId as string);
+    const { data: questionRes } = useGetQuizQuestionsByQuizIdQuery(quizId as string, { skip: !quizId });
     const questions = questionRes;
     const [answers, setAnswers] = useState<Record<string, string>>({});
+    // const totalQuestions = questions?.length ?? 0;
+
+    // Handle loading state
+    if (!lessonId) return <div>Đang tải bài học...</div>;
+    if (isLoading || !quiz) return <div>Đang tải quiz...</div>;
 
     return (
         <section className="w-full flex justify-center px-6 pt-[6rem] mb-[2rem]">
+            {/* Navbar */}
             <nav className="fixed top-0 left-0 w-full h-[5rem] border-b border-gray-200 bg-white z-20">
                 <div className="max-w-[var(--global-width)] mx-auto mt-3 flex items-center justify-between px-6">
                     <div className="flex items-center gap-5">
@@ -113,128 +150,285 @@ const QuizSection = () => {
                     </p>
                 </div>
             </nav>
+
+            {/* QA section */}
             <div className="max-w-[var(--global-width)] w-full grid grid-cols-[1fr_20rem] gap-8">
-                {/* Questions */}
-                <div className="flex flex-col gap-6">
-                    {questions?.map((q) => {
-                        const isAnswered = !!answers[q.id];
-                        return (
-                            <div
-                                key={q.id}
-                                className="mb-8 p-4 rounded-lg w-full transition bg-[var(--color-white)]"
-                            >
-                                {/* Question */}
-                                <div className="flex items-center justify-between w-full mb-2 gap-4">
-                                    <h2 className="text-lg font-regular flex-1 truncate">
-                                        Câu {q.order_index}: {q.question_text}
-                                    </h2>
-                                    <span className="text-sm font-normal !bg-[var(--color-neutral)] rounded-full px-3 py-1 !text-[var(--color-secondary)] whitespace-nowrap">
-                                        {q.points} điểm
-                                    </span>
-                                </div>
-
-                                {/* Options */}
-                                <ul className="space-y-2">
-                                    {q.options.map((o) => (
-                                        <li key={o.id}>
-                                            <label className="relative flex items-center gap-3 cursor-pointer group p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100 leading-none">
-                                                <input
-                                                    type="radio"
-                                                    name={`quiz-${q.id}`}
-                                                    value={o.id}
-                                                    checked={answers[q.id] === o.id}
-                                                    onChange={() =>
-                                                        setAnswers((prev) => ({
-                                                            ...prev,
-                                                            [q.id]: o.id,
-                                                        }))
-                                                    }
-                                                />
-                                                <span className={`text-gray-800 text-base ${answers[q.id] === o.id
-                                                    ? "text-[var(--color-secondary)]"
-                                                    : ""
-                                                    }`}
-                                                >
-                                                    {o.option_text}
-                                                </span>
-                                            </label>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Timer & Progress */}
-                <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-3">
-                    {/* Timer */}
-                    <h2 className="text-2xl font-semibold mb-4">Thời gian còn lại</h2>
-                    <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
-                        <div className="flex items-center gap-6">
-                            <div className="flex flex-col items-center">
-                                <div>{formatTime(timeLeft).hours.toString().padStart(2, '0')}</div>
-                                <p className="text-sm font-normal">giờ</p>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <div>{formatTime(timeLeft).minutes.toString().padStart(2, '0')}</div>
-                                <p className="text-sm font-normal">phút</p>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <div>{formatTime(timeLeft).seconds.toString().padStart(2, '0')}</div>
-                                <p className="text-sm font-normal">giây</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div className="flex flex-wrap gap-2 justify-center mb-4">
-                        {questions?.map((q) => {
-                            const isAnswered = !!answers[q.id];
-                            return (
+                {!isCompleted ? (
+                    // In-progress
+                    <>
+                        {/* LEFT: Questions */}
+                        <div className="flex flex-col gap-6">
+                            {questions?.map((q) => (
                                 <div
                                     key={q.id}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-md text-sm font-medium
-                        ${isAnswered
-                                            ? "bg-[var(--color-neutral)]"
-                                            : "bg-[var(--color-secondary-light)]"
-                                        }
-                    `}
+                                    className="mb-8 p-4 rounded-lg w-full transition bg-[var(--color-white)]"
                                 >
-                                    {q.order_index}
-                                </div>
-                            );
-                        })}
-                    </div>
+                                    {/* Question */}
+                                    <div className="flex items-center justify-between w-full mb-2 gap-4">
+                                        <h2 className="text-lg font-regular flex-1 truncate">
+                                            Câu {q.order_index}: {q.question_text}
+                                        </h2>
+                                        <span className="text-sm font-normal !bg-[var(--color-neutral)] rounded-full px-3 py-1 !text-[var(--color-secondary)] whitespace-nowrap">
+                                            {q.points * 100} điểm
+                                        </span>
+                                    </div>
 
-                    <Button
-                        className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
-                        onClick={() => setModalType('confirm')}
-                    >
-                        Nộp bài
-                    </Button>
-                </aside>
+                                    {/* Options */}
+                                    <ul className="space-y-2">
+                                        {q.options.map((o) => (
+                                            <li key={o.id}>
+                                                <label className="relative flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100">
+                                                    <input
+                                                        type="radio"
+                                                        name={`quiz-${q.id}`}
+                                                        checked={answers[q.id] === o.id}
+                                                        onChange={() =>
+                                                            setAnswers((prev) => ({
+                                                                ...prev,
+                                                                [q.id]: o.id,
+                                                            }))
+                                                        }
+                                                    />
+                                                    <span
+                                                        className={`text-base ${answers[q.id] === o.id
+                                                            ? "text-[var(--color-secondary)]"
+                                                            : "text-gray-800"
+                                                            }`}
+                                                    >
+                                                        {o.option_text}
+                                                    </span>
+                                                </label>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* RIGHT: Timer & Progress */}
+                        <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4">
+                            <h2 className="text-xl font-semibold">Thời gian còn lại</h2>
+                            <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex flex-col items-center">
+                                        <div>{formatTime(timeLeft).hours.toString().padStart(2, '0')}</div>
+                                        <p className="text-sm font-normal">giờ</p>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div>{formatTime(timeLeft).minutes.toString().padStart(2, '0')}</div>
+                                        <p className="text-sm font-normal">phút</p>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div>{formatTime(timeLeft).seconds.toString().padStart(2, '0')}</div>
+                                        <p className="text-sm font-normal">giây</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 justify-center">
+                                {questions?.map((q) => (
+                                    <div
+                                        key={q.id}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-md text-sm font-medium ${answers[q.id]
+                                            ? "bg-[var(--color-neutral)] text-[var(--color-secondary)]"
+                                            : "bg-gray-200"
+                                            }`}
+                                    >
+                                        {q.order_index}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <Button
+                                className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                                onClick={() => setModalType("confirm")}
+                            >
+                                Nộp bài
+                            </Button>
+                        </aside>
+                    </>
+                ) : (
+                    // Completed
+                    <>
+                        {/* LEFT: Questions */}
+                        <div className="flex flex-col gap-6">
+                            {questions?.map((q) => (
+                                <div
+                                    key={q.id}
+                                    className="mb-8 p-4 rounded-lg w-full transition bg-[var(--color-white)]"
+                                >
+                                    {/* Question */}
+                                    <div className="flex items-center justify-between w-full mb-2 gap-4">
+                                        <h2 className="text-lg font-regular flex-1 truncate">
+                                            Câu {q.order_index}: {q.question_text}
+                                        </h2>
+                                    </div>
+
+                                    {/* Options */}
+                                    <ul className="space-y-2">
+                                        {q.options.map((o) => {
+                                            const res = responseMap[q.id];
+                                            const isSelected = res?.selected_option_id === o.id;
+
+                                            let optionClass = "text-gray-800";
+                                            if (isSelected) {
+                                                optionClass = res.is_correct
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-red-100 text-red-700";
+                                            }
+
+                                            return (
+                                                <li key={o.id}>
+                                                    <label
+                                                        className={`flex items-center gap-3 p-2 rounded-lg ${optionClass}`}
+                                                    >
+                                                        <input type="radio" disabled checked={isSelected} />
+                                                        <span>{o.option_text}</span>
+                                                    </label>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* RIGHT: Timer & Progress */}
+                        <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4">
+                            <h2 className="text-xl font-semibold">Thời gian hoàn thành</h2>
+
+                            {timeUsed !== null && (
+                                <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex flex-col items-center">
+                                            <div>{formatTime(timeUsed).hours.toString().padStart(2, '0')}</div>
+                                            <p className="text-sm font-normal">giờ</p>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div>{formatTime(timeUsed).minutes.toString().padStart(2, '0')}</div>
+                                            <p className="text-sm font-normal">phút</p>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div>{formatTime(timeUsed).seconds.toString().padStart(2, '0')}</div>
+                                            <p className="text-sm font-normal">giây</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <p className="text-base font-medium m-4">
+                                Trả lời đúng:{" "}
+                                <span>
+                                    {attempt?.correct_count} / {attempt?.total_questions}
+                                </span>
+                            </p>
+
+                            <div className="flex flex-wrap gap-2 justify-center">
+                                {questions?.map((q) => {
+                                    const res = responseMap[q.id];
+
+                                    let bgClass = "bg-gray-200";
+                                    if (res) {
+                                        bgClass = res.is_correct
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700";
+                                    }
+
+                                    return (
+                                        <div
+                                            key={q.id}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-md text-sm font-medium ${bgClass}`}
+                                        >
+                                            {q.order_index}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <Button
+                                className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                                onClick={() => setModalType("retry")}
+                            >
+                                Làm lại
+                            </Button>
+                        </aside>
+                    </>
+                )}
             </div>
 
-            {/* Submit Modals */}
+            {/* Modals */}
             {modalType === 'confirm' && (
                 <SubmitModal
                     onCancel={() => setModalType(null)}
-                    onSubmit={handleSubmit}
+                    onConfirm={handleSubmit}
+                />
+            )
+            }
+            {modalType === 'auto' && <AutoSubmitModal />}
+            {modalType === 'retry' && (
+                <RetryModal
+                    onCancel={() => setModalType(null)}
+                    onConfirm={() => {
+                        setModalType(null);
+                        handleRetry();
+                    }}
                 />
             )}
-            {modalType === 'auto' && <AutoSubmitModal />}
-        </section >
 
+            {/* Submitting spinner */}
+            {isSubmitting && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
+                    <Spin fullscreen tip="Đang nộp bài..." />
+                </div>
+            )}
+        </section >
     );
 };
 
 type Props = {
     onCancel: () => void;
-    onSubmit: () => void;
+    onConfirm: () => void;
 };
 
-function SubmitModal({ onCancel, onSubmit }: Props) {
+function RetryModal({ onCancel, onConfirm }: Props) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Blur background */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onCancel}
+            />
+
+            {/* Pop up */}
+            <div className="relative flex flex-col items-center justify-center
+                      bg-white rounded-xl shadow-xl
+                      w-[480px] h-[200px] px-6 text-center">
+                <h2 className="text-lg font-semibold mb-2">Làm lại</h2>
+                <p className="text-sm text-gray-600 mb-6">
+                    Bạn có chắc muốn làm lại bài không?
+                </p>
+
+                <div className="flex justify-end gap-3">
+                    <Button
+                        className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                        onClick={onCancel}
+                    >
+                        Hủy
+                    </Button>
+
+                    <Button
+                        className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                        onClick={onConfirm}
+                    >
+                        Làm lại
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SubmitModal({ onCancel, onConfirm }: Props) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Blur background */}
@@ -262,7 +456,7 @@ function SubmitModal({ onCancel, onSubmit }: Props) {
 
                     <Button
                         className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
-                        onClick={onSubmit}
+                        onClick={onConfirm}
                     >
                         Nộp bài
                     </Button>

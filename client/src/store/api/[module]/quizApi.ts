@@ -1,5 +1,5 @@
 import { baseApi } from '../baseApi';
-import { QuizResponse, QuestionsResponse, AnswerSubmit, QuizSubmitResponse, GradeResponse } from '../../../type/quiz.type';
+import { QuizResponse, QuestionsResponse, AnswerSubmit, GradeResponse, AttemptResponse } from '../../../type/quiz.type';
 
 export const quizApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -14,11 +14,14 @@ export const quizApi = baseApi.injectEndpoints({
             providesTags: (result, error, id) => [{ type: 'Quiz', id }],
         }),
 
-        submitQuiz: builder.mutation<QuizSubmitResponse, { quiz_id: string; answers: AnswerSubmit[] }>({
-            query: ({ quiz_id, answers }) => ({
+        submitQuiz: builder.mutation<AttemptResponse, { quiz_id: string; answers: AnswerSubmit[], time_used: number }>({
+            query: ({ quiz_id, answers, time_used }) => ({
                 url: `/quizzes/${quiz_id}/submit`,
                 method: 'POST',
-                body: answers,
+                body: {
+                    time_used: time_used,
+                    responses: answers,
+                },
             }),
             invalidatesTags: (result, error, { quiz_id }) => [{ type: 'Quiz', id: quiz_id }],
         }),
@@ -30,6 +33,11 @@ export const quizApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: (result, error, { attempt_id }) => [{ type: 'Quiz', id: attempt_id }],
         }),
+
+        getLatestQuizAttempt: builder.query<AttemptResponse, string>({
+            query: (quiz_id) => `/quiz-attemps/${quiz_id}/latest`,
+            providesTags: (result, error, quiz_id) => [{ type: 'Quiz', id: quiz_id }],
+        }),
     }),
 });
 
@@ -38,4 +46,5 @@ export const {
     useGetQuizQuestionsByQuizIdQuery,
     useSubmitQuizMutation,
     useGradeQuizAttemptMutation,
+    useGetLatestQuizAttemptQuery,
 } = quizApi;

@@ -28,12 +28,22 @@ export interface AnswerSubmit {
     selected_option_ids?: string;
 }
 
-export interface QuizSubmitResponse {
-    attempt: any;
-    responses: any[];
-}
-
 export interface GradeResponse {
     updatedAttempt: any;
     responses: any[];
+}
+
+export interface AttemptResponse {
+    id: string;
+    enrollment_id: string;
+    quiz_id: string;
+    status: string;
+    score_percentage: number;
+    is_passed: boolean;
+    submitted_at: string | null;
+    graded_at: string | null;
+    graded_by_teacher_id: string | null;
+    correct_count: number;
+    total_questions: number;
+    time_used: number;
 }
