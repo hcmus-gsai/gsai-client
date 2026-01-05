@@ -14,12 +14,19 @@ import dayjs from "dayjs";
 
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
-import { useGetUserProfileQuery } from "@/store/api/[module]/userApi";
 import VideoIcon from "@/../public/student/VideoIcon.svg";
 import MoreIcon from "@/../public/student/MoreIcon.svg";
-import staticMethods from "antd/es/message";
-// import { date } from "better-auth";
+//API call
 import { useAppSelector, useAppDispatch } from "@/store/hook";
+import { useGetUserProfileQuery } from "@/store/api/[module]/userApi";
+import { useGetAllEnrollmentsQuery } from "@/store/api/[module]/enrollmentApi";
+import { EnrolledCourse } from "@/type/enrollment.type";
+import { useLazyGetLearningProgressByEnrollmentQuery} from "@/store/api/[module]/lessonProgressApi";
+import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
+import {LessonProgress} from "@/type/lessonProgress.type";
+
+//Routing
+import { useRouter } from "next/navigation";
 const CustomCalendar = () => {
     const [chosenDate, setChosenDate] = useState<Date | null>(null);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -226,24 +233,15 @@ export default function LearningProgressPage() {
         { id: 5, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
     ]
 
+
     
 
+    const router = useRouter();
     const {data: profile, isLoading, error} = useGetUserProfileQuery();
+    const { data: enrollmentsData, isLoading: enrollmentsLoading } = useGetAllEnrollmentsQuery();
 
     const name = profile?.full_name || '';
-
-    const mockCourses = [
-        { id: 1, name: "Khóa học 1", status: "completed" },
-        { id: 2, name: "Khóa học 2", status: "in_progress" },
-        { id: 3, name: "Khóa học 3", status: "not_started" },
-        { id: 4, name: "Khóa học 4", status: "completed" },
-        { id: 5, name: "Khóa học 5", status: "in_progress" },
-        { id: 6, name: "Khóa học 6", status: "not_started" },
-        { id: 7, name: "Khóa học 7", status: "completed" },
-        { id: 8, name: "Khóa học 8", status: "in_progress" },
-        { id: 9, name: "Khóa học 9", status: "not_started" },
-        { id: 10, name: "Khóa học 10", status: "completed" },
-    ];
+    const enrollments: EnrolledCourse[] = enrollmentsData?.data ?? [];
 
     const [activeTab, setActiveTab] = useState("all");
     const courseListRef = useRef<HTMLDivElement>(null);
@@ -253,13 +251,6 @@ export default function LearningProgressPage() {
             courseListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [activeTab]);
-
-    const filteredData = mockCourses.filter((course) => {
-        if (activeTab === "all") return true;
-        if (activeTab === "ongoing") return course.status === "in_progress";
-        if (activeTab === "completed") return course.status === "completed";
-        return true;
-    });
 
     const TabButton = ({ id, label }: { id: string; label: string }) => (
         <Button
@@ -273,13 +264,96 @@ export default function LearningProgressPage() {
           {label}
         </Button>
     );
-  
+
+    const [fetchProgress] = useLazyGetLearningProgressByEnrollmentQuery();
+    const [fetchModules] = useLazyGetCourseModulesQuery();
+
+    const [progressMap, setProgressMap] = useState<Record<string, LessonProgress[]>>({});
+    const [totalLessonMap, setTotalLessonMap] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const loadProgressAndLesson = async () => {
+            if (!enrollments.length) 
+                return;
+            const progressResults: Record<string, LessonProgress[]> = {};
+            const totalLessonResults: Record<string, number> = {};
+
+            for (const enrolled_course of enrollments) {
+                try {
+                    const progressResponse = await fetchProgress(enrolled_course.id).unwrap();
+                    console.log('Progress response for enrollment', enrolled_course.id, progressResponse);
+                    progressResults[enrolled_course.id] = progressResponse.lessonProgress;
+                    const modulesResponse = await fetchModules(enrolled_course.course_id).unwrap();
+                    totalLessonResults[enrolled_course.id] = modulesResponse.modules.length;
+                }
+                catch (error) {
+                    console.error(`Error loading progress for course`, error);
+                }
+            }
+            setProgressMap(progressResults);
+            setTotalLessonMap(totalLessonResults);
+        }
+        loadProgressAndLesson();
+    }, [enrollments, fetchProgress, fetchModules]);
+
+
+    
+
+    const typeTranslate: Record<string, {label: string}> = {
+        'video': {label: 'Video'},
+        'document': {label: 'Tài liệu'},
+        'quiz': {label: 'Quiz'},
+        'project': {label: 'Bài tập lớn'},
+    }
+
+    const getCompletionPercent = useMemo(() => {
+        return (courseId: string) => {
+            const progress = progressMap[courseId];
+
+            const totalLesson = totalLessonMap[courseId];
+            
+            if (!progress || !totalLesson || totalLesson === 0) return 0;
+
+            const completedCount = progress.filter(p => p.is_completed).length;
+            const completionPercent = Math.round((completedCount / totalLesson) * 100);
+            
+            return completionPercent;
+        }
+    }, [progressMap, totalLessonMap]);
+
+    const getChosenLesson = useMemo(() => {
+        return (courseId: string) => {
+            const progress = progressMap[courseId];
+            if (!progress || progress.length === 0) return null;
+            const currentProgress = progress.find(p => !p.is_completed && p.lesson?.order_index === Math.min(...progress.filter(p => !p.is_completed).map(p => p.lesson?.order_index || 0)));
+            return currentProgress?.lesson || null;
+        }
+    }, [progressMap]);
+
+    const formatTime = useMemo(() => {
+        return (time: string) => {
+            const [hours, minutes, seconds] = time.split(':').map(Number);
+            if (hours > 0) return `${hours} giờ`;
+            if (minutes > 0) return `${minutes} phút`;
+            return `${seconds} giây`;
+        }
+    }, []);  
+    
+
+    const filteredEnrollments = useMemo(()=> {
+        return enrollments.filter((course) => {
+            if (activeTab === "all") return true;
+            if (activeTab === "ongoing") return course.completion_status === "in_progress";
+            if (activeTab === "completed") return course.completion_status === "completed";
+            return true;
+        });
+    }, [enrollments, activeTab]);
 
     return (
         <>
 
         <section className = "h-full w-full flex flex-col items-center justify-center mt-[10rem]">
-            <div className = "w-[var(--global-width)] flex items-stretch justify-between gap-[1rem]">
+            <div className = "w-[var(--global-width)] flex items-stretch justify-between gap-[1rem] mb-[1.5rem]">
                 <div className ="flex-1 flex flex-col items-start justify-start">
                     <div className = "mb-[1rem]">
                         <p className = "text-[2.5rem] font-bold text-[var(--color-primary)]">Xin chào {name}!</p>
@@ -291,19 +365,19 @@ export default function LearningProgressPage() {
                                 <p className = "text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Tình trạng học tập</p>
                                 <div className = "flex item-center justify-center w-full">
                                     <div className = "flex items-end justify-end">
-                                        <p className = "text-[0.875rem] text-[var(--color-primary)]">Đã hoàn thành (67%)</p>
+                                        {/* <p className = "text-[0.875rem] text-[var(--color-primary)]">Đã hoàn thành ({getCompletionPercent(enrollments[0].id)}%)</p> */}
                                         <Image src={LowerPointer} alt="Lower Pointer" width={36} height={36}
                                             className = "relative bottom-5 object-cover !w-[3rem] !h-auto"
                                         />
                                     </div>
                                     
-                                    <Progress percent = {67} type = "circle" size = {100} strokeWidth={12} strokeLinecap ="square" />
+                                    {/* <Progress percent = {getCompletionPercent(enrollments[0].id)} type = "circle" size = {100} strokeWidth={12} strokeLinecap ="square" /> */}
 
                                     <div className = "flex items-start justify-start">
                                         <Image src={UpperPointer} alt="Upper Pointer" width={36} height={36}
                                             className="relative top-2 object-cover !w-[3rem] !h-auto"
                                         />
-                                        <p className = "text-[0.875rem] text-[var(--color-primary)]">Đang học (33%)</p>
+                                        <p className = "text-[0.875rem] text-[var(--color-primary)]">Đang học</p>
                                     </div>
                                 </div>                            
                             </div>
@@ -332,8 +406,6 @@ export default function LearningProgressPage() {
                         <CustomCalendar/>
 
                         <div className = "bg-gray-200 w-full h-[1px] mt-1[rem] mb-[1rem]">
-
-
                         </div>
 
                         <div
@@ -390,59 +462,81 @@ export default function LearningProgressPage() {
                         ref={courseListRef}
                         className="w-full flex flex-col items-center justify-start gap-[1.5rem] mb-[2rem] max-h-[500px] overflow-y-auto custom-scrollbar"
                     >
-                        
-                        {filteredData.map((course) => (
-                            <div
-                                key={course.id}
-                                className="flex items-center justify-center w-full p-[1.5rem] rounded-[20px] border-[1px] border-solid border-[#DCDCDC]"
-                            >
-                                <div className="flex flex-col items-start justify-center w-full h-full mr-auto pl-[1.5rem]">
-                                    
-                                    <p className="text-[1.125rem] font-bold text-[var(--color-primary)]">
-                                        {course.name}
-                                    </p>
-
-                                    <p className="text-[0.875rem] font-light text-[var(--color-primary)]">
-                                        Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
-                                    </p>
-
-                                    <Progress
-                                        percent={75}
-                                        showInfo={false}
-                                        style={{ width: "400px" }}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-end relative w-full h-full ml-auto pr-[1.5rem] gap-[1.5rem]">
-                                    <div>
-                                        <p className="text-[1.125rem] font-bold text-[var(--color-primary)]">
-                                            Tên bài giảng
-                                        </p>
-                                        <div className="flex items-center justify-center gap-[0.5rem]">
-                                            <Image src={VideoIcon} alt="Video Icon" width={20} height={20} />
-                                            <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                Video 2 phút
+                        {enrollmentsLoading ? (
+                            <div className="w-full flex items-center justify-center py-8">
+                                <div className="animate-pulse text-[var(--color-primary)]">Đang tải...</div>
+                            </div>
+                        ) : filteredEnrollments.length === 0 ? (
+                            <div className="w-full flex items-center justify-center py-8">
+                                <p className="text-gray-500">Không có môn học nào</p>
+                            </div>
+                        ) : filteredEnrollments.map((course) => {
+                                const completionPercent = getCompletionPercent(course.id);
+                                const isCompleted = completionPercent === 100;
+                                const chosenLesson = getChosenLesson(course.id);
+                            
+                                return (
+                                    <div
+                                        key={course.id}
+                                        className="flex items-center justify-between w-full p-6 rounded-2xl border border-[#E5E7EB] bg-white shadow-sm hover:shadow-md hover:border-[#1363DF]/30 transition-all duration-200"
+                                    >
+                                        <div className="mr-4">
+                                            {getCompletionPercent(course.id) === 100 ? (
+                                                <div className="w-8 h-8 rounded-full bg-[#1363DF] flex items-center justify-center">
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                        <path d="M13.3 4.3L6 11.6L2.7 8.3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </div>
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full border-2 border-[#E5E7EB]"></div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-2 flex-1 min-w-0 pr-8">
+                                            <p className="text-lg font-semibold text-[var(--color-primary)] truncate">
+                                                {course.course_code} - {course.course_name}
                                             </p>
+
+                                            <p className="text-sm text-gray-500">
+                                                Hoàn thành {getCompletionPercent(course.id)}% · Dự kiến hoàn thành: {formatTime(chosenLesson?.estimated_completion_time || '')}
+                                            </p>                                    
+
+                                            <Progress
+                                                percent={completionPercent}
+                                                showInfo={false}
+                                                strokeColor={isCompleted ? "#22c55e" : "#1363DF"}
+                                                trailColor="#E5E7EB"
+                                                className="max-w-[400px]"
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center gap-6 shrink-0">
+                                            <div className="text-right">
+                                                <p className="text-base font-semibold text-[var(--color-primary)] max-w-[200px] truncate">
+                                                    {chosenLesson?.lesson_name || '-'}
+                                                </p>
+                                                <div className="flex items-center justify-end gap-2 mt-1">
+                                                    {/* <Image src={VideoIcon} alt="Type Icon" width={16} height={16} /> */}
+                                                    <p className="text-xs text-gray-500">
+                                                        {chosenLesson?.estimated_completion_time || '-'} &#9679; {typeTranslate[chosenLesson?.type || '']?.label || '-'}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <Button
+                                                type="primary"
+                                                onClick={() => router.push(`/student/courses/${course.course_id}/content`)}
+                                                className="!w-32 !h-11 !rounded-full !bg-[#1363DF] hover:!bg-[#0d4eb8] !border-none !font-medium !shadow-sm"
+                                            >
+                                                {isCompleted ? "Xem lại" : "Tiếp tục"}
+                                            </Button>
+
+                                            <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                                                <Image src={MoreIcon} alt="More Icon" width={20} height={20} />
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <div>
-                                        <Button
-                                            type="primary"
-                                            // onClick={() => router.push(`/student/courses/${course.id}/content`)}
-                                            className="!border-1 !border-solid !w-[9rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-[#1363DF] hover:!bg-white hover:!text-[#1363DF] hover:!border-[#1363DF]"
-                                        >
-                                            Tiếp tục
-                                        </Button>
-                                    </div>
-
-                                    <div>
-                                        <Image src={MoreIcon} alt="More Icon" width={24} height={24} />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        
+                                );
+                            })}
                     </div>
 
                 </div>

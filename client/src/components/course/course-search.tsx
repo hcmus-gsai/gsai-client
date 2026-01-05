@@ -76,7 +76,7 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
         </div>
 
         { showDropdown && searchResult?.data?.length != null && searchResult.data.length > 0 && (
-            <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50">
+            <div className=" max-h-[15rem] overflow-y-auto absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50">
             {searchResult.data.map((course) => (
                 <div
                 key={course.id}
@@ -97,8 +97,9 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
         </div>
         <div className="flex items-center justify-center w-[calc(100%-18.75rem)] h-full">
             <Button
-            onClick={handleSearch}
-            className="!h-[3rem] !w-[3rem] !bg-[var(--color-secondary)] !rounded-full !border-none !flex !items-center !justify-center"
+              //If click activate the search input bar
+              onClick={handleSearch}
+              className="!h-[3rem] !w-[3rem] !bg-[var(--color-secondary)] !rounded-full !border-none !flex !items-center !justify-center"
             >
             <Image
                 src={SearchIcon}
@@ -106,6 +107,7 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
                 width={12}
                 height={12}
                 className="object-cover !w-[2.5rem] !h-auto"
+                //when click, activate the search
             />
             </Button>
         </div>

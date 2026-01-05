@@ -8,14 +8,14 @@ import { useParams } from 'next/navigation';
 import ChatbotSection from '../components/chatbotSection';
 
 export default function LectureDocPage() {
-    const { lessionId } = useParams();
-    console.log('Lesson ID: ', lessionId);
+    const { lessonId } = useParams();
+    console.log('Lesson ID: ', lessonId);
     const [getDocument, { data: document, isLoading, error }] = useLazyGetDocumentQuery();
     useEffect(() => {
-        if (lessionId) {
-            getDocument(lessionId as string);
+        if (lessonId) {
+            getDocument(lessonId as string);
         }
-    }, [lessionId, getDocument]);
+    }, [lessonId, getDocument]);
     console.log('Document: ', document);
 
     console.log('Document URL: ', document?.file_url);

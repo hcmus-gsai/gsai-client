@@ -6,12 +6,12 @@ import QuizAIContent from '../components/quizAISection';
 
 export default function LectureQuizPage() {
 
-    const { lessionId } = useParams();
+    const { lessonId } = useParams();
 
     return (
         <div className="flex-1 flex flex-col gap-[0.5rem]">
-            <QuizAIContent lessonId={lessionId as string} />
-            <QuizContent lessonId={lessionId as string} />
+            <QuizAIContent lessonId={lessonId as string} />
+            <QuizContent lessonId={lessonId as string} />
         </div>
     )
 }

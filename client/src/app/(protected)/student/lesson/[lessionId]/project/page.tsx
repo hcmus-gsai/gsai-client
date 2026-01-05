@@ -11,7 +11,7 @@ import LectureProjSubmit from '../components/project/project-submit';
 import LectureProjQA from '../components/project/project-qa';
 
 export default function LectureProjPage() {
-    const { lessionId: projectId } = useParams();
+    const { lessonId: projectId } = useParams();
 
     const [activeTab, setActiveTab] = useState<string>('content');
 

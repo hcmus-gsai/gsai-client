@@ -24,7 +24,7 @@ interface FileNode {
 }
 
 const LectureProjQA = () => {
-    const { lessionId: lessonId } = useParams();
+    const { lessonId } = useParams();
     const [formData] = Form.useForm();
     const [messages, setMessages] = useState<QAMessage[]>([]);
     const [isSessionStarted, setIsSessionStarted] = useState(false);

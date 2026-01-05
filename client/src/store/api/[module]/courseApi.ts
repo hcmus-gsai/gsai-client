@@ -51,6 +51,7 @@ export const {
     useGetCourseByIdQuery,
     useLazyGetCourseByIdQuery,
     useGetCourseModulesQuery,
+    useLazyGetCourseModulesQuery,
     useGetCoursesByLessonIdQuery,
     useSearchCoursesQuery,
     useLazySearchCoursesQuery,

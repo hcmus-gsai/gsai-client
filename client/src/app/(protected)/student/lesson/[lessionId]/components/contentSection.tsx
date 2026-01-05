@@ -28,7 +28,7 @@ const ContentSection = () => {
     const moduleId = useAppSelector((state) => state.lesson.moduleId);
     const router = useRouter();
     const params = useParams();
-    const lessonId = params.lessionId as string;
+    const lessonId = params.lessonId as string;
 
     const { data: courseRes } = useGetCoursesByLessonIdQuery(lessonId, {
         skip: !lessonId,

@@ -86,8 +86,8 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
 };
 
 export default function LectureVideoPage() {
-    const {lessionId} = useParams();
-    const { data, isLoading, error } = useGetVideoGenJobByIdQuery(lessionId as string);
+    const {lessonId} = useParams();
+    const { data, isLoading, error } = useGetVideoGenJobByIdQuery(lessonId as string);
     const jobDetail = data?.videoGenJob;
     // console.log('Video Generation Job Detail:', jobDetail);
 

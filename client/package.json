@@ -35,7 +35,7 @@
     "postgres": "^3.4.7",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "react-pdf": "^10.2.0",
+    "react-pdf": "^10.3.0",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",
     "resend": "^6.4.2",

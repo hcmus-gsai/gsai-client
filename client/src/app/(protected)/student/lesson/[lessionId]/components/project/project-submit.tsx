@@ -115,7 +115,7 @@ const calculateTimeRemaining = (
 
 
 const LectureProjSubmit: React.FC = () => {
-  const { lessionId } = useParams();
+  const { lessonId } = useParams();
 
   /* ===== API ===== */
   const [getSubmission, { data, isLoading, isError }] =
@@ -129,10 +129,10 @@ const LectureProjSubmit: React.FC = () => {
 
 
   useEffect(() => {
-    if (lessionId) {
-      getSubmission(lessionId as string);
+    if (lessonId) {
+      getSubmission(lessonId as string);
     }
-  }, [lessionId, getSubmission]);
+  }, [lessonId, getSubmission]);
 
   /* ===== State ===== */
   const [submission, setSubmission] = useState<SubmissionData>({
@@ -171,25 +171,25 @@ const LectureProjSubmit: React.FC = () => {
 
   /* ===== Handlers (placeholder) ===== */
   const handleSave = async () => {
-    if (!repoLink.trim() || !lessionId) return;
+    if (!repoLink.trim() || !lessonId) return;
 
     try {
       if (submission.submissionLink) {
         // UPDATE
         await updateProject({
-          lessonId: lessionId as string,
+          lessonId: lessonId as string,
           github_url: repoLink,
         }).unwrap();
       } else {
         // SUBMIT
         await submitProject({
-          lessonId: lessionId as string,
+          lessonId: lessonId as string,
           github_url: repoLink,
         }).unwrap();
       }
 
       setIsEditing(false);
-      getSubmission(lessionId as string);
+      getSubmission(lessonId as string);
     } catch (err) {
       console.error("Submit failed:", err);
     }
