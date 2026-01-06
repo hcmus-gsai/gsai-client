@@ -3,7 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import "@ant-design/v5-patch-for-react-19";
 import { ReduxProvider } from "./provider";
-
+import { NotificationListener } from "@/components/shared/notification";
 const manrope = Manrope({
   subsets: ["latin", "vietnamese"],
   weight: ["200", "300", "400", "500", "600", "700", "800"],
@@ -24,11 +24,12 @@ export default function RootLayout({
   return (
     <html lang="vi" className={manrope.variable} suppressHydrationWarning={true}>
       <body>
-        
         <ReduxProvider>
+          <NotificationListener>
           <div id="app">
             {children}
           </div>
+          </NotificationListener>
         </ReduxProvider>
       </body>
     </html>

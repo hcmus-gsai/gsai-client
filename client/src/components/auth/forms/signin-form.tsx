@@ -8,7 +8,7 @@ import { useSignInMutation } from '@/store/api/[module]/authApi';
 import { useAppDispatch } from '@/store/hook';
 import { setCredentials } from '@/store/slice/authSlice';
 
-
+import { addNotification } from '@/store/slice/notifySlice';
 const SignInForm = () => {
     const formInstance = Form.useForm();
     const formData = formInstance[0];
@@ -16,8 +16,6 @@ const SignInForm = () => {
 
     const [signIn] = useSignInMutation()
     const dispatch = useAppDispatch();
-
-    // const {notify} = useNotification();
 
     const router = useRouter();
 
@@ -39,9 +37,23 @@ const SignInForm = () => {
                 router.push('/');
             }
             
+            dispatch(addNotification({
+                type: 'success',
+                message: 'Đăng nhập thành công',
+                description: 'Chào mừng trở lại với EPIS',
+                createdAt: Date.now(),
+                isShown: false
+            }));
         }
         catch (error) {
             console.error('Sign in failed:', error);
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Đăng nhập thất bại',
+                description: 'Sai email hoặc mật khẩu',
+                createdAt: Date.now(),
+                isShown: false
+            }));
         } finally {
             setIsLoading(false);
         }

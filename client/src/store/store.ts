@@ -6,7 +6,7 @@ import lessonReducer from './slice/lessonSlice';
 import taskReducer from './slice/taskSlice';
 import courseDisplayReducer from './slice/courseDisplaySlice';
 import './api/[module]/courseApi'; // Import để đăng ký courseApi endpoints
-
+import notifyReducer from './slice/notifySlice';
 export const store = configureStore({
     reducer: {
         [baseApi.reducerPath]: baseApi.reducer,
@@ -15,6 +15,7 @@ export const store = configureStore({
         task: taskReducer,
         //Thêm vào courseDisplay vào để test 
         courseDisplay: courseDisplayReducer,
+        notify: notifyReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });

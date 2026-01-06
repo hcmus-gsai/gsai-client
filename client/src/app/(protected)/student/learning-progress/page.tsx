@@ -24,15 +24,25 @@ import { EnrolledCourse } from "@/type/enrollment.type";
 import { useLazyGetLearningProgressByEnrollmentQuery} from "@/store/api/[module]/lessonProgressApi";
 import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {LessonProgress} from "@/type/lessonProgress.type";
+import {useLazyGetQuizByLessonIdQuery} from "@/store/api/[module]/quizApi";
+import {QuizResponse} from "@/type/quiz.type";
+import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
 
 //Routing
 import { useRouter } from "next/navigation";
 const CustomCalendar = () => {
     const [chosenDate, setChosenDate] = useState<Date | null>(null);
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState<Date | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [today, setToday] = useState<Date | null>(null);
 
     const tasks = useAppSelector((state) => state.task.tasks);
+
+    // Set date chỉ trên client để tránh hydration mismatch
+    useEffect(() => {
+        setCurrentDate(new Date());
+        setToday(new Date());
+    }, []);
 
     const getTasksForDate = (date: Date) => {
         return tasks.filter(task => new Date(task.dueDate).toDateString() === date.toDateString());
@@ -43,6 +53,7 @@ const CustomCalendar = () => {
     }
 
     const calendar_dates = useMemo(()=>{
+        if (!currentDate || !today) return [];
 
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
@@ -72,7 +83,7 @@ const CustomCalendar = () => {
             
             days.push({
                 date: new Date(temp),
-                checkCurrentDay : temp.toDateString() === new Date().toDateString(),
+                checkCurrentDay : temp.toDateString() === today.toDateString(),
                 checkCurrentMonth: temp.getMonth() == currentMonth,
                 taskCount: dayTasks.length,
                 completedCnt,
@@ -86,7 +97,24 @@ const CustomCalendar = () => {
 
 
         return days;
-    },[currentDate, tasks ])
+    },[currentDate, today, tasks])
+
+    // Loading state khi chưa có currentDate (client chưa mount)
+    if (!currentDate) {
+        return (
+            <div className="flex flex-col h-full bg-white text-gray-800 overflow-hidden w-full rounded-[20px] p-4">
+                <div className="animate-pulse text-gray-400 text-center">Đang tải...</div>
+            </div>
+        );
+    }
+
+    const monthNames: Record<string, string> = {
+        'January': 'Tháng 1', 'February': 'Tháng 2', 'March': 'Tháng 3',
+        'April': 'Tháng 4', 'May': 'Tháng 5', 'June': 'Tháng 6',
+        'July': 'Tháng 7', 'August': 'Tháng 8', 'September': 'Tháng 9',
+        'October': 'Tháng 10', 'November': 'Tháng 11', 'December': 'Tháng 12'
+    };
+    const currentMonthName = monthNames[currentDate.toLocaleString('default', { month: 'long' })] || 'Tháng 1';
 
     return (
         <div className="flex flex-col h-full bg-white text-gray-800 overflow-hidden w-full rounded-[20px]">            
@@ -110,20 +138,7 @@ const CustomCalendar = () => {
                     </Button>
                     
                     <div className="text-[1rem] font-bold text-gray-900 min-w-[160px] text-center">
-                        {currentDate.toLocaleString('default', { month: 'long' }) === 'January' 
-                        ? 'Tháng 1' : currentDate.toLocaleString('default', { month: 'long' }) === 'February' 
-                        ? 'Tháng 2' : currentDate.toLocaleString('default', { month: 'long' }) === 'March' 
-                        ? 'Tháng 3' : currentDate.toLocaleString('default', { month: 'long' }) === 'April' 
-                        ? 'Tháng 4' : currentDate.toLocaleString('default', { month: 'long' }) === 'May' 
-                        ? 'Tháng 5' : currentDate.toLocaleString('default', { month: 'long' }) === 'June' 
-                        ? 'Tháng 6' : currentDate.toLocaleString('default', { month: 'long' }) === 'July' 
-                        ? 'Tháng 7' : currentDate.toLocaleString('default', { month: 'long' }) === 'August' 
-                        ? 'Tháng 8' : currentDate.toLocaleString('default', { month: 'long' }) === 'September' 
-                        ? 'Tháng 9' : currentDate.toLocaleString('default', { month: 'long' }) === 'October' 
-                        ? 'Tháng 10' : currentDate.toLocaleString('default', { month: 'long' }) === 'November' 
-                        ? 'Tháng 11' : 
-                          'Tháng 12'},
-                        {currentDate.getFullYear()}
+                        {currentMonthName}, {currentDate.getFullYear()}
                     </div>
                     
                     <Button
@@ -147,7 +162,11 @@ const CustomCalendar = () => {
                 <div className="flex items-center gap-[0.5rem]">
                     <Button
                         className="!px-4 !py-2 !bg-secondary !hover:bg-secondary/80 !text-white rounded-[20px] !shadow-sm !font-medium !transition-colors !text-sm !border-none" 
-                        onClick={() => setCurrentDate(new Date())}
+                        onClick={() => {
+                            const now = new Date();
+                            setCurrentDate(now);
+                            setToday(now);
+                        }}
                     >
                         Hôm nay
                     </Button>
@@ -185,8 +204,6 @@ const CustomCalendar = () => {
                 </div>
 
                 <div className="grid grid-cols-7 auto-rows-fr flex-1 gap-[1px]">
-                    
-
                     {calendar_dates.map((day: any, index: number)=>{
                         const isSelected = chosenDate && day.date.toDateString() === chosenDate.toDateString();
 
@@ -267,9 +284,15 @@ export default function LearningProgressPage() {
 
     const [fetchProgress] = useLazyGetLearningProgressByEnrollmentQuery();
     const [fetchModules] = useLazyGetCourseModulesQuery();
+    const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
+
+    const [fetchQuizzes] = useLazyGetQuizByLessonIdQuery();
 
     const [progressMap, setProgressMap] = useState<Record<string, LessonProgress[]>>({});
     const [totalLessonMap, setTotalLessonMap] = useState<Record<string, number>>({});
+    const [quizMap, setQuizMap] = useState<Record<string, QuizResponse[]>>({});
+
+
 
     useEffect(() => {
         const loadProgressAndLesson = async () => {
@@ -277,14 +300,18 @@ export default function LearningProgressPage() {
                 return;
             const progressResults: Record<string, LessonProgress[]> = {};
             const totalLessonResults: Record<string, number> = {};
+            const quizResults: Record<string, QuizResponse[]> = {};
 
             for (const enrolled_course of enrollments) {
                 try {
                     const progressResponse = await fetchProgress(enrolled_course.id).unwrap();
-                    console.log('Progress response for enrollment', enrolled_course.id, progressResponse);
                     progressResults[enrolled_course.id] = progressResponse.lessonProgress;
                     const modulesResponse = await fetchModules(enrolled_course.course_id).unwrap();
-                    totalLessonResults[enrolled_course.id] = modulesResponse.modules.length;
+                    totalLessonResults[enrolled_course.id] = 0;
+                    for (const module of modulesResponse.modules) {
+                        const lessonsResponse = await fetchModuleLessons(module.id).unwrap();
+                        totalLessonResults[enrolled_course.id] += lessonsResponse.lesson.length;
+                    }
                 }
                 catch (error) {
                     console.error(`Error loading progress for course`, error);
@@ -292,9 +319,10 @@ export default function LearningProgressPage() {
             }
             setProgressMap(progressResults);
             setTotalLessonMap(totalLessonResults);
+            setQuizMap(quizResults);
         }
         loadProgressAndLesson();
-    }, [enrollments, fetchProgress, fetchModules]);
+    }, [enrollments, fetchProgress, fetchModules, fetchModuleLessons]);
 
 
     
@@ -311,7 +339,7 @@ export default function LearningProgressPage() {
             const progress = progressMap[courseId];
 
             const totalLesson = totalLessonMap[courseId];
-            
+
             if (!progress || !totalLesson || totalLesson === 0) return 0;
 
             const completedCount = progress.filter(p => p.is_completed).length;
@@ -330,14 +358,7 @@ export default function LearningProgressPage() {
         }
     }, [progressMap]);
 
-    const formatTime = useMemo(() => {
-        return (time: string) => {
-            const [hours, minutes, seconds] = time.split(':').map(Number);
-            if (hours > 0) return `${hours} giờ`;
-            if (minutes > 0) return `${minutes} phút`;
-            return `${seconds} giây`;
-        }
-    }, []);  
+    
     
 
     const filteredEnrollments = useMemo(()=> {
@@ -348,6 +369,7 @@ export default function LearningProgressPage() {
             return true;
         });
     }, [enrollments, activeTab]);
+
 
     return (
         <>
@@ -415,33 +437,37 @@ export default function LearningProgressPage() {
                                 Sự kiện sắp tới
                             </p>
                             <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
-                                {events.map((e) => (
-                                    <Card
-                                        key={e.id}
-                                        className="w-full min-h-[80px] rounded-[20px] !border !border-gray-300 shrink-0"
-                                        styles={{ body: { padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' } }}
-                                    >
-                                        <div className="bg-[var(--color-neutral)] w-[48px] h-[48px] rounded-full flex-shrink-0 flex items-center justify-center">
-                                            <Image src={ComputingIcon} alt="Icon" width={20} height={20} />
-                                        </div>
-                                        <div className="flex-1 min-w-0"> {/* min-w-0 giúp truncate hoạt động trong flex */}
-                                            <p className="text-[0.875rem] md:text-[1rem] font-bold text-[var(--color-primary)] truncate">
-                                                {e.name}
-                                            </p>
-                                            <div className="flex items-center justify-between gap-1 mt-1">
-                                                <div className="flex items-center gap-1">
-                                                    <Image src={ClockIcon} alt="Clock" width={16} height={16} />
-                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                                    15/12
+                                {/* {upcomingQuizzes.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">Không có sự kiện nào</p>
+                                ) : (
+                                    upcomingQuizzes.map((quiz) => (
+                                        <Card
+                                            key={quiz.lesson_id}
+                                            className="w-full min-h-[80px] rounded-[20px] !border !border-gray-300 shrink-0"
+                                            styles={{ body: { padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' } }}
+                                        >
+                                            <div className="bg-[var(--color-neutral)] w-[48px] h-[48px] rounded-full flex-shrink-0 flex items-center justify-center">
+                                                <Image src={ComputingIcon} alt="Icon" width={20} height={20} />
+                                            </div>
+                                            <div className="flex-1 min-w-0"> 
+                                                <p className="text-[0.875rem] md:text-[1rem] font-bold text-[var(--color-primary)] truncate">
+                                                    {quiz.lesson_name}
+                                                </p>
+                                                <div className="flex items-center justify-between gap-1 mt-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <Image src={ClockIcon} alt="Clock" width={16} height={16} />
+                                                        <p className="text-[0.75rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                                            {quiz.expired_date ? dayjs(quiz.expired_date).format('DD/MM') : '-'}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
+                                                        {quiz.duration ? `${quiz.duration} phút` : '-'}
                                                     </p>
                                                 </div>
-                                                <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                    23:59
-                                                </p>
                                             </div>
-                                        </div>
-                                    </Card>
-                                ))}
+                                        </Card>
+                                    ))
+                                )} */}
                             </div>
                         </div>
                         
@@ -497,7 +523,7 @@ export default function LearningProgressPage() {
                                             </p>
 
                                             <p className="text-sm text-gray-500">
-                                                Hoàn thành {getCompletionPercent(course.id)}% · Dự kiến hoàn thành: {formatTime(chosenLesson?.estimated_completion_time || '')}
+                                                Hoàn thành {getCompletionPercent(course.id)}% · Dự kiến hoàn thành: {course.duration}
                                             </p>                                    
 
                                             <Progress
@@ -549,3 +575,4 @@ export default function LearningProgressPage() {
         </>
     )
 }
+

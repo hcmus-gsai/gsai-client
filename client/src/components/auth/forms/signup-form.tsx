@@ -8,11 +8,14 @@ import { useCheckEmailMutation } from '../../../store/api/[module]/authApi';
 import {GoogleSignIn} from '../ui/form';
 import { sign } from 'crypto';
 
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+
 const SignUpForm = () => {
     const [form] = Form.useForm();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-
+    const dispatch = useAppDispatch();
     const [checkEmail] = useCheckEmailMutation();
 
     const signUpHandler = async () => {
@@ -47,8 +50,23 @@ const SignUpForm = () => {
             // Redirect to Complete Profile page
             router.push("/auth/complete-profile");
 
+            dispatch(addNotification({
+                type: 'success',
+                message: 'Đăng ký thành công',
+                description: 'Chào mừng bạn đến với EPIS',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
         } catch (error: any) {
             console.error('Check email failed:', error);
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Đăng ký thất bại',
+                description: 'Email đã tồn tại, vui lòng dùng email khác.',
+                createdAt: Date.now(),
+                isShown: false
+            }));
         } finally {
             setIsLoading(false);
         }

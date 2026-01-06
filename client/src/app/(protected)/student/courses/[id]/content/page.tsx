@@ -3,20 +3,25 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { useParams, useRouter } from "next/navigation";
 import { FooterSection } from "@/components/guest/ui/guest";
-import { Button, Card } from "antd";
+import { Button, Card, Progress } from "antd";
 import { ChevronDown, ChevronUp, Check } from "@deemlol/next-icons"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
 
 import {useGetCourseByIdQuery, useGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
+import {useLazyGetLearningProgressByCourseQuery} from "@/store/api/[module]/lessonProgressApi";
+import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
+
 import { useAppDispatch } from "@/store/hook";
 import { setModuleId } from "@/store/slice/lessonSlice";
 
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
 import Image from "next/image";
+
+
 
 interface IChapterState {
     id: string;
@@ -71,16 +76,44 @@ const CourseModules = () => {
         }
     };
 
+    const [fetchCourseProgress] = useLazyGetLearningProgressByCourseQuery();
+    const [fetchCourseModules] = useLazyGetCourseModulesQuery();
+    const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
+
+    const [completionPercent, setCompletionPercent] = useState(0);
+
+    useEffect(() => {
+        const loadCourseProgress = async () => {
+            try {
+                const progressResponse = await fetchCourseProgress(id as string).unwrap();
+                const moduleResponse = await fetchCourseModules(id as string).unwrap();
+                
+                let totalLesson = 0;
+
+                for (const module of moduleResponse.modules) {
+                    const lessonsResponse = await fetchModuleLessons(module.id).unwrap();
+                    totalLesson += lessonsResponse.lesson.length;
+                }
+                const completedCount = progressResponse.lessonProgress.filter((progress:any) => progress.is_completed).length;
+
+                const completionPercent = totalLesson > 0 
+                ? Math.round((completedCount / totalLesson) * 100) 
+                : 0;
+                setCompletionPercent(completionPercent);
+            } catch (error) {
+                console.error('Error loading course progress', error);
+            }
+        }
+        loadCourseProgress();
+    }, [id, fetchCourseProgress, fetchCourseModules, fetchModuleLessons]);
+
     return (
-        // Mobile: w-full, Desktop: flex-1
         <section className="w-full md:flex-1 flex flex-col items-center justify-start">
             <div className="w-full mb-[1.5rem]">
-                {/* Responsive Text: Mobile 3xl, Desktop 6xl */}
                 <p className="text-3xl md:text-6xl font-semibold mb-4 text-[var(--color-primary)]">
                     {course?.course_name}
                 </p>
                 
-                {/* Buttons wrapper: Wrap khi màn hình nhỏ */}
                 <div className="flex flex-wrap gap-3 mb-6">
                     <Button className="!text-[var(--color-secondary)] !bg-[var(--color-neutral)] !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] !rounded-full !border-white">
                         Bài giảng
@@ -95,9 +128,15 @@ const CourseModules = () => {
 
                 <div className="w-full flex flex-col gap-2">
                     <p className="text-[0.875rem] md:text-[1rem] font-light text-[var(--color-primary)]">
-                        Hoàn thành 75% · Dự kiến hoàn thành: 05/11/2025
+                        Hoàn thành {completionPercent}% · Dự kiến hoàn thành: {course?.duration}
                     </p>
-                    <div className="bg-[var(--color-secondary)] w-full h-[10px] rounded-full"></div>
+                    <Progress
+                        percent={completionPercent}
+                        showInfo={false}
+                        strokeColor={completionPercent === 100 ? "#22c55e" : "#1363DF"}
+                        trailColor="#E5E7EB"
+                        className="w-full"
+                    />
                 </div>
             </div>
 
@@ -269,13 +308,6 @@ export default function CourseDetailPage() {
                 mt-[6rem] md:mt-[10rem] 
                 gap-[2rem]
             ">
-            {/* Duc code here */}
-            {/* <div className="w-full px-4 md:px-0 md:w-[var(--global-width)] mx-auto h-full flex flex-col-reverse md:flex-row items-start justify-center mt-[6rem] md:mt-[10rem] gap-[2rem]"> */}
-
-                {/* flex-col-reverse:
-                   - Mobile: CourseSchedule (Item 2) lên đầu, CourseModules (Item 1) xuống dưới.
-                   - Desktop (md:flex-row): Modules bên Trái, Schedule bên Phải.
-                */}
                 <CourseModules />
                 <CourseSchedule />
             </div>

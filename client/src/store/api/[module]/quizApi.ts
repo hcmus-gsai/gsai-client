@@ -43,6 +43,7 @@ export const quizApi = baseApi.injectEndpoints({
 
 export const {
     useGetQuizByLessonIdQuery,
+    useLazyGetQuizByLessonIdQuery,
     useGetQuizQuestionsByQuizIdQuery,
     useSubmitQuizMutation,
     useGradeQuizAttemptMutation,
