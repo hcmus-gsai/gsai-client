@@ -36,7 +36,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
     return (
         <div className="flex-1">
             <Card
-                className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-neutral)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
+                className="!mb-[1.5rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-white [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
             >
                 <p className="text-[1rem] font-bold text-[var(--color-primary)]">Thông tin chi tiết</p>
                 <div className="flex items-start justify-between gap-[1rem]">
@@ -67,7 +67,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                     ) : (
                         <Button
                             onClick={() => router.push(`/student/quiz/${quiz?.quiz_id}`)}
-                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-neutral)] !text-[var(--color-secondary)] !border !border-[var(--color-secondary)]
+                            className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-white !text-[var(--color-secondary)] !border !border-[var(--color-secondary)]
                                     hover:!bg-[var(--color-secondary)] hover:!text-white"
                         >
                             Làm lại
@@ -78,7 +78,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
             {!isCompleted ? (
                 <Card
-                    className="!mb-[1rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
+                    className="!mb-[1.5rem] !w-full !rounded-[20px] !border !border-gray-200 !bg-[var(--color-bg_white)] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4"
                 >
                     <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
                     <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Kết quả cao nhất sẽ được ghi nhớ.</p>
@@ -96,6 +96,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                             size={200}
                             strokeWidth={12}
                             strokeLinecap="square"
+                            strokeColor="var(--color-accent)"
                             format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[1rem] font-bold text-[var(--color-primary)]">Trả lời đúng</div>
@@ -114,6 +115,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                             size={200}
                             strokeWidth={12}
                             strokeLinecap="square"
+                            strokeColor="var(--color-accent)"
                             format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[2.5rem] font-bold text-[var(--color-secondary)]">
@@ -129,6 +131,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                             size={200}
                             strokeWidth={12}
                             strokeLinecap="square"
+                            strokeColor="var(--color-accent)"
                             format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[1rem] font-bold text-[var(--color-primary)]">Thời gian</div>
@@ -140,10 +143,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                         />
                     </div>
                 </Card>
-            )
-            }
-
-
+            )}
         </div >
     )
 }

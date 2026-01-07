@@ -1,7 +1,7 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 
-import { Switch } from "antd";   
+import { Switch } from "antd";
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, notFound } from "next/navigation";
@@ -28,25 +28,25 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
     // 1. Tính toán vị trí tương đối của Box so với Video Container
     const relativeTop = rect.top - containerRect.top;
     const relativeLeft = rect.left - containerRect.left;
-    
+
     // 2. Tính điểm giữa (Center) của OCR Box
     const centerX = relativeLeft + rect.width / 2
 
     return (
         <>
             {/* 1. Backdrop: z-index thấp hơn Popover nhưng cao hơn OCR boxes */}
-            <div 
+            <div
                 className="absolute inset-0 z-[40] cursor-default"
                 onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     onClose();
-                }} 
+                }}
             />
-            
+
             {/* 2. Popover Content: z-index cao hơn Backdrop */}
-            <div 
+            <div
                 className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200  pointer-events-auto"
-                style={{ 
+                style={{
                     top: relativeTop + rect.height + 12,
                     left: `${centerX}px`,
                     transform: 'translateX(-50%)',
@@ -68,11 +68,11 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
                 </button>
                 </div>
                 <p className="text-sm text-gray-700">{data.text}</p>*/}
-                <div 
+                <div
                     className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 
                                 border-l-[8px] border-l-transparent 
                                 border-r-[8px] border-r-transparent 
-                                border-b-[8px] border-b-white/95" 
+                                border-b-[8px] border-b-white/95"
                 />
 
                 <div className="flex justify-between items-start mb-2">
@@ -86,7 +86,7 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
 };
 
 export default function LectureVideoPage() {
-    const {lessonId} = useParams();
+    const { lessonId } = useParams();
     const { data, isLoading, error } = useGetVideoGenJobByIdQuery(lessonId as string);
     const jobDetail = data?.videoGenJob;
     // console.log('Video Generation Job Detail:', jobDetail);
@@ -98,14 +98,14 @@ export default function LectureVideoPage() {
         try {
             const rawData = JSON.parse(ocrJson);
             if (!Array.isArray(rawData)) return [];
-        
+
             // Gọi hàm sửa lại renderTime
             let accumulatedTime = 0;
             return rawData.map((item) => {
                 accumulatedTime += item.renderTime;
                 return {
                     ...item,
-                    renderTime: accumulatedTime 
+                    renderTime: accumulatedTime
                 };
             });
         } catch (e) {
@@ -167,7 +167,7 @@ export default function LectureVideoPage() {
 
         return closestFrame?.data || [];
     };
-    
+
     const handlePause = () => {
         setIsPlaying(false); // Cập nhật icon Play/Pause
         if (videoRef.current) {
@@ -203,15 +203,15 @@ export default function LectureVideoPage() {
 
     const handleItemClick = (e: React.MouseEvent, item: ContentItem) => {
         e.stopPropagation();
-        
+
         // Lấy thông tin vị trí của phần tử vừa click
         const rect = e.currentTarget.getBoundingClientRect();
         const containerRect = videoContainerRef.current?.getBoundingClientRect();
 
         if (containerRect) {
             // Lưu trữ cả tọa độ của phần tử click và container để tính toán logic "Center"
-            setSelectedItem({ 
-                item, 
+            setSelectedItem({
+                item,
                 rect,
                 // Thêm containerRect vào state nếu cần hoặc xử lý trong Popover
             });
@@ -293,7 +293,7 @@ export default function LectureVideoPage() {
 
     const handleVolumeSliderInteraction = (clientX: number) => {
         if (!volumeSliderRef.current) return;
-        
+
         const rect = volumeSliderRef.current.getBoundingClientRect();
         const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
         updateVolumeLevelDirect(percent);
@@ -419,13 +419,13 @@ export default function LectureVideoPage() {
     const handleSliderMouseDown = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        
+
         const percent = getSliderPercent(e.clientX);
         const currentDuration = getDuration();
-        
+
         setIsDragging(true);
         setDragPercent(percent * 100);
-        
+
         if (currentDuration > 0 && videoRef.current) {
             const newTime = percent * currentDuration;
             videoRef.current.currentTime = newTime;
@@ -435,13 +435,13 @@ export default function LectureVideoPage() {
 
     const handleSliderTouchStart = (e: React.TouchEvent) => {
         e.stopPropagation();
-        
+
         const percent = getSliderPercent(e.touches[0].clientX);
         const currentDuration = getDuration();
-        
+
         setIsDragging(true);
         setDragPercent(percent * 100);
-        
+
         if (currentDuration > 0 && videoRef.current) {
             const newTime = percent * currentDuration;
             videoRef.current.currentTime = newTime;
@@ -453,12 +453,12 @@ export default function LectureVideoPage() {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDragging || !sliderRef.current) return;
             e.preventDefault();
-            
+
             const percent = getSliderPercent(e.clientX);
             const currentDuration = getDuration();
-            
+
             setDragPercent(percent * 100);
-            
+
             if (currentDuration > 0 && videoRef.current) {
                 const newTime = percent * currentDuration;
                 videoRef.current.currentTime = newTime;
@@ -468,12 +468,12 @@ export default function LectureVideoPage() {
 
         const handleTouchMove = (e: TouchEvent) => {
             if (!isDragging || !sliderRef.current) return;
-            
+
             const percent = getSliderPercent(e.touches[0].clientX);
             const currentDuration = getDuration();
-            
+
             setDragPercent(percent * 100);
-            
+
             if (currentDuration > 0 && videoRef.current) {
                 const newTime = percent * currentDuration;
                 videoRef.current.currentTime = newTime;
@@ -503,8 +503,8 @@ export default function LectureVideoPage() {
 
     // Progress percent: dùng dragPercent khi đang kéo, ngược lại dùng currentTime
     const actualDuration = getDuration();
-    const progressPercent = dragPercent !== null 
-        ? dragPercent 
+    const progressPercent = dragPercent !== null
+        ? dragPercent
         : (actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0);
 
     //ASR and OCR Toggle
@@ -512,7 +512,7 @@ export default function LectureVideoPage() {
     const [enableOCR, setEnableOCR] = useState(false);
 
     return (
-        <>
+        <div className="relative flex w-full gap-4">
             <div className="flex-1 flex flex-col gap-[0.5rem]">
                 <div
                     className="relative w-full h-full aspect-video rounded-lg overflow-hidden shadow-lg cursor-pointer group"
@@ -527,12 +527,12 @@ export default function LectureVideoPage() {
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}
-                        onPlay={handlePlay} 
+                        onPlay={handlePlay}
                         onPause={handlePause}
                         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
                     />
-                    
+
                     {/* Lớp phủ Bounding Boxes */}
                     <div className="video-ocr-overlay" style={{
                         position: 'absolute',
@@ -540,7 +540,7 @@ export default function LectureVideoPage() {
                         top: `${videoDisplayRect.top}px`,
                         width: `${videoDisplayRect.width}px`,
                         height: `${videoDisplayRect.height}px`,
-                        pointerEvents: 'none', 
+                        pointerEvents: 'none',
                         overflow: 'hidden'
                     }}>
                         {!isPlaying && activeBoxes.map((item, index) => {
@@ -570,11 +570,11 @@ export default function LectureVideoPage() {
                         })}
 
                         {selectedItem && (
-                            <ContentPopover 
-                                data={selectedItem.item} 
-                                rect={selectedItem.rect} 
+                            <ContentPopover
+                                data={selectedItem.item}
+                                rect={selectedItem.rect}
                                 containerRef={videoContainerRef}
-                                onClose={closePopover} 
+                                onClose={closePopover}
                             />
                         )}
                     </div>
@@ -582,7 +582,7 @@ export default function LectureVideoPage() {
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 
                         {/* Custom Video Slider */}
-                        <div 
+                        <div
                             ref={sliderRef}
                             className="w-full mb-3 relative h-3 group/slider cursor-pointer select-none flex items-center"
                             onMouseDown={handleSliderMouseDown}
@@ -591,17 +591,17 @@ export default function LectureVideoPage() {
                         >
                             {/* Track background (chưa xem) */}
                             <div className="absolute left-0 right-0 h-1 group-hover/slider:h-[6px] bg-gray-500/60 rounded-full transition-all duration-150" />
-                            
+
                             {/* Progress bar (đã xem) */}
-                            <div 
+                            <div
                                 className="absolute left-0 h-1 group-hover/slider:h-[6px] bg-[var(--color-secondary)] rounded-full transition-all duration-75"
                                 style={{ width: `${progressPercent}%` }}
                             />
-                            
+
                             {/* Thumb (nút kéo) */}
-                            <div 
+                            <div
                                 className="absolute w-3 h-3 group-hover/slider:w-4 group-hover/slider:h-4 bg-white rounded-full shadow-md transition-all duration-150 pointer-events-none"
-                                style={{ 
+                                style={{
                                     left: `calc(${progressPercent}% - ${progressPercent > 50 ? '8px' : '4px'})`,
                                 }}
                             />
@@ -647,9 +647,9 @@ export default function LectureVideoPage() {
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 bg-black/90 text-white text-xs rounded opacity-0 group-hover/volume:opacity-100 transition-opacity whitespace-nowrap">
                                         {Math.round(volumeLevel * 100)}%
                                     </div>
-                                    
+
                                     {/* Custom Volume Slider */}
-                                    <div 
+                                    <div
                                         ref={volumeSliderRef}
                                         className="w-20 h-3 relative cursor-pointer select-none flex items-center"
                                         onMouseDown={handleVolumeMouseDown}
@@ -658,15 +658,15 @@ export default function LectureVideoPage() {
                                     >
                                         {/* Track background */}
                                         <div className="absolute left-0 right-0 h-1 bg-gray-500/60 rounded-full" />
-                                        
+
                                         {/* Volume level bar */}
-                                        <div 
+                                        <div
                                             className="absolute left-0 h-1 bg-white rounded-full transition-all duration-75"
                                             style={{ width: `${volumeLevel * 100}%` }}
                                         />
-                                        
+
                                         {/* Thumb */}
-                                        <div 
+                                        <div
                                             className="absolute w-3 h-3 bg-white rounded-full shadow-md transition-all duration-75 pointer-events-none"
                                             style={{ left: `calc(${volumeLevel * 100}% - 6px)` }}
                                         />
@@ -724,6 +724,6 @@ export default function LectureVideoPage() {
             </div>
 
             <ChatbotSection />
-        </>
+        </div>
     )
 }
