@@ -13,6 +13,7 @@ import {useGetCourseByIdQuery, useGetCourseModulesQuery} from "@/store/api/[modu
 import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
 import {useLazyGetLearningProgressByCourseQuery} from "@/store/api/[module]/lessonProgressApi";
 import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
+import { LessonProgress } from "@/type/lessonProgress.type";
 
 import { useAppDispatch } from "@/store/hook";
 import { setModuleId } from "@/store/slice/lessonSlice";
@@ -82,17 +83,50 @@ const CourseModules = () => {
 
     const [completionPercent, setCompletionPercent] = useState(0);
 
+    //Foreach module => 
+    //Example Module A: {video: 2, document: 1, quiz: 1}
+    type StatCount = { total: number; completed: number };
+    type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
+    const [moduleStats, setModuleStats] = useState<Record<string, ModuleStats>>({});
+
     useEffect(() => {
+
         const loadCourseProgress = async () => {
             try {
+
                 const progressResponse = await fetchCourseProgress(id as string).unwrap();
                 const moduleResponse = await fetchCourseModules(id as string).unwrap();
-                
+                //Track lessonprogress for each lesson
+
                 let totalLesson = 0;
 
+                
                 for (const module of moduleResponse.modules) {
                     const lessonsResponse = await fetchModuleLessons(module.id).unwrap();
                     totalLesson += lessonsResponse.lesson.length;
+                    let currentStats = {
+                        video: { total: 0, completed: 0 },
+                        document: { total: 0, completed: 0 },
+                        quiz: { total: 0, completed: 0 }
+                    };
+                    for (const lesson of lessonsResponse.lesson) {
+                        const isCompleted = progressResponse.lessonProgress.some(
+                            (progress: any) => progress.lesson_id === lesson.id && progress.is_completed
+                        );
+                
+                        if (lesson.type === "video") {
+                            currentStats.video.total++;
+                            if (isCompleted) currentStats.video.completed++;
+                        } else if (lesson.type === "document") {
+                            currentStats.document.total++;
+                            if (isCompleted) currentStats.document.completed++;
+                        } else if (lesson.type === "quiz") {
+                            currentStats.quiz.total++;
+                            if (isCompleted) currentStats.quiz.completed++;
+                        }
+                    }
+                    setModuleStats((prev) => ({...prev, [module.id]: currentStats}));
+                    
                 }
                 const completedCount = progressResponse.lessonProgress.filter((progress:any) => progress.is_completed).length;
 
@@ -153,23 +187,38 @@ const CourseModules = () => {
                                                 <ChevronDown width={24} height={24} className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />
                                             }
                                         </Button>
-                                        {/* Module Name Responsive */}
                                         <p className="text-lg md:text-[1.5rem] font-bold text-[var(--color-primary)] line-clamp-1">
                                             {module.module_name}
                                         </p>
                                     </div>
                                     <div className="flex items-center justify-start gap-2 ml-auto">
-                                        <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
+                                        {completionPercent === 100 && (
+                                            <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
+                                        )}
                                     </div>
                                 </div>
                                 <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem] overflow-x-auto no-scrollbar">
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Đã hoàn thành</p>
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Video: 2/3</p>
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">Quiz: 1/1</p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                        {completionPercent === 100 ? "Đã hoàn thành" : "Chưa hoàn thành"}
+                                    </p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                        {moduleStats[module.id]?.video?.total > 0 && 
+                                        `Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`
+                                        }
+                                    </p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                        {moduleStats[module.id]?.quiz?.total > 0 && 
+                                        `Quiz: ${moduleStats[module.id]?.quiz.completed} / ${moduleStats[module.id]?.quiz.total}`
+                                        }
+                                    </p>
+                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
+                                        {moduleStats[module.id]?.document?.total > 0 && 
+                                        `Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`
+                                        }
+                                    </p>
                                 </div>
                             </div>
                             
-                            {/* Animation Wrapper */}
                             <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${
                                 chapterState.find(cs => cs.id === module.id)?.isExtended ? "grid-rows-[1fr] mt-[1rem]" : "grid-rows-[0fr] mt-0"
                             }`}>
