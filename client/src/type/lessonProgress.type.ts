@@ -1,4 +1,5 @@
 import { Lesson } from "./lesson.type";
+
 export interface LessonProgress {
     id: string;
     lesson_id: string;

@@ -7,15 +7,17 @@ import taskReducer from './slice/taskSlice';
 import courseDisplayReducer from './slice/courseDisplaySlice';
 import './api/[module]/courseApi'; // Import để đăng ký courseApi endpoints
 import notifyReducer from './slice/notifySlice';
+import lessonProgressReducer from './slice/lessonProgressSlice';
+
 export const store = configureStore({
     reducer: {
         [baseApi.reducerPath]: baseApi.reducer,
         auth: authReducer,
         lesson: lessonReducer,
         task: taskReducer,
-        //Thêm vào courseDisplay vào để test 
         courseDisplay: courseDisplayReducer,
         notify: notifyReducer,
+        lessonProgress: lessonProgressReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });

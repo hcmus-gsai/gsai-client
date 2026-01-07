@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import { actionAsyncStorage } from 'next/dist/server/app-render/action-async-storage.external';
 import type { RootState } from '../store';
 
-export interface NotificationItem {
+interface NotificationItem {
     id: string;
     type: 'success' | 'error' | 'info' | 'warning';
     message: string;

@@ -4,19 +4,28 @@ import '@ant-design/v5-patch-for-react-19';
 import { useParams, useRouter } from "next/navigation";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { Button, Card, Progress } from "antd";
-import { ChevronDown, ChevronUp, Check } from "@deemlol/next-icons"
+import { ChevronDown, ChevronUp, Check, Circle } from "@deemlol/next-icons"
 import { useState, useEffect, useMemo } from 'react';
 
 // import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
 
 import {useGetCourseByIdQuery, useGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
-import {useLazyGetLearningProgressByCourseQuery} from "@/store/api/[module]/lessonProgressApi";
+import {useGetLearningProgressByCourseQuery, useLazyGetLearningProgressByCourseQuery, useUpdateLearningProgressByLessonIdMutation} from "@/store/api/[module]/lessonProgressApi";
 import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import { LessonProgress } from "@/type/lessonProgress.type";
 
-import { useAppDispatch } from "@/store/hook";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { setModuleId } from "@/store/slice/lessonSlice";
+import {
+    setLessonProgressData,
+    setModuleStats,
+    setTotalLessons,
+    toggleLessonCompletion,
+    selectCompletionPercent,
+    selectAllModuleStats,
+    selectLessonCompletionStatus,
+} from "@/store/slice/lessonProgressSlice";
 
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
@@ -77,40 +86,52 @@ const CourseModules = () => {
         }
     };
 
+    const {data: progressData} = useGetLearningProgressByCourseQuery(id as string, {
+        skip: !id,
+    });
+    
     const [fetchCourseProgress] = useLazyGetLearningProgressByCourseQuery();
     const [fetchCourseModules] = useLazyGetCourseModulesQuery();
     const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
+    const [triggerLessonUpdate] = useUpdateLearningProgressByLessonIdMutation();
 
-    const [completionPercent, setCompletionPercent] = useState(0);
+    // Use Redux state instead of local state
+    const completionPercent = useAppSelector(selectCompletionPercent);
+    const moduleStats = useAppSelector(selectAllModuleStats);
+    const lessonCompletionStatus = useAppSelector(selectLessonCompletionStatus);
 
     //Foreach module => 
     //Example Module A: {video: 2, document: 1, quiz: 1}
     type StatCount = { total: number; completed: number };
     type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
-    const [moduleStats, setModuleStats] = useState<Record<string, ModuleStats>>({});
+
 
     useEffect(() => {
+        if (!progressData) return;
 
         const loadCourseProgress = async () => {
             try {
+                // Set lesson progress data to Redux
+                dispatch(setLessonProgressData({
+                    courseId: id as string,
+                    lessonProgress: progressData.lessonProgress,
+                }));
 
-                const progressResponse = await fetchCourseProgress(id as string).unwrap();
                 const moduleResponse = await fetchCourseModules(id as string).unwrap();
-                //Track lessonprogress for each lesson
-
                 let totalLesson = 0;
 
-                
                 for (const module of moduleResponse.modules) {
                     const lessonsResponse = await fetchModuleLessons(module.id).unwrap();
                     totalLesson += lessonsResponse.lesson.length;
+                    
                     let currentStats = {
                         video: { total: 0, completed: 0 },
                         document: { total: 0, completed: 0 },
                         quiz: { total: 0, completed: 0 }
                     };
+                    
                     for (const lesson of lessonsResponse.lesson) {
-                        const isCompleted = progressResponse.lessonProgress.some(
+                        const isCompleted = progressData.lessonProgress.some(
                             (progress: any) => progress.lesson_id === lesson.id && progress.is_completed
                         );
                 
@@ -125,21 +146,57 @@ const CourseModules = () => {
                             if (isCompleted) currentStats.quiz.completed++;
                         }
                     }
-                    setModuleStats((prev) => ({...prev, [module.id]: currentStats}));
                     
+                    dispatch(setModuleStats({
+                        moduleId: module.id,
+                        stats: currentStats,
+                    }));
                 }
-                const completedCount = progressResponse.lessonProgress.filter((progress:any) => progress.is_completed).length;
-
-                const completionPercent = totalLesson > 0 
-                ? Math.round((completedCount / totalLesson) * 100) 
-                : 0;
-                setCompletionPercent(completionPercent);
+                
+                dispatch(setTotalLessons(totalLesson));
             } catch (error) {
                 console.error('Error loading course progress', error);
             }
         }
         loadCourseProgress();
-    }, [id, fetchCourseProgress, fetchCourseModules, fetchModuleLessons]);
+    }, [id, progressData, dispatch, fetchCourseModules, fetchModuleLessons]);
+
+
+    const handleUpdateLesson = async (
+        lessonId: string,
+        moduleId: string,
+        lessonType: 'video' | 'document' | 'quiz'
+    ) => {
+        try {
+            // Optimistic update in Redux
+            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
+
+            const progressResponse = await fetchCourseProgress(id as string).unwrap();
+            const currentLessonProgress = progressResponse.lessonProgress.find(
+                (progress: any) => progress.lesson_id === lessonId && progress.module_id === moduleId
+            );
+            
+            await triggerLessonUpdate({
+                lessonId: lessonId,
+                isCompleted: !currentLessonProgress?.is_completed
+            }).unwrap();
+
+            // Update local lessonsMap for UI
+            const lessonMap = { ...lessonsMap };
+            if (lessonMap[moduleId]) {
+                lessonMap[moduleId] = lessonMap[moduleId].map((lesson: any) =>
+                    lesson.id === lessonId
+                        ? { ...lesson, is_completed: !currentLessonProgress?.is_completed }
+                        : lesson
+                );
+                setLessonsMap(lessonMap);
+            }
+        } catch (error) {
+            console.error('Error updating lesson', error);
+            // Revert optimistic update on error
+            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
+        }
+    }
 
     return (
         <section className="w-full md:flex-1 flex flex-col items-center justify-start">
@@ -176,6 +233,7 @@ const CourseModules = () => {
 
             <div className="w-full mt-[1rem] md:mt-[2rem] mb-[2rem]">
                 {modules.map((module:any) => (
+                    
                     <div key={module.id}>
                         <div className="flex items-center flex-col justify-center gap-2">
                             <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -227,26 +285,56 @@ const CourseModules = () => {
                                         {(lessonsMap[module.id] ?? []).map((lesson, index) => (
                                             <Card
                                                 key={lesson.id}
-                                                className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200"
+                                                className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200 flex"
                                                 onClick={() => { 
                                                     dispatch(setModuleId(module.id));
                                                     router.push(`/student/lesson/${lesson.id}/${lesson.type}`); 
                                                 }}
                                                 styles={{ body: { width: '100%', padding: '16px' } }}
                                             >
-                                                <div className="w-full flex flex-col items-start justify-start">
-                                                    <p className="text-[1rem] font-bold text-[var(--color-primary)]">
-                                                        {lesson.lesson_name}
-                                                    </p>
-                                                    <div className="w-full flex items-center justify-start gap-2 mt-1">
-                                                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
-                                                            {lesson.type === "video" ? "Video" : lesson.type === "quiz" ? "Quiz" : "Bài đọc"}
-                                                        </p>
-                                                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
-                                                            {lesson.estimated_completion_time}
-                                                        </p>
+                                                <div className = "flex items-stretch gap-4 p-2">
+                                                    <div className="flex items-center justify-start gap-2">
+                                                        {/* <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" /> */}
+                                                        <Button
+                                                            type="primary"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleUpdateLesson(lesson.id, module.id, lesson.type as 'video' | 'document' | 'quiz');
+                                                            }}
+                                                            className="flex items-center justify-center !bg-transparent !border-none !p-0 !m-0 !shadow-none"
+                                                            icon={
+                                                                lessonCompletionStatus[lesson.id] ? (
+                                                                    <Check 
+                                                                        width={24} 
+                                                                        height={24} 
+                                                                        className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer" 
+                                                                    />
+                                                                ) : (
+                                                                    <Circle 
+                                                                        width={24} 
+                                                                        height={24} 
+                                                                        className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer" 
+                                                                    />
+                                                                )
+                                                            }  
+                                                        />
                                                     </div>
+                                                    <div className="flex flex-col items-start justify-start">
+                                                        <p className="text-[1rem] font-bold text-[var(--color-primary)]">
+                                                            {lesson.lesson_name}
+                                                        </p>
+                                                        <div className="w-full flex items-center justify-start gap-2 mt-1">
+                                                            <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
+                                                                {lesson.type === "video" ? "Video" : lesson.type === "quiz" ? "Quiz" : "Bài đọc"}
+                                                            </p>
+                                                            <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
+                                                                {lesson.estimated_completion_time}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
+                                               
                                             </Card>
                                         ))}
                                     </div>

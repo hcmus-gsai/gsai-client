@@ -1,7 +1,7 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu } from "@deemlol/next-icons";
+import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu, Circle } from "@deemlol/next-icons";
 import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";   
 
 import React, { useState, useEffect } from 'react';
@@ -10,6 +10,11 @@ import { useGetCourseModulesQuery, useGetCoursesByLessonIdQuery } from "@/store/
 import { useLazyGetModuleLessonsQuery } from "@/store/api/[module]/moduleApi";
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { setModuleId } from '@/store/slice/lessonSlice';
+import { toggleLessonCompletion, selectLessonCompletionStatus } from '@/store/slice/lessonProgressSlice';
+import {
+    useUpdateLearningProgressByLessonIdMutation,
+    useLazyGetLearningProgressByCourseQuery,
+} from '@/store/api/[module]/lessonProgressApi';
 interface IChapterState {
     id: string;
     isExtended: boolean;
@@ -42,6 +47,9 @@ const ContentSection = () => {
     const [triggerGetLessons] = useLazyGetModuleLessonsQuery();
     const [lessonsMap, setLessonsMap] = useState<Record<string, any[]>>({});
     const [chapterState, setChapterState] = useState<IChapterState[]>([]);
+    const [triggerLessonUpdate] = useUpdateLearningProgressByLessonIdMutation();
+    const [fetchCourseProgress] = useLazyGetLearningProgressByCourseQuery();
+    const lessonCompletionStatus = useAppSelector(selectLessonCompletionStatus);
 
     useEffect(() => {
         if (modules.length > 0) {
@@ -66,6 +74,45 @@ const ContentSection = () => {
                 ...prev,
                 [id]: res.lesson,
             }));
+        }
+    };
+
+    const handleUpdateLesson = async (
+        lessonId: string,
+        moduleId: string,
+        lessonType: 'video' | 'document' | 'quiz'
+    ) => {
+        try {
+            // Optimistic update in Redux
+            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
+
+            const progressResponse = await fetchCourseProgress(course?.id ?? '').unwrap();
+            const currentLessonProgress = progressResponse.lessonProgress.find(
+                (progress: any) => progress.lesson_id === lessonId && progress.module_id === moduleId
+            );
+
+            console.log("Find currentLessonProgress", currentLessonProgress);
+
+            // Update on server
+            await triggerLessonUpdate({
+                lessonId: lessonId,
+                isCompleted: !currentLessonProgress?.is_completed
+            }).unwrap();
+
+            // Update local lessonsMap for UI
+            const lessonMap = { ...lessonsMap };
+            if (lessonMap[moduleId]) {
+                lessonMap[moduleId] = lessonMap[moduleId].map((lesson: any) =>
+                    lesson.id === lessonId
+                        ? { ...lesson, is_completed: !currentLessonProgress?.is_completed }
+                        : lesson
+                );
+                setLessonsMap(lessonMap);
+            }
+        } catch (error) {
+            console.error('Error updating lesson', error);
+            // Revert optimistic update on error
+            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
         }
     };
 
@@ -134,20 +181,55 @@ const ContentSection = () => {
                                                             router.push(`/student/lesson/${lesson.id}/${lesson.type}`); 
                                                         }}
                                                     >
-                                                        <div className="w-full flex flex-col items-start justify-start">
-                                                            <p className="text-[0.75rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">{lesson.lesson_name}</p>
-                                                            <div className="w-full flex items-center justify-start gap-2">
-                                                                <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                                    {lesson.type === 'video'
-                                                                        ? 'Video'
-                                                                        : lesson.type === 'quiz'
-                                                                            ? 'Quiz'    
-                                                                            : 'Bài đọc'
+                                                        
+                                                        <div className = "flex items-stretch gap-4 p-2 w-full">
+                                                            <div className="flex items-center justify-start gap-2">
+                                                                {/* <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" /> */}
+                                                                                <Button
+                                                                    type="primary"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleUpdateLesson(
+                                                                            lesson.id,
+                                                                            module.id,
+                                                                            lesson.type as 'video' | 'document' | 'quiz'
+                                                                        );
+                                                                    }}
+                                                                    className="flex items-center justify-center !bg-transparent !border-none !p-0 !m-0 !shadow-none"
+                                                                    icon={
+                                                                        lessonCompletionStatus[lesson.id] ? (
+                                                                            <Check
+                                                                                width={24}
+                                                                                height={24}
+                                                                                className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
+                                                                            />
+                                                                        ) : (
+                                                                            <Circle
+                                                                                width={24}
+                                                                                height={24}
+                                                                                className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
+                                                                            />
+                                                                        )
                                                                     }
-                                                                </p>
-                                                                <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
+                                                                />
                                                             </div>
+                                                            <div className="w-full flex flex-col items-start justify-start">
+                                                                <p className="text-[0.75rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">{lesson.lesson_name}</p>
+                                                                <div className="w-full flex items-center justify-start gap-2">
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
+                                                                        {lesson.type === 'video'
+                                                                            ? 'Video'
+                                                                            : lesson.type === 'quiz'
+                                                                                ? 'Quiz'    
+                                                                                : 'Bài đọc'
+                                                                        }
+                                                                    </p>
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
+                                                        
                                                     </Card>
                                                 ))}
                                             </div>
