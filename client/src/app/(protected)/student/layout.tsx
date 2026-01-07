@@ -22,14 +22,17 @@ import { selectNotifications, removeNotification, clearNotifications } from '@/s
 import { CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const StudentNavbar = () => {
+
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+
     // Hook definition
     const router = useRouter();
     const pathname = usePathname();
 
     const [isMounted, setIsMounted] = useState(false);
     const selectedKey = pathname.startsWith("/student/home") ? "homepage" :
-    pathname.startsWith("/student/courses") ? "courses" :
-    pathname.startsWith("/student/about") ? "about" :"";
+        pathname.startsWith("/student/courses") ? "courses" :
+            pathname.startsWith("/student/about") ? "about" : "";
 
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(selectNotifications);
@@ -67,24 +70,24 @@ const StudentNavbar = () => {
         {
             key: '2',
             label: (
-                <span onClick={handleLogout}>Đăng xuất</span>
+                <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span>
             ),
         },
         {
-            key : '3',
-            label : (
-                <span onClick = {() => router.push("/student/learning-progress")}>Quá trình</span>
+            key: '3',
+            label: (
+                <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span>
             )
         }
     ];
 
-    const notificationItems: MenuProps['items'] = notifications.length > 0 ?[
+    const notificationItems: MenuProps['items'] = notifications.length > 0 ? [
         {
             key: 'header',
-            label : (
+            label: (
                 <div className="flex items-center justify-between px-2 py-1">
                     <span className="font-bold text-gray-800">Thông báo</span>
-                    <span 
+                    <span
                         className="text-blue-500 text-sm cursor-pointer hover:underline"
                         onClick={() => dispatch(clearNotifications())}
                     >
@@ -97,20 +100,19 @@ const StudentNavbar = () => {
         {
             type: 'divider' as const
         },
-        ...notifications.map((noti) =>({
+        ...notifications.map((noti) => ({
             key: noti.id,
             label: (
                 <div className="flex items-start gap-2 py-1 min-w-[250px]">
                     {/* Icon theo type */}
-                    <span className={`text-lg ${
-                        noti.type === 'success' ? 'text-green-500' :
+                    <span className={`text-lg ${noti.type === 'success' ? 'text-green-500' :
                         noti.type === 'error' ? 'text-red-500' :
-                        noti.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
-                    }`}>
-                        {noti.type === 'success' ?  <CheckCircleOutlined className="text-green-500" /> :
-                         noti.type === 'error' ? <CloseCircleOutlined className="text-red-500" /> :
-                         noti.type === 'warning' ? <ExclamationCircleOutlined className="text-yellow-500" /> :
-                         <InfoCircleOutlined className="text-blue-500" />}
+                            noti.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
+                        }`}>
+                        {noti.type === 'success' ? <CheckCircleOutlined className="text-green-500" /> :
+                            noti.type === 'error' ? <CloseCircleOutlined className="text-red-500" /> :
+                                noti.type === 'warning' ? <ExclamationCircleOutlined className="text-yellow-500" /> :
+                                    <InfoCircleOutlined className="text-blue-500" />}
                     </span>
                     <div className="flex-1">
                         <p className="font-medium text-sm">{noti.message}</p>
@@ -119,7 +121,7 @@ const StudentNavbar = () => {
                         )}
                     </div>
                     {/* Nút xóa */}
-                    <span 
+                    <span
                         className="text-gray-400 hover:text-red-500 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation();
@@ -131,7 +133,7 @@ const StudentNavbar = () => {
                 </div>
             )
         }))
-    ]: [
+    ] : [
         {
             key: 'empty',
             label: (
@@ -177,33 +179,37 @@ const StudentNavbar = () => {
                                 }}
                                 items={[
                                     {
-                                        key: "homepage", 
-                                        label: <span className="text-[var(--color-primary)] font-bold">Trang chủ</span>
+                                        key: "homepage",
+                                        label: <span>Trang chủ</span>
                                     },
                                     {
-                                        key: "courses", 
-                                        label: <span className="text-[var(--color-primary)] font-bold">Môn học</span>
+                                        key: "courses",
+                                        label: <span>Môn học</span>
                                     },
                                     {
-                                        key: "about", 
-                                        label: <span className="text-[var(--color-primary)] font-bold">Về Epis</span>
+                                        key: "about",
+                                        label: <span>Về Epis</span>
                                     }
                                 ]}
-                                className="!w-full !flex !items-center !justify-start !border-none"
-                                style={{
-                                    backgroundColor: 'transparent'
-                                }}
+                                className='!bg-transparent !border-none !w-full !flex !items-center !justify-start
+                                [&_.ant-menu-item]:font-normal
+                                [&_.ant-menu-item]:text-gray-700
+                                [&_.ant-menu-item:hover]:text-[var(--color-primary)]
+                                [&_.ant-menu-item:hover]:font-semibold
+                                [&_.ant-menu-item-selected]:text-[var(--color-primary)]
+                                [&_.ant-menu-item-selected]:font-semibold'
                             />
+
                         </ConfigProvider>
                     </div>
                     <CourseSearch />
                 </div>
                 <div className="flex items-center justify-end w-full h-[3.5rem]">
-                    <div className="flex items-center justify-center w-[3.5rem] h-full" style = {{}}>
-                        <Dropdown 
-                            menu={{ items: notificationItems }} 
-                            trigger={['click']} 
-                            placement="bottomRight" 
+                    <div className="flex items-center justify-center w-[3.5rem] h-full" style={{}}>
+                        <Dropdown
+                            menu={{ items: notificationItems }}
+                            trigger={['click']}
+                            placement="bottomRight"
                             overlayStyle={{ minWidth: "280px", maxHeight: "400px", overflow: "auto" }}
                         >
                             <Button className="!h-[3.5rem] !w-[3.5rem] !rounded-full !border-none !flex !items-center !justify-center !relative">
@@ -233,10 +239,61 @@ const StudentNavbar = () => {
                     </div>
                 </div>
             </div>
+            {showLogoutModal && (
+                <ConfirmationModal
+                    onCancel={() => setShowLogoutModal(false)}
+                    onConfirm={handleLogout}
+                />
+            )}
         </nav>
     )
 
 }
+
+type Props = {
+    onCancel: () => void;
+    onConfirm: () => void;
+};
+
+function ConfirmationModal({ onCancel, onConfirm }: Props) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Blur background */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onCancel}
+            />
+
+            {/* Pop up */}
+            <div className="relative flex flex-col items-center justify-center
+                      bg-white rounded-xl shadow-xl
+                      w-[480px] h-[200px] px-6 text-center">
+                <h2 className="text-lg font-semibold mb-2">Đăng xuất</h2>
+                <p className="text-sm text-gray-600 mb-6">
+                    Bạn có chắc muốn đăng xuất không?
+                </p>
+
+                <div className="flex justify-end gap-3">
+                    <Button
+                        className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                        onClick={onCancel}
+                    >
+                        Hủy
+                    </Button>
+
+                    <Button
+                        className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                        onClick={onConfirm}
+                    >
+                        Đăng xuất
+                    </Button>
+                </div>
+            </div>
+        </div>
+
+    );
+}
+
 export default function PublicLayout({
     children,
 }: {

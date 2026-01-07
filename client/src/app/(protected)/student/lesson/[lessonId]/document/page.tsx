@@ -2,7 +2,7 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import React, { useEffect } from 'react';
-import { Spin } from "antd";   
+import { Spin } from "antd";
 import { useLazyGetDocumentQuery, useGetDocumentQuery } from '@/store/api/[module]/documentApi';
 import { useParams } from 'next/navigation';
 import ChatbotSection from '../components/chatbotSection';
@@ -21,7 +21,7 @@ export default function LectureDocPage() {
     console.log('Document URL: ', document?.file_url);
 
     return (
-        <>
+        <div className="relative flex w-full gap-4">
             <div className="flex-1 flex flex-col gap-[0.5rem]">
                 <div className="w-full relative">
                     {isLoading ? (
@@ -34,16 +34,15 @@ export default function LectureDocPage() {
                         </div>
                     ) : document ? (
                         <object data={document?.file_url} type="application/pdf" width="100%" height="100%"
-                        style={{ height: 'calc(100vh - 17rem)' }}
-                        className="w-full h-full object-contain"
+                            style={{ height: 'calc(100vh - 17rem)' }}
+                            className="w-full h-full object-contain"
                         >
-
                         </object>
                     ) : null}
                 </div>
             </div>
 
             <ChatbotSection />
-        </>
+        </div>
     );
 }
