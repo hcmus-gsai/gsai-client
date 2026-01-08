@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Input, Button } from 'antd';
 import SearchIcon from '@/../public/shared/SearchIcon.svg';
 import { useRouter } from 'next/navigation';
 import { useLazySearchCoursesQuery } from '@/store/api/[module]/courseApi';
 import { set } from 'better-auth';
-
+import { InputRef } from 'antd/es/input/Input';
 interface CourseSearchProps {
   placeholder?: string;
 }
@@ -44,6 +44,8 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
     return () => clearTimeout(timeout);
   }, [keyword]);
 
+  const inputRef = useRef<InputRef>(null);
+
 
   // Handle search button click or enter key press
   const handleSearch = () => {
@@ -58,7 +60,6 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
       limit: 20,
     });
 
-    // router.push(`/student/courses?query=${encodeURIComponent(keyword)}`);
   };
 
   return (
@@ -67,6 +68,7 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
       <div className="relative w-[22.75rem]">
         <div className="flex items-center justify-start w-[18.75rem] h-[3rem]">
           <Input
+            ref = {inputRef}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onPressEnter={handleSearch}
@@ -76,7 +78,7 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
         </div>
 
         {showDropdown && searchResult?.data?.length != null && searchResult.data.length > 0 && (
-          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50">
+          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
             {searchResult.data.map((course) => (
               <div
                 key={course.id}
@@ -97,17 +99,22 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
       </div>
       <div className="flex items-center justify-center w-[calc(100%-18.75rem)] h-full">
         <Button
-          onClick={handleSearch}
+          onClick={() => {
+            inputRef.current?.focus();
+            handleSearch();
+          }}
+
           className="!h-[3rem] !w-[3rem] !bg-[var(--color-secondary)] !rounded-full !border-none !flex !items-center !justify-center"
-        >
-          <Image
+          icon = {
+            <Image
             src={SearchIcon}
             alt="Search Icon"
             width={12}
             height={12}
-            className="object-cover !w-[2.5rem] !h-auto"
+            className="object-cover !w-[1.5rem] !h-auto"
           />
-        </Button>
+          }
+        />
       </div>
     </div>
 

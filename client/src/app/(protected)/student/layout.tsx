@@ -104,7 +104,6 @@ const StudentNavbar = () => {
             key: noti.id,
             label: (
                 <div className="flex items-start gap-2 py-1 min-w-[250px]">
-                    {/* Icon theo type */}
                     <span className={`text-lg ${noti.type === 'success' ? 'text-green-500' :
                         noti.type === 'error' ? 'text-red-500' :
                             noti.type === 'warning' ? 'text-yellow-500' : 'text-blue-500'
@@ -120,7 +119,6 @@ const StudentNavbar = () => {
                             <p className="text-gray-500 text-xs">{noti.description}</p>
                         )}
                     </div>
-                    {/* Nút xóa */}
                     <span
                         className="text-gray-400 hover:text-red-500 cursor-pointer"
                         onClick={(e) => {
@@ -164,7 +162,7 @@ const StudentNavbar = () => {
                             theme={{
                                 components: {
                                     Menu: {
-                                        itemPaddingInline: 10,   // optional left/right padding
+                                        itemPaddingInline: 10, 
                                     },
                                 },
                             }}
@@ -192,12 +190,34 @@ const StudentNavbar = () => {
                                     }
                                 ]}
                                 className='!bg-transparent !border-none !w-full !flex !items-center !justify-start
-                                [&_.ant-menu-item]:font-normal
-                                [&_.ant-menu-item]:text-gray-700
-                                [&_.ant-menu-item:hover]:text-[var(--color-primary)]
-                                [&_.ant-menu-item:hover]:font-semibold
-                                [&_.ant-menu-item-selected]:text-[var(--color-primary)]
-                                [&_.ant-menu-item-selected]:font-semibold'
+                                [&_.ant-menu-item]:!font-normal
+                                [&_.ant-menu-item]:!text-gray-700
+                                [&_.ant-menu-item]:!relative
+                                
+                                [&_.ant-menu-item:hover]:!text-[var(--color-primary)]
+                                [&_.ant-menu-item-selected]:!text-[var(--color-primary)]
+                                [&_.ant-menu-item-selected]:!font-semibold
+                                [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)]
+
+                                
+                                [&_.ant-menu-item::after]:!content-[""]
+                                [&_.ant-menu-item::after]:!absolute
+                                [&_.ant-menu-item::after]:!bottom-0
+                                [&_.ant-menu-item::after]:!left-0
+                                [&_.ant-menu-item::after]:!h-[2px]
+                                [&_.ant-menu-item::after]:!w-full      
+                                [&_.ant-menu-item::after]:!bg-[var(--color-secondary)] 
+                                
+                                [&_.ant-menu-item::after]:!origin-center
+                                [&_.ant-menu-item::after]:!scale-x-0
+                                [&_.ant-menu-item::after]:!transition-transform
+                                [&_.ant-menu-item::after]:!duration-500
+                                [&_.ant-menu-item::after]:!ease-in-out
+                                [&_.ant-menu-item::after]:!border-none 
+
+                                [&_.ant-menu-item:hover::after]:!scale-x-[80%]
+                                [&_.ant-menu-item-selected::after]:!scale-x-[80%]
+                                '
                             />
 
                         </ConfigProvider>
@@ -216,7 +236,6 @@ const StudentNavbar = () => {
                                 <Image src={NotificationIcon} alt="Notification Icon" width={24} height={24}
                                     className="object-cover !w-[1.5rem] !h-auto"
                                 />
-                                {/* Badge số lượng notification */}
                                 {notifications.length > 0 && (
                                     <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                                         {notifications.length > 5 ? '5+' : notifications.length}

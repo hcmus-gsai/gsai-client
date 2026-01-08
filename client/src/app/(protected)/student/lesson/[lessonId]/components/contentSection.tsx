@@ -234,7 +234,7 @@ const ContentSection = () => {
                                                                     <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
                                                                 </div>
                                                             </div>
-
+ 
                                                         </div>
                                                         
                                                     </Card>
