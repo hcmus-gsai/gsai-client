@@ -7,6 +7,21 @@ export interface QuizResponse {
     passing_score_percentage: number | null;
 }
 
+export interface QuizCourseResponse {
+    id: string;
+    lesson_id: string;
+    expired_date: number | null;
+    duration: number | null;
+    passing_score_percentage: number | null;
+    lesson: {
+        id: string;
+        lesson_name: string;
+        type: 'quiz';
+        order_index: number;
+        estimated_completion_time: string;
+    };
+}
+
 export interface QuestionsResponse {
     id: string;
     question_text: string;
