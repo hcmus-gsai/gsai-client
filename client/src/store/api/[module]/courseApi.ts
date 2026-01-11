@@ -43,6 +43,11 @@ export const courseApi = baseApi.injectEndpoints({
             query: () => '/courses/categories',
             providesTags: ['Course'],
         }),
+
+        // getTeacherInfo : builder.query<{message: string; data}, void>({
+        //     query: (teacher_id) => `/courses/teacher/${teacher_id}`,
+        //     providesTags: ['Course']
+        // })
     }),
 });
 
