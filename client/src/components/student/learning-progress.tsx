@@ -175,10 +175,11 @@ const LearningProgressSection = () => {
                                         <Button
                                             type="primary"
                                             onClick={() => router.push(`/student/courses/${course.course_id}/content`)}
-                                            className="!w-32 !h-11 !rounded-full !bg-[#1363DF] hover:!bg-[#0d4eb8] !border-none !font-medium !shadow-sm"
+                                            className="!w-32 !h-11 !rounded-full !bg-[var(--color-secondary)] hover:!bg-white hover:!text-[var(--color-secondary)] !border hover:!border-[var(--color-secondary)]  !font-bold !shadow-sm"
                                         >
                                             Tiếp tục
                                         </Button>
+
 
                                         <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
                                             <Image src={MoreIcon} alt="More Icon" width={20} height={20} />

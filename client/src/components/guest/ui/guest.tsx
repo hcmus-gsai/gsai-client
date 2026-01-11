@@ -38,7 +38,8 @@ import { RedirectButton } from '@/components/shared/redirect-button'
 import WhiteEpisLogo from "../../../../public/student/WhiteEpisLogo.svg";
 import { Sliders } from '@deemlol/next-icons';
 import { Special_Gothic_Condensed_One } from 'next/font/google';
-
+import {useLazySearchCoursesQuery, useLazyGetAllCategoriesQuery} from "@/store/api/[module]/courseApi";
+import {Course} from "@/type/course.type";
 type FunctionBlock = {
     title: string;
     subtext: string;
@@ -153,14 +154,16 @@ const StyledButton = (
         name,
         buttonClassName,
         iconClassName,
+        onClick,
     }:{
         name: string;
         buttonClassName?: string;
         iconClassName?: string;
+        onClick?: () => void;
     }
 ) =>{
     return (
-        <Button className = {buttonClassName}>
+        <Button className = {buttonClassName} onClick={onClick}>
             {name}
             <ArrowRightOutlined className = {iconClassName} />
         </Button>
@@ -169,170 +172,250 @@ const StyledButton = (
 
 const CourseDisplaySection = () => {
 
-    const courseSampleData = [
-        {
-            id: 1,
-            image : '/images/course-1.jpg',
-            name: 'Nhập môn cấu trúc dữ liệu và giải thuật',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 2,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        
-        {
-            id: 3,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-
-        {
-            id: 4,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 5,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        
-        {
-            id: 6,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 7,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-        {
-            id: 8,
-            name: 'hệ thống thông tin',
-            teacher: 'Nguyễn Văn A',
-            estimated_time : '1 tháng',
-            rating: 5.0,
-            tags : ['hệ thống thông tin', 'hệ thống thông tin', 'hệ thống thông tin']
-        },
-    ];
     const router = useRouter();
 
+    const [loadSearchCourses] = useLazySearchCoursesQuery();
+    const [loadCategories] = useLazyGetAllCategoriesQuery();
+    const [courses, setCourses] = useState<Course[]>([]);
+
+    
+    const [categories, setCategories] = useState<string[]>();
+    const [categoryName, setCategoryName] = useState<string>("Cơ sở ngành");
+    const [showAll, setShowAll] = useState<boolean>(false);
+    const [displayCategoryName, setDisplayCategoryName] = useState<string>("Cơ sở ngành");
+    const [isAnimating, setIsAnimating] = useState<boolean>(false);
+    useEffect(() => {
+        const fetchCoursesAndCategories = async () => {
+            try {
+                const courseResponse = await loadSearchCourses(
+                    {
+                        sortBy: 'created_at',
+                        sortOrder: 'ASC'
+                    }
+                );
+                if (courseResponse.data) {
+                    setCourses(courseResponse.data.data);
+                }
+
+                const categoriesResponse = await loadCategories()
+                if (categoriesResponse.data) {
+                    setCategories(categoriesResponse.data.data)
+
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        fetchCoursesAndCategories();
+    },[]);
+
+    useEffect(() => {
+        setShowAll(false);
+    }, [categoryName]);
+
+    
+    const menuItems = categories?.map((item) => ({
+        label: (
+            <span 
+                className="text-[1rem] font-semibold  cursor-pointer"
+            
+            >
+                
+                {item}
+            </span>
+        ),
+        key: item,
+    }));
+
+    const filteredCourses = useMemo(() => {
+        if (!courses) return [];
+        return courses.filter(
+            c => 
+            c.category?.toString().split(',').map(s => s.trim()).includes(displayCategoryName)
+        )
+    }, [courses, displayCategoryName])
+    const displayCourses = useMemo(() => {
+        return showAll ? filteredCourses: filteredCourses.slice(0,8)
+
+    }, [showAll, filteredCourses]);
+
+
     return (
-        <section className = "w-full h-[100vh] flex flex-col items-center justify-center">
+        <section className = "w-full  flex flex-col items-center justify-center py-[2rem]">
             <div className = "flex flex-col items-center justify-center w-[var(--global-width)]">
-                <div className = "text-center">
+                <div className = "text-center mb-[1.5rem]">
                     <h1 className = "text-[3rem] font-bold">Môn học phổ biến hiện nay</h1>
                     <p className = "text-[1.25rem] font-light text-gray-600 text-center">Chọn môn học đúng hướng, nâng tầm hồ sơ tương lai!</p>
                 </div>
             </div>
-            <div className = "flex items-center justify-center w-[var(--global-width)]">
-                <Menu 
-                    mode = "horizontal"
-                    defaultSelectedKeys={["home"]}
-                    items = {[
-                        { key: "field-1", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_1} alt = "Cate_1" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-2", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_2} alt = "Cate_2" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-3", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_3} alt = "Cate_3" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-4", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_4} alt = "Cate_4" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-5", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_5} alt = "Cate_5" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-6", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_6} alt = "Cate_6" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
-                        { key: "field-7", label: <div className = "!text-[var(--color-primary)] !text-[1rem] flex items-center justify-center gap-2">
-                            <Image src = {Cate_7} alt = "Cate_7" width = {20} height = {20} className = "w-full h-full object-cover" />
-                            <span>Phân loại</span>
-                        </div> },
+            <div className = "flex items-center justify-center w-[var(--global-width)] mb-[1.5rem]">
+                <div
+                    className = "w-full flex items-center justify-center border-none"
+                >
+                    <Menu
+                        mode="horizontal"
+                        selectedKeys={[categoryName]} 
+                        items={menuItems}
+                        
+                        onClick={(e) => {
+                            const item = e.key;
+                            if (item !== categoryName) {
+                                setIsAnimating(true);
+                                setCategoryName(item);
+                                setTimeout(() => {
+                                    setDisplayCategoryName(item);
+                                    setTimeout(() => {
+                                        setIsAnimating(false);
+                                    }, 100);
+                                }, 400);
+                            }
+                        }}
+                        
+                        className='
+                        !bg-transparent !border-none !w-full !flex !items-center !justify-start 
 
-                    ]}
-                    className = "!w-full !flex !items-center !justify-center gap-4"
-                    style = {{
-                        backgroundColor: 'transparent'
-                    }}
-                />
+                        [&_.ant-menu-item]:!font-normal 
+                        [&_.ant-menu-item]:!text-gray-700
+                        [&_.ant-menu-item]:!relative
+                        
+                        [&_.ant-menu-item:hover]:!text-[var(--color-secondary)]
+                        [&_.ant-menu-item-selected]:!text-[var(--color-secondary)]
+                        [&_.ant-menu-item-selected]:!font-semibold
+                        [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)]
+
+                        
+                        [&_.ant-menu-item::after]:!content-[""]
+                        [&_.ant-menu-item::after]:!absolute
+                        [&_.ant-menu-item::after]:!bottom-0
+                        [&_.ant-menu-item::after]:!left-0
+                        [&_.ant-menu-item::after]:!h-[2px]
+                        [&_.ant-menu-item::after]:!w-full      
+                        [&_.ant-menu-item::after]:!bg-[var(--color-secondary)]
+                        [&_.ant-menu-item::after]:!shadow-[0_-5px_25px_2px_rgba(59,130,246,0.6)]
+                        
+                        
+                        [&_.ant-menu-item::after]:!origin-center
+                        [&_.ant-menu-item::after]:!scale-x-0
+                        [&_.ant-menu-item::after]:!transition-transform
+                        [&_.ant-menu-item::after]:!duration-500
+                        [&_.ant-menu-item::after]:!ease-in-out
+                        [&_.ant-menu-item::after]:!border-none 
+                        
+                        [&_.ant-menu-item:hover::after]:!scale-x-[80%]
+                        
+                        [&_.ant-menu-item.ant-menu-item-selected::after]:!scale-x-[80%]
+                        [&_.ant-menu-item.ant-menu-item-selected::after]:!opacity-100
+                        [&_.ant-menu-item.ant-menu-item-selected::after]:!shadow-[0_-10px_20px_2px_rgba(59,130,246,0.6)]
+
+                        '
+                    />
+
+                </div>
+
             </div>
 
-            <div className = "w-[var(--global-width)] h-full flex items-center justify-center">
-                <Row gutter = {[16,16]} className = "mx-auto">
+            <div className = "w-[var(--global-width)] h-full flex items-center justify-center mb-[2rem]">
+                <Row 
+                    gutter = {[16,16]} 
+                    className = {`w-[100%] min-h-[370px] mx-auto !flex !items-start !justify-center `}
+                    key={displayCategoryName}
+                >
                     {
-                        courseSampleData.map((c, idx) => {
-                            return (
-                                <Col span = {6} key = {idx} className = "!flex !items-center !justify-center !gap-2">
-                                    <Card className = "w-[262px] h-[303px] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300">
-                                        <div className = "flex flex-col items-center justify-center">
-                                            <Image src = {EmptyLayout} alt = {c.name} width = {0} height = {0} 
-                                                className = "w-full h-full object-cover"                                                    
-                                            />
-                                            <h3 className = "text-[1.25rem] font-bold text-center text-truncate line-clamp-1">{c.name}</h3>
-                                            <div className="flex items-center justify-center">
-                                                <StarFilled className ="!text-yellow-400"/>
-                                                <span className = "font-bold text-gray-600 text-center ml-[2px]">{c.rating}</span>
-                                            </div>
-                                            <p className = "text-[1rem] font-light text-gray-600 text-center">{c.teacher}</p>
-                                            <p className = "text-[1rem] font-light text-gray-600 text-center">Thời lượng: {c.estimated_time}</p>
-                                            
-                                            <div className = "flex items-start justify-start gap-2 mt-2">
-                                                {
-                                                    c.tags.map((t, idx) => {
-                                                        return (
-                                                            <p key = {idx} className = "text-[10px] font-light text-gray-600 text-center rounded-md px-1 py-1 w-fit bg-gray-100">{t}</p>
-                                                        )
-                                                    })
-                                                }
-                                            </div>
+                        displayCourses.map((c,index) => (
+                            <Col 
+                                span = {6} 
+                                key = {c.id} 
+                                className = {`!flex !items-center !justify-center transition-all duration-300 ease-out ${
+                                    isAnimating 
+                                        ? 'opacity-0' 
+                                        : 'opacity-100'
+                                }`}
+                                // style={{
+                                //     animationDelay: `${index < 8 ? index * 50 : (index - 8) * 50}ms`,
+                                //     animationFillMode: 'both'
+                                // }}
+                            >
+                                <Card 
+                                    className = "w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
+                                    // onClick = {()=>router.push(`/student/courses/${c.id}`)}
+                                >
+                                    <div className = "flex flex-col items-center justify-center">
+                                        <Image 
+                                            width={300} height={200}
+                                            src = {c.thumbnail_url || EmptyLayout} 
+                                            alt = {c.course_name || "Empty Layout"} 
+
+                                            className = "w-full object-cover rounded-lg mb-[1rem]"                                                    
+
+                                        />
+                                        <h3 className = "text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
+                                        
+                                        <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
+                                            bởi {c.teacher_name}
+                                        </p>
+
+                                        <div className="flex items-center justify-center">
+                                            <StarFilled className ="!text-yellow-400"/>
+                                            <span className = "font-bold text-gray-600 text-center ml-[2px]">5</span>
                                         </div>
-                                    </Card>
-                                </Col>
-                            )
-                        })
+
+                                        <p className = "text-[0.875rem] font-light text-gray-600 text-center">Thời lượng: {c.duration}</p>
+                                        
+                                        <div className = "flex items-center justify-center w-full gap-x-[0.5rem]">
+                                            {
+                                                c.category.toString().split(',').map((category, idx) => {
+                                                    return (
+                                                        <div key = {idx} className = "flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]"
+                                                            
+                                                        onClick = {
+                                                                (e) => {
+                                                                    e.stopPropagation();
+                                                                    // dispatch(setTitle(category));
+                                                                    // router.push(`/student/category/${category.toLowerCase().replace(/ /g, '-')}`);
+                                                                }
+                                                            }
+                                                        >
+                                                            <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
+                                                        </div>
+                                                    )
+                                                })
+                                            }
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Col>
+                        ))
                     }
                 </Row>
             </div>
 
-            <StyledButton
-                name = "Xem tất cả"
-                buttonClassName = "mt-8 !bg-black !text-white hover:!bg-[var(--color-bg_white)] hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                iconClassName = "!rotate-315 !text-[var(--color-bg_white)] !hover:!text-black"
-            />
+
+            <Button
+                type="primary"
+                className = {`
+                    group !w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-white !border
+                    hover:!bg-[var(--color-secondary)]
+                    hover:!border-white
+                    `} 
+                style={{ border: `1px solid var(--color-secondary)` }}
+                onClick = {() => setShowAll(!showAll)}
+            >
+                <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
+                    <span className = {`text-[1rem] text-[var(--color-secondary)] group-hover:text-white font-bold`}>{showAll ? "Thu gọn": "Xem tất cả"}</span>
+                </div>
+
+                <div className = {`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem] bg-[var(--color-secondary)] group-hover:bg-[var(--color-white)]`}>
+                    <span 
+                    className="flex items-center justify-center rounded-full p-2 w-full h-full">
+                        <ArrowRightOutlined className={`
+                            !-rotate-45 
+                            !text-[var(--color-bg-white)]
+                            group-hover:!text-[var(--color-secondary)]
+                        `} />
+                    </span>
+                </div>
+            </Button>
         </section>
     )
 }
@@ -431,7 +514,6 @@ const FooterSection = ({
                 </div>
             </div>
 
-            {/* BOTTOM BAR */}
             <footer className="py-6 md:h-[100px] flex flex-col-reverse md:flex-row items-center justify-between w-full px-6 md:px-0 md:w-[var(--global-width)] border-t border-gray-100 md:border-none gap-4 md:gap-0">
                 <div className="text-sm md:text-base text-gray-500">
                     <p>©2025 All rights reserved</p>
@@ -463,7 +545,7 @@ const FunctionSection = (
             style={{ backgroundColor: "#FAFAFA" }}
         >
             <div className="relative w-full h-full flex flex-col justify-center items-center py-19 px-38 gap-4">
-                <p className="text-[3.8vw] font-semibold">Vì sao chọn GSAI?</p>
+                <p className="text-[3.8vw] font-semibold">Vì sao chọn EPIS?</p>
                 <p className="text-[1vw]">Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.</p>
                 <br />
 
@@ -704,7 +786,7 @@ const TestimonialSection = () => {
                 description: 'Epis giúp việc học của tôi tiếp cận cấu trúc dữ liệu và giải thuật một cách dễ dàng hơn.',
             },
             {
-                name: 'TS.Nguyễn Tiến Đạt',
+                name: 'TS.Lê Ngọc Thành',
                 subject: 'Nhập môn hệ thống thông tin',
                 description: 'Epis là công cụ hỗ trợ học tập hiệu quả cho sinh viên.',
             },

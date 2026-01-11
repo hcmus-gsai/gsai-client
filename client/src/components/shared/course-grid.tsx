@@ -41,12 +41,6 @@ export const CourseGrid = (
                                 onClick = {()=>router.push(`/student/courses/${c.id}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
-                                    {/* <Image 
-                                        src = {c.thumbnail_url || EmptyLayout} 
-                                        alt = {c.course_name || "Empty Layout"} 
-                                        width = {300} 
-                                        height = {200} 
-                                    /> */}
                                     <Image 
                                         width={300} height={200}
                                         src = {c.thumbnail_url || EmptyLayout} 
