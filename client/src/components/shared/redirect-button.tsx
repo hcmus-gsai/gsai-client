@@ -38,11 +38,7 @@ export const RedirectButton = ({
     return (
         <Button
             type="primary"
-            className = {`
-                group !w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent
-                hover:!bg-[var(--color-secondary)]
-                hover:!border-white 
-            `} 
+            className = {`group !w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent hover:!bg-[var(--color-secondary)] hover:!border-white `} 
             style={{ border: `1px solid ${buttonBorder}` }}
             onClick = {handleRedirect}
         >

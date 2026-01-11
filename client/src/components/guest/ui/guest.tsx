@@ -272,43 +272,7 @@ const CourseDisplaySection = () => {
                             }
                         }}
                         
-                        className='
-                        !bg-transparent !border-none !w-full !flex !items-center !justify-start 
-
-                        [&_.ant-menu-item]:!font-normal 
-                        [&_.ant-menu-item]:!text-gray-700
-                        [&_.ant-menu-item]:!relative
-                        
-                        [&_.ant-menu-item:hover]:!text-[var(--color-secondary)]
-                        [&_.ant-menu-item-selected]:!text-[var(--color-secondary)]
-                        [&_.ant-menu-item-selected]:!font-semibold
-                        [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)]
-
-                        
-                        [&_.ant-menu-item::after]:!content-[""]
-                        [&_.ant-menu-item::after]:!absolute
-                        [&_.ant-menu-item::after]:!bottom-0
-                        [&_.ant-menu-item::after]:!left-0
-                        [&_.ant-menu-item::after]:!h-[2px]
-                        [&_.ant-menu-item::after]:!w-full      
-                        [&_.ant-menu-item::after]:!bg-[var(--color-secondary)]
-                        [&_.ant-menu-item::after]:!shadow-[0_-5px_25px_2px_rgba(59,130,246,0.6)]
-                        
-                        
-                        [&_.ant-menu-item::after]:!origin-center
-                        [&_.ant-menu-item::after]:!scale-x-0
-                        [&_.ant-menu-item::after]:!transition-transform
-                        [&_.ant-menu-item::after]:!duration-500
-                        [&_.ant-menu-item::after]:!ease-in-out
-                        [&_.ant-menu-item::after]:!border-none 
-                        
-                        [&_.ant-menu-item:hover::after]:!scale-x-[80%]
-                        
-                        [&_.ant-menu-item.ant-menu-item-selected::after]:!scale-x-[80%]
-                        [&_.ant-menu-item.ant-menu-item-selected::after]:!opacity-100
-                        [&_.ant-menu-item.ant-menu-item-selected::after]:!shadow-[0_-10px_20px_2px_rgba(59,130,246,0.6)]
-
-                        '
+                        className='!bg-transparent !border-none !w-full !flex !items-center !justify-start [&_.ant-menu-item]:!font-normal [&_.ant-menu-item]:!text-gray-700 [&_.ant-menu-item]:!relative [&_.ant-menu-item:hover]:!text-[var(--color-secondary)] [&_.ant-menu-item-selected]:!text-[var(--color-secondary)] [&_.ant-menu-item-selected]:!font-semibold [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)] [&_.ant-menu-item::after]:!content-[""] [&_.ant-menu-item::after]:!absolute [&_.ant-menu-item::after]:!bottom-0 [&_.ant-menu-item::after]:!left-0 [&_.ant-menu-item::after]:!h-[2px] [&_.ant-menu-item::after]:!w-full [&_.ant-menu-item::after]:!bg-[var(--color-secondary)] [&_.ant-menu-item::after]:!shadow-[0_-5px_25px_2px_rgba(59,130,246,0.6)] [&_.ant-menu-item::after]:!origin-center [&_.ant-menu-item::after]:!scale-x-0 [&_.ant-menu-item::after]:!transition-transform [&_.ant-menu-item::after]:!duration-500 [&_.ant-menu-item::after]:!ease-in-out [&_.ant-menu-item::after]:!border-none [&_.ant-menu-item:hover::after]:!scale-x-[80%] [&_.ant-menu-item.ant-menu-item-selected::after]:!scale-x-[80%] [&_.ant-menu-item.ant-menu-item-selected::after]:!opacity-100 [&_.ant-menu-item.ant-menu-item-selected::after]:!shadow-[0_-10px_20px_2px_rgba(59,130,246,0.6)]'
                     />
 
                 </div>

@@ -69,10 +69,7 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
                 </div>
                 <p className="text-sm text-gray-700">{data.text}</p>*/}
                 <div
-                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 
-                                border-l-[8px] border-l-transparent 
-                                border-r-[8px] border-r-transparent 
-                                border-b-[8px] border-b-white/95"
+                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white/95"
                 />
 
                 <div className="flex justify-between items-start mb-2">
