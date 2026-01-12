@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import { LessonProgress } from '@/type/lessonProgress.type';
 import { RootState } from '../store';
+import staticMethods from 'antd/es/message';
 
 interface StatsCount {
     total: number;
@@ -11,6 +12,9 @@ interface ModuleStats {
     video: StatsCount;
     document: StatsCount;
     quiz: StatsCount;
+
+    //Update percent for model
+    moduleCompletionPercent: number;
 }
 
 interface LessonProgressState {
@@ -86,6 +90,7 @@ const lessonProgressSlice = createSlice({
                     } else if (lessonType === 'quiz') {
                         moduleStats.quiz.completed += currentStatus ? -1 : 1;
                     }
+
                 }
 
                 state.completionPercent = state.totalLessons > 0 ? Math.round((state.completedLessons / state.totalLessons) * 100): 0;
@@ -145,5 +150,6 @@ export const selectLessonCompletionStatus = (state: RootState) => {
 
 export const selectAllModuleStats = (state: RootState) => 
     state.lessonProgress.moduleStats;
+
 
 export default lessonProgressSlice.reducer;

@@ -33,6 +33,9 @@ import {
 import ClockIcon from "@/../public/student/ClockIcon.svg";
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
 import Image from "next/image";
+import QuizIcon from "@/../public/student/QuizIcon.svg";
+import DocumentIcon from "@/../public/student/DocumentIcon.svg";
+import VideoIcon from "@/../public/student/VideoIcon.svg";
 
 interface IChapterState {
     id: string;
@@ -103,8 +106,8 @@ const CourseModules = () => {
 
     //Foreach module => 
     //Example Module A: {video: 2, document: 1, quiz: 1}
-    type StatCount = { total: number; completed: number };
-    type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
+    // type StatCount = { total: number; completed: number };
+    // type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
 
 
     useEffect(() => {
@@ -128,7 +131,8 @@ const CourseModules = () => {
                     let currentStats = {
                         video: { total: 0, completed: 0 },
                         document: { total: 0, completed: 0 },
-                        quiz: { total: 0, completed: 0 }
+                        quiz: { total: 0, completed: 0 },
+                        moduleCompletionPercent: 0
                     };
 
                     for (const lesson of lessonsResponse.lesson) {
@@ -146,6 +150,12 @@ const CourseModules = () => {
                             currentStats.quiz.total++;
                             if (isCompleted) currentStats.quiz.completed++;
                         }
+
+                        const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total;
+                        const completedLessonInModule = currentStats.video.completed + currentStats.document.completed + currentStats.quiz.completed;
+
+                        const moduleCompletionPercent = totalLessonInModule > 0  ? Math.round((completedLessonInModule / totalLessonInModule) * 100) : 0;
+                        currentStats.moduleCompletionPercent = moduleCompletionPercent;
                     }
 
                     dispatch(setModuleStats({
@@ -251,30 +261,56 @@ const CourseModules = () => {
                                         </p>
                                     </div>
                                     <div className="flex items-center justify-start gap-2 ml-auto">
-                                        {completionPercent === 100 && (
-                                            <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
+                                        {moduleStats[module.id]?.moduleCompletionPercent === 100 && (
+                                            <div className = "flex items-center justify-center gap-2">
+                                                <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
+                                                <p className = "font-bold text-[var(--color-secondary)]">Đã hoàn thành</p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem] overflow-x-auto no-scrollbar">
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                        {completionPercent === 100 ? "Đã hoàn thành" : "Chưa hoàn thành"}
-                                    </p>
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                        {moduleStats[module.id]?.video?.total > 0 &&
-                                            `Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`
-                                        }
-                                    </p>
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                        {moduleStats[module.id]?.quiz?.total > 0 &&
-                                            `Quiz: ${moduleStats[module.id]?.quiz.completed} / ${moduleStats[module.id]?.quiz.total}`
-                                        }
-                                    </p>
-                                    <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                        {moduleStats[module.id]?.document?.total > 0 &&
-                                            `Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`
-                                        }
-                                    </p>
+                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary] flex items-center gap-2 text-gray-700">
+                                        {moduleStats[module.id]?.video?.total > 0 && ( 
+                                            <>
+                                                <Image src={VideoIcon} alt="Video Icon" width={20} height={20} />
+
+                                                {moduleStats[module.id]?.video?.total > 0 && moduleStats[module.id].video?.total === moduleStats[module.id].video?.completed ? 
+                                                (
+                                                    <p>Đã hoàn thành</p>
+                                                ):(
+                                                    <p>{`Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`}</p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
+
+                                        {moduleStats[module.id]?.quiz?.total > 0 && ( 
+                                            <>
+                                                <Image src={QuizIcon} alt="Quiz Icon" width={20} height={20} />
+                                                {moduleStats[module.id].quiz.completed === moduleStats[module.id].quiz.total ? (
+                                                    <p>Đã hoàn thành</p>
+                                                ) : (
+                                                    <p>{`Quiz: ${moduleStats[module.id].quiz.completed} / ${moduleStats[module.id].quiz.total}`}</p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
+                                        {moduleStats[module.id]?.document?.total > 0 && (
+                                            <>
+                                                <Image src={DocumentIcon} alt="Document Icon" width={20} height={20} />
+
+                                                {moduleStats[module.id]?.document?.total > 0 && moduleStats[module.id].document?.total === moduleStats[module.id].document?.completed ? 
+                                                (
+                                                    <p>Đã hoàn thành</p>
+                                                ):(
+                                                    <p>{`Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`}</p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

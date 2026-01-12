@@ -183,7 +183,7 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
-                                <p className = "text-[1rem] text-[var(--color-primary)]">{courseData?.teacher_name}</p>
+                                <p className = "text-[1rem] text-[var(--color-primary)]">{courseData?.teacher}</p>
                             </div> 
                         </div>
                         <div className = "w-full flex items-center justify-start mb-[1.5rem]">
