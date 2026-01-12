@@ -37,13 +37,15 @@ export function QuizCard({ quiz, enrollment, onVisible }: Props) {
     const router = useRouter();
 
     const { data: attempt } = useGetLatestQuizAttemptQuery(quiz.id);
-    if (attempt?.status === 'graded') return null;
+    console.log('Attempt: ', attempt)
 
     useEffect(() => {
         onVisible();
     }, [onVisible]);
 
     const expired = isExpired(enrollment.enrolled_at, quiz.expired_date || 0);
+
+    if (attempt?.status === 'graded') return null;
 
     return (
         <Card

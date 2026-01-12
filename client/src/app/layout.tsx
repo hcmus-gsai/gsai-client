@@ -23,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className={manrope.variable} suppressHydrationWarning={true}>
-      <body>
+      <body suppressHydrationWarning={true}>
         <ReduxProvider>
           <NotificationListener>
           <div id="app">
