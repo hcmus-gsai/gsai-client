@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSignInMutation } from '@/store/api/[module]/authApi';
 import { useAppDispatch } from '@/store/hook';
 import { addNotification } from '@/store/slice/notifySlice';
+import { GoogleSignIn } from '../ui/form';
 
 const SignInForm = () => {
     const formInstance = Form.useForm();
@@ -61,7 +62,11 @@ const SignInForm = () => {
     const password = Form.useWatch('password', formData);
 
 
-    const handleGoogleSignIn = () => { }
+    const handleGoogleSignIn = () => {
+        // Redirect to backend Google OAuth endpoint
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+        window.location.href = `${apiBaseUrl}/auth/google`;
+    }
 
 
     return (
@@ -128,7 +133,7 @@ const SignInForm = () => {
                     htmlType="submit"
                     disabled={isLoading || !password || !email}
                     className={`!form__button !w-[100%] ${isLoading || !password || !email ?
-                            "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
+                        "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
                         }`}
                 >
                     Đăng nhập
@@ -146,14 +151,9 @@ const SignInForm = () => {
             <Form.Item
                 name="google-sign-in"
             >
-
-                <Button
-                    type="primary"
+                <GoogleSignIn
                     className="!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
-                    onClick={handleGoogleSignIn}
-                >
-                    Đăng nhập với google
-                </Button>
+                />
             </Form.Item>
         </Form>
     )

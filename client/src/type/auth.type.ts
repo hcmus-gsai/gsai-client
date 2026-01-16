@@ -1,13 +1,8 @@
 export interface SignUpRequest {
     email: string;
-    password_hash: string;
+    password?: string;
+    auth_provider?: 'local' | 'google';
     role: string;
-    full_name: string;
-    phone_number: string;
-    gender: string;
-    dob: string;
-    location: string;
-    avatar_url?: string;
 }
 
 export interface SignUpResponse {

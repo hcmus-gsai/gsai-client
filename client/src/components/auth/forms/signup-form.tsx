@@ -9,18 +9,30 @@ import { GoogleSignIn } from '../ui/form';
 
 import { useAppDispatch } from '@/store/hook';
 import { addNotification } from '@/store/slice/notifySlice';
+import { useSignUpMutation } from '@/store/api/[module]/authApi';
 
 const SignUpForm = () => {
     const [form] = Form.useForm();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
+    const [signUp] = useSignUpMutation();
     const [checkEmail] = useCheckEmailMutation();
 
     const signUpHandler = async () => {
         try {
             const data = form.getFieldsValue();
             setIsLoading(true);
+
+            // STEP 0: Check is valid email format (contain @, .)
+            if (!data.email.includes('@') || !data.email.includes('.')) {
+                notification.error({
+                    message: 'Lỗi đăng ký',
+                    description: 'Email không hợp lệ, vui lòng nhập lại.',
+                });
+                setIsLoading(false);
+                return;
+            }
 
             // STEP 1: Check Email Availability
             const response = await checkEmail({ email: data.email }).unwrap();
@@ -35,16 +47,13 @@ const SignUpForm = () => {
                 return;
             }
 
-            // STEP 2: Save temp data to session/local storage or Redux
-            // Here we use sessionStorage as example
-            sessionStorage.setItem(
-                'signUpTempData',
-                JSON.stringify({
-                    email: data.email,
-                    password: data.password,
-                    remember: data.remember || false,
-                })
-            );
+            console.log(data);
+
+            const user = await signUp({
+                email: data.email,
+                password: data.password,
+                role: 'student',
+            }).unwrap();
 
             // Redirect to Complete Profile page
             router.push("/auth/complete-profile");
@@ -58,11 +67,10 @@ const SignUpForm = () => {
             }));
 
         } catch (error: any) {
-            console.error('Check email failed:', error);
             dispatch(addNotification({
                 type: 'error',
                 message: 'Đăng ký thất bại',
-                description: 'Email đã tồn tại, vui lòng dùng email khác.',
+                description: error.message,
                 createdAt: Date.now(),
                 isShown: false
             }));
@@ -180,7 +188,7 @@ const SignUpForm = () => {
                     htmlType="submit"
                     disabled={isLoading || !password || !email || !confirmPassword || !remember}
                     className={`!form__button !w-[100%] ${isLoading || !password || !email || !confirmPassword || !remember ?
-                            "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
+                        "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
                         }`}
                 >
                     Đăng ký
