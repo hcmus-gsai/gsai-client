@@ -19,6 +19,7 @@ interface OCRItem {
 interface ContentItem {
     id: number;
     text: string;
+    translatedText?: string;
 }
 
 interface OcrItem {
@@ -26,60 +27,11 @@ interface OcrItem {
   text: string;
 }
 
-interface OcrGroup {
-  data: OcrItem[];
-  // Có thể có các trường khác như id, page...
-}
-
-const translateOcrData = async (ocrData: OcrGroup[]) => {
-  // Tạo một bản sao để không làm thay đổi trực tiếp dữ liệu gốc (tốt cho React state)
-  const updatedData = [...ocrData];
-
-  for (let i = 0; i < updatedData.length; i++) {
-    const currentGroup = updatedData[i];
-
-    // Bước 1: Trích xuất mảng textArray từ group hiện tại
-    const textArray = currentGroup.data.map((item: OcrItem) => item.text);
-
-    // Kiểm tra nếu mảng rỗng thì bỏ qua
-    if (textArray.length === 0) continue;
-
-    try {
-      // Bước 2: Gọi API LibreTranslate (chạy trên port 8080 như đã cấu hình)
-      const response = await fetch("http://localhost:8080/translate", {
-        method: "POST",
-        body: JSON.stringify({
-          q: textArray,
-          source: "en", // Ngôn ngữ nguồn
-          target: "vi", // Ngôn ngữ đích
-          format: "text"
-        }),
-        headers: { "Content-Type": "application/json" }
-      });
-
-      const result = await response.json();
-      const translatedTexts: string[] = result.translatedText;
-
-      // Bước 3: Ghi đè nội dung đã dịch vào key "text"
-      // LibreTranslate trả về mảng theo đúng thứ tự đã gửi lên
-      currentGroup.data.forEach((item, index) => {
-        if (translatedTexts[index]) {
-          item.text = translatedTexts[index];
-        }
-      });
-
-      console.log(`Đã dịch xong cụm data thứ ${i}`);
-    } catch (error) {
-      console.error(`Lỗi khi dịch cụm data thứ ${i}:`, error);
-    }
-  }
-
-  return updatedData;
-};
-
-const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
+const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return null;
+
+    console.log(detectedLang);
 
     // 1. Tính toán vị trí tương đối của Box so với Video Container
     const relativeTop = rect.top - containerRect.top;
@@ -105,34 +57,21 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
                 style={{
                     top: relativeTop + rect.height + 12,
                     left: `${centerX}px`,
-                    transform: 'translateX(-50%)',
-                    minWidth: '220px',
+                    transform: 'translateX(-100%)',
+                    minWidth: `${rect.width + 50}px`,
                     maxWidth: '300px'
                 }}
                 onClick={(e) => e.stopPropagation()} // Quan trọng: chặn click lọt xuống video
             >
-                {/*<div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-blue-600 text-xs uppercase tracking-wider">Thông tin OCR</span>
-                <button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                    }} 
-                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                >
-                    ✕
-                </button>
-                </div>
-                <p className="text-sm text-gray-700">{data.text}</p>*/}
                 <div
                     className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white/95"
                 />
 
                 <div className="flex justify-between items-start mb-2">
-                    <span className="font-bold text-blue-600 text-[10px] uppercase tracking-tighter">Chi tiết nội dung</span>
+                    <span className="font-bold text-blue-600 text-[10px] uppercase tracking-tighter">{detectedLang} --&gt; vi</span>
                     <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">✕</button>
                 </div>
-                <p className="text-sm text-gray-700 leading-snug">{data.text}</p>
+                <p className="text-sm text-gray-700 leading-snug">{data.text} --&gt; {data.translatedText}</p>
             </div>
         </>
     );
@@ -140,14 +79,13 @@ const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
 
 export default function LectureVideoPage() {
     const { lessonId } = useParams();
-    const { data, isLoading, error } = useGetVideoGenJobByIdQuery(lessonId as string);
+    const { data } = useGetVideoGenJobByIdQuery(lessonId as string);
     const jobDetail = data?.videoGenJob;
-    // console.log('Video Generation Job Detail:', jobDetail);
 
     const ocrJson = jobDetail?.ocr_json;
-    // console.log('OCR JSON Data:', ocrJson);
     const parsedOcrData = useMemo(() => {
         if (!ocrJson || typeof ocrJson !== 'string') return [];
+
         try {
             const rawData = JSON.parse(ocrJson);
             if (!Array.isArray(rawData)) return [];
@@ -166,66 +104,6 @@ export default function LectureVideoPage() {
         }
     }, [ocrJson]);
 
-    const [translatedData, setTranslatedData] = useState<any[] | null>(null);
-    const [isTranslating, setIsTranslating] = useState(false);
-
-    // console.log('Parsed OCR Data:', parsedOcrData);
-    // console.log(parsedOcrData[0].data);
-    // const textArray = parsedOcrData[0].data.map((item: { renderTime: string; text: string }) => item.text);
-    // console.log('Text Array:', textArray);
-
-    useEffect(() => {
-        // Chỉ dịch nếu có dữ liệu và chưa có bản dịch cho dữ liệu này
-        if (parsedOcrData.length > 0) {
-            autoTranslateAction(parsedOcrData);
-        } else {
-            setTranslatedData(null); // Reset nếu ocrJson trống
-        }
-    }, [parsedOcrData]);
-
-
-    const autoTranslateAction = async (dataToTranslate: OcrGroup[]) => {
-        setIsTranslating(true);
-        try {
-            // Tạo bản sao sâu để xử lý
-            const newData: OcrGroup[] = JSON.parse(JSON.stringify(dataToTranslate));
-
-            // Duyệt và dịch từng cụm
-            for (let i = 0; i < newData.length; i++) {
-                const textArray = newData[i].data.map(item => item.text);
-                if (textArray.length === 0) continue;
-
-                const response = await fetch("http://localhost:8080/translate", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        q: textArray,
-                        source: "en",
-                        target: "vi"
-                    }),
-                    headers: { "Content-Type": "application/json" }
-                });
-
-                const result = await response.json();
-                const translatedTexts = result.translatedText;
-
-                // Ghi đè kết quả dịch vào bản sao
-                newData[i].data = newData[i].data.map((item, index) => ({
-                    ...item,
-                    text: translatedTexts[index] || item.text
-                }));
-            }
-            console.log("Tự động dịch hoàn tất");
-            // Lưu kết quả vào state để hiển thị
-            setTranslatedData(newData);
-        } catch (error) {
-            console.error("Lỗi tự động dịch:", error);
-        } finally {
-            setIsTranslating(false);
-        }
-    };
-
-    const displayData = translatedData || parsedOcrData;
-
     //===========Video OCR Service============//
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -234,7 +112,7 @@ export default function LectureVideoPage() {
     const [duration, setDuration] = useState(0);
 
     const [activeBoxes, setActiveBoxes] = useState<OCRItem[]>([]);
-    const [selectedItem, setSelectedItem] = useState<{ item: ContentItem, rect: DOMRect } | null>(null);
+    const [selectedItem, setSelectedItem] = useState<{ detectLang: string, item: ContentItem, rect: DOMRect } | null>(null);
 
     const [videoDisplayRect, setVideoDisplayRect] = useState({ width: 0, height: 0, left: 0, top: 0 });
 
@@ -266,15 +144,14 @@ export default function LectureVideoPage() {
     };
 
     const getOCRForTime = (time: number) => {
-        if (!Array.isArray(displayData)) return [];
-        let closestFrame = displayData[0];
-        for (const frame of displayData) {
+        if (!Array.isArray(parsedOcrData)) return [];
+        let closestFrame = parsedOcrData[0];
+        for (const frame of parsedOcrData) {
             if (frame.renderTime >= time) {
                 closestFrame = frame;
                 break;
             }
         }
-        // console.log('Closest Frame at time: ', closestFrame);
 
         return closestFrame?.data || [];
     };
@@ -289,7 +166,8 @@ export default function LectureVideoPage() {
 
     const handlePlay = () => {
         setIsPlaying(true);
-        setActiveBoxes([]); // Xóa các ô đỏ khi video chạy
+        setActiveBoxes([]); 
+        setSelectedItem(null);
     };
 
     useEffect(() => {
@@ -312,26 +190,45 @@ export default function LectureVideoPage() {
         };
     }, []);
 
-    const handleItemClick = (e: React.MouseEvent, item: ContentItem) => {
+    //===========Translate============//
+    const handleItemClick = async(e: React.MouseEvent, item: ContentItem) => {
         e.stopPropagation();
 
-        // Lấy thông tin vị trí của phần tử vừa click
         const rect = e.currentTarget.getBoundingClientRect();
         const containerRect = videoContainerRef.current?.getBoundingClientRect();
 
-        if (containerRect) {
-            // Lưu trữ cả tọa độ của phần tử click và container để tính toán logic "Center"
-            setSelectedItem({
-                item,
-                rect,
-                // Thêm containerRect vào state nếu cần hoặc xử lý trong Popover
+        if (!containerRect) return;
+
+        try {
+            const languageDetectResult = await fetch("http://localhost:8080/detect", {
+                method: "POST",
+                body: JSON.stringify({ q: item.text }),
+                headers: { "Content-Type": "application/json" }
+            }).then(res => res.json());
+
+            const lang = languageDetectResult[0].language;
+
+            const translateResult = await fetch("http://localhost:8080/translate", {
+                method: "POST",
+                body: JSON.stringify({ q: item.text, source: lang, target: "vi" }),
+                headers: { "Content-Type": "application/json" }
+            }).then(res => res.json());
+
+            const translatedText = translateResult.translatedText;
+
+            setSelectedItem({ 
+                detectLang: lang, 
+                item: { ...item, translatedText },
+                rect 
             });
+
+        } catch (error) {
+            console.error("Lỗi dịch:", error);
         }
     };
 
     const closePopover = () => {
         setSelectedItem(null);
-        console.log('Popover closed');
     }
 
     const toggleFullScreen = () => {
@@ -367,19 +264,8 @@ export default function LectureVideoPage() {
         }
     }
 
-    const updateVideoProgress = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // e.stopPropagation();
-        const newProgress = parseFloat(e.target.value);
-
-        if (!videoRef.current) {
-            console.error('Video element not found');
-            return;
-        }
-
-        videoRef.current.currentTime = newProgress;
-        setCurrentTime(newProgress);
-    }
-
+    //===========Video Controller Bar============//
+    // Volume Control
     const volumeRef = useRef<HTMLButtonElement | null>(null);
     const volumeSliderRef = useRef<HTMLDivElement | null>(null);
     const [isMuted, setIsMuted] = useState(false);
@@ -512,7 +398,7 @@ export default function LectureVideoPage() {
         }
     }
 
-    // Custom Video Slider
+    // Video Slider
     const sliderRef = useRef<HTMLDivElement | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragPercent, setDragPercent] = useState<number | null>(null);
@@ -659,20 +545,19 @@ export default function LectureVideoPage() {
                             return (
                                 <div
                                     key={index}
-                                    className="ocr-box"
+                                    className="hover:bg-yellow-200/50 transition-colors"
                                     style={{
                                         position: 'absolute',
                                         left: `${x * 100}%`,
                                         top: `${y * 100}%`,
                                         width: `${w * 100}%`,
                                         height: `${h * 100}%`,
-                                        border: '2px solid red',
-                                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
                                         cursor: 'pointer',
-                                        pointerEvents: 'auto', // Cho phép click vào chính cái box
+                                        pointerEvents: 'auto',
                                     }}
+
                                     onClick={(e) => {
-                                        e.stopPropagation(); // Ngăn trigger play/pause video
+                                        e.stopPropagation();
                                         handleItemClick(e, { id: 1, text: item.text });
                                     }}
                                     title={item.text}
@@ -682,6 +567,7 @@ export default function LectureVideoPage() {
 
                         {selectedItem && (
                             <ContentPopover
+                                detectedLang={selectedItem.detectLang}
                                 data={selectedItem.item}
                                 rect={selectedItem.rect}
                                 containerRef={videoContainerRef}
