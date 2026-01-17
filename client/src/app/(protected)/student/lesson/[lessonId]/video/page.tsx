@@ -21,6 +21,62 @@ interface ContentItem {
     text: string;
 }
 
+interface OcrItem {
+  renderTime: string;
+  text: string;
+}
+
+interface OcrGroup {
+  data: OcrItem[];
+  // Có thể có các trường khác như id, page...
+}
+
+const translateOcrData = async (ocrData: OcrGroup[]) => {
+  // Tạo một bản sao để không làm thay đổi trực tiếp dữ liệu gốc (tốt cho React state)
+  const updatedData = [...ocrData];
+
+  for (let i = 0; i < updatedData.length; i++) {
+    const currentGroup = updatedData[i];
+
+    // Bước 1: Trích xuất mảng textArray từ group hiện tại
+    const textArray = currentGroup.data.map((item: OcrItem) => item.text);
+
+    // Kiểm tra nếu mảng rỗng thì bỏ qua
+    if (textArray.length === 0) continue;
+
+    try {
+      // Bước 2: Gọi API LibreTranslate (chạy trên port 8080 như đã cấu hình)
+      const response = await fetch("http://localhost:8080/translate", {
+        method: "POST",
+        body: JSON.stringify({
+          q: textArray,
+          source: "en", // Ngôn ngữ nguồn
+          target: "vi", // Ngôn ngữ đích
+          format: "text"
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const result = await response.json();
+      const translatedTexts: string[] = result.translatedText;
+
+      // Bước 3: Ghi đè nội dung đã dịch vào key "text"
+      // LibreTranslate trả về mảng theo đúng thứ tự đã gửi lên
+      currentGroup.data.forEach((item, index) => {
+        if (translatedTexts[index]) {
+          item.text = translatedTexts[index];
+        }
+      });
+
+      console.log(`Đã dịch xong cụm data thứ ${i}`);
+    } catch (error) {
+      console.error(`Lỗi khi dịch cụm data thứ ${i}:`, error);
+    }
+  }
+
+  return updatedData;
+};
+
 const ContentPopover = ({ data, rect, containerRef, onClose }: any) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return null;
@@ -99,7 +155,6 @@ export default function LectureVideoPage() {
             const rawData = JSON.parse(ocrJson);
             if (!Array.isArray(rawData)) return [];
         
-            // Gọi hàm sửa lại renderTime
             let accumulatedTime = 0;
             return rawData.map((item) => {
                 accumulatedTime += item.renderTime;
@@ -113,6 +168,66 @@ export default function LectureVideoPage() {
             return [];
         }
     }, [ocrJson]);
+
+    const [translatedData, setTranslatedData] = useState<any[] | null>(null);
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    // console.log('Parsed OCR Data:', parsedOcrData);
+    // console.log(parsedOcrData[0].data);
+    // const textArray = parsedOcrData[0].data.map((item: { renderTime: string; text: string }) => item.text);
+    // console.log('Text Array:', textArray);
+
+    useEffect(() => {
+        // Chỉ dịch nếu có dữ liệu và chưa có bản dịch cho dữ liệu này
+        if (parsedOcrData.length > 0) {
+            autoTranslateAction(parsedOcrData);
+        } else {
+            setTranslatedData(null); // Reset nếu ocrJson trống
+        }
+    }, [parsedOcrData]);
+
+
+    const autoTranslateAction = async (dataToTranslate: OcrGroup[]) => {
+        setIsTranslating(true);
+        try {
+            // Tạo bản sao sâu để xử lý
+            const newData: OcrGroup[] = JSON.parse(JSON.stringify(dataToTranslate));
+
+            // Duyệt và dịch từng cụm
+            for (let i = 0; i < newData.length; i++) {
+                const textArray = newData[i].data.map(item => item.text);
+                if (textArray.length === 0) continue;
+
+                const response = await fetch("http://localhost:8080/translate", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        q: textArray,
+                        source: "en",
+                        target: "vi"
+                    }),
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                const result = await response.json();
+                const translatedTexts = result.translatedText;
+
+                // Ghi đè kết quả dịch vào bản sao
+                newData[i].data = newData[i].data.map((item, index) => ({
+                    ...item,
+                    text: translatedTexts[index] || item.text
+                }));
+            }
+            console.log("Tự động dịch hoàn tất");
+            // Lưu kết quả vào state để hiển thị
+            setTranslatedData(newData);
+        } catch (error) {
+            console.error("Lỗi tự động dịch:", error);
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
+    const displayData = translatedData || parsedOcrData;
 
     //===========Video OCR Service============//
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -154,10 +269,9 @@ export default function LectureVideoPage() {
     };
 
     const getOCRForTime = (time: number) => {
-        if (!Array.isArray(parsedOcrData)) return [];
-        // console.log('Parsed OCR Data: ', parsedOcrData);
-        let closestFrame = parsedOcrData[0];
-        for (const frame of parsedOcrData) {
+        if (!Array.isArray(displayData)) return [];
+        let closestFrame = displayData[0];
+        for (const frame of displayData) {
             if (frame.renderTime >= time) {
                 closestFrame = frame;
                 break;
