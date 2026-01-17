@@ -3,24 +3,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { RootState } from '../store';
-import { signOut, setCredentials } from '../slice/authSlice';
+import { signOut } from '../slice/authSlice';
 
 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 
-// Base query with JWT token
+// Base query with JWT token from httpOnly cookies
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
-  credentials: 'include',
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState() as RootState;
-    const accessToken = state.auth.accessToken;
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`);
-    }
-    return headers;
-  },
+  credentials: 'include', // Automatically sends httpOnly cookies
   timeout: 180_000, // 3 minutes timeout (chatbot API may take 60-90s on cold start)
 });
 
@@ -43,18 +35,9 @@ const baseQueryWithReauth: BaseQueryFn<
     );
 
     if (refreshResult.data) {
-      const user = (api.getState() as RootState).auth.user;
-
-      // Update credentials in Redux store
-      api.dispatch(
-        setCredentials({
-          user,
-          accessToken: (refreshResult.data as any).accessToken,
-          refreshToken: (refreshResult.data as any).refreshToken?.refreshToken, // if you rotate
-        })
-      );
-
-      // Retry original request with new token
+      // Cookies are automatically updated by the server
+      // No need to dispatch to Redux - just retry the original request
+      console.log('Token refreshed successfully');
       result = await baseQuery(args, api, extraOptions);
     } else {
       // Refresh failed → logout

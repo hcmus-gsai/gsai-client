@@ -17,5 +17,5 @@ export interface UserRequest {
     gender: string;
     dob: string;
     location: string;
-    avatar_url: string;
+    avatar_url?: string;
 }

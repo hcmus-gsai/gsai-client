@@ -15,7 +15,7 @@ export interface Course {
     category: string | string[];
     is_active: boolean;
     teacher_id: string;
-    teacher_name: string;
+    teacher: string;
     is_enrolled: boolean;
 }
 

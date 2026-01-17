@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Input, Button } from 'antd';
 import SearchIcon from '@/../public/shared/SearchIcon.svg';
 import { useRouter } from 'next/navigation';
 import { useLazySearchCoursesQuery } from '@/store/api/[module]/courseApi';
 import { set } from 'better-auth';
-
+import { InputRef } from 'antd/es/input/Input';
 interface CourseSearchProps {
   placeholder?: string;
 }
@@ -27,8 +27,8 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
   // Debounce search (500ms)
   useEffect(() => {
     if (!keyword.trim()) {
-        setShowDropdown(false);
-        return;
+      setShowDropdown(false);
+      return;
     }
 
     setShowDropdown(true);
@@ -44,12 +44,14 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
     return () => clearTimeout(timeout);
   }, [keyword]);
 
+  const inputRef = useRef<InputRef>(null);
+
 
   // Handle search button click or enter key press
   const handleSearch = () => {
     if (!keyword.trim()) {
-        setShowDropdown(false);
-        return;
+      setShowDropdown(false);
+      return;
     }
 
     triggerSearch({
@@ -58,59 +60,62 @@ const CourseSearch: React.FC<CourseSearchProps> = ({
       limit: 20,
     });
 
-    // router.push(`/student/courses?query=${encodeURIComponent(keyword)}`);
   };
 
   return (
 
     <div className="flex items-center justify-center w-[22.75rem] h-full">
-        <div className="relative w-[22.75rem]">
+      <div className="relative w-[22.75rem]">
         <div className="flex items-center justify-start w-[18.75rem] h-[3rem]">
-            <Input
+          <Input
+            ref = {inputRef}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onPressEnter={handleSearch}
             placeholder={placeholder}
-            className="!h-full !w-full !bg-white !rounded-full !font-bold !text-[1rem]"
-            />
+            className="!h-full !w-full !bg-white !rounded-full !text-[1rem]"
+          />
         </div>
 
-        { showDropdown && searchResult?.data?.length != null && searchResult.data.length > 0 && (
-            <div className=" max-h-[15rem] overflow-y-auto absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50">
+        {showDropdown && searchResult?.data?.length != null && searchResult.data.length > 0 && (
+          <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
             {searchResult.data.map((course) => (
-                <div
+              <div
                 key={course.id}
                 className="px-4 py-3 hover:bg-gray-100 cursor-pointer"
                 onClick={() => {
-                    setShowDropdown(false);
-                    setKeyword('');
-                    router.push(`/student/courses/${course.id}`);
+                  setShowDropdown(false);
+                  setKeyword('');
+                  router.push(`/student/courses/${course.id}`);
                 }}
-                >
+              >
                 <div className="font-semibold">
-                    {course.course_code} - {course.course_name}
+                  {course.course_code} - {course.course_name}
                 </div>
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
         )}
-        </div>
-        <div className="flex items-center justify-center w-[calc(100%-18.75rem)] h-full">
-            <Button
-              //If click activate the search input bar
-              onClick={handleSearch}
-              className="!h-[3rem] !w-[3rem] !bg-[var(--color-secondary)] !rounded-full !border-none !flex !items-center !justify-center"
-            >
+      </div>
+      <div className="flex items-center justify-center w-[calc(100%-18.75rem)] h-full">
+        <Button
+          onClick={() => {
+            inputRef.current?.focus();
+            handleSearch();
+          }}
+
+          className="!h-[3rem] !w-[3rem] !bg-[var(--color-secondary)] !rounded-full !border-none !flex !items-center !justify-center"
+          icon = {
             <Image
-                src={SearchIcon}
-                alt="Search Icon"
-                width={12}
-                height={12}
-                className="object-cover !w-[2.5rem] !h-auto"
-                //when click, activate the search
-            />
-            </Button>
-        </div>
+            src={SearchIcon}
+            alt="Search Icon"
+            width={12}
+            height={12}
+            className="object-cover !w-[1.5rem] !h-auto"
+          />
+          }
+        />
+      </div>
     </div>
 
   );

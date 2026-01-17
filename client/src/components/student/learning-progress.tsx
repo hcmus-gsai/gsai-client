@@ -13,7 +13,7 @@ import {EnrolledCourse} from "@/type/enrollment.type";
 import { useLazyGetLearningProgressByEnrollmentQuery} from "@/store/api/[module]/lessonProgressApi";
 import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {LessonProgress} from "@/type/lessonProgress.type";
-
+import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
 
 
 
@@ -23,46 +23,12 @@ const LearningProgressSection = () => {
     // let inProgressEnrollments: EnrolledCourse[] = [];
     
     const { data: enrollmentsData, isLoading: enrollmentsLoading } = useGetAllEnrollmentsQuery();
-    const enrollments : EnrolledCourse[] = enrollmentsData?.data ?? [];
+    const enrollments = useMemo(() => enrollmentsData?.data ?? [], [enrollmentsData?.data]);
     const [fetchProgress] = useLazyGetLearningProgressByEnrollmentQuery();
     const [fetchModules] = useLazyGetCourseModulesQuery();
-
+    const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
     const [progressMap, setProgressMap] = useState<Record<string, LessonProgress[]>>({});
     const [totalLessonMap, setTotalLessonMap] = useState<Record<string, number>>({});
-
-    useEffect(()=> {
-        const loadProgressAndLesson = async () => {
-            if (!enrollments.length) return;
-            const progressResults: Record<string, LessonProgress[]> = {};
-            const totalLessonResults: Record<string, number> = {};
-
-            for (const enrolled_course of enrollments) {
-                try {
-                    const progressResponse = await fetchProgress(enrolled_course.id).unwrap();
-                    console.log('Progress response for enrollment', enrolled_course.id, progressResponse);
-                    progressResults[enrolled_course.id] = progressResponse.lessonProgress;
-                    const modulesResponse = await fetchModules(enrolled_course.course_id).unwrap();
-                    totalLessonResults[enrolled_course.id] = modulesResponse.modules.length;
-                }
-                catch (error) {
-                    console.error(`Error loading progress for course`, error);
-                }
-            }
-            setProgressMap(progressResults);
-            setTotalLessonMap(totalLessonResults);
-        }
-        loadProgressAndLesson();
-    }, [enrollments, fetchProgress, fetchModules]);
-
-    if (enrollmentsLoading) {
-        return (
-            <section className="w-full min-h-[200px] py-16 flex flex-col items-center">
-                <div className="w-[var(--global-width)] flex items-center justify-center">
-                    <div className="animate-pulse text-[var(--color-primary)]">Đang tải...</div>
-                </div>
-            </section>
-        );
-    }
 
     const typeTranslate: Record<string, {label: string}> = {
         'video': {label: 'Video'},
@@ -104,6 +70,46 @@ const LearningProgressSection = () => {
         }
     }, []);  
 
+    useEffect(()=> {
+        const loadProgressAndLesson = async () => {
+            if (!enrollments.length) return;
+            const progressResults: Record<string, LessonProgress[]> = {};
+            const totalLessonResults: Record<string, number> = {};
+
+            for (const enrolled_course of enrollments) {
+                try {
+                    const progressResponse = await fetchProgress(enrolled_course.id).unwrap();
+                    progressResults[enrolled_course.id] = progressResponse.lessonProgress;
+
+                    const modulesResponse = await fetchModules(enrolled_course.course_id).unwrap();
+                    totalLessonResults[enrolled_course.id] = 0;
+                    for (const module of modulesResponse.modules) {
+                        const lessonsResponse = await fetchModuleLessons(module.id).unwrap();
+                        totalLessonResults[enrolled_course.id] += lessonsResponse.lesson.length;
+                    }
+                }
+                catch (error) {
+                    console.error(`Error loading progress for course`, error);
+                }
+            }
+            setProgressMap(progressResults);
+            setTotalLessonMap(totalLessonResults);
+        }
+        loadProgressAndLesson();
+    }, [enrollments, fetchProgress, fetchModules, fetchModuleLessons]);
+
+    if (enrollmentsLoading) {
+        return (
+            <section className="w-full min-h-[200px] py-16 flex flex-col items-center">
+                <div className="w-[var(--global-width)] flex items-center justify-center">
+                    <div className="animate-pulse text-[var(--color-primary)]">Đang tải...</div>
+                </div>
+            </section>
+        );
+    }
+
+    
+
     return (
         <section className="w-full py-16 flex flex-col items-center">
             <div className="flex flex-col w-[var(--global-width)] gap-6">
@@ -140,7 +146,7 @@ const LearningProgressSection = () => {
                                         </p>
 
                                         <p className="text-sm text-gray-500">
-                                            Hoàn thành {getCompletionPercent(course.id)}% · Dự kiến hoàn thành: {formatTime(getChosenLesson(course.id)?.estimated_completion_time || '')}
+                                            Hoàn thành {getCompletionPercent(course.id)}% · Dự kiến hoàn thành: {course.duration}
                                         </p>
 
                                         <Progress
@@ -169,10 +175,11 @@ const LearningProgressSection = () => {
                                         <Button
                                             type="primary"
                                             onClick={() => router.push(`/student/courses/${course.course_id}/content`)}
-                                            className="!w-32 !h-11 !rounded-full !bg-[#1363DF] hover:!bg-[#0d4eb8] !border-none !font-medium !shadow-sm"
+                                            className="!w-32 !h-11 !rounded-full !bg-[var(--color-secondary)] hover:!bg-white hover:!text-[var(--color-secondary)] !border hover:!border-[var(--color-secondary)]  !font-bold !shadow-sm"
                                         >
                                             Tiếp tục
                                         </Button>
+
 
                                         <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
                                             <Image src={MoreIcon} alt="More Icon" width={20} height={20} />

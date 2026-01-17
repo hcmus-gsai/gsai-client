@@ -38,20 +38,48 @@ export const RedirectButton = ({
     return (
         <Button
             type="primary"
-            className = {`!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent`} 
+            className = {`group !w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent hover:!bg-[var(--color-secondary)] hover:!border-white `} 
             style={{ border: `1px solid ${buttonBorder}` }}
             onClick = {handleRedirect}
         >
             <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
-                <span className = {`text-[1rem] !text-[${buttonText}]`}>{text}</span>
+                <span className = {`font-bold text-[1rem] !text-[${buttonText}] group-hover:!text-white`}>{text}</span>
             </div>
 
-            <div className = {`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem]`} style={{backgroundColor: `${iconBg}`}}>
+            <div className = {`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem]  group-hover:bg-[var(--color-white)] bg-[${iconBg}]`} >
                 <span className="flex items-center justify-center rounded-full p-2 w-full h-full">
-                    <ArrowRightOutlined className={`!-rotate-45 !text-[${iconText}]`} />
+                    <ArrowRightOutlined className={`!-rotate-45 !text-[${iconText}] group-hover:!text-[var(--color-secondary)]`} />
                 </span>
             </div>
         </Button>
+        /**
+        
+        <Button
+                type="primary"
+                className = {`
+                    group !w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-white !border
+                    hover:!bg-[var(--color-secondary)]
+                    hover:!border-white
+                    `} 
+                style={{ border: `1px solid var(--color-secondary)` }}
+                onClick = {() => setShowAll(!showAll)}
+            >
+                <div className = "mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
+                    <span className = {`text-[1rem] text-[var(--color-secondary)] group-hover:text-white font-bold`}>{showAll ? "Thu gọn": "Xem tất cả"}</span>
+                </div>
+
+                <div className = {`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem] bg-[var(--color-secondary)] group-hover:bg-[var(--color-white)]`}>
+                    <span 
+                    className="flex items-center justify-center rounded-full p-2 w-full h-full">
+                        <ArrowRightOutlined className={`
+                            !-rotate-45 
+                            !text-[var(--color-bg-white)]
+                            group-hover:!text-[var(--color-secondary)]
+                        `} />
+                    </span>
+                </div>
+            </Button>
+        */
     )
 }
 

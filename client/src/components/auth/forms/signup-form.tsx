@@ -5,20 +5,34 @@ import { Form, Input, Button, Checkbox, notification } from "antd";
 import Link from 'next/link';
 import { useState } from 'react';
 import { useCheckEmailMutation } from '../../../store/api/[module]/authApi';
-import {GoogleSignIn} from '../ui/form';
-import { sign } from 'crypto';
+import { GoogleSignIn } from '../ui/form';
+
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+import { useSignUpMutation } from '@/store/api/[module]/authApi';
 
 const SignUpForm = () => {
     const [form] = Form.useForm();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-
+    const dispatch = useAppDispatch();
+    const [signUp] = useSignUpMutation();
     const [checkEmail] = useCheckEmailMutation();
 
     const signUpHandler = async () => {
         try {
             const data = form.getFieldsValue();
             setIsLoading(true);
+
+            // STEP 0: Check is valid email format (contain @, .)
+            if (!data.email.includes('@') || !data.email.includes('.')) {
+                notification.error({
+                    message: 'Lỗi đăng ký',
+                    description: 'Email không hợp lệ, vui lòng nhập lại.',
+                });
+                setIsLoading(false);
+                return;
+            }
 
             // STEP 1: Check Email Availability
             const response = await checkEmail({ email: data.email }).unwrap();
@@ -31,24 +45,35 @@ const SignUpForm = () => {
                 });
                 setIsLoading(false);
                 return;
-            } 
+            }
 
-            // STEP 2: Save temp data to session/local storage or Redux
-            // Here we use sessionStorage as example
-            sessionStorage.setItem(
-                'signUpTempData',
-                JSON.stringify({
-                    email: data.email,
-                    password: data.password,
-                    remember: data.remember || false,
-                })
-            );
+            console.log(data);
+
+            const user = await signUp({
+                email: data.email,
+                password: data.password,
+                role: 'student',
+            }).unwrap();
 
             // Redirect to Complete Profile page
             router.push("/auth/complete-profile");
 
+            dispatch(addNotification({
+                type: 'success',
+                message: 'Đăng ký thành công',
+                description: 'Chào mừng bạn đến với EPIS',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
         } catch (error: any) {
-            console.error('Check email failed:', error);
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Đăng ký thất bại',
+                description: error.message,
+                createdAt: Date.now(),
+                isShown: false
+            }));
         } finally {
             setIsLoading(false);
         }
@@ -61,40 +86,40 @@ const SignUpForm = () => {
 
     return (
         <Form
-            form = {form}
-            name = "sign-up"
-            layout = "vertical"
-            size = "large"
-            initialValues = {{remember: false}}
-            onFinish = {signUpHandler}
+            form={form}
+            name="sign-up"
+            layout="vertical"
+            size="large"
+            initialValues={{ remember: false }}
+            onFinish={signUpHandler}
         >
 
-            <div className = "mb-2">
+            <div className="mb-2">
                 <p className="font-medium font-bold">Email<span className="text-red-500">*</span></p>
             </div>
 
             <Form.Item
-                name = "email"
-                rules = {[
+                name="email"
+                rules={[
                     {
                         required: true,
                         message: 'Vui lòng nhập email'
                     }
                 ]}
             >
-                <Input 
-                    placeholder = "name@gmail.com"
-                    className = "form__input"
+                <Input
+                    placeholder="name@gmail.com"
+                    className="form__input"
                 />
             </Form.Item>
 
-            <div className = "mb-2">
+            <div className="mb-2">
                 <p className="font-medium font-bold">Mật khẩu <span className="text-red-500">*</span></p>
             </div>
 
             <Form.Item
-                name = "password"
-                rules = {[
+                name="password"
+                rules={[
                     {
                         required: true,
                         message: 'Vui lòng nhập mật khẩu'
@@ -109,19 +134,19 @@ const SignUpForm = () => {
                     }
                 ]}
             >
-                <Input.Password placeholder = "Tạo mật khẩu"
-                    className = "form__input"
+                <Input.Password placeholder="Tạo mật khẩu"
+                    className="form__input"
                 />
             </Form.Item>
 
-            <div className = "mb-2">
+            <div className="mb-2">
                 <p className="font-medium font-bold">Nhập lại mật khẩu<span className="text-red-500">*</span></p>
                 <p className="text-gray-500 font-normal font-sm">Gồm chữ thường, chữ hoa, số và dài hơn 8 kí tự</p>
             </div>
 
             <Form.Item
-                name = "confirmPassword"
-                rules = {[
+                name="confirmPassword"
+                rules={[
                     {
                         required: true,
                         message: 'Vui lòng nhập lại mật khẩu'
@@ -136,36 +161,35 @@ const SignUpForm = () => {
                     }
                 ]}
             >
-                <Input.Password placeholder = "Nhập lại mật khẩu"
-                    className = "form__input"
+                <Input.Password placeholder="Nhập lại mật khẩu"
+                    className="form__input"
                 />
             </Form.Item>
 
             <Form.Item
-                name = "remember"
-                valuePropName = "checked"
-                className = "!mt-[-15px]"
+                name="remember"
+                valuePropName="checked"
+                className="!mt-[-15px]"
             >
-                <div className = "flex items-start gap-2">
+                <div className="flex items-start gap-2">
                     <Checkbox
-                        name = "remember"
-                        className = "form__checkbox !mt-1"
+                        name="remember"
+                        className="form__checkbox !mt-1"
                     />
-                    <span className = "text-gray-500 font-normal font-sm">
-                        Tôi đã đọc và đồng ý với <Link href = "/privacy-policy">Điều khoản và điều kiện</Link> cùng <Link href = "/privacy-policy">Chính sách bảo mật</Link> của GSAI
+                    <span className="text-gray-500 font-normal font-sm">
+                        Tôi đã đọc và đồng ý với <Link href="/privacy-policy">Điều khoản và điều kiện</Link> cùng <Link href="/privacy-policy">Chính sách bảo mật</Link> của GSAI
                     </span>
                 </div>
             </Form.Item>
 
             <Form.Item>
-                <Button 
-                    type = "primary" 
-                    htmlType = "submit" 
-                    disabled = {isLoading || !password || !email || !confirmPassword || !remember}
-                    className = {`!form__button !w-[100%] ${
-                        isLoading || !password || !email || !confirmPassword || !remember ?
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={isLoading || !password || !email || !confirmPassword || !remember}
+                    className={`!form__button !w-[100%] ${isLoading || !password || !email || !confirmPassword || !remember ?
                         "!bg-gray-400 !cursor-not-allowed" : "!bg-blue-500 !hover:bg-blue-600"
-                    }`}
+                        }`}
                 >
                     Đăng ký
                 </Button>
@@ -179,13 +203,13 @@ const SignUpForm = () => {
                 </div>
             </Form.Item>
 
-            <Form.Item name = "google-sign-in">
+            <Form.Item name="google-sign-in">
                 <GoogleSignIn
-                    className = "!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
+                    className="!w-[100%] !bg-white !border !border-gray-300 !text-black !py-[1rem]"
                 />
             </Form.Item>
         </Form>
     )
 }
 
-export {SignUpForm}
+export { SignUpForm }

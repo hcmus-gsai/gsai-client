@@ -4,14 +4,10 @@ import type { RootState } from '../store';
 
 export type AuthState = {
     user: User | null,
-    accessToken: string | null,
-    refreshToken: string | null,
 }
 
 const initialState: AuthState = {
     user: null,
-    accessToken: null,
-    refreshToken: null,
 };
 
 
@@ -19,20 +15,16 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: initialState,
     reducers: {
-        setCredentials: (state, action) => {
-            const { accessToken, refreshToken } = action.payload;
-            state.accessToken = accessToken;
-            state.refreshToken = refreshToken;
+        setUser: (state, action: PayloadAction<User | null>) => {
+            state.user = action.payload;
         },
         signOut: (state) => {
             state.user = null;
-            state.accessToken = null;
-            state.refreshToken = null;
         },
     },
 });
 
-export const { setCredentials, signOut } = authSlice.actions;
+export const { setUser, signOut } = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;

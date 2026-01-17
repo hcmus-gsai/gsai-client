@@ -31,12 +31,14 @@ const CourseDisplaySection = ({
         sortOrder: 'ASC'
     })
 
+    // console.log('FFFF:', searchCoursesData)
+
     
 
     const [coursesInfo, setCoursesInfo] = useState<Course[]>([]);
     useEffect(()=> {
         if (searchCoursesData) {
-            console.log('This is searchCoursesData: ', searchCoursesData);
+            // console.log('This is searchCoursesData: ', searchCoursesData);
             if (title.toLowerCase().includes("miễn phí")) {
                 setCoursesInfo(searchCoursesData.data.filter((course) => Number(course.tuition_fee) === 0));
             } else {

@@ -1,38 +1,43 @@
-import React, { createContext } from 'react';
+'use client';
+
+import React, {useEffect, useRef} from 'react';
 import {notification} from 'antd';
-import type {NotificationArgsProps} from 'antd';
 
-type NotificationType = "success" | "info" | "warning" | "error";
-
-interface CustomNotificationArgsProps extends NotificationArgsProps {
-    notiType?: NotificationType; //can be optional
-}
-
-type NotificationContextType = {
-    notify: (config: CustomNotificationArgsProps) => void;
-}
-
-export const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+import {useAppDispatch, useAppSelector} from '@/store/hook';
+import { selectNotifications, markNotificationAsShown } from '@/store/slice/notifySlice';
 
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
+export const NotificationListener : React.FC<{children: React.ReactNode}> = ({children}) => {
     const [api, contextHolder] = notification.useNotification();
-    
-    const notify = (config: CustomNotificationArgsProps) => {
-        api[config.notiType || 'success']({
-            ...config,
-            placement: 'topRight',
-            showProgress: true,
-            duration: 5000,
+    const dispatch = useAppDispatch();
+    const notifications = useAppSelector(selectNotifications);
+
+    const exposeIds = useRef<Set<string>>(new Set());
+
+    useEffect(() => {
+        notifications.forEach((noti)=>{
+            if (exposeIds.current.has(noti.id)) return;
+            exposeIds.current.add(noti.id);
+            api[noti.type]({
+                message: noti.message,
+                description: noti.description,
+                placement: 'topRight',
+                key: noti.id,
+                duration: 5,
+                onClose: () => {
+                    dispatch(markNotificationAsShown(noti.id));
+                },
+            })
+            dispatch(markNotificationAsShown(noti.id));
+
         })
-    }
+    }, [notifications, api, dispatch]);
 
     return (
-        <NotificationContext.Provider value = {{notify}}>
+        <>
             {contextHolder}
             {children}
-        </NotificationContext.Provider>
+        </>
     )
+
 }

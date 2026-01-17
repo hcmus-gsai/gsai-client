@@ -16,7 +16,7 @@ export default function SignInPage() {
         >
             <FormTitle 
                 title = "Đăng nhập"
-                description = "Chào mừng trở lại với GSAI"
+                description = "Chào mừng trở lại với EPIS"
             />
             <SignInForm/>
             <FormNavigation

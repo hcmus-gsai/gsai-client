@@ -27,6 +27,17 @@ export const lessonProgressApi = baseApi.injectEndpoints({
                 'LessonProgress',
             ],
         }),
+
+        updateLearningProgressByLessonId: builder.mutation<{message: string}, {lessonId: string, isCompleted: boolean}>({
+            query: ({lessonId, isCompleted}) => ({
+                url: `/learning-progress/${lessonId}`,
+                method: 'PATCH',
+                body: { is_completed: isCompleted },
+            }),
+            invalidatesTags: ['LessonProgress'],
+        }),
+
+
     }),
 });
 
@@ -36,4 +47,5 @@ export const {
     useLazyGetLearningProgressByCourseQuery,
     useGetLearningProgressByEnrollmentQuery,
     useLazyGetLearningProgressByEnrollmentQuery,
+    useUpdateLearningProgressByLessonIdMutation,
 } = lessonProgressApi;

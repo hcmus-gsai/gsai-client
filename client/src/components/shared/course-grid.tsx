@@ -1,6 +1,7 @@
 'use client';
 
 import {Row, Col, Card} from "antd";
+import {useState, useEffect, useMemo} from 'react';
 import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { StarFilled } from "@ant-design/icons";
@@ -11,6 +12,7 @@ import { EnrolledCourse } from '@/type/enrollment.type';
 import {Course} from '@/type/course.type';
 import { useAppDispatch } from "@/store/hook";
 import { setTitle } from "@/store/slice/courseDisplaySlice";
+import {useLazyGetCourseByIdQuery , useGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
 
 export const CourseGrid = (
     {
@@ -30,10 +32,12 @@ export const CourseGrid = (
     
     if (!courseData) return null;
     
+    
     return (
         <Row gutter = {[16,16]} className = {`w-[100%] mx-auto ${className}`}>
             {
                 courseData.slice(0, maxItems).map((c,index) => {
+                    
                     return (
                         <Col span = {colWidth} key = {index} className = "!flex !items-center !justify-center">
                             <Card 
@@ -41,12 +45,6 @@ export const CourseGrid = (
                                 onClick = {()=>router.push(`/student/courses/${c.id}`)}
                             >
                                 <div className = "flex flex-col items-center justify-center">
-                                    {/* <Image 
-                                        src = {c.thumbnail_url || EmptyLayout} 
-                                        alt = {c.course_name || "Empty Layout"} 
-                                        width = {300} 
-                                        height = {200} 
-                                    /> */}
                                     <Image 
                                         width={300} height={200}
                                         src = {c.thumbnail_url || EmptyLayout} 
@@ -58,7 +56,7 @@ export const CourseGrid = (
                                     <h3 className = "text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
                                     
                                     <p className = "text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
-                                        bởi {c.teacher_name}
+                                        bởi {c?.teacher}
                                     </p>
 
                                     <div className="flex items-center justify-center">
