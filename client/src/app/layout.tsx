@@ -26,9 +26,9 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
         <ReduxProvider>
           <NotificationListener>
-          <div id="app">
-            {children}
-          </div>
+            <div id="app">
+              {children}
+            </div>
           </NotificationListener>
         </ReduxProvider>
       </body>

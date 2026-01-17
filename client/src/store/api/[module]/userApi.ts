@@ -33,6 +33,13 @@ export const userApi = baseApi.injectEndpoints({
             }),
             providesTags: ['User'],
         }),
+        deleteUserAvatar: builder.mutation<UserResponse, void>({
+            query: () => ({
+                url: '/users/avatar',
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['User'],
+        }),
     })
 });
 
@@ -41,4 +48,5 @@ export const {
     useUpdateUserProfileMutation,
     useUpdateUserAvatarMutation,
     useGetUserAvatarQuery,
+    useDeleteUserAvatarMutation,
 } = userApi;
