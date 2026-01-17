@@ -18,8 +18,10 @@ import CourseSearch from '@/components/course/course-search';
 
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { selectNotifications, removeNotification, clearNotifications } from '@/store/slice/notifySlice';
-
+import { useGetUserAvatarQuery } from '@/store/api/[module]/userApi';
 import { CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { baseApi } from '@/store/api/baseApi';
+
 
 const StudentNavbar = () => {
 
@@ -36,6 +38,8 @@ const StudentNavbar = () => {
 
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(selectNotifications);
+    const { data: user } = useGetUserAvatarQuery();
+    const avatar_url = user?.avatar_url;
 
     useEffect(() => {
         setIsMounted(true);
@@ -55,6 +59,8 @@ const StudentNavbar = () => {
         // 2. Gọi hàm signOut và truyền token vào
         // Dù refreshToken là null thì vẫn gọi để chạy logic onQueryStarted xóa dọn dẹp
         await signOut();
+
+        dispatch(baseApi.util.resetApiState());
 
         // 3. Chuyển trang (nếu cần thiết, hoặc để RTK tự xử lý)
         router.push('/auth/signin');
@@ -162,7 +168,7 @@ const StudentNavbar = () => {
                             theme={{
                                 components: {
                                     Menu: {
-                                        itemPaddingInline: 10, 
+                                        itemPaddingInline: 10,
                                     },
                                 },
                             }}
@@ -222,9 +228,15 @@ const StudentNavbar = () => {
                             <Button
                                 className="!h-[3.5rem] !w-[3.5rem] !rounded-full !border-none !flex !items-center !justify-center"
                             >
-                                <Image src={UserIcon} alt="User Icon" width={24} height={24}
-                                    className="!w-[1.5rem] !h-auto"
-                                />
+                                {avatar_url ? (
+                                    <Image src={avatar_url} alt="User Icon" width={24} height={24}
+                                        className="absolute w-[85%] h-[85%] object-cover rounded-full cursor-pointer"
+                                    />
+                                ) : (
+                                    <Image src={UserIcon} alt="User Icon" width={24} height={24}
+                                        className="!w-[1.5rem] !h-auto"
+                                    />
+                                )}
                             </Button>
                         </Dropdown>
                     </div>

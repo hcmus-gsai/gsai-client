@@ -6,10 +6,8 @@ import { FormTitle } from '../ui/form';
 import React, { useState, useRef, useEffect } from 'react';
 import { X, XCircle } from "@deemlol/next-icons"
 import { useRouter } from "next/navigation";
-import { useUpdateUserProfileMutation } from '@/store/api/[module]/userApi';
+import { useGetUserProfileQuery, useUpdateUserProfileMutation, useUpdateUserAvatarMutation } from '@/store/api/[module]/userApi';
 
-//use cloudinary to upload image
-import { CldUploadWidget } from "next-cloudinary";
 
 
 export interface UploadState {
@@ -31,22 +29,50 @@ const ProfileCompletionForm = () => {
     const province = Form.useWatch('province', formData);
     const router = useRouter();
     const [updateProfile] = useUpdateUserProfileMutation();
+    const { data: userProfile } = useGetUserProfileQuery();
+    const [updateAvatar] = useUpdateUserAvatarMutation();
+
+    //Handle profile upload + display
+    const profileInputRef = useRef<InputRef>(null);
+    const [profileUpload, setProfileUpload] = useState<UploadState>({
+        fileObj: null,
+        previewUrl: null,
+        isValid: false,
+        error: null
+    });
+
+
+    const handleProfileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const tempUrl = URL.createObjectURL(file);
+
+        setProfileUpload({
+            fileObj: file,          // giữ FILE
+            previewUrl: tempUrl,    // chỉ để preview
+            isValid: true,
+            error: null
+        });
+    };
+
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const email = urlParams.get('email');
-        if (email) {
-            formData.setFieldsValue({ email });
-            return;
-        }
-        else {
-            const raw = sessionStorage.getItem('signUpTempData');
-            if (!raw) return;
-            const { email, password, remember } = JSON.parse(raw);
-            formData.setFieldsValue({ email, password, remember });
-        }
+        if (userProfile) {
+            formData.setFieldsValue({
+                name: userProfile.full_name || '',
+                phone: userProfile.phone_number || '',
+                avatar_url: userProfile.avatar_url || '',
+            });
 
-    }, []);
+            setProfileUpload({
+                fileObj: null,
+                previewUrl: userProfile.avatar_url || null,
+                isValid: false,
+                error: null
+            });
+        }
+    }, [userProfile, formData]);
 
     const handleCreateProfile = async () => {
         try {
@@ -59,10 +85,14 @@ const ProfileCompletionForm = () => {
                 gender: data.gender,
                 dob: data.dob,
                 location: data.location,
-                avatar_url: data.avatar_url,
             };
 
             const { role } = await updateProfile(payload).unwrap();
+            if (profileUpload.fileObj && profileUpload.previewUrl) {
+                const formData = new FormData();
+                formData.append('avatar', profileUpload.fileObj);
+                await updateAvatar(formData).unwrap();
+            }
 
             // Redirect based on role
             if (role === 'student') {
@@ -117,79 +147,7 @@ const ProfileCompletionForm = () => {
         "Cà Mau"
     ];
 
-    //Handle profile upload + display
-    const profileInputRef = useRef<InputRef>(null);
-    const [profileUpload, setProfileUpload] = useState<UploadState>({
-        fileObj: null,
-        previewUrl: null,
-        isValid: false,
-        error: null
-    });
 
-    const handleProfileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-
-        const file = event.target.files?.[0];
-        if (!file) {
-            return;
-        }
-        //Resource Reference: https://stackoverflow.com/questions/74973640/cloudinary-image-upload
-
-
-        const timestamp = Math.round(new Date().getTime() / 1000);
-        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-        const paramsToSign = {
-            timestamp: timestamp,
-            upload_preset: uploadPreset,
-        }
-
-        const signatureResponse = await fetch("/api/image-upload", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ paramsToSign }),
-        });
-
-        if (!signatureResponse.ok) {
-            throw new Error("Failed to get signature");
-        }
-
-        const { signature } = await signatureResponse.json();
-
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-        const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
-        const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-
-        const currentFormData = new FormData();
-        currentFormData.append("file", file);
-        currentFormData.append("api_key", apiKey!);
-        currentFormData.append("signature", signature);
-        currentFormData.append("timestamp", timestamp.toString());
-        currentFormData.append("upload_preset", uploadPreset!);
-
-        const uploadResponse = await fetch(url, {
-            method: "POST",
-            body: currentFormData
-        });
-
-        if (!uploadResponse.ok) {
-            throw new Error('Upload failed');
-        }
-
-        const uploadData = await uploadResponse.json();
-        const secure_url = uploadData.secure_url;
-
-        formData.setFieldsValue({
-            profileImage: secure_url
-        });
-
-        setProfileUpload({
-            fileObj: file,
-            previewUrl: URL.createObjectURL(file),
-            isValid: true,
-            error: null
-        });
-    }
 
     return (
         <Form
@@ -236,9 +194,10 @@ const ProfileCompletionForm = () => {
                             <Image
                                 src={profileUpload.previewUrl}
                                 alt="Profile Image"
-                                width={0}
-                                height={0}
-                                className="w-full h-full object-cover rounded-full cursor-pointer"
+                                fill
+                                sizes="192px"
+                                className="object-cover rounded-full"
+                                priority
                             />
                             <Button
                                 onClick={() => {
