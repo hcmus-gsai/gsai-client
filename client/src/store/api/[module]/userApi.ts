@@ -1,6 +1,7 @@
 
 import { baseApi } from '../baseApi';
-import { UserResponse, UserRequest} from '../../../type/user.type';
+import { UserResponse, UserRequest } from '../../../type/user.type';
+import { updateUser } from 'better-auth/api';
 
 export const userApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -17,10 +18,27 @@ export const userApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
-    })     
+        updateUserAvatar: builder.mutation<UserResponse, FormData>({
+            query: (formData) => ({
+                url: '/users/avatar',
+                method: 'PATCH',
+                body: formData,
+            }),
+            invalidatesTags: ['User'],
+        }),
+        getUserAvatar: builder.query<UserResponse, void>({
+            query: () => ({
+                url: '/users/avatar',
+                method: 'GET',
+            }),
+            providesTags: ['User'],
+        }),
+    })
 });
 
 export const {
     useGetUserProfileQuery,
     useUpdateUserProfileMutation,
+    useUpdateUserAvatarMutation,
+    useGetUserAvatarQuery,
 } = userApi;
