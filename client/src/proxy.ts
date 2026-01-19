@@ -23,12 +23,6 @@ export async function proxy(req: any) {
     const role = decoded?.role;
     const path = req.nextUrl.pathname;
 
-    // Check expire
-    const expireAt = decoded?.exp;
-    if (expireAt && expireAt < Date.now() / 1000) {
-      return NextResponse.redirect(new URL('/auth/signin', req.url));
-    }
-
     // Nếu user cố truy cập vùng không thuộc role của mình
     if (path.startsWith('/student') && role !== 'student') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
