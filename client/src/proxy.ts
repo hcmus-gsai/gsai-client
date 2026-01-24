@@ -11,7 +11,7 @@ export async function proxy(req: any) {
   const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
   if (!token) {
 
-    if (publicPaths.includes(req.nextUrl.pathname)) 
+    if (publicPaths.includes(req.nextUrl.pathname))
       return NextResponse.next();
     return NextResponse.redirect(new URL('/auth/signin', req.url));
   }
@@ -22,7 +22,7 @@ export async function proxy(req: any) {
 
     const role = decoded?.role;
     const path = req.nextUrl.pathname;
-    
+
     // Nếu user cố truy cập vùng không thuộc role của mình
     if (path.startsWith('/student') && role !== 'student') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));

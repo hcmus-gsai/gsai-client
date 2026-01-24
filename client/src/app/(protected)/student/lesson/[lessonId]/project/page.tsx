@@ -6,14 +6,32 @@ import { Spin, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { useLazyGetDocumentQuery } from '@/store/api/[module]/documentApi';
 import { useParams } from 'next/navigation';
-import LectureProjContent  from  '../components/project/project-content';
+import LectureProjContent from '../components/project/project-content';
 import LectureProjSubmit from '../components/project/project-submit';
 import LectureProjQA from '../components/project/project-qa';
 
+import { useAppDispatch } from '@/store/hook';
+import { setFullWidthMode } from '@/store/slice/lessonSlice';
+
 export default function LectureProjPage() {
     const { lessonId: projectId } = useParams();
+    const dispatch = useAppDispatch();
 
     const [activeTab, setActiveTab] = useState<string>('content');
+
+    // Handle full width mode for QA tab
+    useEffect(() => {
+        if (activeTab === 'qa') {
+            dispatch(setFullWidthMode(true));
+        } else {
+            dispatch(setFullWidthMode(false));
+        }
+
+        // Cleanup on unmount
+        return () => {
+            dispatch(setFullWidthMode(false));
+        };
+    }, [activeTab, dispatch]);
 
     const [
         getProjectDocument,
@@ -25,6 +43,13 @@ export default function LectureProjPage() {
             getProjectDocument(projectId as string);
         }
     }, [projectId, activeTab, getProjectDocument]);
+
+    // Cleanup on unmount of component
+    useEffect(() => {
+        return () => {
+            dispatch(setFullWidthMode(false));
+        }
+    }, [dispatch]);
 
     const tabItems: TabsProps['items'] = [
         {

@@ -30,8 +30,6 @@ import {
     selectLessonCompletionStatus,
 } from "@/store/slice/lessonProgressSlice";
 
-import ClockIcon from "@/../public/student/ClockIcon.svg";
-import ComputingIcon from "@/../public/student/ComputingIcon.svg";
 import Image from "next/image";
 import QuizIcon from "@/../public/student/QuizIcon.svg";
 import DocumentIcon from "@/../public/student/DocumentIcon.svg";
@@ -109,6 +107,15 @@ const CourseModules = () => {
     // type StatCount = { total: number; completed: number };
     // type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
 
+    const LessonTypeLabel = {
+        video: 'Video',
+        document: 'Bài đọc',
+        quiz: 'Quiz',
+        project: 'Project',
+    } as const;
+
+    type LessonType = keyof typeof LessonTypeLabel;
+
 
     useEffect(() => {
         if (!progressData) return;
@@ -132,6 +139,7 @@ const CourseModules = () => {
                         video: { total: 0, completed: 0 },
                         document: { total: 0, completed: 0 },
                         quiz: { total: 0, completed: 0 },
+                        project: { total: 0, completed: 0 },
                         moduleCompletionPercent: 0
                     };
 
@@ -149,12 +157,15 @@ const CourseModules = () => {
                         } else if (lesson.type === "quiz") {
                             currentStats.quiz.total++;
                             if (isCompleted) currentStats.quiz.completed++;
+                        } else if (lesson.type === 'project') {
+                            currentStats.project.total++;
+
                         }
 
-                        const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total;
-                        const completedLessonInModule = currentStats.video.completed + currentStats.document.completed + currentStats.quiz.completed;
+                        const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total + currentStats.project.total;
+                        const completedLessonInModule = currentStats.video.completed + currentStats.document.completed + currentStats.quiz.completed + currentStats.project.completed;
 
-                        const moduleCompletionPercent = totalLessonInModule > 0  ? Math.round((completedLessonInModule / totalLessonInModule) * 100) : 0;
+                        const moduleCompletionPercent = totalLessonInModule > 0 ? Math.round((completedLessonInModule / totalLessonInModule) * 100) : 0;
                         currentStats.moduleCompletionPercent = moduleCompletionPercent;
                     }
 
@@ -176,7 +187,7 @@ const CourseModules = () => {
     const handleUpdateLesson = async (
         lessonId: string,
         moduleId: string,
-        lessonType: 'video' | 'document' | 'quiz'
+        lessonType: 'video' | 'document' | 'quiz' | 'project'
     ) => {
         try {
             // Optimistic update in Redux
@@ -262,31 +273,31 @@ const CourseModules = () => {
                                     </div>
                                     <div className="flex items-center justify-start gap-2 ml-auto">
                                         {moduleStats[module.id]?.moduleCompletionPercent === 100 && (
-                                            <div className = "flex items-center justify-center gap-2">
+                                            <div className="flex items-center justify-center gap-2">
                                                 <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
-                                                <p className = "font-bold text-[var(--color-secondary)]">Đã hoàn thành</p>
+                                                <p className="font-bold text-[var(--color-secondary)]">Đã hoàn thành</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem] overflow-x-auto no-scrollbar">
                                     <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary] flex items-center gap-2 text-gray-700">
-                                        {moduleStats[module.id]?.video?.total > 0 && ( 
+                                        {moduleStats[module.id]?.video?.total > 0 && (
                                             <>
                                                 <Image src={VideoIcon} alt="Video Icon" width={20} height={20} />
 
-                                                {moduleStats[module.id]?.video?.total > 0 && moduleStats[module.id].video?.total === moduleStats[module.id].video?.completed ? 
-                                                (
-                                                    <p>Đã hoàn thành</p>
-                                                ):(
-                                                    <p>{`Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`}</p>
-                                                )}
+                                                {moduleStats[module.id]?.video?.total > 0 && moduleStats[module.id].video?.total === moduleStats[module.id].video?.completed ?
+                                                    (
+                                                        <p>Đã hoàn thành</p>
+                                                    ) : (
+                                                        <p>{`Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`}</p>
+                                                    )}
                                             </>
                                         )}
                                     </div>
                                     <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
 
-                                        {moduleStats[module.id]?.quiz?.total > 0 && ( 
+                                        {moduleStats[module.id]?.quiz?.total > 0 && (
                                             <>
                                                 <Image src={QuizIcon} alt="Quiz Icon" width={20} height={20} />
                                                 {moduleStats[module.id].quiz.completed === moduleStats[module.id].quiz.total ? (
@@ -302,12 +313,26 @@ const CourseModules = () => {
                                             <>
                                                 <Image src={DocumentIcon} alt="Document Icon" width={20} height={20} />
 
-                                                {moduleStats[module.id]?.document?.total > 0 && moduleStats[module.id].document?.total === moduleStats[module.id].document?.completed ? 
-                                                (
-                                                    <p>Đã hoàn thành</p>
-                                                ):(
-                                                    <p>{`Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`}</p>
-                                                )}
+                                                {moduleStats[module.id]?.document?.total > 0 && moduleStats[module.id].document?.total === moduleStats[module.id].document?.completed ?
+                                                    (
+                                                        <p>Đã hoàn thành</p>
+                                                    ) : (
+                                                        <p>{`Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`}</p>
+                                                    )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
+                                        {moduleStats[module.id]?.project?.total > 0 && (
+                                            <>
+                                                <Image src={DocumentIcon} alt="Document Icon" width={20} height={20} />
+
+                                                {moduleStats[module.id]?.project?.total > 0 && moduleStats[module.id].project?.total === moduleStats[module.id].project?.completed ?
+                                                    (
+                                                        <p>Đã hoàn thành</p>
+                                                    ) : (
+                                                        <p>{`Project: ${moduleStats[module.id]?.project.completed} / ${moduleStats[module.id]?.project.total}`}</p>
+                                                    )}
                                             </>
                                         )}
                                     </div>
@@ -335,7 +360,7 @@ const CourseModules = () => {
                                                             type="primary"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleUpdateLesson(lesson.id, module.id, lesson.type as 'video' | 'document' | 'quiz');
+                                                                handleUpdateLesson(lesson.id, module.id, lesson.type as 'video' | 'document' | 'quiz' | 'project');
                                                             }}
                                                             className="flex items-center justify-center !bg-transparent !border-none !p-0 !m-0 !shadow-none"
                                                             icon={
@@ -361,7 +386,7 @@ const CourseModules = () => {
                                                         </p>
                                                         <div className="w-full flex items-center justify-start gap-2 mt-1">
                                                             <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
-                                                                {lesson.type === "video" ? "Video" : lesson.type === "quiz" ? "Quiz" : "Bài đọc"}
+                                                                {LessonTypeLabel[lesson.type as LessonType] ?? 'Không xác định'}
                                                             </p>
                                                             <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
                                                                 {lesson.estimated_completion_time}

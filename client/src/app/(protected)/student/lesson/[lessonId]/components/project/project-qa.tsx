@@ -1,9 +1,9 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import React, { useState, useRef, useEffect } from 'react';
-import { Button, Form, Input, Spin, Tree } from 'antd';
-import { Send, Folder, File } from '@deemlol/next-icons';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Button, Form, Input, Spin, Tree, Select, Empty, Tabs } from 'antd';
+import { Send, Folder, File, Menu } from '@deemlol/next-icons';
 import { useParams } from 'next/navigation';
 import {
     useGetQAHistoryQuery,
@@ -12,7 +12,8 @@ import {
     useGetSubmitJsonQuery
 } from '@/store/api/[module]/projectApi';
 import type { QAMessage } from '@/type/project.type';
-import type { DataNode } from 'antd/es/tree';
+import type { DataNode, TreeProps } from 'antd/es/tree';
+import Editor from '@monaco-editor/react';
 
 interface FileNode {
     name: string;
@@ -23,6 +24,42 @@ interface FileNode {
     size?: number;
 }
 
+const EXTENSION_TO_LANGUAGE: Record<string, string> = {
+    '.js': 'javascript',
+    '.jsx': 'javascript',
+    '.ts': 'typescript',
+    '.tsx': 'typescript',
+    '.py': 'python',
+    '.java': 'java',
+    '.c': 'c',
+    '.cpp': 'cpp',
+    '.h': 'cpp',
+    '.hpp': 'cpp',
+    '.cs': 'csharp',
+    '.html': 'html',
+    '.css': 'css',
+    '.json': 'json',
+    '.md': 'markdown',
+    '.sql': 'sql',
+    '.xml': 'xml',
+    '.yaml': 'yaml',
+    '.yml': 'yaml',
+    '.sh': 'shell',
+    '.bash': 'shell',
+    '.txt': 'plaintext',
+};
+
+// Files to always ignore
+const IGNORED_EXTENSIONS = new Set([
+    '.sln', '.vcxproj', '.vcxproj.filters', '.vx', '.user',
+    '.suo', '.exe', '.dll', '.obj', '.o', '.pdb', '.idb',
+    '.ipch', '.git', '.gitignore', '.vs', '.filters'
+]);
+
+const IGNORED_FOLDERS = new Set([
+    '.git', '.vs', '.vscode', '.idea', 'bin', 'obj', 'debug', 'release', 'x64', 'x86'
+]);
+
 const LectureProjQA = () => {
     const { lessonId } = useParams();
     const [formData] = Form.useForm();
@@ -30,6 +67,11 @@ const LectureProjQA = () => {
     const [isSessionStarted, setIsSessionStarted] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const isInitialLoad = useRef(true);
+
+    // Code Editor State
+    const [selectedFileContent, setSelectedFileContent] = useState<string>('');
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('plaintext');
+    const [selectedFileName, setSelectedFileName] = useState<string>('');
 
     // API hooks
     const { data: historyData, isLoading: historyLoading } = useGetQAHistoryQuery(lessonId as string, {
@@ -139,22 +181,97 @@ const LectureProjQA = () => {
         }
     };
 
-    // Convert file structure to tree data
-    const convertToTreeData = (node: FileNode, parentKey = '0'): DataNode => {
-        const key = `${parentKey}-${node.name}`;
-        const isFolder = node.type === 'folder';
+    // Filter and Convert file structure to tree data
+    const filterAndConvertTreeData = (node: FileNode, parentKey = '0'): DataNode | null => {
+        const lowerName = node.name.toLowerCase();
 
-        return {
-            title: node.name,
-            key,
-            icon: isFolder ? <Folder size={16} /> : <File size={16} />,
-            children: node.children?.map((child, idx) => convertToTreeData(child, `${key}-${idx}`)),
-        };
+        if (node.type === 'folder') {
+            if (IGNORED_FOLDERS.has(lowerName)) return null;
+
+            // If folder, recursively process children
+            const children = node.children
+                ?.map((child, idx) => filterAndConvertTreeData(child, `${parentKey}-${idx}`))
+                .filter(Boolean) as DataNode[];
+
+            // If folder ends up empty after filtering, should we hide it? 
+            // Maybe keep it if it's not explicitly ignored, user might want to see structure.
+            // But if it has no children, it's less useful. Let's keep it for now.
+            return {
+                title: node.name,
+                key: `${parentKey}-${node.name}`,
+                icon: <Folder size={16} />,
+                children: children,
+                selectable: false // Folders not selectable for code view
+            };
+        } else {
+            // Check extension
+            const extension = node.extension?.toLowerCase() || (node.name.includes('.') ? `.${node.name.split('.').pop()?.toLowerCase()}` : '');
+            if (IGNORED_EXTENSIONS.has(extension)) return null;
+
+            const key = `${parentKey}-${node.name}`;
+            return {
+                title: node.name,
+                key: key,
+                icon: <File size={16} />,
+                isLeaf: true,
+                // Store extra data for retrieval
+                // @ts-ignore
+                fileData: {
+                    content: node.content,
+                    extension: extension,
+                    name: node.name
+                }
+            };
+        }
     };
 
-    const treeData: DataNode[] = submitJsonData?.submit_json
-        ? [convertToTreeData(submitJsonData.submit_json)]
-        : [];
+    const treeData: DataNode[] = useMemo(() => {
+        if (!submitJsonData?.submit_json) return [];
+        const root = filterAndConvertTreeData(submitJsonData.submit_json);
+        return root ? [root] : [];
+    }, [submitJsonData]);
+
+    const onSelectData = (node: any) => {
+        const { content, extension, name } = node.fileData;
+        setSelectedFileContent(content || '// No content available');
+        setSelectedFileName(name);
+
+        const lang = EXTENSION_TO_LANGUAGE[extension] || 'plaintext';
+        setSelectedLanguage(lang);
+    };
+
+    const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
+        if (selectedKeys.length === 0) return;
+
+        const node = info.node as any;
+        if (node.fileData) {
+            onSelectData(node);
+        }
+    };
+
+    // Auto-select first file
+    useEffect(() => {
+        if (!selectedFileName && treeData.length > 0) {
+            const findFirstFile = (nodes: DataNode[]): any => {
+                for (const node of nodes) {
+                    // @ts-ignore
+                    if (node.isLeaf && node.fileData) {
+                        return node;
+                    }
+                    if (node.children) {
+                        const found = findFirstFile(node.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const firstFile = findFirstFile(treeData);
+            if (firstFile) {
+                onSelectData(firstFile);
+            }
+        }
+    }, [treeData, selectedFileName]);
 
     // Render message content
     const renderMessageContent = (msg: QAMessage) => {
@@ -194,10 +311,72 @@ const LectureProjQA = () => {
     }
 
     return (
-        <div className="w-full h-[calc(100vh-17rem)] flex gap-4">
-            {/* Left side - Chat interface */}
-            <div className="flex-1 flex flex-col bg-white rounded-lg border border-gray-200 p-4">
-                <h3 className="text-lg font-semibold mb-4">Vấn đáp về Dự án</h3>
+        // Add bottom padding to prevent content from being hidden by the bottom bar
+        <div className="w-full h-[calc(100vh-8rem)] flex gap-4 overflow-hidden pb-4">
+            {/* Left Column: File Tree */}
+            <div className="w-[20%] min-w-[200px] max-w-[300px] flex flex-col bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="text-sm font-semibold mb-3 uppercase text-gray-500">File Explorer</h3>
+                {jsonLoading ? (
+                    <div className="flex-1 flex items-center justify-center">
+                        <Spin />
+                    </div>
+                ) : treeData.length > 0 ? (
+                    <div className="flex-1 overflow-y-auto">
+                        <Tree
+                            showIcon
+                            defaultExpandAll
+                            treeData={treeData}
+                            onSelect={onSelect}
+                            className="bg-transparent"
+                            blockNode
+                        />
+                    </div>
+                ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No files found" />
+                    </div>
+                )}
+            </div>
+
+            {/* Middle Column: Code Editor */}
+            <div className="flex-1 min-w-0 flex flex-col bg-[#1e1e1e] rounded-lg border border-gray-700 overflow-hidden shadow-lg">
+                {/* Editor Header */}
+                <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-[#3e3e3e]">
+                    <div className="flex items-center gap-2">
+                        <span className="text-gray-300 text-sm font-mono">{selectedFileName || 'No file selected'}</span>
+                    </div>
+                    <Select
+                        className="w-32"
+                        size="small"
+                        value={selectedLanguage}
+                        onChange={setSelectedLanguage}
+                        options={Object.values(EXTENSION_TO_LANGUAGE).filter((v, i, a) => a.indexOf(v) === i).map(l => ({ label: l, value: l }))}
+                    // Style select for dark theme if possible, otherwise Antd default
+                    />
+                </div>
+
+                {/* Monaco Editor */}
+                <div className="flex-1 relative">
+                    <Editor
+                        height="100%"
+                        language={selectedLanguage}
+                        value={selectedFileContent}
+                        theme="vs-dark"
+                        options={{
+                            readOnly: true,
+                            minimap: { enabled: false },
+                            scrollBeyondLastLine: false,
+                            fontSize: 13,
+                            wordWrap: 'on',
+                            automaticLayout: true,
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Right Column: Chat QA */}
+            <div className="w-[30%] min-w-[320px] max-w-[450px] flex flex-col bg-white rounded-lg border border-gray-200 p-3 pb-0">
+                <h3 className="text-lg font-semibold mb-4 border-b pb-0">Vấn đáp về Dự án</h3>
 
                 {!isSessionStarted && messages.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center gap-4">
@@ -226,9 +405,9 @@ const LectureProjQA = () => {
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
-                                        className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user'
+                                        className={`max-w-[85%] rounded-2xl px-4 py-2 ${msg.role === 'user'
                                             ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-200 text-gray-800'
+                                            : 'bg-gray-100 text-gray-800'
                                             }`}
                                     >
                                         {renderMessageContent(msg)}
@@ -237,7 +416,7 @@ const LectureProjQA = () => {
                             ))}
                             {sendingMessage && (
                                 <div className="flex justify-start">
-                                    <div className="bg-gray-200 rounded-2xl px-4 py-2">
+                                    <div className="bg-gray-100 rounded-2xl px-4 py-2">
                                         <Spin size="small" />
                                     </div>
                                 </div>
@@ -245,58 +424,35 @@ const LectureProjQA = () => {
                         </div>
 
                         {/* Input form */}
-                        <Form
-                            form={formData}
-                            onFinish={handleSendMessage}
-                            className="flex gap-2 items-end border-t pt-4"
-                        >
-                            <Form.Item name="message" className="flex-1 mb-0">
-                                <Input.TextArea
-                                    placeholder="Nhập câu hỏi về dự án..."
-                                    autoSize={{ minRows: 1, maxRows: 4 }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            formData.submit();
-                                        }
-                                    }}
-                                />
-                            </Form.Item>
-                            <Button
-                                type="primary"
-                                icon={<Send size={16} />}
-                                htmlType="submit"
-                                loading={sendingMessage}
+                        <div className="gap-2 border-t pt-4">
+                            <Form
+                                form={formData}
+                                onFinish={handleSendMessage}
+                                className="flex w-full gap-2"
                             >
-                                Gửi
-                            </Button>
-                        </Form>
+                                <Form.Item name="message" className="w-full h-[1.5rem]">
+                                    <Input.TextArea
+                                        placeholder="Nhập câu hỏi..."
+                                        autoSize={{ minRows: 1, maxRows: 4 }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                formData.submit();
+                                            }
+                                        }}
+                                        className="!bg-gray-50"
+                                    />
+                                </Form.Item>
+                                <Button
+                                    type="primary"
+                                    icon={<Send size={14} />}
+                                    htmlType="submit"
+                                    loading={sendingMessage}
+                                >
+                                </Button>
+                            </Form>
+                        </div>
                     </>
-                )}
-            </div>
-
-            {/* Right side - File tree */}
-            <div className="w-[400px] flex flex-col bg-white rounded-lg border border-gray-200 p-4">
-                <h3 className="text-lg font-semibold mb-4">Cấu trúc Dự án</h3>
-                {jsonLoading ? (
-                    <div className="flex-1 flex items-center justify-center">
-                        <Spin />
-                    </div>
-                ) : submitJsonData?.submit_json ? (
-                    <div className="flex-1 overflow-y-auto">
-                        <Tree
-                            showIcon
-                            defaultExpandAll
-                            treeData={treeData}
-                            className="bg-transparent"
-                        />
-                    </div>
-                ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                        <p className="text-gray-500 text-center">
-                            Chưa có thông tin cấu trúc dự án
-                        </p>
-                    </div>
                 )}
             </div>
         </div>
