@@ -11,8 +11,9 @@ export async function proxy(req: any) {
   const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
   if (!token) {
 
-    if (publicPaths.includes(req.nextUrl.pathname))
+    if (publicPaths.includes(req.nextUrl.pathname)) {
       return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/auth/signin', req.url));
   }
 
@@ -23,6 +24,9 @@ export async function proxy(req: any) {
     const role = decoded?.role;
     const path = req.nextUrl.pathname;
 
+    console.log('Role:', role);
+    console.log('Path:', path);
+
     // Nếu user cố truy cập vùng không thuộc role của mình
     if (path.startsWith('/student') && role !== 'student') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
@@ -32,13 +36,20 @@ export async function proxy(req: any) {
     //   return NextResponse.redirect(new URL('/auth/signin', req.url));
     // }
 
+    // Nếu user truy cập vùng authentication, direct về trang role/home
+    if (path.startsWith('/auth')) {
+      console.log('Im fucking here');
+      return NextResponse.redirect(new URL(`/${role}/home`, req.url));
+    }
+
     return NextResponse.next();
   } catch (err) {
+    console.log(err);
     return NextResponse.redirect(new URL('/auth/signin', req.url));
   }
 }
 
 // Áp dụng middleware cho các route cần bảo vệ
 export const config = {
-  matcher: ['/student/:path*', '/teacher/:path*'],
+  matcher: ['/student/:path*', '/teacher/:path*', '/auth/:path*'],
 };
