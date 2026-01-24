@@ -25,96 +25,84 @@ import { useLazyGetLearningProgressByEnrollmentQuery} from "@/store/api/[module]
 import {useLazyGetCourseModulesQuery} from "@/store/api/[module]/courseApi";
 import {LessonProgress} from "@/type/lessonProgress.type";
 import {useLazyGetQuizByLessonIdQuery} from "@/store/api/[module]/quizApi";
-import {QuizResponse} from "@/type/quiz.type";
+import {QuizResponse, QuizCourseResponse} from "@/type/quiz.type";
 import {useLazyGetModuleLessonsQuery} from "@/store/api/[module]/moduleApi";
 
-//Routing
-import { useRouter } from "next/navigation";
-const CustomCalendar = () => {
-    const [chosenDate, setChosenDate] = useState<Date | null>(null);
-    const [currentDate, setCurrentDate] = useState<Date | null>(null);
+import {QuizCard } from "../courses/[id]/components/quizCard";
+import { useGetQuizzesByCourseIdQuery } from '@/store/api/[module]/quizApi';
+import {selectQuizMap} from '@/store/slice/quizSlice';
+import {useRouter} from "next/navigation";
+
+interface CustomCalendarProps {
+    processedQuizzes: any[]; 
+    chosenDate: Date | null; 
+    setChosenDate: (date: Date | null) => void;
+}
+
+type CalendarInfo = {
+    weekDays : string[];
+    monthNames : string[];
+}
+
+
+const CustomCalendar = ({ processedQuizzes, chosenDate, setChosenDate }: CustomCalendarProps) => {
+    const [currentDate, setCurrentDate] = useState<Date>(new Date());
+    const [today, setToday] = useState<Date>(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [today, setToday] = useState<Date | null>(null);
+    const calendarInfo: CalendarInfo = {
+        weekDays: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+        monthNames: [
+            'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+        ]
+    };
 
-    const tasks = useAppSelector((state) => state.task.tasks);
-
-    // Set date chỉ trên client để tránh hydration mismatch
-    useEffect(() => {
-        setCurrentDate(new Date());
-        setToday(new Date());
-    }, []);
-
-    const getTasksForDate = (date: Date) => {
-        return tasks.filter(task => new Date(task.dueDate).toDateString() === date.toDateString());
-    }
-
-    const calendar_info = {
-        weekDays: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-    }
+    const currentMonthName = calendarInfo.monthNames[currentDate.getMonth()];
 
     const calendar_dates = useMemo(()=>{
-        if (!currentDate || !today) return [];
+        if (!currentDate) return [];
 
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
         const days = [];
-        const first = new Date(currentYear, currentMonth, 1);
-        const last = new Date(currentYear, currentMonth + 1, 0);
-        const startDate = new Date(first);
-        const dayOfWeek = first.getDay();
-        const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        startDate.setDate(startDate.getDate() - offset);
-        
-        const temp = new Date(startDate);
 
-        while (temp <= last || temp.getDay() !== 1){
-            const dayTasks = getTasksForDate(temp);
-            const completedCnt = dayTasks.filter(
-                task => task.status === 'completed'
-            ).length;
-            
-            const overdueCnt = dayTasks.filter(
-                task => task.status === 'overdue'
-            ).length;
-            
-            const pendingCnt = dayTasks.filter(
-                task => task.status === 'pending'
-            ).length;
-            
-            days.push({
-                date: new Date(temp),
-                checkCurrentDay : temp.toDateString() === today.toDateString(),
-                checkCurrentMonth: temp.getMonth() == currentMonth,
-                taskCount: dayTasks.length,
-                completedCnt,
-                overdueCnt,
-                pendingCnt,
-                tasks: dayTasks,
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+        const startDate = new Date(firstDayOfMonth);
+        const dayOfWeek = firstDayOfMonth.getDay(); 
+        const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; 
+        startDate.setDate(startDate.getDate() - offset);
+
+        const tempDate = new Date(startDate);
+        tempDate.setHours(0,0,0,0);
+
+        while (tempDate <= lastDayOfMonth || tempDate.getDay() !== 1) {
+            const curr = new Date(tempDate);
+
+            const currentDayQuizzes = processedQuizzes.filter(quiz =>{
+                return quiz.deadlineDate.toDateString() === curr.toDateString()
             });
-            temp.setDate(temp.getDate() + 1);
+
+            days.push({
+                date: curr,
+                isToday: curr.toDateString() === new Date().toDateString(),
+                isCurrentMonth: curr.getMonth() === currentMonth,
+                quizzes: currentDayQuizzes,
+                hasDeadline: currentDayQuizzes.length > 0
+            });
+
+            tempDate.setDate(tempDate.getDate() + 1);
+
 
         }
 
-
         return days;
-    },[currentDate, today, tasks])
 
-    // Loading state khi chưa có currentDate (client chưa mount)
-    if (!currentDate) {
-        return (
-            <div className="flex flex-col h-full bg-white text-gray-800 overflow-hidden w-full rounded-[20px] p-4">
-                <div className="animate-pulse text-gray-400 text-center">Đang tải...</div>
-            </div>
-        );
-    }
+    }, [currentDate, processedQuizzes]);
 
-    const monthNames: Record<string, string> = {
-        'January': 'Tháng 1', 'February': 'Tháng 2', 'March': 'Tháng 3',
-        'April': 'Tháng 4', 'May': 'Tháng 5', 'June': 'Tháng 6',
-        'July': 'Tháng 7', 'August': 'Tháng 8', 'September': 'Tháng 9',
-        'October': 'Tháng 10', 'November': 'Tháng 11', 'December': 'Tháng 12'
-    };
-    const currentMonthName = monthNames[currentDate.toLocaleString('default', { month: 'long' })] || 'Tháng 1';
+    useEffect(() => {
+        setToday(new Date());
+    }, []);
 
     return (
         <div className="flex flex-col h-full bg-white text-gray-800 overflow-hidden w-full rounded-[20px]">            
@@ -122,17 +110,7 @@ const CustomCalendar = () => {
                 <div className="w-full flex items-center justify-between">
                     <Button
                         onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))}
-                        className="
-                            !p-2
-                            rounded-[20px]
-                            !shadow-none
-                            !border-none
-                            !text-gray-600
-                            hover:!bg-gray-200
-                            hover:!text-gray-800
-                            transition-colors
-                            duration-200
-                        "
+                        className="!p-2 rounded-[20px] !shadow-none !border-none !text-gray-600 hover:!bg-gray-200 hover:!text-gray-800 transition-colors duration-200"
                     >
                         Trước
                     </Button>
@@ -143,17 +121,7 @@ const CustomCalendar = () => {
                     
                     <Button
                         onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))}
-                        className="
-                            !p-2
-                            rounded-[20px]
-                            !shadow-none
-                            !border-none
-                            !text-gray-600
-                            hover:!bg-gray-200
-                            hover:!text-gray-800
-                            transition-colors
-                            duration-200
-                        "
+                        className="!p-2 rounded-[20px] !shadow-none !border-none !text-gray-600 hover:!bg-gray-200 hover:!text-gray-800 transition-colors duration-200"
                     >
                        Sau
                     </Button>
@@ -191,12 +159,12 @@ const CustomCalendar = () => {
                         onClick={() => setShowDatePicker(true)}
                         icon={<CalendarOutlined />}
                     />
-                </div>
+                </div>  
             </div>
             
             <div className = "flex flex-col flex-1 overflow-hidden w-full">
                 <div className = "grid grid-cols-7 gap-2">
-                    {calendar_info.weekDays.map(day => (
+                    {calendarInfo.weekDays.map(day => (
                         <div key={day} className="py-2 text-center text-xs font-tracking-wider text-gray-500">
                             {day}
                         </div>
@@ -206,34 +174,37 @@ const CustomCalendar = () => {
                 <div className="grid grid-cols-7 auto-rows-fr flex-1 gap-[1px]">
                     {calendar_dates.map((day: any, index: number)=>{
                         const isSelected = chosenDate && day.date.toDateString() === chosenDate.toDateString();
+                        const hasQuiz = day.quizzes.length > 0;
 
                         return (
                             <div
                                 key = {index}
                                 onClick = {() => setChosenDate(day.date)}
-                                className={`
-                                    relative flex flex-col h-[40px] w-full cursor-pointer transition-all duration-200 rounded-[5px]
-                                    ${!day.checkCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white'}
-                            
-                                    ${isSelected ? 'ring-2 ring-inset ring-secondary' : 'hover:bg-gray-100'}
-                                `}
+                                className={`relative flex flex-col h-[40px] w-full cursor-pointer transition-all duration-200 rounded-[5px] ${!day.checkCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white'} ${isSelected ? 'ring-2 ring-inset ring-secondary' : 'hover:bg-gray-100'}`}
                             >
-                                <div className={`
-                                    flex items-center justify-center w-full h-full rounded-[5px]
-                                    ${day.checkCurrentDay ? 'bg-secondary text-white shadow-md' : ''}
-                                `}>
+                                <div className={`flex items-center justify-center w-full h-full rounded-[5px] ${day.isToday ? 'bg-blue-500 text-white shadow-md' : 'text-black'}`}>
                                     {day.date.getDate()}
                                 </div>
+                                {hasQuiz && (
+                                    <div className = "flex gap-1">
+                                        <div className="h-[18px] min-w-[18px] px-1 rounded-[4px] bg-green-100 text-green-600 text-[10px] flex items-center justify-center font-bold">
+                                            {day.quizzes.length}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )
                     })}
 
                 </div>
-            </div>
+            </div> 
         </div>
 
     )
+
+
 }
+
 
 export default function LearningProgressPage() {
     const [isClient, setIsClient] = useState(false);
@@ -242,16 +213,6 @@ export default function LearningProgressPage() {
         setIsClient(true)
     }, []);
 
-    const events = [
-        { id: 1, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
-        { id: 2, name: "Bài tập lớn", deadline: "23:59 15/12/2025" },
-        { id: 3, name: "Bài tập lớn", deadline: "23:59 15/12/2025" },
-        { id: 4, name: "Toán ứng dụng 2", deadline: "23:59 15/12/2025" },
-        { id: 5, name: "Thi cuối kì", deadline: "23:59 15/12/2025" },
-    ]
-
-
-    
 
     const router = useRouter();
     const {data: profile, isLoading, error} = useGetUserProfileQuery();
@@ -263,6 +224,16 @@ export default function LearningProgressPage() {
     const [activeTab, setActiveTab] = useState("all");
     const courseListRef = useRef<HTMLDivElement>(null);
 
+    // Hiep code
+    const quizzesMap = useAppSelector(selectQuizMap);
+    const [visibleCount, setVisibleCount] = useState(0);
+    useEffect(() => {
+        setVisibleCount(0);
+    }, [quizzesMap]);
+    
+
+    console.log('Quiz Map over here', quizzesMap)
+    
     useEffect(() => {
         if (courseListRef.current) {
             courseListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
@@ -281,18 +252,15 @@ export default function LearningProgressPage() {
           {label}
         </Button>
     );
+    
 
     const [fetchProgress] = useLazyGetLearningProgressByEnrollmentQuery();
     const [fetchModules] = useLazyGetCourseModulesQuery();
     const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
 
-    const [fetchQuizzes] = useLazyGetQuizByLessonIdQuery();
 
     const [progressMap, setProgressMap] = useState<Record<string, LessonProgress[]>>({});
     const [totalLessonMap, setTotalLessonMap] = useState<Record<string, number>>({});
-    const [quizMap, setQuizMap] = useState<Record<string, QuizResponse[]>>({});
-
-
 
     useEffect(() => {
         const loadProgressAndLesson = async () => {
@@ -300,7 +268,6 @@ export default function LearningProgressPage() {
                 return;
             const progressResults: Record<string, LessonProgress[]> = {};
             const totalLessonResults: Record<string, number> = {};
-            const quizResults: Record<string, QuizResponse[]> = {};
 
             for (const enrolled_course of enrollments) {
                 try {
@@ -319,13 +286,9 @@ export default function LearningProgressPage() {
             }
             setProgressMap(progressResults);
             setTotalLessonMap(totalLessonResults);
-            setQuizMap(quizResults);
         }
         loadProgressAndLesson();
     }, [enrollments, fetchProgress, fetchModules, fetchModuleLessons]);
-
-
-    
 
     const typeTranslate: Record<string, {label: string}> = {
         'video': {label: 'Video'},
@@ -358,9 +321,6 @@ export default function LearningProgressPage() {
         }
     }, [progressMap]);
 
-    
-    
-
     const filteredEnrollments = useMemo(()=> {
         return enrollments.filter((course) => {
             if (activeTab === "all") return true;
@@ -370,6 +330,46 @@ export default function LearningProgressPage() {
         });
     }, [enrollments, activeTab]);
 
+    const computeDeadline = (
+        enrolledDate: string,
+        daysToAdd: number
+    ): Date => {
+        const current = new Date(enrolledDate);
+        current.setDate(current.getDate() + daysToAdd);
+        current.setHours(0, 0, 0, 0);
+        return current;
+    }
+
+    const processedQuizzes = useMemo(()=>{
+        const allQuizzes = Object.entries(quizzesMap).flatMap(([courseId, quizzes ])=>{
+            const enrollment = enrollments.find(e => e.course_id === courseId);
+            if (!enrollment || !quizzes) 
+                return [];
+
+            return quizzes.map(quiz => {
+                const deadline = computeDeadline(enrollment.enrolled_at, quiz.expired_date || 0);
+                
+                return {
+                    ...quiz,
+                    deadlineDate: deadline, 
+                    enrollmentData: enrollment 
+                };
+            });
+
+        })
+        return allQuizzes.sort((a, b) => a.deadlineDate.getTime() - b.deadlineDate.getTime());
+    }, [quizzesMap, enrollments]);
+
+    const [chosenDate, setChosenDate] = useState<Date | null>(null);
+
+    const quizzesFromDate = useMemo(() => {
+        if (!chosenDate){
+            return processedQuizzes;
+        };
+        return processedQuizzes.filter(q => 
+            q.deadlineDate.getTime() === chosenDate.getTime()
+        );
+    }, [processedQuizzes, chosenDate])
 
     return (
         <>
@@ -425,7 +425,11 @@ export default function LearningProgressPage() {
                 <div className = "w-[26%] flex flex-col items-center justify-start">
 
                     <div className = "w-full flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                        <CustomCalendar/>
+                        <CustomCalendar
+                            processedQuizzes={processedQuizzes}
+                            chosenDate={chosenDate}
+                            setChosenDate={setChosenDate}
+                        />
 
                         <div className = "bg-gray-200 w-full h-[1px] mt-1[rem] mb-[1rem]">
                         </div>
@@ -433,46 +437,29 @@ export default function LearningProgressPage() {
                         <div
                             className="w-full h-[350px] p-[1rem] max-h-[350px] overflow-y-auto custom-scrollbar"
                         >
-                            <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">
+                            <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem] ">
                                 Sự kiện sắp tới
                             </p>
                             <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
-                                {/* {upcomingQuizzes.length === 0 ? (
-                                    <p className="text-gray-500 text-sm">Không có sự kiện nào</p>
-                                ) : (
-                                    upcomingQuizzes.map((quiz) => (
-                                        <Card
-                                            key={quiz.lesson_id}
-                                            className="w-full min-h-[80px] rounded-[20px] !border !border-gray-300 shrink-0"
-                                            styles={{ body: { padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' } }}
-                                        >
-                                            <div className="bg-[var(--color-neutral)] w-[48px] h-[48px] rounded-full flex-shrink-0 flex items-center justify-center">
-                                                <Image src={ComputingIcon} alt="Icon" width={20} height={20} />
-                                            </div>
-                                            <div className="flex-1 min-w-0"> 
-                                                <p className="text-[0.875rem] md:text-[1rem] font-bold text-[var(--color-primary)] truncate">
-                                                    {quiz.lesson_name}
-                                                </p>
-                                                <div className="flex items-center justify-between gap-1 mt-1">
-                                                    <div className="flex items-center gap-1">
-                                                        <Image src={ClockIcon} alt="Clock" width={16} height={16} />
-                                                        <p className="text-[0.75rem] font-light text-[var(--color-primary)] whitespace-nowrap">
-                                                            {quiz.expired_date ? dayjs(quiz.expired_date).format('DD/MM') : '-'}
-                                                        </p>
-                                                    </div>
-                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                        {quiz.duration ? `${quiz.duration} phút` : '-'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </Card>
+                                {quizzesFromDate.length > 0 ? (
+                                    quizzesFromDate.map((quiz) => (
+                                        <QuizCard
+                                            key={quiz.id}
+                                            quiz={quiz}
+                                            enrollment={quiz.enrollmentData} 
+                                            onVisible={() => setVisibleCount(v => v + 1)}
+                                        />
                                     ))
-                                )} */}
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center mt-10 opacity-50">
+                                        <p className="text-sm text-gray-400 text-center">
+                                            Không có sự kiện nào
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        
                     </div>
-                    
                 </div>
             </div>
             
@@ -576,4 +563,3 @@ export default function LearningProgressPage() {
         </>
     )
 }
-

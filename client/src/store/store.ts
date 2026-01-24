@@ -8,7 +8,7 @@ import courseDisplayReducer from './slice/courseDisplaySlice';
 import './api/[module]/courseApi'; // Import để đăng ký courseApi endpoints
 import notifyReducer from './slice/notifySlice';
 import lessonProgressReducer from './slice/lessonProgressSlice';
-
+import quizReducer from  './slice/quizSlice';
 export const store = configureStore({
     reducer: {
         [baseApi.reducerPath]: baseApi.reducer,
@@ -18,6 +18,7 @@ export const store = configureStore({
         courseDisplay: courseDisplayReducer,
         notify: notifyReducer,
         lessonProgress: lessonProgressReducer,
+        quiz: quizReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });

@@ -36,7 +36,7 @@ import Image from "next/image";
 import QuizIcon from "@/../public/student/QuizIcon.svg";
 import DocumentIcon from "@/../public/student/DocumentIcon.svg";
 import VideoIcon from "@/../public/student/VideoIcon.svg";
-
+import { setQuizzesByCourseId } from '@/store/slice/quizSlice';
 interface IChapterState {
     id: string;
     isExtended: boolean;
@@ -385,10 +385,21 @@ const CourseModules = () => {
 }
 
 const CourseSchedule = () => {
+    const dispatch = useAppDispatch();
+
     const [visibleCount, setVisibleCount] = useState(0);
 
     const { id: courseId } = useParams();
     const { data: quizzes } = useGetQuizzesByCourseIdQuery(courseId as string);
+
+    useEffect(() => {
+        if (quizzes && courseId) {
+            dispatch(setQuizzesByCourseId({
+                courseId: courseId as string, 
+                quizzes: quizzes
+            }));
+        }
+    }, [quizzes, courseId, dispatch]);
 
     const { enrollment } = useGetAllEnrollmentsQuery(undefined, {
         selectFromResult: ({ data, isLoading }) => ({
