@@ -237,23 +237,24 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                             </span>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)]">5.0 đánh giá</p>
                         </div>
-
-                        <div className="flex flex-col items-center w-full border-r-2 border-gray-200">
-                            <div className="mt-7 w-[80%] h-full text-center">
-                                <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
-                                <p className="text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
-                            </div>
+                    </div>
+                    
+                    <div className="flex flex-col items-center w-full border-r-2 border-gray-200">
+                        <div className="mt-7 w-[80%] h-full text-center">
+                            <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
+                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
                         </div>
+                    </div>
 
-                        <div className="flex flex-col items-center w-full">
-                            <div className="mt-7 w-[70%] h-full text-center">
-                                <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
-                                <p className="text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
-                            </div>
+                    <div className="flex flex-col items-center w-full">
+                        <div className="mt-7 w-[70%] h-full text-center">
+                            <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
         </>
     )
 
@@ -299,7 +300,7 @@ export default function StudentCoursePage() {
             <CourseDisplaySection
                 title="Môn học tương tự"
             />
-            <QASection />
+            {/* <QASection /> */}
             <FooterSection hasRegisterBox={false} />
         </main>
     )
