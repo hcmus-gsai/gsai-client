@@ -24,14 +24,16 @@
 // export const { setModuleId, clearModuleId } = lessonSlice.actions;
 // export default lessonSlice.reducer;
 
-import { createSlice, PayloadAction  } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface LessonState {
     moduleId: string | null;
+    isFullWidthMode: boolean;
 }
 
-const initialState : LessonState = {
+const initialState: LessonState = {
     moduleId: null,
+    isFullWidthMode: false,
 }
 
 const lessonSlice = createSlice({
@@ -43,9 +45,12 @@ const lessonSlice = createSlice({
         },
         clearModuleId: (state) => {
             state.moduleId = null;
+        },
+        setFullWidthMode: (state, action: PayloadAction<boolean>) => {
+            state.isFullWidthMode = action.payload;
         }
     }
 })
 
-export const { setModuleId, clearModuleId } = lessonSlice.actions;
+export const { setModuleId, clearModuleId, setFullWidthMode } = lessonSlice.actions;
 export default lessonSlice.reducer;

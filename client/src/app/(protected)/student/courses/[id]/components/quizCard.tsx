@@ -5,13 +5,6 @@ import { Card } from "antd";
 import { useRouter } from "next/navigation";
 import { useGetLatestQuizAttemptQuery } from '@/store/api/[module]/quizApi';
 import ComputingIcon from "@/../public/student/ComputingIcon.svg";
-import { useEffect } from "react";
-
-interface Props {
-    quiz: any;
-    enrollment: any;
-    onVisible: () => void;
-}
 
 function formatDate(dateString: string) {
     const d = new Date(dateString);
@@ -33,26 +26,20 @@ function isExpired(dateString: string, days: number) {
     return new Date(deadline) < now;
 }
 
-export function QuizCard({ quiz, enrollment, onVisible }: Props) {
+export function QuizCard({ quiz, enrollment }: any) {
     const router = useRouter();
 
-    const { data: attempt } = useGetLatestQuizAttemptQuery(quiz.id);
-    console.log('Attempt: ', attempt)
-
-    useEffect(() => {
-        onVisible();
-    }, [onVisible]);
+    const { data: attempt, isLoading } = useGetLatestQuizAttemptQuery(quiz.id);
 
     const expired = isExpired(enrollment.enrolled_at, quiz.expired_date || 0);
 
-    if (attempt?.status === 'graded') {
-        return (<div className = "text-light">Chưa có sự kiện nào</div>);
-
+    if (isLoading || attempt?.status === 'graded') {
+        return <div className="hidden hidden-card" />;
     }
 
     return (
         <Card
-            className={`w-full min-h-[80px] rounded-[20px] shrink-0 cursor-pointer !border
+            className={`visible-card w-full min-h-[80px] rounded-[20px] shrink-0 cursor-pointer !border
                 ${expired ? '!border-red-400 bg-red-50' : '!border-gray-300'}`}
             styles={{
                 body: {

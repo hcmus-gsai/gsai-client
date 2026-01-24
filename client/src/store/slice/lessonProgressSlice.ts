@@ -1,4 +1,4 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LessonProgress } from '@/type/lessonProgress.type';
 import { RootState } from '../store';
 import staticMethods from 'antd/es/message';
@@ -12,6 +12,7 @@ interface ModuleStats {
     video: StatsCount;
     document: StatsCount;
     quiz: StatsCount;
+    project: StatsCount;
 
     //Update percent for model
     moduleCompletionPercent: number;
@@ -30,12 +31,12 @@ interface LessonProgressState {
 
 const initialState: LessonProgressState = {
     courseId: null,
-    lessonProgress : [],
-    moduleStats : {},
-    totalLessons : 0,
-    completedLessons : 0,
-    completionPercent : 0,
-    isLoading : false,
+    lessonProgress: [],
+    moduleStats: {},
+    totalLessons: 0,
+    completedLessons: 0,
+    completionPercent: 0,
+    isLoading: false,
 }
 
 const lessonProgressSlice = createSlice({
@@ -62,13 +63,13 @@ const lessonProgressSlice = createSlice({
         setTotalLessons: (state, action: PayloadAction<number>) => {
             state.totalLessons = action.payload;
 
-            state.completionPercent = state.totalLessons > 0 ? Math.round((state.completedLessons / state.totalLessons) * 100): 0; 
+            state.completionPercent = state.totalLessons > 0 ? Math.round((state.completedLessons / state.totalLessons) * 100) : 0;
         },
 
         toggleLessonCompletion: (state, action: PayloadAction<{
             lessonId: string,
             moduleId: string,
-            lessonType: 'video' | 'document' | 'quiz'
+            lessonType: 'video' | 'document' | 'quiz' | 'project'
         }>) => {
             const { lessonId, moduleId, lessonType } = action.payload;
 
@@ -93,7 +94,7 @@ const lessonProgressSlice = createSlice({
 
                 }
 
-                state.completionPercent = state.totalLessons > 0 ? Math.round((state.completedLessons / state.totalLessons) * 100): 0;
+                state.completionPercent = state.totalLessons > 0 ? Math.round((state.completedLessons / state.totalLessons) * 100) : 0;
 
             }
         },
@@ -102,7 +103,7 @@ const lessonProgressSlice = createSlice({
             state.isLoading = action.payload;
         },
 
-        
+
         resetLessonProgress: () => initialState,
     }
 });
@@ -116,7 +117,7 @@ export const {
     resetLessonProgress,
 } = lessonProgressSlice.actions;
 
-export const selectLessonProgressState = (state: RootState) => 
+export const selectLessonProgressState = (state: RootState) =>
     state.lessonProgress;
 
 
@@ -141,14 +142,14 @@ export const selectIsLessonCompleted = (
 
 
 export const selectLessonCompletionStatus = (state: RootState) => {
-    const statusMap : Record<string, boolean> = {};
+    const statusMap: Record<string, boolean> = {};
     state.lessonProgress.lessonProgress.forEach((progress) => {
         statusMap[progress.lesson_id] = progress.is_completed;
     });
     return statusMap;
 }
 
-export const selectAllModuleStats = (state: RootState) => 
+export const selectAllModuleStats = (state: RootState) =>
     state.lessonProgress.moduleStats;
 
 

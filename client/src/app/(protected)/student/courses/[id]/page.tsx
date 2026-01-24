@@ -1,16 +1,16 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 import { useState } from 'react';
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CourseDisplaySection } from "@/components/student/course-display";
 
-import {Card, Button, Form} from "antd";
+import { Card, Button, Form } from "antd";
 import { QASection } from "@/components/student/qna";
-import {FooterSection} from "@/components/guest/ui/guest";
+import { FooterSection } from "@/components/guest/ui/guest";
 import { useParams, notFound } from "next/navigation";
-import { RightOutlined  } from "@ant-design/icons";
-import {useGetCourseByIdQuery} from "@/store/api/[module]/courseApi";
+import { RightOutlined } from "@ant-design/icons";
+import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
 
 import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
@@ -21,22 +21,23 @@ import { CourseHighLightComponent } from "@/components/student/course-category-p
 import { Course } from '@/type/course.type';
 import { XCircle } from "@deemlol/next-icons";
 import { useEnrollInCourseMutation } from '@/store/api/[module]/enrollmentApi';
+import { useCreateLearningProgressMutation } from '@/store/api/[module]/lessonProgressApi';
 const CourseSyllabusSection = () => {
     const achievableKnowledge = [
         {
-            title:'Mô hình hóa toán học',
+            title: 'Mô hình hóa toán học',
             description: 'Xây dựng mô hình giúp mô phỏng và dự đoán các hiện tượng trong đời sống, kinh tế và kỹ thuật.'
         },
         {
-            title:'Ứng dụng công nghệ trong phân tích dữ liệu',
+            title: 'Ứng dụng công nghệ trong phân tích dữ liệu',
             description: 'Sử dụng phần mềm PowerBI và ngôn ngữ lập trình Python để trực quan hóa và phân tích số liệu hiệu quả.'
         },
         {
-            title:'Xác suất và thống kê suy luận',
+            title: 'Xác suất và thống kê suy luận',
             description: 'Nắm vững công cụ để đưa ra kết luận, dự báo và ra quyết định dựa trên dữ liệu.'
         },
         {
-            title:'Phân tích và xử lý dữ liệu',
+            title: 'Phân tích và xử lý dữ liệu',
             description: 'Hiểu cách thu thập, sắp xếp, làm sạch và diễn giải dữ liệu thực tế.'
         }
     ]
@@ -76,13 +77,13 @@ const CourseSyllabusSection = () => {
                             </div>
                         ))}
                     </div>
-                </div>  
+                </div>
             </div>
         </section>
     )
 }
 
-const CourseRegisterModal = ({isOpen, onClose, children}:{
+const CourseRegisterModal = ({ isOpen, onClose, children }: {
     isOpen: boolean,
     onClose: () => void,
     children: React.ReactNode,
@@ -93,13 +94,13 @@ const CourseRegisterModal = ({isOpen, onClose, children}:{
     }
 
     return (
-        <div className ="fixed inset-0 bg-black/40 bg-opacity-40 z-50 flex items-center justify-center" onClick={onClose}>
-            <div className = "relative bg-[var(--color-white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
-                <Button 
-                    className = "!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md !absolute !top-2 !right-2"
-                    onClick = {onClose}
+        <div className="fixed inset-0 bg-black/40 bg-opacity-40 z-50 flex items-center justify-center" onClick={onClose}>
+            <div className="relative bg-[var(--color-white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
+                <Button
+                    className="!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md !absolute !top-2 !right-2"
+                    onClick={onClose}
                 >
-                    <XCircle className = "!text-white !w-full !h-full"/>
+                    <XCircle className="!text-white !w-full !h-full" />
                 </Button>
                 {children}
             </div>
@@ -107,14 +108,15 @@ const CourseRegisterModal = ({isOpen, onClose, children}:{
     )
 }
 
-const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId: string}) => {
+const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, courseId: string }) => {
 
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    const [enrollInCourse, {isLoading: isEnrolling}] = useEnrollInCourseMutation();
+    const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation();
+    const [createLearningProgress] = useCreateLearningProgressMutation();
 
     const handleRegisterCourse = () => {
         setIsModalOpen(true);
@@ -123,6 +125,7 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
     const handleConfirmRegisterCourse = async () => {
         try {
             await enrollInCourse(courseId).unwrap();
+            await createLearningProgress(courseId).unwrap();
             // router.refresh();
         }
         catch (error) {
@@ -198,10 +201,10 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
 
                         <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>  
 
+                        </div>
+
                     </div>
-                    
-                </div>
-                {/*<CourseHighlightComponent/> */}
+                    {/*<CourseHighlightComponent/> */}
 
                 <div className = "mt-[8vh] sm:mt-[12vh] grid grid-cols-2 sm:grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px] border-2 border-gray-200 py-3 mx-4 sm:mx-0">
                     <div className = "flex flex-col items-center w-full border-r-2 border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
@@ -234,24 +237,23 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
                             </span>
                             <p className = "text-[1rem] font-light text-[var(--color-primary)]">5.0 đánh giá</p>
                         </div>
-                    </div>
-                    
-                    <div className = "flex flex-col items-center w-full border-r-2 border-gray-200">
-                        <div className = "mt-7 w-[80%] h-full text-center">
-                            <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
-                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
+
+                        <div className="flex flex-col items-center w-full border-r-2 border-gray-200">
+                            <div className="mt-7 w-[80%] h-full text-center">
+                                <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div className = "flex flex-col items-center w-full">
-                        <div className = "mt-7 w-[70%] h-full text-center">
-                            <p className = "text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
-                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
+
+                        <div className="flex flex-col items-center w-full">
+                            <div className="mt-7 w-[70%] h-full text-center">
+                                <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
         </>
     )
 
@@ -259,10 +261,10 @@ const CourseInfoSection = ({courseData, courseId}: {courseData: Course, courseId
 
 export default function StudentCoursePage() {
 
-    
+
     const router = useRouter();
-    const {id} = useParams();
-    const {data: courseInfo, isLoading, error} = useGetCourseByIdQuery(id as string);
+    const { id } = useParams();
+    const { data: courseInfo, isLoading, error } = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
     console.log('This is course data: ', courseData);
 
@@ -273,8 +275,8 @@ export default function StudentCoursePage() {
     if (error || !courseData) {
         return <div className="w-full min-h-screen flex items-center justify-center">Không tìm thấy khóa học</div>;
     }
-    
-    return(
+
+    return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             {/* <StudentGreetingSection
                 title = {courseInfo?.data?.course_name || ""}
@@ -285,20 +287,20 @@ export default function StudentCoursePage() {
                 hasTopGradient = {false}
                 hasCurveSpace = {false}
             /> */}
-            <section className = "w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
-                <div className = "w-[var(--global-width)] h-full flex items-center justify-start"> 
-                    Môn học <span className = "ml-2 mr-2"><RightOutlined className = "text-[var(--color-primary)]" /></span> {courseData?.category}
+            <section className="w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
+                <div className="w-[var(--global-width)] h-full flex items-center justify-start">
+                    Môn học <span className="ml-2 mr-2"><RightOutlined className="text-[var(--color-primary)]" /></span> {courseData?.category}
                 </div>
             </section>
-            
-            <CourseInfoSection courseData = {courseData} courseId = {id as string} />
+
+            <CourseInfoSection courseData={courseData} courseId={id as string} />
             <CourseSyllabusSection />
 
-            <CourseDisplaySection 
-                title = "Môn học tương tự"
+            <CourseDisplaySection
+                title="Môn học tương tự"
             />
             <QASection />
-            <FooterSection hasRegisterBox = {false}/>
+            <FooterSection hasRegisterBox={false} />
         </main>
     )
 

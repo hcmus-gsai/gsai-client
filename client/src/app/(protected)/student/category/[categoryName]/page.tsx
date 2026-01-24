@@ -98,7 +98,7 @@ export default function CategoriesPage() {
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
             <CategorySlider />
             {/* <CourseDisplaySection title = "Môn học phổ biến hiện nay"/> */}
-            <LearningPathSection />
+            {/* <LearningPathSection /> */}
             <FooterSection hasRegisterBox={false} />
         </main>
 

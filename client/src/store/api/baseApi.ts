@@ -17,6 +17,9 @@ const baseQuery = fetchBaseQuery({
 });
 
 
+// Mutex to prevent multiple refresh calls
+let refreshPromise: Promise<boolean> | null = null;
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -26,23 +29,51 @@ const baseQueryWithReauth: BaseQueryFn<
 
   // Only attempt refresh if we get 401
   if (result.error?.status === 401) {
+
+    // If a refresh is already in progress, wait for it
+    if (refreshPromise) {
+      console.log('Refresh already in progress, waiting...');
+      const refreshSuccess = await refreshPromise;
+      if (refreshSuccess) {
+        // Retry the original request
+        return baseQuery(args, api, extraOptions);
+      } else {
+        // If refresh failed, we fail too (and let the logout happen from the first failure)
+        // api.dispatch(signOut()); // Redundant, handled below
+        return result;
+      }
+    }
+
     console.log('Access token expired, attempting refresh...');
 
-    const refreshResult = await baseQuery(
-      '/auth/refresh-token', // your refresh endpoint
-      api,
-      extraOptions
-    );
+    // Start a new refresh process
+    refreshPromise = (async () => {
+      try {
+        const refreshResult = await baseQuery(
+          '/auth/refresh-token',
+          api,
+          extraOptions
+        );
+        if (refreshResult.data) {
+          console.log("Token refreshed successfully");
+          return true;
+        } else {
+          console.log("Refresh token failed/expired");
+          api.dispatch(signOut());
+          return false;
+        }
+      } catch (e) {
+        console.error("Refresh error:", e);
+        api.dispatch(signOut());
+        return false;
+      }
+    })();
 
-    if (refreshResult.data) {
-      // Cookies are automatically updated by the server
-      // No need to dispatch to Redux - just retry the original request
-      console.log('Token refreshed successfully');
+    const success = await refreshPromise;
+    refreshPromise = null; // Reset mutex
+
+    if (success) {
       result = await baseQuery(args, api, extraOptions);
-    } else {
-      // Refresh failed → logout
-      console.log('Refresh token failed or expired. Logging out...');
-      api.dispatch(signOut());
     }
   }
 

@@ -291,8 +291,8 @@ const CourseDisplaySection = () => {
                                 span={6}
                                 key={c.id}
                                 className={`!flex !items-center !justify-center transition-all duration-300 ease-out ${isAnimating
-                                        ? 'opacity-0'
-                                        : 'opacity-100'
+                                    ? 'opacity-0'
+                                    : 'opacity-100'
                                     }`}
                             // style={{
                             //     animationDelay: `${index < 8 ? index * 50 : (index - 8) * 50}ms`,
@@ -467,7 +467,7 @@ const FooterSection = ({
                 {/* Column 4: Về GSAI */}
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
                     <h1 className="text-lg font-bold text-[var(--color-primary)] mb-4">
-                        Về GSAI
+                        Về Epis
                     </h1>
                     <div className="flex flex-col gap-2">
                         <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Giới thiệu</p>

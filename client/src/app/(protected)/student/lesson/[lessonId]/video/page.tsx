@@ -200,7 +200,7 @@ export default function LectureVideoPage() {
         if (!containerRect) return;
 
         try {
-            const languageDetectResult = await fetch("http://localhost:8080/detect", {
+            const languageDetectResult = await fetch(`${process.env.LIBERTRANS}/detect`, {
                 method: "POST",
                 body: JSON.stringify({ q: item.text }),
                 headers: { "Content-Type": "application/json" }
@@ -208,7 +208,7 @@ export default function LectureVideoPage() {
 
             const lang = languageDetectResult[0].language;
 
-            const translateResult = await fetch("http://localhost:8080/translate", {
+            const translateResult = await fetch(`${process.env.LIBERTRANS}/translate`, {
                 method: "POST",
                 body: JSON.stringify({ q: item.text, source: lang, target: "vi" }),
                 headers: { "Content-Type": "application/json" }
@@ -504,10 +504,6 @@ export default function LectureVideoPage() {
         ? dragPercent
         : (actualDuration > 0 ? (currentTime / actualDuration) * 100 : 0);
 
-    //ASR and OCR Toggle
-    const [enableASR, setEnableASR] = useState(false);
-    const [enableOCR, setEnableOCR] = useState(false);
-
     return (
         <div className="relative flex w-full gap-4">
             <div className="flex-1 flex flex-col gap-[0.5rem]">
@@ -703,19 +699,6 @@ export default function LectureVideoPage() {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div className="w-full flex items-center justify-center gap-[1rem] mt-[1rem] mb-[1.5rem]">
-                    <div className="flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
-                        <p className="text-white">ASR</p>
-                        <Switch
-                            checked={enableASR} checkedChildren="Bật" unCheckedChildren="Tắt" value={enableASR} onChange={() => setEnableASR(!enableASR)}
-                        />
-                    </div>
-                    <div className="flex items-center justify-center gap-[0.5rem] bg-[var(--color-secondary)] rounded-[20px] border border-gray-200 px-[0.75rem] py-[0.5rem]">
-                        <p className="text-white">OCR</p>
-                        <Switch checked={enableOCR} checkedChildren="Bật" unCheckedChildren="Tắt" value={enableOCR} onChange={() => setEnableOCR(!enableOCR)} />
                     </div>
                 </div>
             </div>

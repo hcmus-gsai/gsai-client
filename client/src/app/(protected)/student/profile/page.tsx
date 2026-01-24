@@ -88,6 +88,8 @@ const ProfileModal = ({ isOpen, onClose, children }: {
 
 export default function PersonalProfilePage() {
     const [isClient, setIsClient] = useState(false);
+
+
     useEffect(() => {
         setIsClient(true)
     }, [])
@@ -275,8 +277,11 @@ export default function PersonalProfilePage() {
                             className="w-full h-full flex items-center justify-center"
                         >
                             <Image
-                                src={profileUpload.previewUrl || EmptyLayout} alt="Empty Layout" width={0} height={0}
-                                className="absolute w-[12rem] h-[12rem] object-cover rounded-full"
+                                src={profileUpload.previewUrl || profile?.avatar_url || EmptyLayout}
+                                alt="User Avatar"
+                                width={192}
+                                height={192}
+                                className="absolute w-[12rem] h-[12rem] object-cover rounded-full cursor-pointer"
                             />
                         </div>
 

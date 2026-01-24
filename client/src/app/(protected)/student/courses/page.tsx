@@ -10,7 +10,7 @@ import { TagDisplaySession } from "@/components/student/tag-display";
 import { QASection } from "@/components/student/qna";
 
 import AbstractTop from "@/../public/student/AbstractTop.svg";
-import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";    
+import AbstractNCurve from "@/../public/student/AbstractNCurve.svg";
 
 import { useState, useEffect } from 'react';
 
@@ -21,21 +21,15 @@ export default function StudentHomePage() {
     }, [])
 
 
-    return(
-
+    return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            
-            <TagDisplaySession/>
-
-            <LearningPathSection />
-            <CourseDisplaySection title = "Môn học phổ biến hiện nay"/>
-            <CourseDisplaySection title = "Môn học dành riêng cho bạn"/>
-            <CourseDisplaySection title = "Trải nghiệm các khóa học miễn phí"/>
-            <QASection />
-
-            <FooterSection hasRegisterBox = {false}/> 
-            
+            <TagDisplaySession />
+            {/* <LearningPathSection /> */}
+            <CourseDisplaySection title="Môn học phổ biến hiện nay" />
+            <CourseDisplaySection title="Môn học dành riêng cho bạn" />
+            <CourseDisplaySection title="Trải nghiệm các khóa học miễn phí" />
+            {/* <QASection /> */}
+            <FooterSection hasRegisterBox={false} />
         </main>
     )
 }
- 

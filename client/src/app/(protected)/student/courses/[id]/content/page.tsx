@@ -4,10 +4,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { useParams, useRouter } from "next/navigation";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { Button, Card, Progress } from "antd";
-import { ChevronDown, ChevronUp, Check, Circle } from "@deemlol/next-icons"
-import { useState, useEffect, useMemo } from 'react';
-
-// import { useGetCourseByIdQuery, useGetCourseModulesQuery, useLazyGetModuleLessonsQuery } from "@/store/api/[module]/courseApi";
+import { useState, useEffect } from 'react';
 
 import { useGetCourseByIdQuery, useGetCourseModulesQuery } from "@/store/api/[module]/courseApi";
 import { useLazyGetModuleLessonsQuery } from "@/store/api/[module]/moduleApi";
@@ -24,18 +21,11 @@ import {
     setLessonProgressData,
     setModuleStats,
     setTotalLessons,
-    toggleLessonCompletion,
     selectCompletionPercent,
-    selectAllModuleStats,
-    selectLessonCompletionStatus,
 } from "@/store/slice/lessonProgressSlice";
 
-import ClockIcon from "@/../public/student/ClockIcon.svg";
-import ComputingIcon from "@/../public/student/ComputingIcon.svg";
-import Image from "next/image";
-import QuizIcon from "@/../public/student/QuizIcon.svg";
-import DocumentIcon from "@/../public/student/DocumentIcon.svg";
-import VideoIcon from "@/../public/student/VideoIcon.svg";
+import LectureSection from '../components/lectureSection';
+import GradeSection from '../components/gradeSection';
 import { setQuizzesByCourseId } from '@/store/slice/quizSlice';
 interface IChapterState {
     id: string;
@@ -44,9 +34,9 @@ interface IChapterState {
 
 const CourseModules = () => {
 
+    const [activeTab, setActiveTab] = useState<'lecture' | 'quiz' | 'grade'>('lecture');
 
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
     const dispatch = useAppDispatch();
     const { id } = useParams();
 
@@ -75,39 +65,24 @@ const CourseModules = () => {
         }
     }, [modules]);
 
-    const handleToggleChapter = async (id: string) => {
-        setChapterState((prev) =>
-            prev.map((cs) =>
-                cs.id === id ? { ...cs, isExtended: !cs.isExtended } : cs
-            )
-        );
-        if (!lessonsMap[id]) {
-            const res = await triggerGetLessons(id).unwrap();
-            setLessonsMap((prev) => ({
-                ...prev,
-                [id]: res.lesson,
-            }));
-        }
-    };
-
     const { data: progressData } = useGetLearningProgressByCourseQuery(id as string, {
         skip: !id,
     });
 
-    const [fetchCourseProgress] = useLazyGetLearningProgressByCourseQuery();
     const [fetchCourseModules] = useLazyGetCourseModulesQuery();
     const [fetchModuleLessons] = useLazyGetModuleLessonsQuery();
-    const [triggerLessonUpdate] = useUpdateLearningProgressByLessonIdMutation();
 
     // Use Redux state instead of local state
     const completionPercent = useAppSelector(selectCompletionPercent);
-    const moduleStats = useAppSelector(selectAllModuleStats);
-    const lessonCompletionStatus = useAppSelector(selectLessonCompletionStatus);
 
-    //Foreach module => 
-    //Example Module A: {video: 2, document: 1, quiz: 1}
-    // type StatCount = { total: number; completed: number };
-    // type ModuleStats = { video: StatCount; document: StatCount; quiz: StatCount };
+    const LessonTypeLabel = {
+        video: 'Video',
+        document: 'Bài đọc',
+        quiz: 'Quiz',
+        project: 'Project',
+    } as const;
+
+    type LessonType = keyof typeof LessonTypeLabel;
 
 
     useEffect(() => {
@@ -132,6 +107,7 @@ const CourseModules = () => {
                         video: { total: 0, completed: 0 },
                         document: { total: 0, completed: 0 },
                         quiz: { total: 0, completed: 0 },
+                        project: { total: 0, completed: 0 },
                         moduleCompletionPercent: 0
                     };
 
@@ -149,12 +125,15 @@ const CourseModules = () => {
                         } else if (lesson.type === "quiz") {
                             currentStats.quiz.total++;
                             if (isCompleted) currentStats.quiz.completed++;
+                        } else if (lesson.type === 'project') {
+                            currentStats.project.total++;
+                            if (isCompleted) currentStats.project.completed++;
                         }
 
-                        const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total;
-                        const completedLessonInModule = currentStats.video.completed + currentStats.document.completed + currentStats.quiz.completed;
+                        const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total + currentStats.project.total;
+                        const completedLessonInModule = currentStats.video.completed + currentStats.document.completed + currentStats.quiz.completed + currentStats.project.completed;
 
-                        const moduleCompletionPercent = totalLessonInModule > 0  ? Math.round((completedLessonInModule / totalLessonInModule) * 100) : 0;
+                        const moduleCompletionPercent = totalLessonInModule > 0 ? Math.round((completedLessonInModule / totalLessonInModule) * 100) : 0;
                         currentStats.moduleCompletionPercent = moduleCompletionPercent;
                     }
 
@@ -172,42 +151,9 @@ const CourseModules = () => {
         loadCourseProgress();
     }, [id, progressData, dispatch, fetchCourseModules, fetchModuleLessons]);
 
-
-    const handleUpdateLesson = async (
-        lessonId: string,
-        moduleId: string,
-        lessonType: 'video' | 'document' | 'quiz'
-    ) => {
-        try {
-            // Optimistic update in Redux
-            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
-
-            const progressResponse = await fetchCourseProgress(id as string).unwrap();
-            const currentLessonProgress = progressResponse.lessonProgress.find(
-                (progress: any) => progress.lesson_id === lessonId && progress.module_id === moduleId
-            );
-
-            await triggerLessonUpdate({
-                lessonId: lessonId,
-                isCompleted: !currentLessonProgress?.is_completed
-            }).unwrap();
-
-            // Update local lessonsMap for UI
-            const lessonMap = { ...lessonsMap };
-            if (lessonMap[moduleId]) {
-                lessonMap[moduleId] = lessonMap[moduleId].map((lesson: any) =>
-                    lesson.id === lessonId
-                        ? { ...lesson, is_completed: !currentLessonProgress?.is_completed }
-                        : lesson
-                );
-                setLessonsMap(lessonMap);
-            }
-        } catch (error) {
-            console.error('Error updating lesson', error);
-            // Revert optimistic update on error
-            dispatch(toggleLessonCompletion({ lessonId, moduleId, lessonType }));
-        }
-    }
+    const baseBtn = "!w-[7rem] !h-[2.25rem] !rounded-full !border-white hover:!border-[var(--color-secondary)]";
+    const activeBtn = "!text-[var(--color-secondary)] !bg-[var(--color-neutral)]";
+    const inactiveBtn = "!text-black !bg-white hover:!text-[var(--color-secondary)] hover:!bg-white";
 
     return (
         <section className="w-full md:flex-1 flex flex-col items-center justify-start">
@@ -217,13 +163,16 @@ const CourseModules = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-3 mb-6">
-                    <Button className="!text-[var(--color-secondary)] !bg-[var(--color-neutral)] !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] !rounded-full !border-white">
+                    <Button
+                        onClick={() => setActiveTab('lecture')}
+                        className={`${baseBtn} ${activeTab === 'lecture' ? activeBtn : inactiveBtn}`}
+                    >
                         Bài giảng
                     </Button>
-                    <Button className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white">
-                        Quiz
-                    </Button>
-                    <Button className="!text-black !bg-white !w-[7rem] !h-[2.25rem] hover:!border-[var(--color-secondary)] hover:!text-[var(--color-secondary)] hover:!bg-white !rounded-full !border-white">
+                    <Button
+                        onClick={() => setActiveTab('grade')}
+                        className={`${baseBtn} ${activeTab === 'grade' ? activeBtn : inactiveBtn}`}
+                    >
                         Điểm
                     </Button>
                 </div>
@@ -241,145 +190,8 @@ const CourseModules = () => {
                     />
                 </div>
             </div>
-
-            <div className="w-full mt-[1rem] md:mt-[2rem] mb-[2rem]">
-                {modules.map((module: any) => (
-
-                    <div key={module.id}>
-                        <div className="flex items-center flex-col justify-center gap-2">
-                            <div className="w-full flex flex-col items-center justify-center gap-2">
-                                <div className="w-full flex items-center justify-center gap-2">
-                                    <div className="flex items-center justify-start gap-2 mr-auto">
-                                        <Button onClick={() => handleToggleChapter(module.id)} className="!bg-transparent !border-none !p-0 !m-0">
-                                            {chapterState.find((cs) => cs.id === module.id)?.isExtended ?
-                                                <ChevronUp width={24} height={24} className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> :
-                                                <ChevronDown width={24} height={24} className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />
-                                            }
-                                        </Button>
-                                        <p className="text-lg md:text-[1.5rem] font-bold text-[var(--color-primary)] line-clamp-1">
-                                            {module.module_name}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center justify-start gap-2 ml-auto">
-                                        {moduleStats[module.id]?.moduleCompletionPercent === 100 && (
-                                            <div className = "flex items-center justify-center gap-2">
-                                                <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" />
-                                                <p className = "font-bold text-[var(--color-secondary)]">Đã hoàn thành</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="w-full flex items-center justify-start gap-2 border-b border-gray-300 pb-[1.25rem] overflow-x-auto no-scrollbar">
-                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary] flex items-center gap-2 text-gray-700">
-                                        {moduleStats[module.id]?.video?.total > 0 && ( 
-                                            <>
-                                                <Image src={VideoIcon} alt="Video Icon" width={20} height={20} />
-
-                                                {moduleStats[module.id]?.video?.total > 0 && moduleStats[module.id].video?.total === moduleStats[module.id].video?.completed ? 
-                                                (
-                                                    <p>Đã hoàn thành</p>
-                                                ):(
-                                                    <p>{`Video: ${moduleStats[module.id]?.video.completed} / ${moduleStats[module.id]?.video.total}`}</p>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
-
-                                        {moduleStats[module.id]?.quiz?.total > 0 && ( 
-                                            <>
-                                                <Image src={QuizIcon} alt="Quiz Icon" width={20} height={20} />
-                                                {moduleStats[module.id].quiz.completed === moduleStats[module.id].quiz.total ? (
-                                                    <p>Đã hoàn thành</p>
-                                                ) : (
-                                                    <p>{`Quiz: ${moduleStats[module.id].quiz.completed} / ${moduleStats[module.id].quiz.total}`}</p>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                    <div className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] flex items-center gap-2 text-gray-700">
-                                        {moduleStats[module.id]?.document?.total > 0 && (
-                                            <>
-                                                <Image src={DocumentIcon} alt="Document Icon" width={20} height={20} />
-
-                                                {moduleStats[module.id]?.document?.total > 0 && moduleStats[module.id].document?.total === moduleStats[module.id].document?.completed ? 
-                                                (
-                                                    <p>Đã hoàn thành</p>
-                                                ):(
-                                                    <p>{`Bài đọc: ${moduleStats[module.id]?.document.completed} / ${moduleStats[module.id]?.document.total}`}</p>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${chapterState.find(cs => cs.id === module.id)?.isExtended ? "grid-rows-[1fr] mt-[1rem]" : "grid-rows-[0fr] mt-0"
-                                }`}>
-                                <div className="overflow-hidden">
-                                    <div className="flex flex-col gap-[1.25rem] pb-4">
-                                        {(lessonsMap[module.id] ?? []).map((lesson, index) => (
-                                            <Card
-                                                key={lesson.id}
-                                                className="!w-full !flex !items-center !justify-start !rounded-[20px] !border !border-gray-200 cursor-pointer hover:!border-[var(--color-secondary)] hover:shadow-md transition-all duration-200 flex"
-                                                onClick={() => {
-                                                    dispatch(setModuleId(module.id));
-                                                    router.push(`/student/lesson/${lesson.id}/${lesson.type}`);
-                                                }}
-                                                styles={{ body: { width: '100%', padding: '16px' } }}
-                                            >
-                                                <div className="flex items-stretch gap-4 p-2">
-                                                    <div className="flex items-center justify-start gap-2">
-                                                        {/* <Check width={24} height={24} className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2" /> */}
-                                                        <Button
-                                                            type="primary"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleUpdateLesson(lesson.id, module.id, lesson.type as 'video' | 'document' | 'quiz');
-                                                            }}
-                                                            className="flex items-center justify-center !bg-transparent !border-none !p-0 !m-0 !shadow-none"
-                                                            icon={
-                                                                lessonCompletionStatus[lesson.id] ? (
-                                                                    <Check
-                                                                        width={24}
-                                                                        height={24}
-                                                                        className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
-                                                                    />
-                                                                ) : (
-                                                                    <Circle
-                                                                        width={24}
-                                                                        height={24}
-                                                                        className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
-                                                                    />
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <div className="flex flex-col items-start justify-start">
-                                                        <p className="text-[1rem] font-bold text-[var(--color-primary)]">
-                                                            {lesson.lesson_name}
-                                                        </p>
-                                                        <div className="w-full flex items-center justify-start gap-2 mt-1">
-                                                            <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
-                                                                {lesson.type === "video" ? "Video" : lesson.type === "quiz" ? "Quiz" : "Bài đọc"}
-                                                            </p>
-                                                            <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
-                                                                {lesson.estimated_completion_time}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {activeTab === 'lecture' && <LectureSection />}
+            {activeTab === 'grade' && <GradeSection />}
         </section>
     );
 }
@@ -410,20 +222,15 @@ const CourseSchedule = () => {
         }),
     });
 
-    useEffect(() => {
-        setVisibleCount(0);
-    }, [quizzes]);
-
     return (
         // Mobile: w-full, Desktop: w-[25%]
         <section className="w-full md:w-[25%] flex flex-col items-start justify-start">
             <div className="w-full h-full flex flex-col items-start justify-start gap-[1.5rem] md:gap-[2rem]">
 
-                <Card className="w-full !rounded-[20px] !border !border-gray-300">
+                {/* <Card className="w-full !rounded-[20px] !border !border-gray-300">
                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[0.5rem]">Lịch học</p>
                     <p className="text-[0.875rem] mb-[0.5rem]">Tôi cam kết sẽ học 3 ngày mỗi tuần.</p>
 
-                    {/* Day Buttons: Justify between để dàn đều */}
                     <div className="w-full flex items-center justify-between mb-[0.5rem] gap-1">
                         {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => (
                             <Button key={day} className="!w-[32px] !h-[32px] md:!w-[38px] md:!h-[38px] !p-0 !min-w-0 !rounded-full !border !border-gray-300 !text-[0.75rem] md:!text-[1rem] font-bold text-[var(--color-primary)] flex items-center justify-center">
@@ -432,7 +239,7 @@ const CourseSchedule = () => {
                         ))}
                     </div>
                     <p className="text-[1rem] font-bold text-[var(--color-secondary)] cursor-pointer">Điều chỉnh lịch học</p>
-                </Card>
+                </Card> */}
 
                 <Card
                     className="w-full h-auto !rounded-[20px] !border !border-gray-300 shadow-sm"
@@ -448,21 +255,18 @@ const CourseSchedule = () => {
                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">
                         Sự kiện sắp tới
                     </p>
-                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar group relative">
+                        <div className="w-full text-center mt-4 text-sm text-gray-400 block group-has-[.visible-card]:hidden">
+                            Chưa có sự kiện nào
+                        </div>
                         {!quizzes || !enrollment ? null : (
                             quizzes.map(q => (
                                 <QuizCard
                                     key={q.id}
                                     quiz={q}
                                     enrollment={enrollment}
-                                    onVisible={() => setVisibleCount(v => v + 1)}
                                 />
                             ))
-                        )}
-                        {visibleCount === 0 && (
-                            <p className="text-sm text-gray-400 text-center mt-4">
-                                Chưa có sự kiện nào
-                            </p>
                         )}
                     </div>
                 </Card>
