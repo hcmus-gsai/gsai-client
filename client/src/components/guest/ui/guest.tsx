@@ -524,7 +524,7 @@ const FunctionSection = (
                         <Card
                             style={{ width: "17vw", borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}
                         >
-                            <div className="flex flex-col justify-center items-center max-h-[22vh] overflow-auto">
+                            <div className="flex flex-col justify-center items-center overflow-auto">
                                 <Image
                                     src={walletIcon}
                                     alt="Wallet Icon"
@@ -585,7 +585,7 @@ const FunctionSection = (
                         <Card
                             style={{ width: "17vw", borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}
                         >
-                            <div className="flex flex-col justify-center items-center max-h-[20vh] overflow-auto">
+                            <div className="flex flex-col justify-center items-center overflow-auto">
                                 <Image
                                     src={userTickIcon}
                                     alt="Wallet Icon"

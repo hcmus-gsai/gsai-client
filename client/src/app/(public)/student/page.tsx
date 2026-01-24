@@ -94,7 +94,7 @@ export default function StudentLandingPage() {
                 }}
             />
             <WorkFlowSection />
-            <CourseDisplaySection />
+            {/* <CourseDisplaySection /> */}
             <TestimonialSection />
             <FooterSection />
 
