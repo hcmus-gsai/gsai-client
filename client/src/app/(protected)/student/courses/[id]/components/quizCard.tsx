@@ -46,8 +46,7 @@ export function QuizCard({ quiz, enrollment, onVisible }: Props) {
     const expired = isExpired(enrollment.enrolled_at, quiz.expired_date || 0);
 
     if (attempt?.status === 'graded') {
-        return (<div className = "text-light">Chưa có sự kiện nào</div>);
-
+        return;
     }
 
     return (
