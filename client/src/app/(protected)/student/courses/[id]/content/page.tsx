@@ -197,8 +197,6 @@ const CourseModules = () => {
 }
 
 const CourseSchedule = () => {
-    const [visibleCount, setVisibleCount] = useState(0);
-
     const { id: courseId } = useParams();
     const { data: quizzes } = useGetQuizzesByCourseIdQuery(courseId as string);
 
@@ -211,20 +209,15 @@ const CourseSchedule = () => {
         }),
     });
 
-    useEffect(() => {
-        setVisibleCount(0);
-    }, [quizzes]);
-
     return (
         // Mobile: w-full, Desktop: w-[25%]
         <section className="w-full md:w-[25%] flex flex-col items-start justify-start">
             <div className="w-full h-full flex flex-col items-start justify-start gap-[1.5rem] md:gap-[2rem]">
 
-                <Card className="w-full !rounded-[20px] !border !border-gray-300">
+                {/* <Card className="w-full !rounded-[20px] !border !border-gray-300">
                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[0.5rem]">Lịch học</p>
                     <p className="text-[0.875rem] mb-[0.5rem]">Tôi cam kết sẽ học 3 ngày mỗi tuần.</p>
 
-                    {/* Day Buttons: Justify between để dàn đều */}
                     <div className="w-full flex items-center justify-between mb-[0.5rem] gap-1">
                         {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => (
                             <Button key={day} className="!w-[32px] !h-[32px] md:!w-[38px] md:!h-[38px] !p-0 !min-w-0 !rounded-full !border !border-gray-300 !text-[0.75rem] md:!text-[1rem] font-bold text-[var(--color-primary)] flex items-center justify-center">
@@ -233,7 +226,7 @@ const CourseSchedule = () => {
                         ))}
                     </div>
                     <p className="text-[1rem] font-bold text-[var(--color-secondary)] cursor-pointer">Điều chỉnh lịch học</p>
-                </Card>
+                </Card> */}
 
                 <Card
                     className="w-full h-auto !rounded-[20px] !border !border-gray-300 shadow-sm"
@@ -249,21 +242,18 @@ const CourseSchedule = () => {
                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">
                         Sự kiện sắp tới
                     </p>
-                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar group relative">
+                        <div className="w-full text-center mt-4 text-sm text-gray-400 block group-has-[.visible-card]:hidden">
+                            Chưa có sự kiện nào
+                        </div>
                         {!quizzes || !enrollment ? null : (
                             quizzes.map(q => (
                                 <QuizCard
                                     key={q.id}
                                     quiz={q}
                                     enrollment={enrollment}
-                                    onVisible={() => setVisibleCount(v => v + 1)}
                                 />
                             ))
-                        )}
-                        {visibleCount === 0 && (
-                            <p className="text-sm text-gray-400 text-center mt-4">
-                                Chưa có sự kiện nào
-                            </p>
                         )}
                     </div>
                 </Card>
