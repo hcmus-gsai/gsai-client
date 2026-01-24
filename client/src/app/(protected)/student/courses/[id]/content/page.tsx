@@ -127,7 +127,7 @@ const CourseModules = () => {
                             if (isCompleted) currentStats.quiz.completed++;
                         } else if (lesson.type === 'project') {
                             currentStats.project.total++;
-
+                            if (isCompleted) currentStats.project.completed++;
                         }
 
                         const totalLessonInModule = currentStats.video.total + currentStats.document.total + currentStats.quiz.total + currentStats.project.total;
