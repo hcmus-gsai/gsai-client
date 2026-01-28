@@ -24,8 +24,7 @@ const QuizAIContent = ({ lessonId }: { lessonId: string }) => {
                     </div>
 
                     <Button
-                        className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white !border !border-[var(--color-secondary)]
-                                    hover:!bg-neutral hover:!text-[var(--color-secondary)]"
+                        className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white !border !border-[var(--color-secondary)] hover:!bg-neutral hover:!text-[var(--color-secondary)]"
                     >
                         Bắt đầu
                     </Button>

@@ -29,5 +29,6 @@ export const chatApi = baseApi.injectEndpoints({
 
 export const {
     useSendMessageMutation,
-    useGetChatHistoryQuery
+    useGetChatHistoryQuery,
+    useLazyGetChatHistoryQuery
 } = chatApi;

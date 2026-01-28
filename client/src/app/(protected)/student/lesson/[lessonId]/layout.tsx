@@ -37,10 +37,7 @@ export default function LessonLayout({
     return (
         <main className="w-full grow flex flex-col items-center justify-center min-h-screen overflow-x-clip">
             <section
-                className={`flex flex-col items-center justify-center transition-all duration-300 ${isFullWidthMode
-                    ? "w-full h-full mt-[6rem] px-4"
-                    : "w-[var(--global-width)] mt-[10rem] mb-[2rem]"
-                    }`}
+                className={`flex flex-col items-center justify-center transition-all duration-300 ${isFullWidthMode ? "w-full h-full mt-[6rem] px-4": "w-[var(--global-width)] mt-[10rem] mb-[2rem]"}`}
             >
                 {/* 
                   Wrapper div to maintain tree structure. 
@@ -48,10 +45,7 @@ export default function LessonLayout({
                   In full mode: w-full h-full block (or flex)
                 */}
                 <div
-                    className={`w-full ${isFullWidthMode
-                        ? "h-full"
-                        : "flex items-start justify-center gap-[1.5rem]"
-                        }`}
+                    className={`w-full ${isFullWidthMode? "h-full": "flex items-start justify-center gap-[1.5rem]"}`}
                 >
                     {!isFullWidthMode && <ContentSection />}
 

@@ -122,15 +122,7 @@ const ContentSection = () => {
             {!extendableNavbar && (
                 <Button
                     onClick={toggleExtendableNavbar}
-                    className="
-                        !w-[48px] !h-[48px]
-                        !p-0
-                        !flex !items-center !justify-center
-                        !bg-[var(--color-secondary)]
-                        !border border-gray-200
-                        !rounded-full
-                        transition-all duration-300
-                    "
+                    className="!w-[48px] !h-[48px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border border-gray-200 !rounded-full transition-all duration-300"
                     icon={
                         <Menu className="!text-white text-[22px]" />
                     }
@@ -139,10 +131,7 @@ const ContentSection = () => {
             )}
 
             {/* Extendable Navbar with smooth transition */}
-            <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar
-                ? 'w-[24%] opacity-100'
-                : 'w-0 opacity-0 !p-0 !border-0'
-                }`}>
+            <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar ? 'w-[24%] opacity-100' : 'w-0 opacity-0 !p-0 !border-0'}`}>
 
                 <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
                     <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
@@ -224,12 +213,7 @@ const ContentSection = () => {
                                                                 <p className="text-[0.75rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">{lesson.lesson_name}</p>
                                                                 <div className="w-full flex items-center justify-start gap-2">
                                                                     <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
-                                                                        {lesson.type === 'video'
-                                                                            ? 'Video'
-                                                                            : lesson.type === 'quiz'
-                                                                                ? 'Quiz'    
-                                                                                : 'Bài đọc'
-                                                                        }
+                                                                        {lesson.type === 'video'? 'Video': lesson.type === 'quiz'? 'Quiz'    : 'Bài đọc'}
                                                                     </p>
                                                                     <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
                                                                 </div>

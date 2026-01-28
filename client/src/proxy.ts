@@ -38,7 +38,6 @@ export async function proxy(req: any) {
 
     // Nếu user truy cập vùng authentication, direct về trang role/home
     if (path.startsWith('/auth')) {
-      console.log('Im fucking here');
       return NextResponse.redirect(new URL(`/${role}/home`, req.url));
     }
 

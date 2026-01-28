@@ -8,11 +8,21 @@ import { RobotOutlined } from '@ant-design/icons';
 
 //For Voice Recorder
 import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
+import AudioWaveForm from "@/../public/student/AudioWaveForm.svg";
+import AudioWaveFormHover from "@/../public/student/AudioWaveFormHover.svg";
+
 import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
 import { useSendMessageMutation, useGetChatHistoryQuery } from '@/store/api/[module]/chatApi';
 import { ContentType } from '@/type/chat.type';
 import { useParams } from 'next/navigation';
 import { useAppSelector } from '@/store/hook';
+import Image from 'next/image';
+import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
+import { useGetUserProfileQuery } from '@/store/api/[module]/userApi';
+//Clone voice
+import {useCloneVoiceMutation} from "@/store/api/[module]/voiceApi";
+
+//===========
 
 interface Message {
     sender: 'user' | 'bot';
@@ -23,11 +33,21 @@ const ChatbotSection = () => {
 
     const [sendMessage] = useSendMessageMutation();
     const moduleId = useAppSelector((state) => state.lesson.moduleId);
+    const params = useParams();
 
     const [extendableNavbar, setExtendableNavbar] = useState(false);
     const toggleExtendableNavbar = () => {
         setExtendableNavbar(prev => !prev);
     };
+
+    const {data: courseResult} = useGetCoursesByLessonIdQuery(params.lessonId as string);
+    const teacherId = courseResult?.data?.teacher_id;
+    console.log('Teacher id in chatbot:', teacherId);
+
+
+    useEffect(() => {
+    }, [moduleId]);
+
 
     // Skip query nếu moduleId chưa có (tránh gọi API với moduleId undefined)
     const { data: historyData, isLoading, isFetching } = useGetChatHistoryQuery(
@@ -40,6 +60,14 @@ const ChatbotSection = () => {
             skip: !moduleId
         }
     );
+
+    useEffect(() => {
+        console.log('Loaded previous history data for chatbot', historyData);
+        
+        
+    }, [])
+
+    
 
     //===========ASR Service============//
     const [permission, setPermission] = useState(false);
@@ -163,15 +191,26 @@ const ChatbotSection = () => {
 
     // Ref để track xem đã load history lần đầu chưa
     const isInitialLoad = useRef(true);
+    const hasLoadedHistory = useRef(false);
+
+    // Debug logs - để theo dõi bug history mất khi reload
+    useEffect(() => {
+        console.log('ChatBot Debug:', {
+            moduleId,
+            hasHistoryData: !!historyData,
+            historyMessagesCount: historyData?.messages?.length || 0,
+            isLoading,
+            isFetching,
+            hasLoadedHistory: hasLoadedHistory.current,
+            currentMessagesCount: messages.length
+        });
+    }, [moduleId, historyData, isLoading, isFetching, messages.length]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
             behavior: hasLoadedHistory.current ? "smooth" : "auto",
         });
     }, [messages]);
-
-    // Load history từ API - chỉ load 1 lần khi có data và chưa có messages
-    const hasLoadedHistory = useRef(false);
 
     useEffect(() => {
         if (historyData?.messages && historyData.messages.length > 0 && !hasLoadedHistory.current) {
@@ -237,6 +276,167 @@ const ChatbotSection = () => {
         }
     }
     //=======================================//
+
+    //===========Voice Clone Service===============//
+    const [voiceCloneRecording, setVoiceCloneRecording] = useState(false);
+    const [voiceCloneStream, setVoiceCloneStream] = useState<MediaStream | null>(null);
+    const voiceCloneMediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const voiceCloneChunksRef = useRef<Blob[]>([]);
+    const voiceCloneAudioContextRef = useRef<AudioContext | null>(null);
+    const voiceCloneAnalyserRef = useRef<AnalyserNode | null>(null);
+    const voiceCloneRafRef = useRef<number | null>(null);
+
+    const requestVoiceCloneMicrophoneAccess = async () => {
+        try {
+            const voiceCloneStreamData = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            });
+            setPermission(true);
+            setVoiceCloneStream(voiceCloneStreamData);
+            alert("Cho phép truy cập Micro thành công!");
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+        }
+    }
+
+    const [cloneVoiceTrigger] = useCloneVoiceMutation();
+
+    const handleVoiceClone = async () => {
+        if (!permission) {
+            await requestVoiceCloneMicrophoneAccess();
+            return;
+        }
+
+        try {
+            if (!voiceCloneRecording && voiceCloneStream) {
+                const mediaRecorder = new MediaRecorder(voiceCloneStream);
+                voiceCloneMediaRecorderRef.current = mediaRecorder;
+                voiceCloneChunksRef.current = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) voiceCloneChunksRef.current.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const asrAudioBlob = new Blob(voiceCloneChunksRef.current, { type: "audio/webm" });
+                    const asrAudioFile = new File([asrAudioBlob], "recording.webm", { type: "audio/webm" });
+                    
+                    const formData = new FormData();
+                    formData.append("file", asrAudioFile);
+                    
+                    try {
+                        const { transcript } = await transcribeAudio(formData).unwrap();
+                        console.log("User transcript:", transcript);
+                        
+                        // setMessages(prev => [...prev, {
+                        //     sender: "user",
+                        //     text: transcript
+                        // }]);
+
+                        // if (!moduleId) {
+                        //     setMessages((prev) => [
+                        //         ...prev,
+                        //         { sender: "bot", text: "Không tìm thấy module. Vui lòng quay lại trang khóa học và chọn bài học." },
+                        //     ]);
+                        //     return;
+                        // }
+
+                        // const chatResponse = await sendMessage({
+                        //     module_id: moduleId,
+                        //     content_type: ContentType.TEXT,
+                        //     message_text: transcript,
+                        // }).unwrap();
+
+                        // const botResponseText = chatResponse.bot_response.message_text;
+                        // console.log("Bot response text:", botResponseText);
+
+                        const voiceCloneResponse = await cloneVoiceTrigger({
+                            text: transcript,
+                            voice_name: "leonas", // Có thể thay đổi voice_name
+                            teacher_id: teacherId as string
+                        }).unwrap();
+                        
+                        console.log('Voice cloned successfully:', voiceCloneResponse);
+                        
+                        setMessages(prev => [...prev, {
+                            sender: "bot",
+                            text: transcript
+                        }]);
+
+                        // Phát audio đã clone
+                        const audioUrl = voiceCloneResponse.cloned_audio_url;
+                        const clonedAudio = new Audio(audioUrl);
+                        clonedAudio.play().catch(error => {
+                            console.error('Error playing cloned audio:', error);
+                        });
+
+                    } catch (error) {
+                        console.error("Error in voice clone flow:", error);
+                        setMessages(prev => [...prev, {
+                            sender: "bot",
+                            text: "Có lỗi xảy ra trong quá trình xử lý giọng nói."
+                        }]);
+                    }
+
+                    // Cleanup volume animation
+                    if (voiceCloneRafRef.current) cancelAnimationFrame(voiceCloneRafRef.current);
+                    voiceCloneAudioContextRef.current?.close();
+                    setVolume(0);
+                };
+
+                mediaRecorder.start();
+                setVoiceCloneRecording(true);
+                console.log("Voice recording started...");
+
+                // Setup volume visualization
+                const audioContext = new AudioContext();
+                await audioContext.resume();
+                voiceCloneAudioContextRef.current = audioContext;
+
+                const source = audioContext.createMediaStreamSource(voiceCloneStream);
+                const voiceCloneAnalyser = audioContext.createAnalyser();
+                voiceCloneAnalyser.fftSize = 512;
+                voiceCloneAnalyserRef.current = voiceCloneAnalyser;
+
+                source.connect(voiceCloneAnalyser);
+
+                const dataArray = new Uint8Array(voiceCloneAnalyser.fftSize);
+
+                const animate = () => {
+                    voiceCloneAnalyser.getByteTimeDomainData(dataArray);
+
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        const value = dataArray[i] - 128;
+                        sum += Math.abs(value);
+                    }
+
+                    setVolume(sum / dataArray.length);
+                    voiceCloneRafRef.current = requestAnimationFrame(animate);
+                };
+
+                animate();
+                
+            } else if (voiceCloneRecording && voiceCloneMediaRecorderRef.current) {
+                // Dừng recording khi bấm lần 2
+                voiceCloneMediaRecorderRef.current.stop();
+                setVoiceCloneRecording(false);
+                console.log("Voice recording stopped.");
+            }
+
+        } catch (error) {
+            console.error("Error in handleVoiceClone:", error);
+            setMessages(prev => [...prev, {
+                sender: "bot",
+                text: "Có lỗi xảy ra khi xử lý giọng nói."
+            }]);
+        }
+    }
+
+    //=======================================//
+
+
     return (
         <>
             {!extendableNavbar && (
@@ -248,34 +448,15 @@ const ChatbotSection = () => {
                         right: 24,
                         zIndex: 9999,
                     }}
-                    className="
-                        !w-[56px]
-                        !h-[56px]
-                        !p-0
-                        !rounded-full
-                        !bg-[var(--color-secondary)]
-                    "
+                    className="!w-[56px] !h-[56px] !p-0 !rounded-full !bg-[var(--color-secondary)]"
                     icon={<RobotOutlined className="!text-white text-[24px]" />}
                 />
 
             )}
 
-            <nav
-                className={`
-                    fixed
-                    bottom-6
-                    right-6
-                    z-50
-                    h-[480px]
-                    flex flex-col
-                    border border-gray-200
-                    rounded-[20px]
-                    bg-white
-                    shadow-xl
-                    transition-all duration-300
-                    ${extendableNavbar ? 'w-[360px]' : 'w-0 opacity-0 pointer-events-none'}
-                `}
-            >
+
+
+            <nav className={`fixed bottom-6 right-6 z-50 h-[480px] flex flex-col border border-gray-200 rounded-[20px] bg-white shadow-xl transition-all duration-300 ${extendableNavbar ? 'w-[360px]' : 'w-0 opacity-0 pointer-events-none'}`}>
                 <div className="h-[48px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
                     <span className="font-semibold text-[var(--color-primary)]">
                         Trợ lý học tập
@@ -289,13 +470,7 @@ const ChatbotSection = () => {
 
                 <div
                     ref={chatContainerRef}
-                    className="
-                    flex-1
-                    w-full
-                    flex flex-col gap-[1rem]
-                    overflow-y-auto
-                    p-[0.5rem]
-                "
+                    className="flex-1 w-full flex flex-col gap-[1rem] overflow-y-auto p-[0.5rem]"
                 >
                     {messages.map((msg, index) =>
                         msg.sender === 'user' ? (
@@ -367,6 +542,37 @@ const ChatbotSection = () => {
                             ) : (
                                 <AudioOutlined />
                             )}
+                        </Button>
+
+                        <Button
+                            onClick = {handleVoiceClone}
+                            icon = {
+                                voiceCloneRecording ?(
+                                    <div className="flex items-center gap-[3px] h-[22px]">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span
+                                                key={i}
+                                                className="w-[3px] bg-[var(--color-secondary)] rounded"
+                                                style={{
+                                                    height: `${Math.min(
+                                                        22,
+                                                        Math.max(4, volume * 0.8 * Math.random())
+                                                    )}px`,
+                                                    transition: "height 0.08s linear",
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                ):(
+                                    <div className = "relative w-6 h-6">
+                                        <Image src = {AudioWaveForm} alt = "Audio Wave Form" width = {24} height = {24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-100 group-hover:opacity-0"/>
+                                        <Image src = {AudioWaveFormHover} alt="Audio wave form hover"  width={24}  height={24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100"/>
+                                    </div>
+                                )
+                            }
+                            className = "group !rounded-full !border-none !relative !flex !items-center !justify-center"
+                        >
+
                         </Button>
                     </Form>
                 </div>
