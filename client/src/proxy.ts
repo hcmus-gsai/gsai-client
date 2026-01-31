@@ -8,10 +8,21 @@ export async function proxy(req: any) {
   const token = req.cookies.get('accessToken')?.value;
 
   // Không có token → cho vào public routes
-  const publicPaths = ['/auth/signin', '/auth/signup', '/student', '/teacher'];
+  const publicPaths = [
+    '/auth/signin', 
+    '/auth/signup', 
+    '/auth/google-callback',  // Allow Google OAuth callback
+    '/auth/complete-profile',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/auth/send-email-success',
+    '/auth/resend-link',
+    '/teacher',
+    '/student',
+  ];
   if (!token) {
 
-    if (publicPaths.includes(req.nextUrl.pathname)) {
+    if (publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/auth/signin', req.url));
@@ -50,5 +61,5 @@ export async function proxy(req: any) {
 
 // Áp dụng middleware cho các route cần bảo vệ
 export const config = {
-  matcher: ['/student/:path*', '/teacher/:path*', '/auth/:path*'],
+  matcher: ['/student/:path*', '/teacher/:path*'], //'/auth/:path*'
 };

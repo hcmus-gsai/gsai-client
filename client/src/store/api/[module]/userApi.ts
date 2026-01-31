@@ -1,7 +1,8 @@
 
 import { baseApi } from '../baseApi';
-import { UserResponse, UserRequest } from '../../../type/user.type';
+import { UserResponse, UserRequest, CompletedLessonByDate } from '../../../type/user.type';
 import { updateUser } from 'better-auth/api';
+import { get } from 'http';
 
 export const userApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -40,6 +41,17 @@ export const userApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
+
+        // User Statistic
+        getStreak: builder.query<number, void>({
+            query: () => '/user-statistic/streak',
+            providesTags: ['User'],
+        }),
+
+        getCompletedLessonsLast7Days: builder.query<CompletedLessonByDate[], void>({
+            query: () => '/user-statistic/completed-lessons-last-7-days',
+            providesTags: ['User'],
+        }),
     })
 });
 
@@ -49,4 +61,8 @@ export const {
     useUpdateUserAvatarMutation,
     useGetUserAvatarQuery,
     useDeleteUserAvatarMutation,
+
+    // User Statistic
+    useGetStreakQuery,
+    useGetCompletedLessonsLast7DaysQuery,
 } = userApi;

@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.6.7",
     "@ant-design/nextjs-registry": "^1.2.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@deemlol/next-icons": "^0.1.9",
@@ -38,6 +39,7 @@
     "react-dom": "^19.2.1",
     "react-pdf": "^10.3.0",
     "react-redux": "^9.2.0",
+    "recharts": "^3.7.0",
     "redux-persist": "^6.0.0",
     "resend": "^6.4.2",
     "tailwind-merge": "^3.3.1"

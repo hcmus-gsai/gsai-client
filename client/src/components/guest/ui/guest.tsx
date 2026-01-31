@@ -315,7 +315,7 @@ const CourseDisplaySection = () => {
                                         <h3 className="text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
 
                                         <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
-                                            bởi {c.teacher}
+                                            bởi {c.teacher_name}
                                         </p>
 
                                         <div className="flex items-center justify-center">

@@ -19,3 +19,10 @@ export interface UserRequest {
     location: string;
     avatar_url?: string;
 }
+
+// For User Statistic
+export interface CompletedLessonByDate {
+    date: string;   // '2026-01-30'
+    count: number;  // số lesson hoàn thành trong ngày
+    detail: Record<string, number>; // chi tiết theo loại lesson
+}

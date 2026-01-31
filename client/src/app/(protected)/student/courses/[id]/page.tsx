@@ -53,27 +53,27 @@ const CourseSyllabusSection = () => {
     ]
 
     return (
-        <section className = "w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
-            <div className = "w-[var(--global-width)] px-4 sm:px-0 flex flex-col gap-[3rem] sm:gap-[4rem]">
-                <div className = "w-full">
-                    <div><p className = "text-[1.25rem] sm:text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Bạn sẽ học được</p></div>
-                    <div className = "w-full grid grid-cols-1 md:grid-cols-2 gap-[1rem]">
-                        {achievableKnowledge.slice(0,4).map((knowledge) => (
-                            <Card key = {knowledge.title} className = "!pr-[1.5rem] !border-gray-200 hover:shadow-[10px_10px_10px_var(--color-neutral)] transition-all duration-300 !rounded-[20px]">
-                                <p className = "text-[1.1rem] sm:text-[1.25rem] font-bold text-[var(--color-primary)]">{knowledge.title}</p>
-                                <p className = "text-[0.9rem] sm:text-[1rem] font-light text-[var(--color-primary)]">{knowledge.description}</p>
+        <section className="w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
+            <div className="w-[var(--global-width)] px-4 sm:px-0 flex flex-col gap-[3rem] sm:gap-[4rem]">
+                <div className="w-full">
+                    <div><p className="text-[1.25rem] sm:text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Bạn sẽ học được</p></div>
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-[1rem]">
+                        {achievableKnowledge.slice(0, 4).map((knowledge) => (
+                            <Card key={knowledge.title} className="!pr-[1.5rem] !border-gray-200 hover:shadow-[10px_10px_10px_var(--color-neutral)] transition-all duration-300 !rounded-[20px]">
+                                <p className="text-[1.1rem] sm:text-[1.25rem] font-bold text-[var(--color-primary)]">{knowledge.title}</p>
+                                <p className="text-[0.9rem] sm:text-[1rem] font-light text-[var(--color-primary)]">{knowledge.description}</p>
                             </Card>
                         ))}
                     </div>
                 </div>
 
-                <div className = "w-full">
-                    <div><p className = "text-[1.25rem] sm:text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Kỹ năng bạn sẽ học được</p></div>
-                      
-                    <div className = "w-full flex flex-wrap items-center justify-start gap-2">
+                <div className="w-full">
+                    <div><p className="text-[1.25rem] sm:text-[1.5rem] font-bold text-[var(--color-primary)] mb-[1rem]">Kỹ năng bạn sẽ học được</p></div>
+
+                    <div className="w-full flex flex-wrap items-center justify-start gap-2">
                         {achievableSkills.map((skill) => (
-                            <div key = {skill} className = "min-w-[120px] sm:w-[145px] h-[32px] px-3 sm:px-0 bg-blue-200 flex items-center justify-center rounded-full">
-                                <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-secondary)]">{skill}</p>
+                            <div key={skill} className="min-w-[120px] sm:w-[145px] h-[32px] px-3 sm:px-0 bg-blue-200 flex items-center justify-center rounded-full">
+                                <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-secondary)]">{skill}</p>
                             </div>
                         ))}
                     </div>
@@ -136,125 +136,125 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
 
     return (
         <>
-        {isModalOpen && (
-            <CourseRegisterModal isOpen={isModalOpen} onClose={closeModal}>
-                <p className = "text-[1.5rem] font-bold text-[var(--color-primary)] text-center mb-[1rem]">Xác nhận đăng kí môn học</p>
-                <p className = "text-[1rem] font-light text-[var(--color-primary)] text-center mb-[2rem]">Bạn có chắc chắn muốn đăng ký môn học này không? Hãy xác nhận để bắt đầu học ngay!</p>
-                <div className = "w-full flex items-center justify-center gap-2">
-                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
-                        onClick = {closeModal}
-                    >Hủy</Button>
-                    <Button className = "!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
-                        onClick = {handleConfirmRegisterCourse}
-                        loading = {isEnrolling}
-                    >
-                        Đăng ký ngay
-                    </Button>
-                </div>
-            </CourseRegisterModal>
-        )}
-        
-        
-        
-        <section className = "w-full flex flex-col relative">
-            <div className="w-full absolute top-0 left-0 z-[-1]">
-                <Image 
-                    src = {AbstractMiddle} alt = "Curve Space Middle" width = {0} height = {0}
-                    className = "w-full h-auto object-cover"
-                />
-            </div>
-            
-            <div className = "w-full h-full flex flex-col items-center z-10">
-                <div className = "w-[var(--global-width)] mt-[5vh] px-4 sm:px-0 flex flex-col justify-between">
-                    <div className = "h-full w-full md:w-[80%] lg:w-[60%] flex flex-col items-start justify-between">
-                        <div className = {`flex flex-col items-start justify-between w-full mb-[2rem]`}>                    
-                            <p className = {`text-[2rem] sm:text-[3rem] lg:text-[3.5rem] font-bold text-[var(--color-primary)]`}>{courseData?.course_name}</p>
-                            <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)] mb-[2rem]">{courseData?.course_description}</p>
-                            <div className = "flex items-center justify-center gap-2">
-                                <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
-                                    <Image
-                                        src={EmptyLayout}
-                                        alt="Empty Layout"
-                                        width={0}
-                                        height={0}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">{courseData?.teacher}</p>
-                            </div> 
-                        </div>
-                        <div className = "w-full sm:w-auto sm:flex-row flex items-center justify-start mb-[1.5rem]">
-                            
-                            {courseData.is_enrolled ? (
-                                <Button 
-                                onClick = {() => router.push(`/student/courses/${courseId}/content`)} className = "!w-full sm:!w-auto !min-w-[160px] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
-                                    Đi đến môn học
-                                </Button>
-                            ):(
-                                <Button
-                                onClick = {handleRegisterCourse} 
-                                className = "!w-full sm:!w-auto !min-w-[160px] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
-                                    Tham gia ngay
-                                </Button>
-                            )}
-                        </div>
+            {isModalOpen && (
+                <CourseRegisterModal isOpen={isModalOpen} onClose={closeModal}>
+                    <p className="text-[1.5rem] font-bold text-[var(--color-primary)] text-center mb-[1rem]">Xác nhận đăng kí môn học</p>
+                    <p className="text-[1rem] font-light text-[var(--color-primary)] text-center mb-[2rem]">Bạn có chắc chắn muốn đăng ký môn học này không? Hãy xác nhận để bắt đầu học ngay!</p>
+                    <div className="w-full flex items-center justify-center gap-2">
+                        <Button className="!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
+                            onClick={closeModal}
+                        >Hủy</Button>
+                        <Button className="!w-[50%] !h-[40px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black rounded-[20px] !text-[1rem]"
+                            onClick={handleConfirmRegisterCourse}
+                            loading={isEnrolling}
+                        >
+                            Đăng ký ngay
+                        </Button>
+                    </div>
+                </CourseRegisterModal>
+            )}
 
-                        <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>  
+
+
+            <section className="w-full flex flex-col relative">
+                <div className="w-full absolute top-0 left-0 z-[-1]">
+                    <Image
+                        src={AbstractMiddle} alt="Curve Space Middle" width={0} height={0}
+                        className="w-full h-auto object-cover"
+                    />
+                </div>
+
+                <div className="w-full h-full flex flex-col items-center z-10">
+                    <div className="w-[var(--global-width)] mt-[5vh] px-4 sm:px-0 flex flex-col justify-between">
+                        <div className="h-full w-full md:w-[80%] lg:w-[60%] flex flex-col items-start justify-between">
+                            <div className={`flex flex-col items-start justify-between w-full mb-[2rem]`}>
+                                <p className={`text-[2rem] sm:text-[3rem] lg:text-[3.5rem] font-bold text-[var(--color-primary)]`}>{courseData?.course_name}</p>
+                                <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)] mb-[2rem]">{courseData?.course_description}</p>
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
+                                        <Image
+                                            src={EmptyLayout}
+                                            alt="Empty Layout"
+                                            width={0}
+                                            height={0}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">GV. {courseData?.teacher_name}</p>
+                                </div>
+                            </div>
+                            <div className="w-full sm:w-auto sm:flex-row flex items-center justify-start mb-[1.5rem]">
+
+                                {courseData.is_enrolled ? (
+                                    <Button
+                                        onClick={() => router.push(`/student/courses/${courseId}/content`)} className="!w-full sm:!w-auto !min-w-[160px] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                        Đi đến môn học
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleRegisterCourse}
+                                        className="!w-full sm:!w-auto !min-w-[160px] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]">
+                                        Tham gia ngay
+                                    </Button>
+                                )}
+                            </div>
+
+                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>
 
                         </div>
 
                     </div>
                     {/*<CourseHighlightComponent/> */}
 
-                <div className = "mt-[8vh] sm:mt-[12vh] grid grid-cols-2 sm:grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px] border-2 border-gray-200 py-3 mx-4 sm:mx-0">
-                    <div className = "flex flex-col items-center w-full border-r-2 border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
-                        <div className = "mt-7 w-[80%] h-full text-center">
-                            {
-                                Number(courseData?.tuition_fee) === 0 ?(
-                                    <>
-                                    <p className = "text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
-                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
-                                    </>
-                                ):(
-                                    <>
-                                    <p className = "text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học có phí</p>
-                                    <p className = "text-[1rem] font-light text-[var(--color-primary)]">Phí: {courseData?.tuition_fee} VNĐ</p>
-                                    </>
-                                )
-                            }
+                    <div className="mt-[8vh] sm:mt-[12vh] grid grid-cols-2 sm:grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px] border-2 border-gray-200 py-3 mx-4 sm:mx-0">
+                        <div className="flex flex-col items-center w-full border-r-2 border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
+                            <div className="mt-7 w-[80%] h-full text-center">
+                                {
+                                    Number(courseData?.tuition_fee) === 0 ? (
+                                        <>
+                                            <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Khóa học miễn phí</p>
+                                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Mở rộng kỹ năng của bạn hoàn toàn miễn phí</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-[1.5rem] font-bold text-[var(--color-primary)]">Khóa học có phí</p>
+                                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Phí: {courseData?.tuition_fee} VNĐ</p>
+                                        </>
+                                    )
+                                }
+                            </div>
                         </div>
-                    </div>
 
-                    <div className = "flex flex-col items-center w-full border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
-                        <div className = "mt-7 h-full">
-                            <span className="flex mb-3">
-                                <p className = "text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
-                                
-                                <Image 
-                                    src = {starSVG} alt = "Star Icon" width = {0} height = {0}
-                                    className = "w-[1.4rem]"
-                                />
-                            </span>
-                            <p className = "text-[1rem] font-light text-[var(--color-primary)]">5.0 đánh giá</p>
-                        </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-center w-full border-r-2 border-gray-200">
-                        <div className="mt-7 w-[80%] h-full text-center">
-                            <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Trình độ trung cấp</p>
-                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Trình độ đề xuất</p>
-                        </div>
-                    </div>
+                        <div className="flex flex-col items-center w-full border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
+                            <div className="mt-7 h-full">
+                                <span className="flex mb-3">
+                                    <p className="text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
 
-                    <div className="flex flex-col items-center w-full">
-                        <div className="mt-7 w-[70%] h-full text-center">
-                            <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
-                            <p className="text-[1rem] font-light text-[var(--color-primary)]">Hoản thành {courseData?.duration} học</p>
+                                    <Image
+                                        src={starSVG} alt="Star Icon" width={0} height={0}
+                                        className="w-[1.4rem]"
+                                    />
+                                </span>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">5.0 đánh giá</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col items-center w-full border-r-2 border-gray-200">
+                            <div className="mt-7 w-[80%] h-full text-center">
+                                <p className="text-[1.5rem] mb-3 font-bold text-[var(--color-primary)]">Phân loại</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.category}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col items-center w-full">
+                            <div className="mt-7 w-[70%] h-full text-center">
+                                <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.duration}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
         </>
     )
 

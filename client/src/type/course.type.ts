@@ -15,21 +15,21 @@ export interface Course {
     category: string | string[];
     is_active: boolean;
     teacher_id: string;
-    teacher: string;
+    teacher_name: string;
     is_enrolled: boolean;
 }
 
 
 
 export interface CourseQueryParams {
-  name?: string;
-  category?: string;
-  minTuitionFee?: number;
-  maxTuitionFee?: number;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
+    name?: string;
+    category?: string;
+    minTuitionFee?: number;
+    maxTuitionFee?: number;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'ASC' | 'DESC';
 }
 
 export interface CourseListResponse {
