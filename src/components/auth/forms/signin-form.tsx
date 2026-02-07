@@ -29,9 +29,12 @@ const SignInForm = () => {
 
             // Redirect based on role
             if (role === 'student') {
-                window.location.href = '/student/home';
+                // window.location.href = '/student/home';
+                router.push('/student/home');
+                window.history.replaceState({}, document.title, "/student/home");
             } else if (role === 'teacher') {
-                window.location.href = '/teacher/home';
+                router.push('/teacher/home');
+                window.history.replaceState({}, document.title, "/teacher/home");
             } else {
                 window.location.href = '/';
             }

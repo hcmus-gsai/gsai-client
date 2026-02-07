@@ -57,6 +57,7 @@ const SignUpForm = () => {
 
             // Redirect to Complete Profile page
             router.push("/auth/complete-profile");
+            window.history.replaceState({}, document.title, "/auth/complete-profile");
 
             dispatch(addNotification({
                 type: 'success',
