@@ -21,8 +21,9 @@ export async function proxy(req: any) {
     '/student',
   ];
   if (!token) {
-
-    if (publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+    console.log('No token found, checking public paths.');
+    console.log(req.nextUrl.pathname);
+    if (publicPaths.some(path => req.nextUrl.pathname === path)) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/auth/signin', req.url));
