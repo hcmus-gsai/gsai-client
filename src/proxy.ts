@@ -9,8 +9,8 @@ export async function proxy(req: any) {
 
   // Không có token → cho vào public routes
   const publicPaths = [
-    '/auth/signin', 
-    '/auth/signup', 
+    '/auth/signin',
+    '/auth/signup',
     '/auth/google-callback',  // Allow Google OAuth callback
     '/auth/complete-profile',
     '/auth/forgot-password',
@@ -21,9 +21,8 @@ export async function proxy(req: any) {
     '/student',
   ];
   if (!token) {
-    console.log('No token found, checking public paths.');
-    console.log(req.nextUrl.pathname);
-    if (publicPaths.some(path => req.nextUrl.pathname === path)) {
+
+    if (publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/auth/signin', req.url));
