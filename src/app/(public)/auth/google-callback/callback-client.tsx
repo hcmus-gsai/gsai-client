@@ -29,11 +29,9 @@ function AuthCallbackContent() {
                     if (role === 'student') {
                         console.log('→ Redirecting to /student/home');
                         router.push('/student/home');
-                        window.history.replaceState({}, document.title, "/student/home");
                     } else if (role === 'teacher') {
                         console.log('→ Redirecting to /teacher/home');
                         router.push('/teacher/home');
-                        window.history.replaceState({}, document.title, "/teacher/home");
                     } else if (role === 'guest') {
                         console.log('→ Redirecting to /');
                         router.push('/');
@@ -42,7 +40,6 @@ function AuthCallbackContent() {
                     // First-time user, needs to complete profile
                     console.log('New user, redirecting to profile completion');
                     router.push('/auth/complete-profile');
-                    window.history.replaceState({}, document.title, "/auth/complete-profile");
                 } else {
                     // Authentication failed
                     const errorMsg = error || 'unknown';
