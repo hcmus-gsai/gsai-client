@@ -126,7 +126,8 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
         try {
             await enrollInCourse(courseId).unwrap();
             await createLearningProgress(courseId).unwrap();
-            // router.refresh();
+            closeModal();
+            router.refresh();
         }
         catch (error) {
             console.error('Đăng ký thất bại:', error);
