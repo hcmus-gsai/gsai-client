@@ -321,7 +321,7 @@ export default function LearningProgressPage() {
             const currentProgress = progress.find(p => !p.is_completed && p.lesson?.order_index === Math.min(...progress.filter(p => !p.is_completed).map(p => p.lesson?.order_index || 0)));
             return currentProgress?.lesson || null;
         }
-    }, [progressMap]); 
+    }, [progressMap]);
 
 
     const filteredEnrollments = useMemo(() => {
@@ -380,7 +380,10 @@ export default function LearningProgressPage() {
 
     const formatLabel = (dateStr: string) => {
         const d = dayjs(dateStr);
-        const thu = `T${d.day() === 0 ? 8 : d.day() + 1}`;
+        let thu = `T${d.day() === 0 ? 7 : d.day()}`;
+        if (d.day() === 0) {
+            thu = 'CN';
+        }
         return `${thu}, ${d.format('D/M')}`;
     };
 
@@ -394,29 +397,29 @@ export default function LearningProgressPage() {
         }));
     }, [weeklyLessons]);
 
-    const weeklyChartConfig = { 
-        data: weeklyChartData, 
-        xField: 'date', 
-        yField: 'value', 
+    const weeklyChartConfig = {
+        data: weeklyChartData,
+        xField: 'date',
+        yField: 'value',
         autoFit: true,
-        color: '#1363DF', 
-        columnWidthRatio: 0.5, 
-        xAxis: { 
-            label: { 
-                autoRotate: false, 
-                style: { fontSize: 12, fill: '#374151', }, 
-            }, 
-        }, 
-        yAxis: { 
-            title: { text: 'Số bài học', }, 
-            min: 0, 
-            tickInterval: 1, 
-        }, 
-        tooltip: { 
-            formatter: (datum: any) => ({ 
-                name: 'Bài học hoàn thành', value: datum.detail, 
-            }), 
-        }, 
+        color: '#1363DF',
+        columnWidthRatio: 0.5,
+        xAxis: {
+            label: {
+                autoRotate: false,
+                style: { fontSize: 12, fill: '#374151', },
+            },
+        },
+        yAxis: {
+            title: { text: 'Số bài học', },
+            min: 0,
+            tickInterval: 1,
+        },
+        tooltip: {
+            formatter: (datum: any) => ({
+                name: 'Bài học hoàn thành', value: datum.detail,
+            }),
+        },
     };
 
     const firstEnrollmentId = enrollments[0]?.id;
