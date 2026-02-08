@@ -31,12 +31,10 @@ const SignInForm = () => {
             if (role === 'student') {
                 // window.location.href = '/student/home';
                 router.push('/student/home');
-                window.history.replaceState({}, document.title, "/student/home");
             } else if (role === 'teacher') {
                 router.push('/teacher/home');
-                window.history.replaceState({}, document.title, "/teacher/home");
             } else {
-                window.location.href = '/';
+                router.push('/');
             }
 
             dispatch(addNotification({
