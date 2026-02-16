@@ -11,6 +11,7 @@ import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { ArrowLeftOutlined, ArrowRightOutlined, FacebookFilled, InstagramFilled, YoutubeFilled, MailOutlined, StarFilled } from "@ant-design/icons"
 
 import Cate_1 from "@/../public/guest/Cate_1.svg";
+import { PublicNavbar } from "@/components/shared/PublicNavbar";
 import Cate_2 from "@/../public/guest/Cate_2.svg";
 import Cate_3 from "@/../public/guest/Cate_3.svg";
 import Cate_4 from "@/../public/guest/Cate_4.svg";
@@ -59,95 +60,29 @@ const GreetingSection = () => {
     const router = useRouter();
 
     return (
-        <section className="w-full h-[80vh] flex flex-col items-center justify-center">
-            <div className="flex w-[var(--global-width)] items-center justify-between h-[4.8125rem]">
-                <div className="flex flex-1 items-center justify-start gap-2">
-                    <div className="text-2xl font-bold">
-                        <Image src={WhiteEpisLogo} alt="Epis Logo" width={0} height={0} className="w-full h-full object-cover" />
-                    </div>
+        <section className="flex-1 flex flex-col items-center justify-center w-full min-h-[100vh] px-4">
+            <div className="flex flex-col items-center justify-center gap-8 max-w-[var(--global-width)] text-center">
+                <div className="text-6xl md:text-7xl font-bold leading-tight">
+                    <p className="text-[var(--color-primary)]">Chào Mừng Đến Với EPIS</p>
                 </div>
-                <div className="flex flex-1 items-center justify-center gap-2 ">
-                    <Menu
-                        mode="horizontal"
-                        defaultSelectedKeys={["home"]}
-                        items={[
-                            { key: "intro", label: <span className="!text-[var(--color-primary)] !text-[1rem]">Giới thiệu</span> },
-                            { key: "courses", label: <span className="!text-[var(--color-primary)] !text-[1rem]">Môn học</span> },
-                            { key: "evaluate", label: <span className="!text-[var(--color-primary)] !text-[1rem]">Đánh giá</span> },
-                            { key: "contact", label: <span className="!text-[var(--color-primary)] !text-[1rem]">Liên hệ</span> },
-                        ]}
-                        className="!border-none !flex-1 !flex !items-center !justify-center"
-                        style={{
-                            backgroundColor: 'transparent'
-                        }}
-                    />
-                </div>
-                <div className="flex flex-1 items-center justify-end gap-2">
-                    <div className="flex items-center justify-center gap-2">
-                        {/* <RedirectButton
-                            title = "auth/signin"
-                            text = "Tham gia ngay"
-                            buttonText = "var(--color-bg_white)"
-                            buttonBorder = "white"
-                            iconBg = "var(--color-bg-white)"
-                            iconText = "var(--color-secondary)"
-                        /> */}
-                        <Button
-                            type="primary"
-                            className={`!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent`}
-                            style={{ border: `1px solid white` }}
-                            onClick={() => router.push("/auth/signin")}
-                        >
-                            <div className="mr-auto flex items-center justify-center relative w-[calc(100%-3rem)] left-[0.5rem]">
-                                <span className={`text-[1rem] !text-white`}>Tham gia ngay</span>
-                            </div>
 
-                            <div className={`ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem]  rounded-full relative right-[-0.75rem]`} style={{ backgroundColor: `white` }}>
-                                <span className="flex items-center justify-center rounded-full p-2 w-full h-full">
-                                    <ArrowRightOutlined className={`!-rotate-45 !text-[var(--color-secondary)]`} />
-                                </span>
-                            </div>
-                        </Button>
+                <div className="space-y-3 text-lg md:text-xl text-gray-600">
+                    <p>Bạn đang gặp khó khăn trong quá trình học tập của mình?</p>
+                    <p>Bạn cần một gia sư đồng hành cùng mình?</p>
+                    <p>Đừng lo lắng.</p>
+                </div>
 
-                        {/* <Button
-                            type="primary"
-                            className = "!w-[10.5rem] !h-[3rem] !rounded-full !flex !items-center !justify-center !bg-transparent !border-white"
-                            onClick = {() => router.push("/auth/signin")}
-                        >
-                            <span className = "text-[1rem] text-white">Tham gia ngay</span>
-                            <div className = "ml-2 flex items-center justify-center w-[2rem] h-[2rem] bg-white rounded-full">
-                                <ArrowRightOutlined className="!-rotate-45 !text-[var(--color-secondary)]" />
-                            </div>
-                        </Button> */}
-                    </div>
-                </div>
-            </div>
-            <div className="mx-auto w-full h-full flex flex-col items-center justify-center gap-8 w-[calc(100vh-40px)]">
-                <div className="flex items-center justify-center gap-4">
-                    <div className="text-7xl font-bold leading-tight">
-                        <p className="text-center !text-[var(--color-primary)]">Chào Mừng Đến Với EPIS</p>
-                    </div>
-                </div>
-                <div className="flex flex-col justify-center items-center gap-4">
-                    <div className="text-[1rem] font-medium text-gray-600 text-center">
-                        <p>Bạn đang gặp khó khăn trong quá trình học tập của mình?</p>
-                        <p>Bạn cần một gia sư đồng hành cùng mình?</p>
-                        <p>Đừng lo lắng.</p>
-                    </div>
-                    <div className="flex items-center justify-center">
-                        <Button
-                            type="default"
-                            className="!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                            onClick={() => router.push("/auth/signin")}
-                        >
-                            Khám phá ngay
-                        </Button>
-                    </div>
-                </div>
+                <Button
+                    type="default"
+                    className="!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-10 !py-6 !rounded-full !text-xl min-w-[240px]"
+                    onClick={() => router.push("/auth/signin")}
+                >
+                    Khám phá ngay
+                </Button>
             </div>
         </section>
-    )
-}
+    );
+};
 
 const StyledButton = (
     {
@@ -393,29 +328,7 @@ const FooterSection = ({
     const isPageA = pathname === '/student' || pathname === '/teacher';
 
     return (
-        <section className={`w-full flex flex-col items-center justify-center ${isPageA ? "" : "border-t border-gray-200"}`}>
-            {hasRegisterBox && (
-                <div className="flex flex-col items-center justify-center gap-6 shadow-[5px_5px_10px_rgba(19,99,223,0.25)] rounded-2xl p-6 md:p-[6rem] mt-10 md:mt-[4rem] w-[90%] md:w-[var(--global-width)] border border-blue-50 mb-10 md:mb-20">
-                    <div className="flex flex-col items-center justify-center text-center w-full">
-                        {/* Title Responsive: Nhỏ trên mobile, lớn trên desktop */}
-                        <h1 className="text-2xl md:text-[2.5rem] font-bold text-[var(--color-primary)] w-full md:w-[80%] leading-tight mb-2">
-                            Đăng ký học cùng EPIS và chuẩn bị hành trang cho tương lai ngay hôm nay
-                        </h1>
-                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)] text-center px-2">
-                            Bứt phá hiệu suất học tập với gia sư ảo và mở ra nhiều cơ hội mới.
-                        </p>
-                    </div>
-
-                    <Button
-                        onClick={() => router.push('/auth/signin')}
-                        type="primary"
-                        className="!bg-[var(--color-secondary)] w-[12rem] !text-white hover:!bg-white hover:!text-black hover:!border-[var(--color-secondary)] !px-8 !py-5 md:!py-3 !rounded-[30px] !text-base md:!text-[20px] !h-auto"
-                    // className = "!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-[50px] !text-[20px]"
-                    >
-                        Tham gia
-                    </Button>
-                </div>
-            )}
+        <section className={`w-full flex flex-col items-center justify-center bg-neural ${isPageA ? "" : "border-t border-gray-200"}`}>
 
             {/* MAIN GRID: Mobile: 1 cột, Tablet: 2 cột, Desktop: 4 cột */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[var(--global-width)]">

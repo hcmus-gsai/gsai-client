@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { PublicNavbar } from "@/components/shared/PublicNavbar";
 
 export default function PublicLayout({
   children,
@@ -8,7 +9,8 @@ export default function PublicLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-        <main className="flex-1">{children}</main>
+      <PublicNavbar />
+      {children}
     </div>
   );
 }
