@@ -29,6 +29,7 @@ const SignInForm = () => {
 
             // Redirect based on role
             if (role === 'student') {
+                // window.location.href = '/student/home';
                 router.push('/student/home');
             } else if (role === 'teacher') {
                 router.push('/teacher/home');
@@ -61,12 +62,6 @@ const SignInForm = () => {
     const email = Form.useWatch('email', formData);
     const password = Form.useWatch('password', formData);
 
-
-    const handleGoogleSignIn = () => {
-        // Redirect to backend Google OAuth endpoint
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-        window.location.href = `${apiBaseUrl}/auth/google`;
-    }
 
 
     return (

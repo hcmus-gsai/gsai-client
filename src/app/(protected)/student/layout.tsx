@@ -63,7 +63,8 @@ const StudentNavbar = () => {
         dispatch(baseApi.util.resetApiState());
 
         // 3. Chuyển trang (nếu cần thiết, hoặc để RTK tự xử lý)
-        router.push('/auth/signin');
+        // router.push('/auth/signin');
+        window.location.href = '/auth/signin';
     };
 
     const items: MenuProps['items'] = [
@@ -76,14 +77,14 @@ const StudentNavbar = () => {
         {
             key: '2',
             label: (
-                <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span>
-            ),
+                <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span>
+            )
         },
         {
             key: '3',
             label: (
-                <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span>
-            )
+                <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span>
+            ),
         }
     ];
 

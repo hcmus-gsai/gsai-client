@@ -108,6 +108,7 @@ const ContentSection = () => {
                         : lesson
                 );
                 setLessonsMap(lessonMap);
+                console.log("Updated lessonsMap:", lessonMap);
             }
         } catch (error) {
             console.error('Error updating lesson', error);
@@ -116,7 +117,10 @@ const ContentSection = () => {
         }
     };
 
+    // 
+
     return (
+         
         <>
             {/* Toggle Button - shows when navbar is collapsed */}
             {!extendableNavbar && (

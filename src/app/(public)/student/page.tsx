@@ -70,6 +70,7 @@ export default function StudentLandingPage() {
             </div>
 
             <GreetingSection />
+
             <FunctionSection
                 title="Khám phá các chức năng dành cho học sinh"
                 firstBlock={{
@@ -92,10 +93,10 @@ export default function StudentLandingPage() {
                     subtext: "Sử dụng AI để hỗ trợ việc học tập và nghiên cứu của bạn.",
                     button: "Tìm hiểu thêm",
                 }}
-            />
-            <WorkFlowSection />
+            /> 
+            <WorkFlowSection /> 
             {/* <CourseDisplaySection /> */}
-            <TestimonialSection />
+            <TestimonialSection /> 
             <FooterSection />
 
             <div className="relative">

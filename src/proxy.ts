@@ -9,20 +9,22 @@ export async function proxy(req: any) {
 
   // Không có token → cho vào public routes
   const publicPaths = [
-    '/auth/signin', 
-    '/auth/signup', 
+    '/auth/signin',
+    '/auth/signup',
     '/auth/google-callback',  // Allow Google OAuth callback
     '/auth/complete-profile',
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/send-email-success',
     '/auth/resend-link',
-    '/teacher',
-    '/student',
   ];
   if (!token) {
 
-    if (publicPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+    if (publicPaths.some(path => req.nextUrl.pathname.startsWith(path))
+      || req.nextUrl.pathname === '/'
+      || req.nextUrl.pathname === '/student'
+      || req.nextUrl.pathname === '/teacher'
+    ) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/auth/signin', req.url));
