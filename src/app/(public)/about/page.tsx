@@ -22,8 +22,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
     return (
         <div className="flex flex-col min-h-screen font-sans text-gray-800 bg-white/0">
-            <div className="h-[4.25rem]"></div>
-
+            <PublicNavbar />
             <main>
                 <HeroSection />
 

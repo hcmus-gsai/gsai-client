@@ -20,7 +20,10 @@ import Image from 'next/image';
 import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
 import { useGetUserProfileQuery } from '@/store/api/[module]/userApi';
 //Clone voice
-import {useCloneVoiceMutation} from "@/store/api/[module]/voiceApi";
+import { useCloneVoiceMutation } from "@/store/api/[module]/voiceApi";
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 //===========
 
@@ -40,7 +43,7 @@ const ChatbotSection = () => {
         setExtendableNavbar(prev => !prev);
     };
 
-    const {data: courseResult} = useGetCoursesByLessonIdQuery(params.lessonId as string);
+    const { data: courseResult } = useGetCoursesByLessonIdQuery(params.lessonId as string);
     const teacherId = courseResult?.data?.teacher_id;
     console.log('Teacher id in chatbot:', teacherId);
 
@@ -63,11 +66,11 @@ const ChatbotSection = () => {
 
     useEffect(() => {
         console.log('Loaded previous history data for chatbot', historyData);
-        
-        
+
+
     }, [])
 
-    
+
 
     //===========ASR Service============//
     const [permission, setPermission] = useState(false);
@@ -321,14 +324,14 @@ const ChatbotSection = () => {
                 mediaRecorder.onstop = async () => {
                     const asrAudioBlob = new Blob(voiceCloneChunksRef.current, { type: "audio/webm" });
                     const asrAudioFile = new File([asrAudioBlob], "recording.webm", { type: "audio/webm" });
-                    
+
                     const formData = new FormData();
                     formData.append("file", asrAudioFile);
-                    
+
                     try {
                         const { transcript } = await transcribeAudio(formData).unwrap();
                         console.log("User transcript:", transcript);
-                        
+
                         // setMessages(prev => [...prev, {
                         //     sender: "user",
                         //     text: transcript
@@ -356,9 +359,9 @@ const ChatbotSection = () => {
                             voice_name: "leonas", // Có thể thay đổi voice_name
                             teacher_id: teacherId as string
                         }).unwrap();
-                        
+
                         console.log('Voice cloned successfully:', voiceCloneResponse);
-                        
+
                         setMessages(prev => [...prev, {
                             sender: "bot",
                             text: transcript
@@ -417,7 +420,7 @@ const ChatbotSection = () => {
                 };
 
                 animate();
-                
+
             } else if (voiceCloneRecording && voiceCloneMediaRecorderRef.current) {
                 // Dừng recording khi bấm lần 2
                 voiceCloneMediaRecorderRef.current.stop();
@@ -478,18 +481,18 @@ const ChatbotSection = () => {
                                 key={index}
                                 className="ml-auto max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]"
                             >
-                                <p className="text-white text-sm break-words">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {msg.text}
-                                </p>
+                                </ReactMarkdown>
                             </div>
                         ) : (
                             <div
                                 key={index}
                                 className="max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
                             >
-                                <p className="text-[var(--color-primary)] text-sm break-words">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {msg.text}
-                                </p>
+                                </ReactMarkdown>
                             </div>
                         )
                     )}
@@ -545,9 +548,9 @@ const ChatbotSection = () => {
                         </Button>
 
                         <Button
-                            onClick = {handleVoiceClone}
-                            icon = {
-                                voiceCloneRecording ?(
+                            onClick={handleVoiceClone}
+                            icon={
+                                voiceCloneRecording ? (
                                     <div className="flex items-center gap-[3px] h-[22px]">
                                         {[...Array(5)].map((_, i) => (
                                             <span
@@ -563,14 +566,14 @@ const ChatbotSection = () => {
                                             />
                                         ))}
                                     </div>
-                                ):(
-                                    <div className = "relative w-6 h-6">
-                                        <Image src = {AudioWaveForm} alt = "Audio Wave Form" width = {24} height = {24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-100 group-hover:opacity-0"/>
-                                        <Image src = {AudioWaveFormHover} alt="Audio wave form hover"  width={24}  height={24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100"/>
+                                ) : (
+                                    <div className="relative w-6 h-6">
+                                        <Image src={AudioWaveForm} alt="Audio Wave Form" width={24} height={24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-100 group-hover:opacity-0" />
+                                        <Image src={AudioWaveFormHover} alt="Audio wave form hover" width={24} height={24} className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100" />
                                     </div>
                                 )
                             }
-                            className = "group !rounded-full !border-none !relative !flex !items-center !justify-center"
+                            className="group !rounded-full !border-none !relative !flex !items-center !justify-center"
                         >
 
                         </Button>

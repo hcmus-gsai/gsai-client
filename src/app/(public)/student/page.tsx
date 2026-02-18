@@ -11,6 +11,7 @@ import GradientTopLeft from "@/../public/guest/gradient_top_left.svg";
 import GradientTopRight from "@/../public/guest/gradient_top_right.svg";
 import GradientBottomLeft from "@/../public/guest/gradient_bottom_left.svg";
 import GradientBottomRight from "@/../public/guest/gradient_bottom_right.svg";
+import { PublicNavbar } from '@/components/shared/PublicNavbar';
 
 export default function TeacherLandingPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +23,7 @@ export default function TeacherLandingPage() {
 
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
+            <PublicNavbar />
             <div className="relative">
                 <div className="absolute top-0 left-0 -z-10 pointer-events-none">
                     <Image
