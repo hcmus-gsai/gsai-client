@@ -10,6 +10,7 @@ import { useParams, notFound } from "next/navigation";
 import ChatbotSection from '../components/chatbotSection';
 import { useAppSelector } from '@/store/hook';
 import { useGetVideoGenJobByIdQuery } from '@/store/api/[module]/ocrApi';
+import { useLazyGetVideoUrlQuery } from '@/store/api/[module]/videoApi';
 
 interface OCRItem {
     bbox: [number, number, number, number];
@@ -23,8 +24,8 @@ interface ContentItem {
 }
 
 interface OcrItem {
-  renderTime: string;
-  text: string;
+    renderTime: string;
+    text: string;
 }
 
 const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
@@ -89,7 +90,7 @@ export default function LectureVideoPage() {
         try {
             const rawData = JSON.parse(ocrJson);
             if (!Array.isArray(rawData)) return [];
-        
+
             let accumulatedTime = 0;
             return rawData.map((item) => {
                 accumulatedTime += item.renderTime;
@@ -166,7 +167,7 @@ export default function LectureVideoPage() {
 
     const handlePlay = () => {
         setIsPlaying(true);
-        setActiveBoxes([]); 
+        setActiveBoxes([]);
         setSelectedItem(null);
     };
 
@@ -191,7 +192,7 @@ export default function LectureVideoPage() {
     }, []);
 
     //===========Translate============//
-    const handleItemClick = async(e: React.MouseEvent, item: ContentItem) => {
+    const handleItemClick = async (e: React.MouseEvent, item: ContentItem) => {
         e.stopPropagation();
 
         const rect = e.currentTarget.getBoundingClientRect();
@@ -216,10 +217,10 @@ export default function LectureVideoPage() {
 
             const translatedText = translateResult.translatedText;
 
-            setSelectedItem({ 
-                detectLang: lang, 
+            setSelectedItem({
+                detectLang: lang,
                 item: { ...item, translatedText },
-                rect 
+                rect
             });
 
         } catch (error) {
@@ -265,6 +266,14 @@ export default function LectureVideoPage() {
     }
 
     //===========Video Controller Bar============//
+    // Source
+    const [getVideoUrl, { data: video, isLoading, error }] = useLazyGetVideoUrlQuery();
+    useEffect(() => {
+        if (lessonId) {
+            getVideoUrl(lessonId as string);
+        }
+    }, [lessonId, getVideoUrl]);
+
     // Volume Control
     const volumeRef = useRef<HTMLButtonElement | null>(null);
     const volumeSliderRef = useRef<HTMLDivElement | null>(null);
@@ -516,7 +525,7 @@ export default function LectureVideoPage() {
                         id='video'
                         ref={videoRef}
                         className="w-full h-full object-contain"
-                        src="/student/sample_video.mp4"
+                        src={video?.file_url}
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}
