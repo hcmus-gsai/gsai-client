@@ -1,7 +1,8 @@
 
 import { baseApi } from '../baseApi';
-import { CourseListResponse, CourseQueryParams, CourseResponse} from '../../../type/course.type';
-import { ModuleResponse} from '../../../type/module.type';
+import { CourseListResponse, CourseQueryParams, CourseResponse } from '../../../type/course.type';
+import { ModuleResponse } from '../../../type/module.type';
+import { store } from '@/store/store';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -14,7 +15,7 @@ export const courseApi = baseApi.injectEndpoints({
             query: (course_id) => `/courses/${course_id}`,
             providesTags: (result, error, course_id) => [{ type: 'Course', id: course_id }],
         }),
-        
+
         getCourseModules: builder.query<ModuleResponse, string>({
             query: (course_id) => `/courses/${course_id}/modules`,
             providesTags: (result, error, id) => [{ type: 'Course', id }],
@@ -27,16 +28,16 @@ export const courseApi = baseApi.injectEndpoints({
 
         searchCourses: builder.query<CourseListResponse, CourseQueryParams>({
             query: (params) => ({
-                url: '/courses/search',    
+                url: '/courses/search',
                 params,
             }),
-            providesTags: (result) => 
+            providesTags: (result) =>
                 result
-                ? [
-                    ...result.data.map(({ id }) => ({ type: 'Course' as const, id })),
-                    { type: 'Course', id: 'LIST' },
-                ]
-                : [{ type: 'Course', id: 'LIST' }],
+                    ? [
+                        ...result.data.map(({ id }) => ({ type: 'Course' as const, id })),
+                        { type: 'Course', id: 'LIST' },
+                    ]
+                    : [{ type: 'Course', id: 'LIST' }],
         }),
 
         getAllCategories: builder.query<{ message: string; data: string[] }, void>({
@@ -48,6 +49,20 @@ export const courseApi = baseApi.injectEndpoints({
         //     query: (teacher_id) => `/courses/teacher/${teacher_id}`,
         //     providesTags: ['Course']
         // })
+
+        getCoursesByTeacher: builder.query<CourseListResponse, CourseQueryParams>({
+            query: (params) => ({
+                url: `/courses/teacher`,
+                params,
+            }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.data.map(({ id }) => ({ type: 'Course' as const, id })),
+                        { type: 'Course', id: 'LIST' },
+                    ]
+                    : [{ type: 'Course', id: 'LIST' }],
+        }),
     }),
 });
 
@@ -62,5 +77,6 @@ export const {
     useSearchCoursesQuery,
     useLazySearchCoursesQuery,
     useGetAllCategoriesQuery,
-    useLazyGetAllCategoriesQuery
+    useLazyGetAllCategoriesQuery,
+    useGetCoursesByTeacherQuery,
 } = courseApi;
