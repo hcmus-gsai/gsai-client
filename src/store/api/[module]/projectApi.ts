@@ -94,10 +94,10 @@ export const projectApi = baseApi.injectEndpoints({
          * POST /lessons/:lessonId/qa/message
          */
         sendQAMessage: builder.mutation<SendQAMessageResponse, { lessonId: string } & SendQAMessageRequest>({
-            query: ({ lessonId, message }) => ({
+            query: ({ lessonId, message, answer_mode }) => ({
                 url: `/lessons/${lessonId}/qa/message`,
                 method: 'POST',
-                body: { message },
+                body: { message, answer_mode },
             }),
             // Don't invalidate tags to prevent auto-refetch that overwrites local state
             // The component handles state updates manually

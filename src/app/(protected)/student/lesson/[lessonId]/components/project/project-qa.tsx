@@ -3,7 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button, Form, Input, Spin, Tree, Select, Empty, Tabs } from 'antd';
-import { Send, Folder, File, Menu } from '@deemlol/next-icons';
+import { Send as SendIcon, Folder as FolderIcon, File as FileIcon, Menu as MenuIcon } from '@deemlol/next-icons';
 import { useParams } from 'next/navigation';
 import {
     useGetQAHistoryQuery,
@@ -14,6 +14,17 @@ import {
 import type { QAMessage } from '@/type/project.type';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import Editor from '@monaco-editor/react';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Image from 'next/image';
+import AudioWaveForm from "@/../public/student/AudioWaveForm.svg";
+import AudioWaveFormHover from "@/../public/student/AudioWaveFormHover.svg";
+
+//For Voice Recorder
+import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@ant-design/icons';
+import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
+import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
+import { ContentType } from '@/type/chat.type';
 
 interface FileNode {
     name: string;
@@ -72,6 +83,133 @@ const LectureProjQA = () => {
     const [selectedFileContent, setSelectedFileContent] = useState<string>('');
     const [selectedLanguage, setSelectedLanguage] = useState<string>('plaintext');
     const [selectedFileName, setSelectedFileName] = useState<string>('');
+    const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
+    const [row, setRow] = useState(1);
+
+    const { data: courseResult } = useGetCoursesByLessonIdQuery(lessonId as string);
+    const teacherId = courseResult?.data?.teacher_id;
+
+    //===========ASR Service============//
+    const [permission, setPermission] = useState(false);
+    const [recording, setRecording] = useState(false);
+    const [stream, setStream] = useState<MediaStream | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+    const [transcribeAudio] = useTranscribeAudioMutation();
+
+    const [volume, setVolume] = useState(0);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const rafRef = useRef<number | null>(null);
+
+    const requestMicrophoneAccess = async () => {
+        try {
+            const streamData = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            });
+            setPermission(true);
+            setStream(streamData);
+            alert("Cho phép truy cập Micro thành công!");
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+        }
+    }
+
+    const handleAudioRecording = async () => {
+        if (!permission) {
+            await requestMicrophoneAccess();
+            return;
+        }
+
+        if (!recording && stream) {
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunksRef.current.push(e.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+                const audioFile = new File([audioBlob], "recording.webm", { type: "audio/webm" });
+
+                const formData = new FormData();
+                formData.append("file", audioFile);
+
+                try {
+                    const { transcript } = await transcribeAudio(formData).unwrap();
+                    setMessages(prev => [...prev, {
+                        id: `temp-${Date.now()}`,
+                        lesson_id: lessonId as string,
+                        enrollment_id: '',
+                        role: 'user',
+                        content: { message: transcript },
+                        timestamp: new Date().toISOString(),
+                    }]);
+
+                    const response = await sendMessage({
+                        lessonId: lessonId as string,
+                        message: transcript,
+                        answer_mode: answerMode,
+                    }).unwrap();
+
+                    const botMsg: QAMessage = {
+                        id: response.assistantMessage.id,
+                        lesson_id: response.assistantMessage.lesson_id,
+                        enrollment_id: response.assistantMessage.enrollment_id,
+                        role: 'assistant',
+                        content: response.assistantMessage.content,
+                        timestamp: response.assistantMessage.timestamp,
+                    };
+                    setMessages((prev) => [...prev, botMsg]);
+                } catch (error) {
+                    console.error(error);
+                }
+
+                if (rafRef.current) cancelAnimationFrame(rafRef.current);
+                audioContextRef.current?.close();
+                setVolume(0);
+            };
+
+            mediaRecorder.start();
+            setRecording(true);
+
+            const audioContext = new AudioContext();
+            await audioContext.resume();
+            audioContextRef.current = audioContext;
+
+            const source = audioContext.createMediaStreamSource(stream);
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 512;
+            analyserRef.current = analyser;
+
+            source.connect(analyser);
+
+            const dataArray = new Uint8Array(analyser.fftSize);
+
+            const animate = () => {
+                analyser.getByteTimeDomainData(dataArray);
+
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const value = dataArray[i] - 128;
+                    sum += Math.abs(value);
+                }
+
+                setVolume(sum / dataArray.length);
+                rafRef.current = requestAnimationFrame(animate);
+            };
+
+            animate();
+        } else if (recording && mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setRecording(false);
+        }
+    };
+    //====================================
+
 
     // API hooks
     const { data: historyData, isLoading: historyLoading } = useGetQAHistoryQuery(lessonId as string, {
@@ -133,12 +271,13 @@ const LectureProjQA = () => {
     };
 
     // Handle send message
-    const handleSendMessage = async () => {
+    const handleMessageSubmit = async () => {
         const data = formData.getFieldsValue();
-        if (!data.message?.trim()) return;
+        if (!data.chatMessage?.trim()) return;
 
-        const userMessage = data.message.trim();
-        formData.resetFields(['message']);
+        const userMessage = data.chatMessage.trim();
+        formData.resetFields(['chatMessage']);
+        setRow(1);
 
         // Add user message optimistically
         const tempUserMsg: QAMessage = {
@@ -155,6 +294,7 @@ const LectureProjQA = () => {
             const response = await sendMessage({
                 lessonId: lessonId as string,
                 message: userMessage,
+                answer_mode: answerMode,
             }).unwrap();
 
             // Add bot response using the actual backend structure
@@ -199,7 +339,7 @@ const LectureProjQA = () => {
             return {
                 title: node.name,
                 key: `${parentKey}-${node.name}`,
-                icon: <Folder size={16} />,
+                icon: <FolderIcon size={16} />,
                 children: children,
                 selectable: false // Folders not selectable for code view
             };
@@ -212,7 +352,7 @@ const LectureProjQA = () => {
             return {
                 title: node.name,
                 key: key,
-                icon: <File size={16} />,
+                icon: <FileIcon size={16} />,
                 isLeaf: true,
                 // Store extra data for retrieval
                 // @ts-ignore
@@ -273,32 +413,24 @@ const LectureProjQA = () => {
         }
     }, [treeData, selectedFileName]);
 
-    // Render message content
-    const renderMessageContent = (msg: QAMessage) => {
+    // Helper to get message text string
+    const getMessageText = (msg: QAMessage): string => {
         if (msg.role === 'user') {
-            // User message - extract text from various possible structures
             const userText = typeof msg.content === 'string'
                 ? msg.content
                 : msg.content?.message || msg.content?.text || JSON.stringify(msg.content);
-            return <p className="text-white text-wrap wrap-break-word">{userText}</p>;
+            return typeof userText === 'string' ? userText : JSON.stringify(userText);
         } else {
-            // Assistant message - handle complex content structure
-            let responseText = '';
-
-            if (typeof msg.content === 'string') {
-                responseText = msg.content;
-            } else if (msg.content?.response) {
-                // New message format from our optimistic update
-                responseText = typeof msg.content.response === 'string'
+            if (typeof msg.content === 'string') return msg.content;
+            if (msg.content?.response) {
+                return typeof msg.content.response === 'string'
                     ? msg.content.response
                     : JSON.stringify(msg.content.response);
-            } else if (msg.content) {
-                // Complex content from history (e.g., repository_structure, assignment_requirements)
-                // For now, try to extract meaningful text or stringify
-                responseText = JSON.stringify(msg.content, null, 2);
             }
-
-            return <p className="text-gray-800 text-wrap wrap-break-word whitespace-pre-wrap">{responseText}</p>;
+            if (msg.content) {
+                return JSON.stringify(msg.content, null, 2);
+            }
+            return '';
         }
     };
 
@@ -399,57 +531,113 @@ const LectureProjQA = () => {
                             ref={chatContainerRef}
                             className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2"
                         >
-                            {messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
+                            {messages.map((msg, index) =>
+                                msg.role === 'user' ? (
                                     <div
-                                        className={`max-w-[85%] rounded-2xl px-4 py-2 ${msg.role === 'user'
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 text-gray-800'
-                                            }`}
+                                        key={index}
+                                        className="ml-auto w-fit max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem] text-white"
                                     >
-                                        {renderMessageContent(msg)}
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {getMessageText(msg)}
+                                        </ReactMarkdown>
                                     </div>
-                                </div>
-                            ))}
+                                ) : (
+                                    <div
+                                        key={index}
+                                        className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
+                                    >
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {getMessageText(msg)}
+                                        </ReactMarkdown>
+                                    </div>
+                                )
+                            )}
                             {sendingMessage && (
-                                <div className="flex justify-start">
-                                    <div className="bg-gray-100 rounded-2xl px-4 py-2">
-                                        <Spin size="small" />
+                                <div className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
+                                    <div className="flex space-x-1 h-6 items-center w-12 pl-1">
+                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
                         {/* Input form */}
-                        <div className="gap-2 border-t pt-4">
+                        <div className="border-t border-gray-200 p-[0.5rem] flex-shrink-0">
                             <Form
                                 form={formData}
-                                onFinish={handleSendMessage}
-                                className="flex w-full gap-2"
+                                onFinish={handleMessageSubmit}
+                                className={`w-full flex items-end gap-2 !bg-white !border border-gray-200 !px-[0.5rem] !py-[0.5rem] ${row >= 2 ? 'rounded-[20px]' : 'rounded-full'}`}
                             >
-                                <Form.Item name="message" className="w-full h-[1.5rem]">
+                                <Form.Item name="chatMessage" className="!mb-0 flex-1">
                                     <Input.TextArea
-                                        placeholder="Nhập câu hỏi..."
-                                        autoSize={{ minRows: 1, maxRows: 4 }}
+                                        placeholder="Nhập câu hỏi"
+                                        autoSize={{ minRows: 1, maxRows: 7 }}
+                                        classNames={{
+                                            textarea: "!border-none !outline-none focus:!shadow-none",
+                                        }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault();
                                                 formData.submit();
                                             }
                                         }}
-                                        className="!bg-gray-50"
+                                        onChange={(e) => {
+                                            const lines = e.target.value.split('\n').length;
+                                            setRow(lines);
+                                        }}
                                     />
                                 </Form.Item>
+
                                 <Button
-                                    type="primary"
-                                    icon={<Send size={14} />}
-                                    htmlType="submit"
-                                    loading={sendingMessage}
+                                    onClick={handleAudioRecording}
+                                    className="!rounded-full !border-none !relative !flex !items-center !justify-center"
                                 >
+                                    {recording ? (
+                                        <div className="flex items-center gap-[3px] h-[22px]">
+                                            {[...Array(5)].map((_, i) => (
+                                                <span
+                                                    key={i}
+                                                    className="w-[3px] bg-[var(--color-secondary)] rounded"
+                                                    style={{
+                                                        height: `${Math.min(
+                                                            22,
+                                                            Math.max(4, volume * 0.8 * Math.random())
+                                                        )}px`,
+                                                        transition: "height 0.08s linear",
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <AudioOutlined />
+                                    )}
                                 </Button>
+
+                                <Button
+                                    onClick={() => setAnswerMode(prev => prev === 'text' ? 'audio' : 'text')}
+                                    icon={
+                                        <div className="relative w-6 h-6">
+                                            <Image
+                                                src={AudioWaveForm}
+                                                alt="Audio Wave Form"
+                                                width={24}
+                                                height={24}
+                                                className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
+                                            />
+                                            <Image
+                                                src={AudioWaveFormHover}
+                                                alt="Audio wave form hover"
+                                                width={24}
+                                                height={24}
+                                                className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                            />
+                                        </div>
+                                    }
+                                    className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
+                                    title="Chế độ phản hồi bằng âm thanh"
+                                />
                             </Form>
                         </div>
                     </>
