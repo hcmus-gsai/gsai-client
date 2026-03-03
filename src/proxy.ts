@@ -41,13 +41,13 @@ export async function proxy(req: any) {
     console.log('Path:', path);
 
     // Nếu user cố truy cập vùng không thuộc role của mình
-    if (path.startsWith('/student') && role !== 'student') {
+    if (path.startsWith('/student/') && role !== 'student') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
     }
 
-    // if (path.startsWith('/teacher') && role !== 'teacher') {
-    //   return NextResponse.redirect(new URL('/auth/signin', req.url));
-    // }
+    if (path.startsWith('/teacher/') && role !== 'teacher') {
+      return NextResponse.redirect(new URL('/auth/signin', req.url));
+    }
 
     // Nếu user truy cập vùng authentication, direct về trang role/home
     if (path.startsWith('/auth')) {
