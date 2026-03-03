@@ -3,6 +3,7 @@ import { baseApi } from '../baseApi';
 import { CourseListResponse, CourseQueryParams, CourseResponse } from '../../../type/course.type';
 import { ModuleResponse } from '../../../type/module.type';
 import { store } from '@/store/store';
+import { get } from 'http';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -63,6 +64,12 @@ export const courseApi = baseApi.injectEndpoints({
                     ]
                     : [{ type: 'Course', id: 'LIST' }],
         }),
+
+        getTeacherStatistic: builder.query<{ message: string; data: { total_courses: number; total_enrollments: number } }, void>({
+            query: () => '/courses/teacher/me/statistic',
+            providesTags: ['Course'],
+        }),
+        
     }),
 });
 
@@ -79,4 +86,5 @@ export const {
     useGetAllCategoriesQuery,
     useLazyGetAllCategoriesQuery,
     useGetCoursesByTeacherQuery,
+    useGetTeacherStatisticQuery,
 } = courseApi;

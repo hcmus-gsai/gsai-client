@@ -4,10 +4,13 @@ import { useMemo } from "react";
 
 type HistoryItem = {
     id: number;
+    courseName: string;
     lessonName: string;
     studentName: string;
     submissionDate: string;
-    score: number | null;
+    score: string;
+    submission_status: string;
+    grading_status: string;
 };
 
 type AITaskItem = {
@@ -47,7 +50,9 @@ export const Table = (props: TableProps) => {
 
     return (
         <div className={`w-full rounded-[16px] overflow-hidden ${className}`}>
-            <div className="grid grid-cols-[3fr_1.5fr_1.5fr_1fr_1fr] bg-blue-600 text-white font-semibold px-6 py-4">
+            <div className={`bg-blue-600 text-white font-semibold px-6 py-4 ${
+                type === "submission" ? "grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr_1fr]" : "grid grid-cols-[3fr_1.5fr_1.5fr_1fr_1fr]"
+            }`}>
                 {columns.map((col, index) => (
                     <div key={index} className="text-sm">
                         {col}
@@ -60,24 +65,34 @@ export const Table = (props: TableProps) => {
                 if (type === "submission") {
                     const submissionItem = item as HistoryItem;
 
+                    // Determine colors based on status
+                    const dateColor = submissionItem.submission_status === "Late" 
+                        ? "text-red-600" 
+                        : submissionItem.submission_status === "On Time" 
+                        ? "text-green-600" 
+                        : "";
+
+                    const gradeColor = submissionItem.grading_status === "Not graded" 
+                        ? "text-yellow-600" 
+                        : submissionItem.grading_status === "Graded" 
+                        ? "text-blue-600" 
+                        : "";
+
                     return (
                         <div
                             key={submissionItem.id}
-                            className={`grid grid-cols-[3fr_1.5fr_1.5fr_1fr_1fr] px-6 py-4 text-sm items-center
+                            className={`grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr_1fr] px-6 py-4 text-sm items-center
                             ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                         >
-                            <div className="text-blue-600 hover:underline cursor-pointer">
-                                {submissionItem.lessonName}
+                            <div className="text-blue-600 hover:underline cursor-pointer flex flex-col">
+                                <span className="font-semibold">{submissionItem.courseName}</span>
+                                <span>{submissionItem.lessonName}</span>
                             </div>
                             <div>{submissionItem.studentName}</div>
-                            <div>{submissionItem.submissionDate}</div>
-                            <div>{submissionItem.score ?? "--"}</div>
-                            <div className="text-blue-600 text-right hover:underline cursor-pointer">
-                                {submissionItem.score == null
-                                    ? "Chấm bài"
-                                    : submissionItem.score === 100
-                                        ? "Xem chi tiết"
-                                        : "Chấm lại"}
+                            <div className={dateColor}>{submissionItem.submissionDate}</div>
+                            <div className={gradeColor}>{submissionItem.score}</div>
+                            <div className="text-blue-600 text-center hover:underline cursor-pointer">
+                                Chi tiết
                             </div>
                         </div>
                     );
