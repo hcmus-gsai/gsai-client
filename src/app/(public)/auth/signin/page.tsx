@@ -11,8 +11,6 @@ import { FormTitle, FormNavigation, FormLayout } from '@/components/auth/ui/form
 export default function SignInPage() {
     return (
         <div className="relative">
-
-            {/* Home Button Top Left */}
             <Link href="/student">
                 <Button
                     icon={<ArrowLeftOutlined />}
@@ -34,7 +32,6 @@ export default function SignInPage() {
                     description="Chưa có tài khoản?"
                 />
             </FormLayout>
-
         </div>
     );
 }
