@@ -10,7 +10,8 @@ import {
     SendQAMessageRequest,
     SendQAMessageResponse,
     QAHistoryResponse,
-    SubmissionMuatationResponse
+    SubmissionMuatationResponse,
+    SubmissionHistoryItem
 } from '@/type/project.type';
 import { baseApi } from '../baseApi';
 
@@ -181,6 +182,13 @@ export const projectApi = baseApi.injectEndpoints({
                 { type: 'Document', id: `submit-json-${lessonId}` }
             ],
         }),
+
+        // ==================== Teacher View Endpoints ====================
+        getAllSubmissions: builder.query<SubmissionHistoryItem, null>({
+            query: () => `projects-submission/all`,
+        }),
+
+
     }),
 });
 
@@ -206,4 +214,8 @@ export const {
     useLazyGetSubmissionQuery,
     useGetSubmitJsonQuery,
     useLazyGetSubmitJsonQuery,
+
+    // Teacher view hooks
+    useGetAllSubmissionsQuery,
+    
 } = projectApi;

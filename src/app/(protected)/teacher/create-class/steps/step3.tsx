@@ -403,7 +403,6 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
                                                                     <Switch size="small" />
                                                                     </Form.Item>
                                                                 </div>
-                                                                {/* <EyeOutlined className="text-gray-400" /> */}
                                                             </div>
                                                         </div>
                                                     ))}
