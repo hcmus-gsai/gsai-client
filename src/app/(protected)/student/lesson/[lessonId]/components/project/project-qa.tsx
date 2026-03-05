@@ -3,7 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button, Form, Input, Spin, Tree, Select, Empty, Tabs } from 'antd';
-import { Send as SendIcon, Folder as FolderIcon, File as FileIcon, Menu as MenuIcon } from '@deemlol/next-icons';
+import { Send as SendIcon, Folder as FolderIcon, File as FileIcon, Menu as MenuIcon, Play } from '@deemlol/next-icons';
 import { useParams } from 'next/navigation';
 import {
     useGetQAHistoryQuery,
@@ -161,6 +161,7 @@ const LectureProjQA = () => {
                         enrollment_id: response.assistantMessage.enrollment_id,
                         role: 'assistant',
                         content: response.assistantMessage.content,
+                        audio_url: response.assistantMessage.audio_url,
                         timestamp: response.assistantMessage.timestamp,
                     };
                     setMessages((prev) => [...prev, botMsg]);
@@ -237,6 +238,7 @@ const LectureProjQA = () => {
                     enrollment_id: msg.enrollment_id,
                     role: msg.role,
                     content: msg.content,
+                    audio_url: msg.audio_url,
                     timestamp: msg.timestamp,
                 }));
             setMessages(loadedMessages);
@@ -304,6 +306,7 @@ const LectureProjQA = () => {
                 enrollment_id: response.assistantMessage.enrollment_id,
                 role: 'assistant',
                 content: response.assistantMessage.content,
+                audio_url: response.assistantMessage.audio_url,
                 timestamp: response.assistantMessage.timestamp,
             };
             setMessages((prev) => [...prev, botMsg]);
@@ -549,6 +552,19 @@ const LectureProjQA = () => {
                                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                             {getMessageText(msg)}
                                         </ReactMarkdown>
+                                        {/* Nếu có audio response, hiển thị thêm nút play */}
+                                        {msg.audio_url && (
+                                            <Button
+                                                onClick={() => {
+                                                    const audio = new Audio(msg.audio_url);
+                                                    audio.play().catch(error => {
+                                                        console.error('Error playing audio response:', error);
+                                                    });
+                                                }}
+                                                className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
+                                                icon={<Play className="!w-[16px] !h-[16px]" />}
+                                            />
+                                        )}
                                     </div>
                                 )
                             )}

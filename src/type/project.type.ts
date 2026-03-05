@@ -108,6 +108,7 @@ export interface SendQAMessageResponse {
             }>;
             suggestions?: string[];
         };
+        audio_url?: string;
         timestamp: string;
     };
 }
@@ -118,6 +119,7 @@ export interface QAMessage {
     enrollment_id: string;
     role: 'user' | 'assistant' | 'system';
     content: any;
+    audio_url?: string;
     timestamp: string;
 }
 
