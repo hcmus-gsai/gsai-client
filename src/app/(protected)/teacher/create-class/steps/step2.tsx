@@ -17,6 +17,9 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
 
     const handleFinish = (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
+
+        //Logic xử lý data từ step2
+
         onNext(values); // Gửi toàn bộ object values về file cha
     };
 
@@ -81,9 +84,24 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
                         )}
                     </Form.List>
 
-                    <div className='w-full flex justify-center gap-6'>
-                        <Button type="default" onClick={onBack} size="large">Quay lại</Button>
-                        <Button type="primary" htmlType="submit" size="large">Tiếp tục</Button>
+                    <div className='w-full  flex justify-center gap-8'>
+                        <Button 
+                            type="primary" 
+                            size="large"
+                            onClick={onBack}
+                            className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)]  !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)] hover:!border-[var(--color-bg-white)]"
+                        >
+                            Quay lại
+                        </Button>
+    
+                        <Button 
+                            type="primary" 
+                            size="large"
+                            htmlType="submit"
+                            className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                        >
+                            Tiếp tục
+                        </Button>
                     </div>
                 </Form>
                 

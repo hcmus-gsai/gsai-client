@@ -13,13 +13,17 @@ export interface Step2Data {
     description: string;
 }
 
-interface Lesson {
+export interface Lesson {
+    chapter: number
     type: string;
     lessonName: string;
     file: File | null;
+
+    contentType: string;
+    createdAt: number;
 }
 
-interface Question {
+export interface Question {
     index: number;
     question: string;
     score: number;
@@ -27,18 +31,26 @@ interface Question {
     required: boolean; 
 }
 
-interface Quiz {
+export interface Quiz {
     quizName: string;
     deadline: Date;
     questions: Question[];
+    chapter: number;
+    
+    contentType: string;
+    createdAt: number;
 }
 
-interface Project {
+export interface Project {
     projectName: string;
     deadline: Date;
     file: File | null;
     permit: boolean;
     audio?: File | null;
+    chapter: number;
+    
+    contentType: string;
+    createdAt: number;
 }
 
 export interface Step3Data {

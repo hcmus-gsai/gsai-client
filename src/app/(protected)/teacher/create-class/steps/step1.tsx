@@ -6,6 +6,7 @@ import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
 import CreateClassIntro from '../components/create-class-intro';
+import { XCircle } from '@deemlol/next-icons';
 
 const { TextArea } = Input;
 
@@ -35,6 +36,9 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
 
     const handleFinish = (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
+
+        //Logic xử lý data từ step1
+
         onNext(values); // Gửi toàn bộ object values về file cha
     };
 
@@ -46,7 +50,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                 <Form
                     form={form} 
                     onFinish={handleFinish} 
-                    initialValues={data}
+                    initialValues={data} // Chỗ này load data get từ server
                     requiredMark={false}
                     labelCol={{
                             xs: { span: 4 }, // Mặc định cho màn siêu nhỏ
@@ -106,7 +110,6 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     <Form.Item 
                         name="pricingType"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phí</span>}
-                        initialValue={1}
                     >
                         <Radio.Group
                             style={{display:'flex', flexDirection: 'column', gap: 8}}

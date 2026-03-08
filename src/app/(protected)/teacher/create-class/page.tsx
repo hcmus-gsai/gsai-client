@@ -14,8 +14,6 @@ export default function CreateClassPage() {
 		setCurrentStep(currentStep + 1);
 	};
 
-	console.log(classData);
-
 	const back = () => setCurrentStep(currentStep - 1);
 
 	return (
