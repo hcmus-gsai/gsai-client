@@ -52,6 +52,7 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
     const [modalVidDoc, setModalVidDoc] = useState('');
     const [modalQuiz, setModalQuiz] = useState(false);
     const [modalProject, setModalProject] = useState(false);
+    const [modalSubmit, setModalSubmit] = useState(false);
     
     const [radioVal, setRadioVal] = useState(data.pricingType || 1);
     const onChangeRadio = (e: RadioChangeEvent) => {
@@ -406,6 +407,13 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
         }
         
         handleClose();
+    };
+
+    const onFinalSubmit = () =>{
+        console.log("submit all here");
+        console.log(lessons);
+        console.log(quizs);
+        console.log(projects);
     }
 
     const handleClose = () => {
@@ -470,11 +478,13 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
                     <Button 
                         type="primary" 
                         size="large"
+                        onClick={() => setModalSubmit(true)}
                         className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                     >
                         Tiếp tục
                     </Button>
                 </div>
+                {modalSubmit && (<SubmitModal onCancel={() => setModalSubmit(false)} onConfirm={onFinalSubmit}/>)}
                         
                 {modalVidDoc != '' && (
                     <div className='fixed inset-0 z-50 flex items-center justify-center'>
@@ -871,6 +881,61 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
             </div>
         </main>
         
+    );
+}
+
+type submitProps = {
+    onCancel: () => void;
+    onConfirm: () => void;
+};
+
+function SubmitModal({ onCancel, onConfirm }: submitProps) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onCancel}
+            />
+
+            <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[40%] h-[35%] px-3 py-3">
+                <div className='flex flex-row justify-end mb-4'>
+                    <button 
+                        type='button' onClick={onCancel}
+                        className="w-[2rem] h-[2rem] hover:scale-110 hover:drop-shadow-lg transition-transform active:opacity-70"
+                    >
+                        <X width={24} height={24}/>
+                    </button>
+                </div>
+
+                <div className='w-full h-auto flex flex-col justify-center items-center text-center'>
+                    <h2 className="text-2xl font-bold mb-2">Xác nhận hoàn thành thiết lập môn học</h2>
+                    <p className="text-sm text-gray-600">
+                        Bạn đã cài đặt tất cả thông tin cho môn học này.
+                    </p>
+
+                    <p className="text-sm text-gray-600 mb-6">
+                        Hãy xác nhận thiết lập để khóa học có thể được sử dụng bởi tất cả học sinh!
+                    </p>
+
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                            onClick={onCancel}
+                        >
+                            Hủy
+                        </Button>
+
+                        <Button
+                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                            onClick={onConfirm}
+                        >
+                            Thiết lập
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     );
 }
 

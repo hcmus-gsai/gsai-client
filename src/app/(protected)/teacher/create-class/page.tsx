@@ -20,9 +20,9 @@ export default function CreateClassPage() {
 		<main>
 			<h1>Tạo lớp học mới</h1>
 
-			{currentStep === 3 && <Step1 onNext={next} data={classData} />}
+			{currentStep === 1 && <Step1 onNext={next} data={classData} />}
 			{currentStep === 2 && <Step2 onNext={next} onBack={back} data={classData}/>}
-			{currentStep === 1 && <Step3 onNext={next} onBack={back} data={classData}/>}
+			{currentStep === 3 && <Step3 onNext={next} onBack={back} data={classData}/>}
 		</main>
 	);
 }
