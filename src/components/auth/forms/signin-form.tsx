@@ -24,8 +24,7 @@ const SignInForm = () => {
             const data = formData.getFieldsValue();
             setIsLoading(true);
 
-            const { role, accessToken, refreshToken } = await signIn({ email: data.email, password: data.password }).unwrap();
-
+            const { role, accessToken, refreshToken } = await signIn({ email: data.email, password: data.password }).unwrap(); 
 
             // Redirect based on role
             if (role === 'student') {

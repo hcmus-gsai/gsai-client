@@ -6,13 +6,14 @@ import Image from "next/image";
 import EmptyLayout from "@/../public/EmptyLayout.svg";
 import { StarFilled } from "@ant-design/icons";
 import { string } from "better-auth";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { EnrolledCourse } from '@/type/enrollment.type';
 import { Course } from '@/type/course.type';
 import { useAppDispatch } from "@/store/hook";
 import { setTitle } from "@/store/slice/courseDisplaySlice";
 import { useLazyGetCourseByIdQuery, useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+
 
 export const CourseGrid = (
     {
@@ -32,6 +33,9 @@ export const CourseGrid = (
 
     if (!courseData) return null;
 
+    const pathname = usePathname();
+    const role = pathname.split('/')[1];
+
     return (
         <Row gutter={[16, 16]} className={`w-[100%] mx-auto ${className}`}>
             {
@@ -48,7 +52,7 @@ export const CourseGrid = (
                         >
                             <Card
                                 className="w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick={() => router.push(`/student/courses/${c.id}`)}
+                                onClick={() => router.push(`/${role}/courses/${c.id}`)}
                             >
                                 <div className="flex flex-col items-center justify-center">
                                     <Image
@@ -80,7 +84,7 @@ export const CourseGrid = (
                                                             (e) => {
                                                                 e.stopPropagation();
                                                                 dispatch(setTitle(category));
-                                                                router.push(`/student/category/${category.toLowerCase().replace(/ /g, '-')}`);
+                                                                router.push(`/${role}/category/${category.toLowerCase().replace(/ /g, '-')}`);
                                                             }
                                                         }
                                                     >

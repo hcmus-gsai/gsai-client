@@ -12,6 +12,9 @@ import { useAppSelector } from '@/store/hook';
 import { useGetVideoGenJobByIdQuery } from '@/store/api/[module]/ocrApi';
 import { useLazyGetVideoUrlQuery } from '@/store/api/[module]/videoApi';
 
+// HLS
+import Hls from 'hls.js';
+
 interface OCRItem {
     bbox: [number, number, number, number];
     text: string;
@@ -273,6 +276,39 @@ export default function LectureVideoPage() {
             getVideoUrl(lessonId as string);
         }
     }, [lessonId, getVideoUrl]);
+    
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        const url = video?.video_url;
+
+        if (!videoElement || !url) return;
+
+        let hls: Hls;
+
+        if (Hls.isSupported()) {
+            hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(videoElement);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                console.log("HLS stream is ready!");
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    console.error("Fatal HLS Error:", data);
+                }
+            });
+        }
+        else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+            videoElement.src = url;
+        }
+
+        return () => {
+            if (hls) {
+                hls.destroy();
+            }
+        };
+    }, [video?.video_url]);
 
     // Volume Control
     const volumeRef = useRef<HTMLButtonElement | null>(null);
@@ -525,7 +561,7 @@ export default function LectureVideoPage() {
                         id='video'
                         ref={videoRef}
                         className="w-full h-full object-contain"
-                        src={video?.file_url}
+                        // src={video?.file_url}
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}

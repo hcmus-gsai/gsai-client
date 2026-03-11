@@ -21,8 +21,9 @@ import { useGetUserAvatarQuery } from '@/store/api/[module]/userApi';
 import { CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { baseApi } from '@/store/api/baseApi';
 
+import { FooterSection } from "@/components/guest/ui/guest";
 
-const StudentNavbar = () => {
+const TeacherNavbar = () => {
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -31,9 +32,9 @@ const StudentNavbar = () => {
     const pathname = usePathname();
 
     const [isMounted, setIsMounted] = useState(false);
-    const selectedKey = pathname.startsWith("/student/home") ? "homepage" :
-        pathname.startsWith("/student/courses") ? "courses" :
-            pathname.startsWith("/student/about") ? "about" : "";
+    const selectedKey = pathname.startsWith("/teacher/home") ? "homepage" :
+        pathname.startsWith("/teacher/courses") ? "courses" :
+            pathname.startsWith("/teacher/about") ? "about" : "";
 
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(selectNotifications);
@@ -70,13 +71,13 @@ const StudentNavbar = () => {
         {
             key: '1',
             label: (
-                <span onClick={() => router.push("/student/profile")}>Trang cá nhân</span>
+                <span onClick={() => router.push("/teacher/profile")}>Trang cá nhân</span>
             ),
         },
         {
             key: '2',
             label: (
-                <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span>
+                <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span>
             )
         },
         {
@@ -177,9 +178,9 @@ const StudentNavbar = () => {
                                 mode="horizontal"
                                 selectedKeys={[selectedKey]}
                                 onClick={({ key }) => {
-                                    if (key === "homepage") router.push("/student/home");
-                                    else if (key === "courses") router.push("/student/courses");
-                                    else if (key === "about") router.push("/student/about");
+                                    if (key === "homepage") router.push("/teacher/home");
+                                    else if (key === "courses") router.push("/teacher/courses");
+                                    else if (key === "about") router.push("/teacher/about");
                                 }}
                                 items={[
                                     {
@@ -190,10 +191,6 @@ const StudentNavbar = () => {
                                         key: "courses",
                                         label: <span>Môn học</span>
                                     },
-                                    {
-                                        key: "about",
-                                        label: <span>Về Epis</span>
-                                    }
                                 ]}
                                 className='!bg-transparent !border-none !w-full !flex !items-center !justify-start [&_.ant-menu-item]:!font-normal [&_.ant-menu-item]:!text-gray-700 [&_.ant-menu-item]:!relative [&_.ant-menu-item:hover]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!font-semibold [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)] [&_.ant-menu-item::after]:!content-[""] [&_.ant-menu-item::after]:!absolute [&_.ant-menu-item::after]:!bottom-0 [&_.ant-menu-item::after]:!left-0 [&_.ant-menu-item::after]:!h-[2px] [&_.ant-menu-item::after]:!w-full [&_.ant-menu-item::after]:!bg-[var(--color-secondary)] [&_.ant-menu-item::after]:!origin-center [&_.ant-menu-item::after]:!scale-x-0 [&_.ant-menu-item::after]:!transition-transform [&_.ant-menu-item::after]:!duration-500 [&_.ant-menu-item::after]:!ease-in-out [&_.ant-menu-item::after]:!border-none [&_.ant-menu-item:hover::after]:!scale-x-[80%] [&_.ant-menu-item-selected::after]:!scale-x-[80%]'
                             />
@@ -268,9 +265,7 @@ function ConfirmationModal({ onCancel, onConfirm }: Props) {
             />
 
             {/* Pop up */}
-            <div className="relative flex flex-col items-center justify-center
-                      bg-white rounded-xl shadow-xl
-                      w-[480px] h-[200px] px-6 text-center">
+            <div className="relative flex flex-col items-center justify-center bg-white rounded-xl shadow-xl w-[480px] h-[200px] px-6 text-center">
                 <h2 className="text-lg font-semibold mb-2">Đăng xuất</h2>
                 <p className="text-sm text-gray-600 mb-6">
                     Bạn có chắc muốn đăng xuất không?
@@ -305,8 +300,9 @@ export default function PublicLayout({
     return (
 
         <div className="min-h-screen flex flex-col">
-            <StudentNavbar />
+            <TeacherNavbar />
             <main className="flex-1">{children}</main>
+            <FooterSection />
         </div>
     )
 }

@@ -140,3 +140,17 @@ export interface SubmitJsonNode {
     total_folders?: number;
     skipped_files?: number;
 }
+
+// ==================== Project Submission Teacher View ====================
+export interface SubmissionHistoryItem {
+    message: string;
+    data: {
+        course_name: string;
+        lesson_name: string;
+        student_name: string;
+        submitted_at: string;
+        submission_status: string;
+        grade: string;
+        grading_status: string;
+    }[];
+}
