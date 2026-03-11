@@ -21,6 +21,7 @@ export default function TeacherCoursesPage() {
 
                 <Button
                     className="!w-[178px] !h-[54px] !bg-[var(--color-neutral)] !rounded-full !border-none !text-[var(--color-secondary)] !p-2 !text-md !font-medium hover:!bg-[var(--color-secondary)] hover:!text-white transition-colors duration-300"
+                    href="/teacher/create-class"
                 >
                     Tạo môn học
                 </Button>

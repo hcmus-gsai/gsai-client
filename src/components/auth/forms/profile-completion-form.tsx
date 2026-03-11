@@ -60,9 +60,9 @@ const ProfileCompletionForm = () => {
     useEffect(() => {
         if (userProfile) {
             formData.setFieldsValue({
-                name: userProfile.full_name || '',
-                phone: userProfile.phone_number || '',
-                avatar_url: userProfile.avatar_url || '',
+                name: userProfile.full_name,
+                phone: userProfile.phone_number,
+                avatar_url: userProfile.avatar_url,
             });
 
             setProfileUpload({
@@ -222,13 +222,13 @@ const ProfileCompletionForm = () => {
                 </Form.Item>
 
                 <div className="mb-2 w-full">
-                    <p className="font-medium font-bold">Họ và tên<span className="text-red-500">*</span></p>
+                    <p className="font-medium font-bold">Họ và tên</p>
                 </div>
                 <Form.Item
                     name="name"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Vui lòng nhập họ và tên'
                         }
                     ]}
@@ -241,14 +241,14 @@ const ProfileCompletionForm = () => {
                 </Form.Item>
 
                 <div className="mb-2 w-full">
-                    <p className="font-medium font-bold">Số điện thoại<span className="text-red-500">*</span></p>
+                    <p className="font-medium font-bold">Số điện thoại</p>
                 </div>
 
                 <Form.Item
                     name="phone"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Vui lòng nhập số điện thoại'
                         },
                         {
@@ -264,14 +264,14 @@ const ProfileCompletionForm = () => {
                 </Form.Item>
 
                 <div className="mb-2 w-full">
-                    <p className="font-medium font-bold">Giới tính<span className="text-red-500">*</span></p>
+                    <p className="font-medium font-bold">Giới tính</p>
                 </div>
 
                 <Form.Item
                     name="gender"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Vui lòng chọn giới tính'
                         }
                     ]}
@@ -287,14 +287,14 @@ const ProfileCompletionForm = () => {
                 </Form.Item>
 
                 <div className="mb-2 w-full">
-                    <p className="font-medium font-bold">Ngày sinh<span className="text-red-500">*</span></p>
+                    <p className="font-medium font-bold">Ngày sinh</p>
                 </div>
 
                 <Form.Item
                     name="dob"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Vui lòng nhập ngày sinh'
                         }
                     ]}
@@ -308,14 +308,14 @@ const ProfileCompletionForm = () => {
                 </Form.Item>
 
                 <div className="mb-2 w-full">
-                    <p className="font-medium font-bold">Tỉnh<span className="text-red-500">*</span></p>
+                    <p className="font-medium font-bold">Tỉnh</p>
                 </div>
 
                 <Form.Item
                     name="location"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Vui lòng chọn tỉnh/thành phố'
                         }
                     ]}

@@ -32,9 +32,9 @@ const TeacherNavbar = () => {
     const pathname = usePathname();
 
     const [isMounted, setIsMounted] = useState(false);
-    const selectedKey = pathname.startsWith("/student/home") ? "homepage" :
-        pathname.startsWith("/student/courses") ? "courses" :
-            pathname.startsWith("/student/about") ? "about" : "";
+    const selectedKey = pathname.startsWith("/teacher/home") ? "homepage" :
+        pathname.startsWith("/teacher/courses") ? "courses" :
+            pathname.startsWith("/teacher/about") ? "about" : "";
 
     const dispatch = useAppDispatch();
     const notifications = useAppSelector(selectNotifications);
@@ -71,13 +71,13 @@ const TeacherNavbar = () => {
         {
             key: '1',
             label: (
-                <span onClick={() => router.push("/student/profile")}>Trang cá nhân</span>
+                <span onClick={() => router.push("/teacher/profile")}>Trang cá nhân</span>
             ),
         },
         {
             key: '2',
             label: (
-                <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span>
+                <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span>
             )
         },
         {
@@ -178,9 +178,9 @@ const TeacherNavbar = () => {
                                 mode="horizontal"
                                 selectedKeys={[selectedKey]}
                                 onClick={({ key }) => {
-                                    if (key === "homepage") router.push("/student/home");
-                                    else if (key === "courses") router.push("/student/courses");
-                                    else if (key === "about") router.push("/student/about");
+                                    if (key === "homepage") router.push("/teacher/home");
+                                    else if (key === "courses") router.push("/teacher/courses");
+                                    else if (key === "about") router.push("/teacher/about");
                                 }}
                                 items={[
                                     {
