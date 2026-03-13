@@ -2,7 +2,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import { FooterSection } from "@/components/guest/ui/guest";
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu } from "@deemlol/next-icons";
+import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu, Play } from "@deemlol/next-icons";
 import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
 import { RobotOutlined } from '@ant-design/icons';
 
@@ -12,13 +12,12 @@ import AudioWaveForm from "@/../public/student/AudioWaveForm.svg";
 import AudioWaveFormHover from "@/../public/student/AudioWaveFormHover.svg";
 
 import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
-import { useSendMessageMutation, useGetChatHistoryQuery } from '@/store/api/[module]/chatApi';
+import { useSendMessageMutation, useGetChatHistoryQuery, useSendMessageV2Mutation } from '@/store/api/[module]/chatApi';
 import { ContentType } from '@/type/chat.type';
 import { useParams } from 'next/navigation';
 import { useAppSelector } from '@/store/hook';
 import Image from 'next/image';
 import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
-import { useGetUserProfileQuery } from '@/store/api/[module]/userApi';
 //Clone voice
 import { useCloneVoiceMutation } from "@/store/api/[module]/voiceApi";
 
@@ -30,11 +29,13 @@ import remarkGfm from "remark-gfm";
 interface Message {
     sender: 'user' | 'bot';
     text: string;
+    audio?: string; // URL của audio nếu có
 }
 
 const ChatbotSection = () => {
 
-    const [sendMessage] = useSendMessageMutation();
+    // const [sendMessage, { isLoading: isMessagingLoading }] = useSendMessageMutation();
+    const [sendMessageV2, { isLoading: isMessagingLoading}] = useSendMessageV2Mutation();
     const moduleId = useAppSelector((state) => state.lesson.moduleId);
     const params = useParams();
 
@@ -191,6 +192,7 @@ const ChatbotSection = () => {
     const [isHydrated, setIsHydrated] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
 
     // Ref để track xem đã load history lần đầu chưa
     const isInitialLoad = useRef(true);
@@ -219,7 +221,8 @@ const ChatbotSection = () => {
         if (historyData?.messages && historyData.messages.length > 0 && !hasLoadedHistory.current) {
             const loadedMessages: Message[] = historyData.messages.map((msg) => ({
                 sender: msg.sender_type === 'user' ? 'user' : 'bot',
-                text: msg.message_text || ''
+                text: msg.message_text || '',
+                audio: msg.audio_url
             }));
 
             setMessages(loadedMessages);
@@ -257,10 +260,11 @@ const ChatbotSection = () => {
         }
 
         try {
-            const response = await sendMessage({
+            const response = await sendMessageV2({
                 module_id: moduleId,
                 content_type: ContentType.TEXT,
                 message_text: data.chatMessage,
+                answer_mode: answerMode
             }).unwrap();
 
             console.log(response);
@@ -268,7 +272,7 @@ const ChatbotSection = () => {
             // Thêm response từ bot vào messages
             setMessages((prev) => [
                 ...prev,
-                { sender: "bot", text: response.bot_response.message_text },
+                { sender: "bot", text: response.bot_response.message_text, audio: response.bot_response.audio_url },
             ]);
         } catch (error) {
             console.error("Error sending message:", error);
@@ -280,7 +284,10 @@ const ChatbotSection = () => {
     }
     //=======================================//
 
+    
+
     //===========Voice Clone Service===============//
+    /* 
     const [voiceCloneRecording, setVoiceCloneRecording] = useState(false);
     const [voiceCloneStream, setVoiceCloneStream] = useState<MediaStream | null>(null);
     const voiceCloneMediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -356,7 +363,7 @@ const ChatbotSection = () => {
 
                         const voiceCloneResponse = await cloneVoiceTrigger({
                             text: transcript,
-                            voice_name: "leonas", // Có thể thay đổi voice_name
+                            voice_name: "lnthanh", // Có thể thay đổi voice_name
                             teacher_id: teacherId as string
                         }).unwrap();
 
@@ -436,7 +443,7 @@ const ChatbotSection = () => {
             }]);
         }
     }
-
+     */
     //=======================================//
 
 
@@ -479,7 +486,7 @@ const ChatbotSection = () => {
                         msg.sender === 'user' ? (
                             <div
                                 key={index}
-                                className="ml-auto max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem]"
+                                className="ml-auto max-w-[80%] w-fit bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem] text-white"
                             >
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {msg.text}
@@ -488,13 +495,37 @@ const ChatbotSection = () => {
                         ) : (
                             <div
                                 key={index}
-                                className="max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
+                                className="max-w-[80%] w-fit bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
                             >
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {msg.text}
                                 </ReactMarkdown>
+
+                                {/* Nếu có audio response, hiển thị thêm nút play */}
+                                {msg.audio && (
+                                    <Button
+                                        onClick={() => {
+                                            const audio = new Audio(msg.audio);
+                                            audio.play().catch(error => {
+                                                console.error('Error playing audio response:', error);
+                                            }
+                                            );
+                                        }}
+                                        className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
+                                        icon={<Play className="!w-[16px] !h-[16px]" />}
+                                    ></Button>
+                                )}
                             </div>
                         )
+                    )}
+                    {isMessagingLoading && (
+                        <div className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
+                            <div className="flex space-x-1 h-6 items-center w-12 pl-1">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                            </div>
+                        </div>
                     )}
                     <div ref={bottomRef} />
                 </div>
@@ -547,7 +578,7 @@ const ChatbotSection = () => {
                             )}
                         </Button>
 
-                        <Button
+                        {/* <Button
                             onClick={handleVoiceClone}
                             icon={
                                 voiceCloneRecording ? (
@@ -575,8 +606,31 @@ const ChatbotSection = () => {
                             }
                             className="group !rounded-full !border-none !relative !flex !items-center !justify-center"
                         >
+                        </Button> */}
 
-                        </Button>
+                        <Button
+                            onClick={() => setAnswerMode(prev => prev === 'text' ? 'audio' : 'text')}
+                            icon={
+                                <div className="relative w-6 h-6">
+                                    <Image
+                                        src={AudioWaveForm}
+                                        alt="Audio Wave Form"
+                                        width={24}
+                                        height={24}
+                                        className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
+                                    />
+                                    <Image
+                                        src={AudioWaveFormHover}
+                                        alt="Audio wave form hover"
+                                        width={24}
+                                        height={24}
+                                        className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                    />
+                                </div>
+                            }
+                            className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
+                            title="Chế độ phản hồi bằng âm thanh"
+                        />
                     </Form>
                 </div>
             </nav>
