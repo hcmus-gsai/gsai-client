@@ -24,28 +24,28 @@ export interface ProjectSubmissionResponse {
 /* ===== ENUM TYPES ===== */
 
 export type SubmissionStatus =
-  | "NOT_SUBMITTED"
-  | "SUBMITTED"
-  | "RESUBMITTED"; // nếu backend có
+    | "NOT_SUBMITTED"
+    | "SUBMITTED"
+    | "RESUBMITTED"; // nếu backend có
 
 export type GradingStatus =
-  | "NOT_GRADED"
-  | "GRADED";
+    | "NOT_GRADED"
+    | "GRADED";
 
 /* ===== ENTITY RESPONSE ===== */
 
 export interface ProjectSubmission {
-  id: string;
-  lesson_id: string;
-  user_id: string;
+    id: string;
+    lesson_id: string;
+    user_id: string;
 
-  submission_status: SubmissionStatus;
-  grading_status: GradingStatus;
+    submission_status: SubmissionStatus;
+    grading_status: GradingStatus;
 
-  github_url: string | null;
-  submit_json: string | null;
+    github_url: string | null;
+    submit_json: string | null;
 
-  submitted_at: string | null; // ISO string
+    submitted_at: string | null; // ISO string
 }
 
 /* ===== API RESPONSE ===== */
@@ -55,7 +55,7 @@ export interface ProjectSubmission {
  * PUT  /lessons/:id/projects-submission
  */
 export interface SubmissionMuatationResponse {
-  data: ProjectSubmission;
+    data: ProjectSubmission;
 }
 export interface SubmitProjectRequest {
     github_url: string;
@@ -80,6 +80,7 @@ export interface StartQASessionResponse {
 
 export interface SendQAMessageRequest {
     message: string;
+    answer_mode: string; // "text" | "audio"
 }
 
 export interface SendQAMessageResponse {
@@ -107,6 +108,7 @@ export interface SendQAMessageResponse {
             }>;
             suggestions?: string[];
         };
+        audio_url?: string;
         timestamp: string;
     };
 }
@@ -117,6 +119,7 @@ export interface QAMessage {
     enrollment_id: string;
     role: 'user' | 'assistant' | 'system';
     content: any;
+    audio_url?: string;
     timestamp: string;
 }
 
