@@ -63,7 +63,14 @@ const GreetingSection = () => {
         <section className="flex-1 flex flex-col items-center justify-center w-full min-h-[100vh] px-4">
             <div className="flex flex-col items-center justify-center gap-8 max-w-[var(--global-width)] text-center">
                 <div className="text-6xl md:text-7xl font-bold leading-tight">
-                    <p className="text-[var(--color-primary)]">Chào Mừng Đến Với EPIS</p>
+                    <p className="text-[var(--color-primary)]">
+                        Chào Mừng Đến Với  
+                        <span className="relative inline-block ml-2">
+                            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
+                                EPIS
+                            </span>
+                        </span>
+                    </p>
                 </div>
 
                 <div className="space-y-3 text-lg md:text-xl text-gray-600">

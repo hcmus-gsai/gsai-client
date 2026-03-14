@@ -3,7 +3,7 @@
 import React, { use, useState } from 'react';
 import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, InputNumber, Switch, Radio } from 'antd';
 import type { RadioChangeEvent } from 'antd';
-
+import Link from "next/link";
 import Image from 'next/image';
 import VideoIcon from '@/../public/shared/VideoIcon.svg'
 import DocumentIcon from '@/../public/shared/DocumentIcon.svg'
@@ -542,6 +542,14 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
                                             />
                                         </Upload>
                                     </Form.Item>   
+
+                                    <Form.Item
+                                        name = "ai_test"
+                                    >
+                                        <Link href = "/teacher/create-slide" className = "text-blue-500 underline">
+                                            Thử nghiệm tạo video bài giảng bằng AI
+                                        </Link>
+                                    </Form.Item>
 
                                     <Form.Item className='flex justify-center'>
                                         <Button 
