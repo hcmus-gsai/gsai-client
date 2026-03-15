@@ -20,11 +20,13 @@ export const CourseGrid = (
         courseData,
         colWidth,
         maxItems,
+        routeInactiveTeacherCoursesToCreateClass = false,
         className = ""
     }: {
         courseData: Course[];
         colWidth: number;
         maxItems: number;
+        routeInactiveTeacherCoursesToCreateClass?: boolean;
         className?: string;
     }
 ) => {
@@ -52,7 +54,19 @@ export const CourseGrid = (
                         >
                             <Card
                                 className="w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick={() => router.push(`/${role}/courses/${c.id}`)}
+                                onClick={() => {
+                                    const shouldResumeDraft =
+                                        routeInactiveTeacherCoursesToCreateClass &&
+                                        role === 'teacher' &&
+                                        c.is_active === false;
+
+                                    if (shouldResumeDraft) {
+                                        router.push(`/teacher/create-class?courseId=${c.id}`);
+                                        return;
+                                    }
+
+                                    router.push(`/${role}/courses/${c.id}`);
+                                }}
                             >
                                 <div className="flex flex-col items-center justify-center">
                                     <Image

@@ -1,12 +1,13 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Button, Select, Form, Input, InputNumber, Radio } from 'antd';
+import { Button, Select, Form, Input, InputNumber, Radio, message } from 'antd';
 import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
 import CreateClassIntro from '../components/create-class-intro';
-import { XCircle } from '@deemlol/next-icons';
+import { useCreateCourseStepMutation, usePatchCourseStepMutation } from '@/store/api/[module]/createClassApi';
+import { useSearchParams } from 'next/navigation';
 
 const { TextArea } = Input;
 
@@ -16,7 +17,10 @@ interface Props {
 }
 
 const Step1: React.FC<Props> = ({ data, onNext }) =>{
+    const searchParams = useSearchParams();
     const [form] = Form.useForm();
+    const [createCourseStep, { isLoading: isCreating }] = useCreateCourseStepMutation();
+    const [patchCourseStep, { isLoading: isUpdating }] = usePatchCourseStepMutation();
 
     const options = [
         { label: 'React', value: 'react' },
@@ -34,12 +38,48 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
         return `${end ? `${v}.${end}` : `${v}`}`;
     };
 
-    const handleFinish = (values: any) => {
+    const handleFinish = async (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
 
         //Logic xử lý data từ step1
+        const courseData = {
+            // On form
+            course_code: values.courseCode,
+            course_name: values.courseName,
+            course_description: values.description,
+            duration: values.duration,
+            thumbnail_url: values.thumbnail_url || undefined,
+            tuition_fee: values.price || 0,
+            category: values.categories,
 
-        onNext(values); // Gửi toàn bộ object values về file cha
+            // Implicit
+            is_active: false,
+        };
+
+        try {
+            const resumeCourseId = searchParams.get('courseId') || undefined;
+            let courseId = (data.courseId as string | undefined) || resumeCourseId;
+
+            if (courseId) {
+                await patchCourseStep({
+                    courseId,
+                    body: courseData,
+                }).unwrap();
+                message.success('Cập nhật thông tin môn học thành công');
+            } else {
+                const created = await createCourseStep(courseData).unwrap();
+                courseId = created.id;
+                message.success('Tạo môn học thành công');
+            }
+
+            onNext({
+                ...values,
+                courseId,
+            });
+        } catch (error) {
+            console.error('Create/Patch course error', error);
+            message.error('Không thể lưu thông tin môn học, vui lòng thử lại');
+        }
     };
 
     return(
@@ -97,7 +137,15 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                             }}
                         />
                     </Form.Item>
-                    
+
+                    <Form.Item 
+                        name="duration" 
+                        label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Thời lượng</span>}
+                        rules={[{ required: true, message: 'Vui lòng nhập thời lượng môn học!' }]}
+                    >
+                        <Input size="large"/>
+                    </Form.Item>
+
                     <Form.Item 
                         name="categories"
                         className='mt-[10rem]' 
@@ -138,7 +186,14 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     )}
 
                     <Form.Item className='flex justify-center'>
-                        <Button type="primary" htmlType="submit" size="large">Tiếp tục</Button>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            size="large"
+                            loading={isCreating || isUpdating}
+                        >
+                            Tiếp tục
+                        </Button>
                     </Form.Item>
                 </Form>
             </div>

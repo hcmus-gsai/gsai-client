@@ -37,3 +37,13 @@ export interface CourseListResponse {
     data: Course[];
 }
 
+export interface CreateCourseRequest {
+    course_code: string;
+    course_name: string;
+    course_description: string;
+    duration: string;
+    thumbnail_url?: string;
+    tuition_fee: number;
+    category: string | string[];
+    is_active: boolean;
+}

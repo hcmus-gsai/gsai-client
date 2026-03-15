@@ -12,9 +12,10 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
         const allChapters = form.getFieldValue('chapters');
         
         const currentChapterData = allChapters[name];
+        const { moduleId, ...copyableChapterData } = currentChapterData || {};
         add({
-            ...currentChapterData,
-            chapterName: `${currentChapterData.chapterName || ''} (Bản sao)`
+            ...copyableChapterData,
+            chapterName: `${currentChapterData?.chapterName || ''} (Bản sao)`
         }, index + 1); 
     };
 

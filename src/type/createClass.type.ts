@@ -1,16 +1,21 @@
 export interface Step1Data {
+    courseId?: string;
     courseCode: string;   
     courseName: string;  
     description: string;  
+    duration?: string;
     categories: string[]; 
     pricingType: number; 
     price?: number;   
 }
 
 export interface Step2Data {
-
-    chapterName: string;
-    description: string;
+    courseId?: string;
+    chapters: {
+        chapterName: string;
+        description: string;
+        moduleId?: string;
+    }[];
 }
 
 export interface Lesson {
@@ -18,24 +23,38 @@ export interface Lesson {
     type: string;
     lessonName: string;
     file: File | null;
+    lessonId?: string;
+    materialId?: string;
+    moduleId?: string;
+    estimatedCompletionTime?: string;
+    order?: number;
 
     contentType: string;
     createdAt: number;
 }
 
 export interface Question {
+    id?: string;
     index: number;
     question: string;
     score: number;
-    options: string[];
+    options: Array<{
+        id?: string;
+        value: string;
+    } | string>;
+    correctOption?: number;
     required: boolean; 
 }
 
 export interface Quiz {
     quizName: string;
-    deadline: Date;
+    expiredDate: number;
+    duration: number;
     questions: Question[];
     chapter: number;
+    lessonId?: string;
+    moduleId?: string;
+    order?: number;
     
     contentType: string;
     createdAt: number;
@@ -48,6 +67,10 @@ export interface Project {
     permit: boolean;
     audio?: File | null;
     chapter: number;
+    lessonId?: string;
+    materialId?: string;
+    moduleId?: string;
+    order?: number;
     
     contentType: string;
     createdAt: number;

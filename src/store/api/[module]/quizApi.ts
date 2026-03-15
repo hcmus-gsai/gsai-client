@@ -50,8 +50,10 @@ export const {
     useGetQuizByLessonIdQuery,
     useLazyGetQuizByLessonIdQuery,
     useGetQuizQuestionsByQuizIdQuery,
+    useLazyGetQuizQuestionsByQuizIdQuery,
     useSubmitQuizMutation,
     useGradeQuizAttemptMutation,
     useGetLatestQuizAttemptQuery,
     useGetQuizzesByCourseIdQuery,
+    useLazyGetQuizzesByCourseIdQuery,
 } = quizApi;
