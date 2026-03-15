@@ -6,6 +6,9 @@ import { CourseDisplaySection } from "@/components/teacher/course-display";
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from 'antd';
+import {pdfjs} from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface Slide {
     id: number;
@@ -15,6 +18,7 @@ interface Slide {
     audioFile : File | null;
     audioUrl: string | null;
     isGenerating: boolean;
+    slideImageUrl: string | null;
 }
 
 interface VoicePickerModalProps {
@@ -25,26 +29,22 @@ interface VoicePickerModalProps {
 
 const voice_options = ["leonas","lnthanh","ngvanduc","ngvanhau"]
 
-const initialSlide : Slide[] = [
-  { id: 1, title: "Slide 1", content: "Nội dung slide 1", voice: "leonas", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 2, title: "Slide 2", content: "Nội dung slide 2", voice: "lnthanh", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 3, title: "Slide 3", content: "Nội dung slide 3", voice: "ngvanduc", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 4, title: "Slide 4", content: "Nội dung slide 4", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 5, title: "Slide 5", content: "Nội dung slide 5", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 6, title: "Slide 6", content: "Nội dung slide 6", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 7, title: "Slide 7", content: "Nội dung slide 7", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 8, title: "Slide 8", content: "Nội dung slide 8", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 9, title: "Slide 9", content: "Nội dung slide 9", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-  { id: 10, title: "Slide 10", content: "Nội dung slide 10", voice: "ngvanhau", audioFile: null, audioUrl: null, isGenerating: false },
-]
+const makeEmptySlides = (count: number): Slide[] => 
+    Array.from({ length: count }, (_, i) => ({
+    id: i + 1,
+    title: `Slide ${i + 1}`,
+    content: '',
+    voice: 'leonas',
+    audioFile: null,
+    audioUrl: null,
+    isGenerating: false,
+    slideImageUrl: null,
+  }));
 
-// const VoicePickerModal = ({value, onChange, voices}:VoicePickerModalProps) => {
-
-// }
 
 export default function SlideList() {
     
-    const [slides, setSlides] = useState<Slide[]>(initialSlide);
+    const [slides, setSlides] = useState<Slide[]>(makeEmptySlides(5));
 
     const fileInputRef = useRef<{[key: number]:HTMLInputElement | null}>({});
 
@@ -69,6 +69,10 @@ export default function SlideList() {
     const [voiceSample, setVoiceSample] = useState<{file:File; url:string}|null>(null);
     const [textPrompt, setTextPrompt] = useState('');
     const [slideFile, setSlideFile]= useState<File|null>(null);
+    
+    const [isParsingSlide, setIsParsingSlide] = useState(false);
+    const [previewSlide, setPreviewSlide] = useState<{url:string; title: string}|null >(null);
+
 
     const thumbnailRef = useRef<HTMLInputElement>(null);
     const voiceRef = useRef<HTMLInputElement>(null);
@@ -88,6 +92,81 @@ export default function SlideList() {
         const url = URL.createObjectURL(file);
         setVoiceSample({file, url});
     }
+    
+    const handleSlideFileUpload = async (file:File) => {
+        if (!file){
+            return;
+        }
+
+
+        setSlideFile(file);
+
+        if(!file.name.endsWith('.pdf')) {
+            return;
+        }
+
+        setIsParsingSlide(true);
+
+        try  {
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf =  await pdfjs.getDocument({data: arrayBuffer}).promise;
+            const n_pages = pdf.numPages;
+
+
+            const newSlides: Slide[] = [];
+
+            for (let pageIdx = 1; pageIdx <= n_pages; pageIdx++) {
+                const page = await pdf.getPage(pageIdx);
+                const viewport = page.getViewport({scale:1.5});
+
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                const ctx = canvas.getContext('2d')!;
+                await page.render({ canvas:canvas, canvasContext: ctx, viewport }).promise;
+
+                const imageUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                newSlides.push({
+                    id: pageIdx,
+                    title :  `Slide ${pageIdx}`,
+                    content: '',
+                    voice: '',
+                    audioFile: null,
+                    audioUrl: null,
+                    isGenerating: false,
+                    slideImageUrl: imageUrl,
+                });
+
+            }
+            setSlides(newSlides);
+        }
+
+        catch (err) {
+            console.error('Lỗi parser PDF ở client', err);
+        }
+        finally {
+            setIsParsingSlide(false)
+        }   
+    }
+    // useEffect(() => {
+    //     const saved = localStorage.getItem('slides');
+    //     if(saved) {
+    //         try {
+    //             const parsed = JSON.parse(saved);
+    //             setSlides(parsed);
+    //         }
+    //         catch{
+    //             setSlides(makeEmptySlides(5))
+    //         }
+    //     }
+    // },[]);
+    // useEffect(() => {
+    //     localStorage.setItem('slides', JSON.stringify(slides));
+
+    // },[slides]);
 
     return (
         <section className="w-full flex flex-col items-center justify-center mt-[5rem] mb-[10rem]">
@@ -221,7 +300,7 @@ export default function SlideList() {
                             </div>
                             {textPrompt && (
                                 <span className="ml-auto text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                                    {prompt.length} ký tự
+                                    {textPrompt.length} ký tự
                                 </span>
                             )}
                         </div>
@@ -243,24 +322,24 @@ export default function SlideList() {
                             </div>
                             <div>
                                 <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Tải Slide</p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">PDF, PPTX</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">PDF, PPTX (PPTX có thể lỗi)</p>
                             </div>
                             {slideFile && (
-                            <button
-                                onClick={() => setSlideFile(null)}
-                                className="ml-auto text-slate-500 hover:text-red-400 transition-colors"
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                </svg>
-                            </button>
+                                <button
+                                    onClick={() => setSlideFile(null)}
+                                    className="ml-auto text-slate-500 hover:text-red-400 transition-colors"
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                </button>
                             )}
                         </div>
 
                         <input 
                             type = "file" accept = ".pdf,.pptx"
                             ref = {slideRef} className = "hidden"
-                            onChange = {(e)=>{const f = e.target.files?.[0]; if (f) setSlideFile(f);}}
+                            onChange = {(e)=>{const f = e.target.files?.[0]; if (f) handleSlideFileUpload(f);}}
                         />
                         {slideFile ? (
                             <div className="space-y-3">
@@ -296,10 +375,6 @@ export default function SlideList() {
                         )}
                     </div>
                 </div>
-
-                
-
-                
             </div>
             <div className = "w-[var(--global-width)] px-4 mt-[2.5rem]">
                 <h1 className = "text-center text-2xl font-bold text-[var(--color-secondary)] mb-8 tracking-wide ">
@@ -316,20 +391,47 @@ export default function SlideList() {
                         <div className="text-sm  font-medium">Tải Audio</div>
                     </div>
                 </div>
-                <div className = "divide-y divide-[var(--color-secondary)] rounded-xl py-4">
+                <div className = "divide-y divide-[var(--color-secondary)] rounded-xl py-4 max-h-[1024px] overflow-y-auto">
+                    {isParsingSlide && (
+                    <div className="flex items-center justify-center gap-3 py-8 text-sm text-slate-400">
+                        <svg className="animate-spin text-blue-400" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="10"/>
+                        </svg>
+                        Đang phân tích slide...
+                    </div>
+                    )}
                     {slides.map((slide)=>(
                         <div
                             key = {slide.id}
                             className = "grid grid-cols-1 md:grid-cols-[130px_1fr_210px_150px] gap-4 px-5 py-5 first:rounded-tl-xl first:rounded-tr-xl first:border-t last:rounded-bl-xl last:rounded-br-xl last:border-b border-l border-r border-blue-500/20 hover:bg-blue-500/5 transition-colors items-center "
                         >
                             <div className="flex flex-col items-center gap-1.5">
-                                <div className="w-24 h-16 rounded-lg bg-[var(--color-secondary)] border border-dashed border-blue-500/30 flex items-center justify-center text-blue-500 hover:border-blue-400/60 hover:text-blue-400 transition-colors cursor-pointer">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                                    <rect x="3" y="3" width="18" height="14" rx="2" stroke="white" strokeWidth="1.5" />
-                                    <path d="M3 17l4-4 3 3 4-5 7 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
-                                <span className="text-xs font-medium text-[var(--color-primary)]">{slide.title}</span>
+                                {slide.slideImageUrl ?(
+                                    <div className = "w-24 h-16 rounded-lg overflow-hidden border border-blue-500/30 cursor-pointer hover:border-blue-400/70 hover:scale-105 transition-all duration-150 shadow-md"
+                                        onClick={() => setPreviewSlide({ url: slide.slideImageUrl!, title: slide.title })}
+                                    >
+                                        <img
+                                            src={slide.slideImageUrl}
+                                            alt={slide.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ):(
+                                    <div className="w-24 h-16 rounded-lg bg-[var(--color-secondary)]/10 border border-dashed border-blue-500/30 flex items-center justify-center text-blue-500/40">
+                                        {isParsingSlide ? (
+                                            <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="10"/>
+                                            </svg>
+                                        ) : (
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                            <rect x="3" y="3" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                                            <path d="M3 17l4-4 3 3 4-5 7 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div>{slide.id}</div>
                             </div>
 
                             <div>
@@ -402,7 +504,34 @@ export default function SlideList() {
                         </div>
                     ))}
                 </div>
-            </div>            
+            </div>    
+
+            {previewSlide && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setPreviewSlide(null)}
+                >
+                    <div className = "relative max-w-3xl w-full rounded-2xl overflow-hidden shadow-2xl"
+                        onClick = {(e) => e.stopPropagation()}
+                    >
+                        <div className = "flex items-center justify-between bg-[#0f172a] px-4 py-3 border-b border-white/10">
+                            <span className = "text-sm font-meidum text-white">
+                                {previewSlide.title}
+                            </span>
+                            <button
+                                onClick={() => setPreviewSlide(null)}
+                                className="text-slate-400 hover:text-white transition-colors"
+                                >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <img src={previewSlide.url} alt={previewSlide.title} className="w-full"/>
+
+                    </div>
+                </div>
+            )}        
         </section>
     )
 
