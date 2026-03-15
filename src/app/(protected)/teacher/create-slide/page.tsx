@@ -175,7 +175,7 @@ export default function SlideList() {
                     Điền đầy đủ thông tin của Giọng nói, hình ảnh, slide trước khi tạo bài giảng
                 </h1>
 
-                <div className = "grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 gap-4">
+                <div className = "grid grid-cols-1 md:grid-cols-2 md:grid-cols-2 gap-4">
                     <div className="md:row-span-2 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
                         <div className = "flex items-center gap-2.5 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
@@ -236,7 +236,7 @@ export default function SlideList() {
                             </svg>
                             </div>
                             <div>
-                            <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Đăng ký giọng nói</p>
+                            <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Tải giọng nói</p>
                             <p className="text-[11px] text-slate-500 mt-0.5">MP3, WAV, M4A — mẫu giọng của bạn</p>
                             </div>
                             {voiceSample && (
@@ -295,8 +295,8 @@ export default function SlideList() {
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Script giọng nói</p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">Prompt định hướng nội dung</p>
+                                <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Nhập văn bản của giọng nói đã tải</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">Lưu ý: giọng nói nên từ 5-15 giây, khi thu âm tránh hiện tượng kéo dài âm</p>
                             </div>
                             {textPrompt && (
                                 <span className="ml-auto text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
@@ -310,6 +310,25 @@ export default function SlideList() {
                             value={textPrompt}
                             onChange={(e) => setTextPrompt(e.target.value)}
                         />
+                    </div>
+
+                    <div className = "md:col-span-2 h-auto group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
+                            <button
+                                disabled={!thumbnail || !voiceSample || !textPrompt.trim()}
+                                onClick={() => {
+                                    // TODO: gọi API đăng ký giọng nói
+                                }}
+                                className="cursor-pointer bg-secondary py-5 w-full h-full shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150
+                                    disabled:cursor-not-allowed 
+                                "
+                                >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="white"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                </svg>
+                                <span className = "text-white text-2xl">Đăng ký giọng nói</span>
+                            </button>
+
                     </div>
 
                     <div className="md:col-span-2 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
