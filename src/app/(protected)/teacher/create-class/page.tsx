@@ -123,11 +123,13 @@ export default function CreateClassPage() {
 						if (lessonType === 'project') {
 							let materialId: string | undefined;
 							let fileName: string | undefined;
+							let expiredDate = 7;
 
 							try {
 								const projectResp = await getProjectDocument(lesson.id).unwrap();
 								const projectAny = projectResp as any;
 								materialId = projectAny?.id || projectAny?.project?.id;
+								expiredDate = Number(projectAny?.expired_date || projectAny?.project?.expired_date || 7);
 								const rawUrl = projectAny?.file_url || projectAny?.project?.file_url;
 								if (typeof rawUrl === 'string' && rawUrl.length > 0) {
 									const segments = rawUrl.split('/');
@@ -139,7 +141,7 @@ export default function CreateClassPage() {
 
 							hydratedProjects.push({
 								projectName: lesson.lesson_name,
-								deadline: new Date().toISOString().slice(0, 10),
+								expiredDate,
 								file: fileName ? { name: fileName } : null,
 								permit: false,
 								audio: null,

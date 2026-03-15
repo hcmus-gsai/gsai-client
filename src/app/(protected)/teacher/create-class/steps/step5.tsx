@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, Radio, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, Input, InputNumber, Upload, UploadProps, Radio, message } from 'antd';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -54,6 +54,14 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
     const [audioProjectName, setAudioProjectName] = useState<string>('');
 
     const toNativeFile = (input: any): File | null => {
+        if (Array.isArray(input)) {
+            return input.length > 0 ? toNativeFile(input[0]) : null;
+        }
+
+        if (Array.isArray(input?.fileList)) {
+            return input.fileList.length > 0 ? toNativeFile(input.fileList[0]) : null;
+        }
+
         if (input instanceof File) {
             return input;
         }
@@ -116,7 +124,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
 
         form.setFieldsValue({
             projectName: item.projectName,
-            deadline: item.deadline,
+            expiredDate: item.expiredDate,
             permit: permitValue,
             file: { fileList: item.file ? [item.file] : [] },
             audio: { fileList: item.audio ? [item.audio] : [] },
@@ -126,7 +134,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
     const onFinishProject = (values: any) => {
         const updatedProject: Project = {
             projectName: values.projectName,
-            deadline: values.deadline,
+            expiredDate: Number(values.expiredDate || 1),
             file: values.file?.fileList?.[0] || values.file,
             permit: Number(values.permit) === 2,
             audio: values.audio?.fileList?.[0] || values.audio,
@@ -171,7 +179,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                             </div>
                             <div>
                                 <h4 className="font-bold text-[#1D3557]">{item.projectName}</h4>
-                                <p className="text-sm text-gray-400">Đồ án</p>
+                                <p className="text-sm text-gray-400">Đồ án • Hạn nộp: {item.expiredDate} ngày</p>
                             </div>
                         </div>
 
@@ -256,63 +264,72 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
             let lessonId = project.lessonId;
             const wasExistingLesson = Boolean(lessonId);
 
-            if (lessonId) {
-                await patchLessonStep({
-                    lessonId,
-                    body: {
-                        lesson_name: project.projectName,
-                        contentType: 'project',
-                        estimatedCompletionTime: '0',
-                    },
-                }).unwrap();
-            } else {
-                const createdLesson = await createLessonStep({
-                    moduleId,
-                    body: {
-                        name: project.projectName,
-                        lesson_name: project.projectName,
+            const requiresNewMaterialUpload = !project.materialId && !wasExistingLesson;
+            const nativeFileForNewMaterial = requiresNewMaterialUpload ? toNativeFile(project.file) : null;
+
+            if (requiresNewMaterialUpload && !nativeFileForNewMaterial) {
+                throw new Error('File project không hợp lệ');
+            }
+
+            let createdNewLesson = false;
+
+            try {
+                if (lessonId) {
+                    await patchLessonStep({
+                        lessonId,
+                        body: {
+                            lesson_name: project.projectName,
+                            contentType: 'project',
+                            estimatedCompletionTime: '0',
+                        },
+                    }).unwrap();
+                } else {
+                    const createdLesson = await createLessonStep({
                         moduleId,
-                        orderIndex: i + 1,
-                        contentType: 'project',
-                        estimatedCompletionTime: '0',
-                    },
-                }).unwrap();
+                        body: {
+                            name: project.projectName,
+                            lesson_name: project.projectName,
+                            moduleId,
+                            orderIndex: i + 1,
+                            contentType: 'project',
+                            estimatedCompletionTime: '0',
+                        },
+                    }).unwrap();
 
-                lessonId = createdLesson.id;
-            }
-
-            if (!lessonId) {
-                throw new Error('Không thể lưu đồ án');
-            }
-
-            if (project.materialId) {
-                const now = new Date();
-                const deadline = new Date(project.deadline);
-                const diff = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-                await patchMaterialStep({
-                    materialId: project.materialId,
-                    body: {
-                        material_type: 'project',
-                        material_name: project.projectName,
-                        expired_date: Math.max(diff, 1),
-                    },
-                }).unwrap();
-            } else if (project.file && !wasExistingLesson) {
-                const nativeFile = toNativeFile(project.file);
-                if (!nativeFile) {
-                    throw new Error('File project không hợp lệ');
+                    lessonId = createdLesson.id;
+                    createdNewLesson = true;
                 }
 
-                const now = new Date();
-                const deadline = new Date(project.deadline);
-                const diff = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                if (!lessonId) {
+                    throw new Error('Không thể lưu đồ án');
+                }
 
-                await createProjectMaterialStep({
-                    lessonId,
-                    file: nativeFile,
-                    expired_date: Math.max(diff, 1),
-                }).unwrap();
+                if (project.materialId) {
+                    await patchMaterialStep({
+                        materialId: project.materialId,
+                        body: {
+                            material_type: 'project',
+                            material_name: project.projectName,
+                            expired_date: Math.max(Number(project.expiredDate || 1), 1),
+                        },
+                    }).unwrap();
+                } else if (requiresNewMaterialUpload && nativeFileForNewMaterial) {
+                    await createProjectMaterialStep({
+                        lessonId,
+                        file: nativeFileForNewMaterial,
+                        expired_date: Math.max(Number(project.expiredDate || 1), 1),
+                    }).unwrap();
+                }
+            } catch (projectError) {
+                if (createdNewLesson && lessonId) {
+                    try {
+                        await deleteLessonStep(lessonId).unwrap();
+                    } catch (rollbackError) {
+                        console.error('Rollback lesson creation failed (step 5)', rollbackError);
+                    }
+                }
+
+                throw projectError;
             }
 
             savedProjects.push({
@@ -468,7 +485,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                     requiredMark={false}
                                     onFinish={onFinishProject}
                                     className="w-full"
-                                    initialValues={{ permit: 1 }}
+                                    initialValues={{ permit: 1, expiredDate: 7 }}
                                 >
                                     <Form.Item
                                         name="projectName"
@@ -479,11 +496,11 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                     </Form.Item>
 
                                     <Form.Item
-                                        name="deadline"
-                                        label={<span className="font-semibold">Hạn nộp</span>}
-                                        rules={[{ required: true, message: 'Vui lòng chọn hạn nộp!' }]}
+                                        name="expiredDate"
+                                        label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
+                                        rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                                     >
-                                        <Input size="large" type="date" className="rounded-lg" />
+                                        <InputNumber min={1} size="large" style={{ width: '100%' }} addonAfter="ngày" />
                                     </Form.Item>
 
                                     <Form.Item

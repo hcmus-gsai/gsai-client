@@ -62,7 +62,7 @@ export interface Quiz {
 
 export interface Project {
     projectName: string;
-    deadline: Date;
+    expiredDate: number;
     file: File | null;
     permit: boolean;
     audio?: File | null;
