@@ -595,87 +595,165 @@ const FunctionSection = (
 const WorkFlowSection = () => {
 
     return (
-        <section
-            className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
-        >
-            <div className="w-[var(--global-width)] h-full py-19 grid grid-cols-12">
-                <div className="col-span-7 flex flex-col">
-                    <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
+        // <section
+        //     className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
+        // >
+        //     <div className="w-[var(--global-width)] h-full py-19 grid grid-cols-12">
+        //         <div className="col-span-7 flex flex-col">
+        //             <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
 
-                    <div className="w-full h-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-6">
-                            <p className="text-[4.7vw] leading-none py-0">01</p>
+        //             <div className="w-full h-full flex items-stretch mb-5">
+        //                 <div className="flex items-center justify-center mr-6">
+        //                     <p className="text-[4.7vw] leading-none py-0">01</p>
+        //                 </div>
+
+        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+        //                     <div className="flex">
+        //                         <span>
+        //                             <Image
+        //                                 src={createAccIcon}
+        //                                 alt="create account icon"
+        //                                 width={0} height={0}
+        //                                 className="w-[4vw] h-[4vw]"
+        //                             />
+        //                         </span>
+
+        //                         <span className="flex flex-col ml-3">
+        //                             <p className="text-[1.3vw] font-semibold">Tạo tài khoản</p>
+        //                             <p className="text-[0.9vw]">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
+        //                         </span>
+        //                     </div>
+        //                 </Card>
+        //             </div>
+
+        //             <div className="w-full h-full flex items-stretch mb-5">
+        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+        //                     <div className="flex">
+        //                         <span>
+        //                             <Image
+        //                                 src={pickClassIcon}
+        //                                 alt="create account icon"
+        //                                 width={0} height={0}
+        //                                 className="w-[4vw] h-[4vw]"
+        //                             />
+        //                         </span>
+
+        //                         <span className="flex flex-col ml-3">
+        //                             <p className="text-[1.3vw] font-semibold">Đăng tải môn học</p>
+        //                             <p className="text-[0.9vw]">Xây dựng môn học dẫn đầu xu thế.</p>
+        //                         </span>
+        //                     </div>
+        //                 </Card>
+
+        //                 <div className="flex items-center justify-center ml-6">
+        //                     <p className="text-[5vw]">02</p>
+        //                 </div>
+        //             </div>
+
+        //             <div className="w-full h-full flex items-stretch mb-5">
+        //                 <div className="flex items-center justify-center mr-6">
+        //                     <p className="text-[4.7vw] leading-none py-0">03</p>
+        //                 </div>
+
+        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+        //                     <div className="flex">
+        //                         <span>
+        //                             <Image
+        //                                 src={AITutorIcon}
+        //                                 alt="create account icon"
+        //                                 width={0} height={0}
+        //                                 className="w-[4vw] h-[4vw]"
+        //                             />
+        //                         </span>
+
+        //                         <span className="flex flex-col ml-3">
+        //                             <p className="text-[1.3vw] font-semibold">Phân tích thông tin môn học</p>
+        //                             <p className="text-[0.9vw]">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
+        //                         </span>
+        //                     </div>
+        //                 </Card>
+        //             </div>
+        //         </div>
+
+        //         <div className="col-span-4 col-start-9">
+        //             <Image
+        //                 src={workFlowPic}
+        //                 alt="workflow pic"
+        //                 width={0} height={0}
+        //                 className="w-full h-full object-contain"
+        //             />
+        //         </div>
+        //     </div>
+        // </section>
+
+         <section className="w-full flex flex-col items-center justify-center bg-white py-12 sm:py-16 lg:py-20">
+            <div className="w-[var(--global-width)] flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-0">
+                
+                <div className="lg:col-span-7 flex flex-col">
+                    <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-8">Cách hoạt động</p>
+
+                    <div className="w-full flex items-stretch mb-5">
+                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
+                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">01</p>
                         </div>
-
-                        <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-                            <div className="flex">
-                                <span>
-                                    <Image
-                                        src={createAccIcon}
-                                        alt="create account icon"
-                                        width={0} height={0}
-                                        className="w-[4vw] h-[4vw]"
-                                    />
-                                </span>
-
-                                <span className="flex flex-col ml-3">
-                                    <p className="text-[1.3vw] font-semibold">Tạo tài khoản</p>
-                                    <p className="text-[0.9vw]">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
-                                </span>
+                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <Image
+                                    src={createAccIcon}
+                                    alt="create account icon"
+                                    width={0} height={0}
+                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                />
+                                <div className="flex flex-col">
+                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Tạo tài khoản</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
+                                </div>
                             </div>
                         </Card>
                     </div>
 
-                    <div className="w-full h-full flex items-stretch mb-5">
-                        <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-                            <div className="flex">
-                                <span>
-                                    <Image
-                                        src={pickClassIcon}
-                                        alt="create account icon"
-                                        width={0} height={0}
-                                        className="w-[4vw] h-[4vw]"
-                                    />
-                                </span>
-
-                                <span className="flex flex-col ml-3">
-                                    <p className="text-[1.3vw] font-semibold">Đăng tải môn học</p>
-                                    <p className="text-[0.9vw]">Xây dựng môn học dẫn đầu xu thế.</p>
-                                </span>
+                    <div className="w-full flex items-stretch mb-5">
+                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <Image
+                                    src={pickClassIcon}
+                                    alt="pick class icon"
+                                    width={0} height={0}
+                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                />
+                                <div className="flex flex-col">
+                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Đăng tải môn học</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Xây dựng môn học dẫn đầu xu thế.</p>
+                                </div>
                             </div>
                         </Card>
-
-                        <div className="flex items-center justify-center ml-6">
-                            <p className="text-[5vw]">02</p>
+                        <div className="flex items-center justify-center ml-4 sm:ml-6 w-10 sm:w-14 flex-shrink-0">
+                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">02</p>
                         </div>
                     </div>
 
-                    <div className="w-full h-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-6">
-                            <p className="text-[4.7vw] leading-none py-0">03</p>
+                    <div className="w-full flex items-stretch mb-5">
+                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
+                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">03</p>
                         </div>
-
-                        <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-                            <div className="flex">
-                                <span>
-                                    <Image
-                                        src={AITutorIcon}
-                                        alt="create account icon"
-                                        width={0} height={0}
-                                        className="w-[4vw] h-[4vw]"
-                                    />
-                                </span>
-
-                                <span className="flex flex-col ml-3">
-                                    <p className="text-[1.3vw] font-semibold">Phân tích thông tin môn học</p>
-                                    <p className="text-[0.9vw]">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
-                                </span>
+                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <Image
+                                    src={AITutorIcon}
+                                    alt="AI tutor icon"
+                                    width={0} height={0}
+                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                />
+                                <div className="flex flex-col">
+                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Phân tích thông tin môn học</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
+                                </div>
                             </div>
                         </Card>
                     </div>
                 </div>
 
-                <div className="col-span-4 col-start-9">
+                <div className="hidden lg:flex lg:col-span-4 lg:col-start-9 items-center justify-center">
                     <Image
                         src={workFlowPic}
                         alt="workflow pic"
@@ -684,7 +762,6 @@ const WorkFlowSection = () => {
                     />
                 </div>
             </div>
-
         </section>
     );
 };
