@@ -8,8 +8,36 @@
   --color-bg-white: #FFFFFF;
   --color-bg-white-soft: #FAFAFA;
 
-  --global-width: calc(100% - 12rem);
+  /* --global-width: calc(100% - 12rem); */
   --font-family-sans: var(--font-manrope), system-ui, sans-serif;
+}
+
+:root {
+  --global-width: calc(100% - 2rem); /* mobile default */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --global-width: calc(100% - 4rem);
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --global-width: calc(100% - 6rem);
+  }
+}
+
+@media (min-width : 1024px) {
+  :root {
+    --global-width : calc(100% - 8rem)
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --global-width: calc(100% - 12rem);
+  }
 }
 
 * {

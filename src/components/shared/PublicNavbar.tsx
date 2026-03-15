@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Menu, Button } from "antd";
-import { ArrowRightOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, MenuOutlined,CloseOutlined   } from "@ant-design/icons";
 import WhiteEpisLogo from "../../../public/student/WhiteEpisLogo.svg";
+import {useState} from 'react';
 
 export const PublicNavbar = () => {
     const router = useRouter();
@@ -93,3 +94,116 @@ export const PublicNavbar = () => {
         </div>
     );
 };
+
+
+export const DynamicNavbar = () => {
+    
+    const nav_items = [
+        {key: "student",href:"/student" , label: "Học sinh"},
+        {key: "teacher" , href: "/teacher", label: "Giáo viên"},
+        {key: "about-us", href :"/about", label: "Về Epis"}
+    ]
+
+    const router = useRouter();
+    const path = usePathname();
+
+    const [open, setOpen] = useState(false);
+
+    const activeKey = path === "/student" ? "student" : path === "/teacher" ? "teacher" : path === "/about" ? "about-us": ""
+    return (
+        <>
+        <header className="w-full h-[4.25rem] bg-primary flex justify-center items-center fixed top-0 z-50 backdrop-blur-sm">
+            <div className = "flex w-full max-w-[var(--global-width)] px-4 sm:px-6 items-center justify-between h-full">
+                <div className = "flex items-center gap-8">
+                    <div
+                        className = "cursor-pointer flex-shrink-0"
+                        onClick = {() => router.push("/")}
+                    >
+                        <Image src={WhiteEpisLogo} alt="Epis Logo" width={0} height={0} className="w-auto h-8 object-contain"/>
+                    </div>
+
+                    <nav className = "hidden md:flex items-center gap-1">
+                        {
+                            nav_items.map(({key, href, label}) => (
+                                <Link
+                                    key={key}
+                                    href={href}
+                                    className={`
+                                        text-white text-[1rem] px-3 py-1.5 rounded-md
+                                        transition-colors hover:bg-white/15
+                                        ${activeKey === key ? "font-bold bg-white/10" : ""}
+                                    `}
+                                >
+                                    {label}
+                                </Link>
+                        ))}
+                    </nav>
+                </div>
+
+                <div className = "flex items-center gap-3">
+                    <button
+                        className="hidden md:flex items-center w-46 h-[3rem] rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors pr-1 pl-4"
+                        onClick = {()=>router.push("/auth/signin")}
+                    >
+                        <span className="flex-1 text-white text-[1rem] text-left">Tham gia ngay</span>
+                        <span className="flex items-center justify-center w-[2.5rem] h-[2.5rem] rounded-full bg-white flex-shrink-0">
+                            <ArrowRightOutlined className="!-rotate-45 !text-[var(--color-secondary)]" />
+                        </span>
+                    </button>
+
+                    <button
+                        className="md:hidden flex items-center justify-center w-10 h-10 rounded-md text-white hover:bg-white/15 transition-colors"
+                        onClick={() => setOpen(!open)}
+                        aria-label="Toggle menu"
+                        >
+                        {open ? <CloseOutlined className="text-[18px]" /> : <MenuOutlined className="text-[18px]" />}
+                    </button>
+                </div>
+            </div>
+        </header>
+        <div
+            className={`
+            fixed top-[4.25rem] left-0 right-0 z-40 md:hidden
+            bg-primary/95 backdrop-blur-md
+            flex flex-col px-4 pb-5 gap-1
+            transition-all duration-250 ease-out
+            ${open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}
+            `}
+        >
+            {nav_items.map(({ key, href, label }) => (
+            <Link
+                key={key}
+                href={href}
+                onClick={() => setOpen(false)}
+                className={`
+                text-white text-[1rem] px-4 py-3 rounded-lg
+                transition-colors hover:bg-white/12
+                ${activeKey === key ? "font-bold bg-white/8" : ""}
+                `}
+            >
+                {label}
+            </Link>
+            ))}
+
+            <div className="h-px bg-white/20 my-2" />
+
+            <button
+                className="flex items-center rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors py-2 pl-5 pr-2 gap-3"
+                onClick={() => { router.push("/auth/signin"); setOpen(false); }}
+            >
+                <span className="flex-1 text-white text-[1rem] text-left">Tham gia ngay</span>
+                <span className="ml-auto flex items-center justify-center w-[2.5rem] h-[2.5rem] rounded-full bg-white flex-shrink-0">
+                    <ArrowRightOutlined className="!-rotate-45 !text-[var(--color-secondary)]" />
+                </span>
+            </button>
+        </div>
+
+        {open && (
+            <div
+            className="fixed inset-0 z-30 md:hidden"
+            onClick={() => setOpen(false)}
+            />
+        )}
+        </>
+    )
+}

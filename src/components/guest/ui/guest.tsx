@@ -60,20 +60,56 @@ const GreetingSection = () => {
     const router = useRouter();
 
     return (
-        <section className="flex-1 flex flex-col items-center justify-center w-full min-h-[100vh] px-4">
-            <div className="flex flex-col items-center justify-center gap-8 max-w-[var(--global-width)] text-center">
-                <div className="text-6xl md:text-7xl font-bold leading-tight">
-                    <p className="text-[var(--color-primary)]">
-                        Chào Mừng Đến Với  
+        // <section className="flex-1 flex flex-col items-center justify-center w-full min-h-[100vh] px-4">
+        //     <div className="flex flex-col items-center justify-center gap-8 max-w-[var(--global-width)] text-center">
+        //         <div className="text-6xl md:text-7xl font-bold leading-tight">
+        //             <p className="text-[var(--color-primary)]">
+        //                 Chào Mừng Đến Với  
+        //                 <span className="relative inline-block ml-2">
+        //                     <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
+        //                         EPIS
+        //                     </span>
+        //                 </span>
+        //             </p>
+        //         </div>
+
+        //         <div className="space-y-3 text-lg md:text-xl text-gray-600">
+        //             <p>Bạn đang gặp khó khăn trong quá trình học tập của mình?</p>
+        //             <p>Bạn cần một gia sư đồng hành cùng mình?</p>
+        //             <p>Đừng lo lắng.</p>
+        //         </div>
+
+        //         <Button
+        //             type="default"
+        //             className="!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-10 !py-6 !rounded-full !text-xl min-w-[240px]"
+        //             onClick={() => router.push("/auth/signin")}
+        //         >
+        //             Khám phá ngay
+        //         </Button>
+        //     </div>
+        // </section>
+        <section className="flex-1 flex flex-col items-center justify-center w-full min-h-[100dvh] pt-[4.25rem] px-4">
+            <div className="flex flex-col items-center justify-center gap-8 w-full max-w-[var(--global-width)] text-center py-12">
+                <div className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight">
+                    {/* <p className="text-[var(--color-primary)]">
+                        Chào Mừng Đến Với
                         <span className="relative inline-block ml-2">
                             <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
                                 EPIS
                             </span>
                         </span>
-                    </p>
+                    </p> */}
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-sans font-bold text-primary mb-8 leading-[1.1] tracking-tight opacity-0 animate-[fadeSlideIn_0.8s_ease-out_0.2s_forwards]">
+                        Chào mừng đến với <br className="hidden md:block" />
+                        <span className="relative inline-block">
+                            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
+                                EPIS
+                            </span>
+                        </span>
+                    </h1>
                 </div>
 
-                <div className="space-y-3 text-lg md:text-xl text-gray-600">
+                <div className="space-y-3 text-base sm:text-lg md:text-xl text-gray-600 max-w-[320px] sm:max-w-none opacity-0 animate-[fadeSlideIn_0.8s_ease-out_0.2s_forwards]">
                     <p>Bạn đang gặp khó khăn trong quá trình học tập của mình?</p>
                     <p>Bạn cần một gia sư đồng hành cùng mình?</p>
                     <p>Đừng lo lắng.</p>
@@ -81,7 +117,7 @@ const GreetingSection = () => {
 
                 <Button
                     type="default"
-                    className="!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-10 !py-6 !rounded-full !text-xl min-w-[240px]"
+                    className="!bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-10 !py-6 !rounded-full !text-lg sm:!text-xl min-w-[200px] sm:min-w-[240px] opacity-0 animate-[fadeSlideIn_0.8s_ease-out_0.2s_forwards]"
                     onClick={() => router.push("/auth/signin")}
                 >
                     Khám phá ngay

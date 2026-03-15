@@ -8,7 +8,7 @@ import { UsageContext } from '@/components/about/UsageContext';
 import { ResponsibilitySection } from '@/components/about/ResponsibilitySection';
 import { RoadmapSection } from '@/components/about/RoadmapSection';
 import { TeamSection, CTASection } from '@/components/about/TeamSectionCTA';
-import { PublicNavbar } from '@/components/shared/PublicNavbar';
+import { DynamicNavbar, PublicNavbar } from '@/components/shared/PublicNavbar';
 import { FooterSection } from '@/components/guest/ui/guest';
 import Image from 'next/image';
 import GradientBottomLeft from "@/../public/guest/gradient_bottom_left.svg";
@@ -22,7 +22,8 @@ export const metadata: Metadata = {
 export default function AboutPage() {
     return (
         <div className="flex flex-col min-h-screen font-sans text-gray-800 bg-white/0">
-            <PublicNavbar />
+            {/* <PublicNavbar /> */}
+            <DynamicNavbar/>
             <main>
                 <HeroSection />
 
