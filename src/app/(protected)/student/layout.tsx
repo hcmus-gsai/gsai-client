@@ -390,7 +390,7 @@ const DynamicStudentNavbar = () => {
                             {NAV_ITEMS.map(({ key, label, path }) => (
                                 <button key={key} onClick={() => router.push(path)}
                                     className={`
-                                        relative px-3 py-1.5 text-sm rounded-md whitespace-nowrap
+                                        relative px-3 py-1.5 text-sm rounded-md whitespace-nowrap cursor-pointer
                                         transition-colors duration-200
                                         after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
                                         after:h-[2px] after:bg-[var(--color-secondary)]
