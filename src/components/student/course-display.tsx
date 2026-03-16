@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect , useRef} from 'react';
 
 import { RedirectButton } from "@/components/shared/redirect-button";
 import { CourseGrid } from "@/components/shared/course-grid";
@@ -46,19 +46,45 @@ const CourseDisplaySection = ({
     }, [searchCoursesData]);
 
     return (
+        // <section className="w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
+        //     <div className="flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem] px-4">
+        //         <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">{title}</h1>
+        //         <div className="flex items-center justify-center w-full">
+        //             <CourseGrid
+        //                 courseData={coursesInfo}
+        //                 colWidth={6}
+        //                 maxItems={4}
+        //             />
+        //         </div>
+        //     </div>
+        //     <div className="flex items-center justify-center w-[var(--global-width)] py-[2rem]">
+
+        //         <RedirectButton
+        //             title={title}
+        //             text="Xem tất cả"
+        //             buttonBg="white"
+        //             buttonText="var(--color-secondary)"
+        //             buttonBorder="#1363DF"
+        //             iconBg="var(--color-secondary)"
+        //             iconText="var(--color-bg_white)"
+        //         />
+        //     </div>
+        // </section>
+        
         <section className="w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
             <div className="flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem] px-4">
-                <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">{title}</h1>
-                <div className="flex items-center justify-center w-full">
-                    <CourseGrid
-                        courseData={coursesInfo}
-                        colWidth={6}
-                        maxItems={4}
-                    />
-                </div>
-            </div>
-            <div className="flex items-center justify-center w-[var(--global-width)] py-[2rem]">
+                <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">
+                    {title}
+                </h1>
 
+                <CourseGrid
+                    courseData={coursesInfo}
+                    colWidth={6}
+                    maxItems={4}
+                />
+            </div>
+
+            <div className="flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                 <RedirectButton
                     title={title}
                     text="Xem tất cả"
@@ -72,5 +98,7 @@ const CourseDisplaySection = ({
         </section>
     )
 }
+
+
 
 export { CourseDisplaySection };
