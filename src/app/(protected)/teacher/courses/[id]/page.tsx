@@ -197,7 +197,6 @@ export default function StudentCoursePage() {
 
             <CourseInfoSection courseData={courseData} courseId={id as string} />
             <CourseSyllabusSection />
-            <FooterSection hasRegisterBox={false} />
         </main>
     )
 }

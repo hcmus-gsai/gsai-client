@@ -1,442 +1,420 @@
 'use client'
 
-import React, { use, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, InputNumber, Switch, Radio } from 'antd';
-import type { RadioChangeEvent } from 'antd';
-import Link from "next/link";
+import React, { useMemo, useState } from 'react';
+import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, message } from 'antd';
 import Image from 'next/image';
-import VideoIcon from '@/../public/shared/VideoIcon.svg'
-import DocumentIcon from '@/../public/shared/DocumentIcon.svg'
-import QuizIcon from '@/../public/shared/QuizIcon.svg'
-import ProjectIcon from '@/../public/shared/ProjectIcon.svg'
-import UploadIcon from '@/../public/shared/UploadIcon.svg'
-import CreateClassCopy from '@/../public/teacher/createClassCopy.svg'
-import CreateClassTrash from '@/../public/teacher/createClassTrash.svg'
-import CreateClassTrashRed from '@/../public/teacher/createClassTrashRed.svg'
-import CreateClassEdit from '@/../public/teacher/createClassEdit.svg'
-import { ChevronDown, ChevronUp, Divide, X } from "@deemlol/next-icons"
+import { useSearchParams } from 'next/navigation';
+import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
 
-import { Lesson, Quiz, Project, Step3Data } from '@/type/createClass.type'
+import VideoIcon from '@/../public/shared/VideoIcon.svg';
+import DocumentIcon from '@/../public/shared/DocumentIcon.svg';
+import UploadIcon from '@/../public/shared/UploadIcon.svg';
+import CreateClassEdit from '@/../public/teacher/createClassEdit.svg';
+import CreateClassTrashRed from '@/../public/teacher/createClassTrashRed.svg';
 
-// Mock data cho các bài học bên trong
-const mock_lessons = [
-  { id: 1, title: 'Tích phân', type: 'Video', duration: '2 phút', icon: <Image src={VideoIcon} alt="Vid" width={24} height={24} /> },
-  { id: 2, title: 'Vector', type: 'Bài đọc', duration: '2 phút', icon: <Image src={DocumentIcon} alt="Doc" width={24} height={24} /> },
-  { id: 3, title: 'Bài tập toán ứng dụng 1', type: 'Quiz', duration: '30 phút', icon: <Image src={QuizIcon} alt="Quiz" width={24} height={24} /> },
-];
+import { Lesson, Step3Data } from '@/type/createClass.type';
+import CreateClassIntro from '../components/create-class-intro';
+import {
+    useCreateDocumentMaterialStepMutation,
+    useCreateLessonStepMutation,
+    useCreateVideoMaterialStepMutation,
+    useDeleteLessonStepMutation,
+    usePatchLessonStepMutation,
+    usePatchMaterialStepMutation,
+    useReorderLessonsStepMutation,
+} from '@/store/api/[module]/createClassApi';
 
 interface Props {
-    data: any; 
+    data: any;
     onNext: (data: Partial<Step3Data>) => void;
-    onBack: () => void
+    onBack: () => void;
 }
 
-const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
-
+const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const searchParams = useSearchParams();
     const [form] = Form.useForm();
 
-    const [chapter, setChapter] = useState<number>(0)
-    const [chapterItems, setChapterItems] = useState<Record<number, number>>({
-        1: 0,
-        2: 0
-    });
+    const [createLessonStep, { isLoading: isCreatingLesson }] = useCreateLessonStepMutation();
+    const [patchLessonStep, { isLoading: isPatchingLesson }] = usePatchLessonStepMutation();
+    const [deleteLessonStep, { isLoading: isDeletingLesson }] = useDeleteLessonStepMutation();
 
-    const [lessons, setLessons] = useState<Lesson[]>([]);
-    const [quizs, setQuizs] = useState<Quiz[]>([]);
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [createDocumentMaterialStep, { isLoading: isCreatingDocument }] = useCreateDocumentMaterialStepMutation();
+    const [createVideoMaterialStep, { isLoading: isCreatingVideo }] = useCreateVideoMaterialStepMutation();
+    const [patchMaterialStep, { isLoading: isPatchingMaterial }] = usePatchMaterialStepMutation();
+    const [reorderLessonsStep, { isLoading: isReorderingLessons }] = useReorderLessonsStepMutation();
 
-    console.log('Lessons', lessons);
-    console.log('Quizs', quizs);
-    console.log('Projects', projects);
+    const [lessons, setLessons] = useState<Lesson[]>(data.lessons || []);
+    const [chapter, setChapter] = useState<number>(0);
+    const [modalLessonType, setModalLessonType] = useState<'video' | 'document' | ''>('');
+    const [fileLessonName, setFileLessonName] = useState<string>('');
+    const [editingItem, setEditingItem] = useState<Lesson | null>(null);
 
-    const [modalVidDoc, setModalVidDoc] = useState('');
-    const [modalQuiz, setModalQuiz] = useState(false);
-    const [modalProject, setModalProject] = useState(false);
-    const [modalSubmit, setModalSubmit] = useState(false);
-    
-    const [radioVal, setRadioVal] = useState(data.pricingType || 1);
-    const onChangeRadio = (e: RadioChangeEvent) => {
-        setRadioVal(e.target.value);
+    const toNativeFile = (input: any): File | null => {
+        if (Array.isArray(input)) {
+            return input.length > 0 ? toNativeFile(input[0]) : null;
+        }
+
+        if (Array.isArray(input?.fileList)) {
+            return input.fileList.length > 0 ? toNativeFile(input.fileList[0]) : null;
+        }
+
+        if (input instanceof File) {
+            return input;
+        }
+
+        if (input?.originFileObj instanceof File) {
+            return input.originFileObj;
+        }
+
+        return null;
     };
 
-    const [fileLessonName, setFileLessonName] = useState<string>('');
+    const handleClose = () => {
+        setModalLessonType('');
+        setEditingItem(null);
+        setFileLessonName('');
+        form.resetFields();
+    };
+
     const changeFileLessonSelect: UploadProps['onChange'] = (info) => {
         const lastFile = info.fileList.slice(-1)[0];
-
-        if (lastFile) {
-            setFileLessonName(lastFile.name);
-        } else {
-            setFileLessonName('');
-        }
+        setFileLessonName(lastFile?.name || '');
     };
 
-    const [fileProjectName, setFileProjectName] = useState<string>('');
-    const changeFileProjectSelect: UploadProps['onChange'] = (info) => {
-        const lastFile = info.fileList.slice(-1)[0];
-
-        if (lastFile) {
-            setFileProjectName(lastFile.name);
-        } else {
-            setFileProjectName('');
+    const chapters = useMemo(() => {
+        if (Array.isArray(data.chapters) && data.chapters.length > 0) {
+            return data.chapters;
         }
+
+        return [
+            { chapterName: 'Chương 1', description: '' },
+            { chapterName: 'Chương 2', description: '' },
+        ];
+    }, [data.chapters]);
+
+    const openLessonModal = (type: 'video' | 'document', chapterIndex: number) => {
+        setChapter(chapterIndex);
+        setModalLessonType(type);
     };
 
-    const [audioProjectName, setAudioProjectName] = useState<string>('');
-    const changeAudioProjectSelect: UploadProps['onChange'] = (info) => {
-        const lastFile = info.fileList.slice(-1)[0];
-
-        if (lastFile) {
-            setAudioProjectName(lastFile.name);
-        } else {
-            setAudioProjectName('');
-        }
-    };  
-
-    const [editingItem, setEditingItem] = useState<{ item: any, contentType: 'lesson' | 'quiz' | 'project' } | null>(null);
-    const handleDeleteItem = (contentType: string, createdAt: number) => {
-        if (contentType === 'lesson') {
-            setLessons(prev => prev.filter(l => l.createdAt !== createdAt));
-        } else if (contentType === 'quiz') {
-            setQuizs(prev => prev.filter(q => q.createdAt !== createdAt));
-        } else if (contentType === 'project') {
-            setProjects(prev => prev.filter(p => p.createdAt !== createdAt));
-        }
-    };
-
-    const handleEditItem = (item: any) => {
-        setEditingItem({ item, contentType: item.contentType });
+    const handleEditItem = (item: Lesson) => {
+        setEditingItem(item);
         setChapter(item.chapter);
+        setModalLessonType(item.type === 'video' ? 'video' : 'document');
+        setFileLessonName((item.file as any)?.name || '');
 
-        // 1. Đổ dữ liệu vào Form
-        if (item.contentType === 'lesson') {
-            setModalVidDoc(item.type);
-            setFileLessonName(item.file?.name || '');
-
-            form.setFieldsValue({
-                lessonName: item.lessonName,
-                file: { fileList: item.file ? [item.file] : [] }
-            });
-        } else if (item.contentType === 'quiz') {
-            setModalQuiz(true);
-            form.setFieldsValue({
-                quizName: item.quizName,
-                deadline: item.deadline,
-                questions: item.questions
-            });
-        } else if (item.contentType === 'project') {
-            setModalProject(true);
-
-            setFileProjectName(item.file?.name || '');
-            setAudioProjectName(item.audio?.name || '');
-            setRadioVal(item.permit);
-
-            form.setFieldsValue({
-                projectName: item.projectName,
-                deadline: item.deadline,
-                permit: item.permit,
-                file: { fileList: item.file ? [item.file] : [] },
-                audio: { fileList: item.audio ? [item.audio] : [] }
-            });
-        }
+        form.setFieldsValue({
+            lessonName: item.lessonName,
+            file: item.file ? [item.file] : [],
+        });
     };
 
-    const genHeader = (title: string, index: number) => {
-        const handleIconClick = (e: React.MouseEvent, type: string, key: number) => {
-            e.stopPropagation();
+    const handleDeleteItem = (createdAt: number) => {
+        setLessons((prev) => prev.filter((lesson) => lesson.createdAt !== createdAt));
+    };
 
-            if(type === 'video' || type === 'document'){
-                setChapter(key);
-                setModalVidDoc(type);
-            }
-            if(type === 'quiz'){
-                setChapter(key);
-                setModalQuiz(true);
-            }
-            if(type === 'project'){
-                setChapter(key);
-                setModalProject(true);
-            }
+    const onFinishLesson = (values: any) => {
+        if (!modalLessonType) {
+            return;
+        }
+
+        const normalizedFile = Array.isArray(values.file)
+            ? values.file[0]
+            : values.file?.fileList?.[0] || values.file;
+
+        const updatedLesson: Lesson = {
+            lessonName: values.lessonName,
+            file: normalizedFile,
+            chapter,
+            type: modalLessonType,
+            contentType: 'lesson',
+            order: editingItem?.order,
+            lessonId: editingItem?.lessonId,
+            materialId: editingItem?.materialId,
+            moduleId: editingItem?.moduleId,
+            estimatedCompletionTime: editingItem?.estimatedCompletionTime || '0',
+            createdAt: editingItem ? editingItem.createdAt : Date.now(),
         };
 
-        return (
-            <>
-                <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
-                    <span className="text-2xl font-bold text-[#1D3557]">
-                        Chương {index}: {title}
-                    </span>
-                    <div className="flex gap-4 text-gray-500">
-                        <button 
-                            type="button" 
-                            onClick={(e) => handleIconClick(e, 'video', index)}
-                            className="hover:scale-110 transition-transform active:opacity-70"
-                        >
-                            <Image src={VideoIcon} alt="Vid" width={24} height={24} />
-                        </button>
+        if (editingItem) {
+            setLessons((prev) => prev.map((lesson) => lesson.createdAt === editingItem.createdAt ? updatedLesson : lesson));
+        } else {
+            setLessons((prev) => [...prev, updatedLesson]);
+        }
 
-                        <button 
-                            type="button" 
-                            onClick={(e) => handleIconClick(e, 'document', index)}
-                            className="hover:scale-110 transition-transform active:opacity-70"
-                        >
-                            <Image src={DocumentIcon} alt="Doc" width={24} height={24} />
-                        </button>
-
-                        <button 
-                            type="button" 
-                            onClick={(e) => handleIconClick(e, 'quiz', index)}
-                            className="hover:scale-110 transition-transform active:opacity-70"
-                        >
-                            <Image src={QuizIcon} alt="Quiz" width={24} height={24} />
-                        </button>
-
-                        <button 
-                            type="button" 
-                            onClick={(e) => handleIconClick(e, 'project', index)}
-                            className="hover:scale-110 transition-transform active:opacity-70"
-                        >
-                            <Image src={ProjectIcon} alt="Proj" width={24} height={24} />
-                        </button>
-                    </div>
-                </div>
-                <hr style={{color:'gray', opacity:0.5}}/>
-            </>
-        );
+        handleClose();
     };
 
     const renderChapterContent = (chapterIndex: number) => {
-        const allContent = [
-            ...lessons.map(item => ({ ...item, contentType: 'lesson' as const })),
-            ...quizs.map(item => ({ ...item, contentType: 'quiz' as const })),
-            ...projects.map(item => ({ ...item, contentType: 'project' as const }))
-        ].filter(item => item.chapter === chapterIndex);
+        const chapterLessons = lessons
+            .filter((lesson) => lesson.chapter === chapterIndex)
+            .sort((a, b) => a.createdAt - b.createdAt);
 
-        const sortedContent = allContent.sort((a, b) => a.createdAt - b.createdAt);
-
-        if (sortedContent.length === 0) {
+        if (chapterLessons.length === 0) {
             return (
                 <div className="py-8 text-center text-gray-400 italic bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                    Chưa có nội dung cho chương này
+                    Chưa có tài liệu cho chương này
                 </div>
             );
         }
 
         return (
             <div className="mb-4 flex flex-col gap-3 py-4">
-                {sortedContent.map((item, idx) => {
-                    // Xác định Icon và Tiêu đề dựa trên loại nội dung
-                    let icon = QuizIcon;
-                    let title = "";
-                    let subTitle = "";
-
-                    if (item.contentType === 'lesson') {
-                        icon = item.type === 'video' ? VideoIcon : DocumentIcon;
-                        title = item.lessonName;
-                        subTitle = item.type === 'video' ? 'Video' : 'Tài liệu';
-                    } else if (item.contentType === 'quiz') {
-                        icon = QuizIcon;
-                        title = item.quizName;
-                        subTitle = `Quiz • Hạn nộp: ${item.deadline}`;
-                    } else if (item.contentType === 'project') {
-                        icon = ProjectIcon;
-                        title = item.projectName;
-                        subTitle = `Đồ án • Hạn nộp: ${item.deadline}`;
-                    }
-
-                    return (
-                        <div key={item.createdAt} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-shadow">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-gray-50 p-2 rounded-lg">
-                                    <Image src={icon} alt="icon" width={24} height={24} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-[#1D3557]">{title}</h4>
-                                    <p className="text-sm text-gray-400">{subTitle}</p>
-                                </div>
+                {chapterLessons.map((item) => (
+                    <div key={item.createdAt} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-gray-50 p-2 rounded-lg">
+                                <Image src={item.type === 'video' ? VideoIcon : DocumentIcon} alt="icon" width={24} height={24} />
                             </div>
-                            {/* <div className="flex gap-4">
-                                <Image src={CreateClassEdit} alt="edit" width={20} height={20} className='cursor-pointer' />
-                                <Image src={CreateClassTrashRed} alt="delete" width={20} height={20} className='cursor-pointer' />
-                            </div> */}
-
-                            <div className="flex gap-4">
-                                <Image 
-                                    src={CreateClassEdit} 
-                                    alt="edit" 
-                                    width={20} height={20} 
-                                    className='cursor-pointer hover:opacity-70' 
-                                    onClick={() => handleEditItem(item)} // Gọi hàm sửa
-                                />
-                                <Image 
-                                    src={CreateClassTrashRed} 
-                                    alt="delete" 
-                                    width={20} height={20} 
-                                    className='cursor-pointer hover:opacity-70' 
-                                    onClick={() => handleDeleteItem(item.contentType, item.createdAt)} // Gọi hàm xóa
-                                />
+                            <div>
+                                <h4 className="font-bold text-[#1D3557]">{item.lessonName}</h4>
+                                <p className="text-sm text-gray-400">{item.type === 'video' ? 'Video' : 'Tài liệu'}</p>
                             </div>
                         </div>
-                    );
-                })}
+
+                        <div className="flex gap-4">
+                            <Image
+                                src={CreateClassEdit}
+                                alt="edit"
+                                width={20}
+                                height={20}
+                                className="cursor-pointer hover:opacity-70"
+                                onClick={() => handleEditItem(item)}
+                            />
+                            <Image
+                                src={CreateClassTrashRed}
+                                alt="delete"
+                                width={20}
+                                height={20}
+                                className="cursor-pointer hover:opacity-70"
+                                onClick={() => handleDeleteItem(item.createdAt)}
+                            />
+                        </div>
+                    </div>
+                ))}
             </div>
         );
     };
 
-    const collapseItems = [
-        {
-            key: '1',
-            label: genHeader("Đại số tuyến tính", 1),
-            children: 
-                // <div className="mb-4 flex flex-col gap-3 py-4">
-                //     {mock_lessons.map((lesson) => (
-                //         <div 
-                //             key={lesson.id}
-                //             className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-shadow"
-                //         >
-                //             <div className="flex items-center gap-4">
-                //                 <div className="text-2xl text-gray-600 bg-gray-50 p-2 rounded-lg">
-                //                     {lesson.icon}
-                //                 </div>
-                //                 <div>
-                //                     <h4 className="font-bold text-[#1D3557]">{lesson.title}</h4>
-                //                     <p className="text-sm text-gray-400">{lesson.type} • {lesson.duration}</p>
-                //                 </div>
-                //             </div>
-                //             <div className="flex gap-4 text-lg">
-                //                 <Image src={CreateClassEdit} alt="edit lesson" width={20} height={20} className='cursor-pointer' />
-                //                 <Image src={CreateClassTrashRed} alt="delete lesson" width={20} height={20} className='cursor-pointer' />
-                //             </div>
-                //         </div>
-                //     ))}
-                // </div>
-                renderChapterContent(1),
-        },
-        {
-            key: '2',
-            label: genHeader("Xác suất thống kê", 2),
-            children: renderChapterContent(2),
-            // <div className="mb-4 flex flex-col gap-3 py-4">
-            //         {mock_lessons.map((lesson) => (
-            //             <div 
-            //                 key={lesson.id}
-            //                 className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-shadow"
-            //             >
-            //                 <div className="flex items-center gap-4">
-            //                     <div className="text-2xl text-gray-600 bg-gray-50 p-2 rounded-lg">
-            //                         {lesson.icon}
-            //                     </div>
-            //                     <div>
-            //                         <h4 className="font-bold text-[#1D3557]">{lesson.title}</h4>
-            //                         <p className="text-sm text-gray-400">{lesson.type} • {lesson.duration}</p>
-            //                     </div>
-            //                 </div>
-            //                 <div className="flex gap-4 text-lg">
-            //                     {/* <EditOutlined className="text-gray-400 hover:text-blue-600 cursor-pointer" />
-            //                     <DeleteOutlined className="text-red-400 hover:text-red-600 cursor-pointer" /> */}
-            //                 </div>
-            //             </div>
-            //         ))}
-            //     </div>,
-        },
-    ];
+    const genHeader = (title: string, index: number) => (
+        <>
+            <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
+                <span className="text-2xl font-bold text-[#1D3557]">
+                    Chương {index}: {title}
+                </span>
+                <div className="flex gap-4 text-gray-500">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            openLessonModal('video', index);
+                        }}
+                        className="hover:scale-110 transition-transform active:opacity-70"
+                    >
+                        <Image src={VideoIcon} alt="Vid" width={24} height={24} />
+                    </button>
 
-    const onFinishLesson = (values:any) => {
-        const currentOrder = editingItem ? editingItem.item.order : (chapterItems[chapter] || 0) + 1;
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            openLessonModal('document', index);
+                        }}
+                        className="hover:scale-110 transition-transform active:opacity-70"
+                    >
+                        <Image src={DocumentIcon} alt="Doc" width={24} height={24} />
+                    </button>
+                </div>
+            </div>
+            <hr style={{ color: 'gray', opacity: 0.5 }} />
+        </>
+    );
 
-        const updatedLesson: Lesson = {
-            ...values,
-            file: values.file?.fileList?.[0] || values.file,
-            type: modalVidDoc,
-            chapter: chapter,
-            contentType: 'lesson',
-            order: currentOrder, // Gán order ở đây
-            createdAt: editingItem ? editingItem.item.createdAt : Date.now()
-        };
+    const collapseItems = chapters.map((chapterItem: any, index: number) => ({
+        key: `${index + 1}`,
+        label: genHeader(chapterItem.chapterName || `Chương ${index + 1}`, index + 1),
+        children: renderChapterContent(index + 1),
+    }));
 
-        if (editingItem) {
-            setLessons(prev => prev.map(l => l.createdAt === editingItem.item.createdAt ? updatedLesson : l));
-        } else {
-            setLessons(prev => [...prev, updatedLesson]);
-            // Tăng count của chapter lên 1 khi thêm mới
-            setChapterItems(prev => ({ ...prev, [chapter]: currentOrder }));
+    const onSubmitStep3 = async () => {
+        const resumeCourseId = searchParams.get('courseId') || undefined;
+        const courseId = (data.courseId as string | undefined) || resumeCourseId;
+        if (!courseId) {
+            message.error('Thiếu courseId. Vui lòng hoàn tất bước 1 trước.');
+            return;
         }
 
-        handleClose();
-    };
+        const chapterModuleMap = (data.chapters || []).reduce((acc: Record<number, string>, chapterItem: any, index: number) => {
+            if (chapterItem.moduleId) {
+                acc[index + 1] = chapterItem.moduleId;
+            }
+            return acc;
+        }, {});
 
-    const onFinishQuiz = (values: any) => {
-        const currentOrder = editingItem ? editingItem.item.order : (chapterItems[chapter] || 0) + 1;
+        const previousLessons = (data.lessons || []) as Lesson[];
+        const keptCreatedAt = new Set<number>(lessons.map((item) => item.createdAt));
 
-        const updatedQuiz: Quiz = {
-            ...values,
-            chapter: chapter,
-            contentType: 'quiz',
-            order: currentOrder,
-            createdAt: editingItem ? editingItem.item.createdAt : Date.now()
-        };
+        try {
+            for (const previous of previousLessons) {
+                if (previous.lessonId && !keptCreatedAt.has(previous.createdAt)) {
+                    await deleteLessonStep(previous.lessonId).unwrap();
+                }
+            }
 
-        if (editingItem) {
-            setQuizs(prev => prev.map(l => l.createdAt === editingItem.item.createdAt ? updatedQuiz : l));
-        } else {
-            setQuizs(prev => [...prev, updatedQuiz]);
-            // Tăng count của chapter lên 1 khi thêm mới
-            setChapterItems(prev => ({ ...prev, [chapter]: currentOrder }));
+            const savedLessons: Lesson[] = [];
+            for (let i = 0; i < lessons.length; i += 1) {
+                const lesson = lessons[i];
+                const moduleId = chapterModuleMap[lesson.chapter];
+                if (!moduleId) {
+                    throw new Error(`Thiếu moduleId cho chương ${lesson.chapter}`);
+                }
+
+                let lessonId = lesson.lessonId;
+                const wasExistingLesson = Boolean(lessonId);
+
+                const requiresNewMaterialUpload = !lesson.materialId && !wasExistingLesson;
+                const nativeFileForNewMaterial = requiresNewMaterialUpload ? toNativeFile(lesson.file) : null;
+
+                if (requiresNewMaterialUpload && !nativeFileForNewMaterial) {
+                    throw new Error(lesson.type === 'video' ? 'File video không hợp lệ' : 'File tài liệu không hợp lệ');
+                }
+
+                let createdNewLesson = false;
+
+                try {
+                    if (lessonId) {
+                        await patchLessonStep({
+                            lessonId,
+                            body: {
+                                lesson_name: lesson.lessonName,
+                                contentType: lesson.type === 'video' ? 'video' : 'document',
+                                estimatedCompletionTime: lesson.estimatedCompletionTime || '0',
+                            },
+                        }).unwrap();
+                    } else {
+                        const createdLesson = await createLessonStep({
+                            moduleId,
+                            body: {
+                                name: lesson.lessonName,
+                                lesson_name: lesson.lessonName,
+                                moduleId,
+                                orderIndex: i + 1,
+                                contentType: lesson.type === 'video' ? 'video' : 'document',
+                                estimatedCompletionTime: lesson.estimatedCompletionTime || '0',
+                            },
+                        }).unwrap();
+
+                        lessonId = createdLesson.id;
+                        createdNewLesson = true;
+                    }
+
+                    if (!lessonId) {
+                        throw new Error('Không thể lưu bài giảng');
+                    }
+
+                    if (lesson.type === 'document') {
+                        if (lesson.materialId) {
+                            await patchMaterialStep({
+                                materialId: lesson.materialId,
+                                body: {
+                                    material_type: 'document',
+                                    material_name: lesson.lessonName,
+                                },
+                            }).unwrap();
+                        } else if (!wasExistingLesson && nativeFileForNewMaterial) {
+                            await createDocumentMaterialStep({
+                                lessonId,
+                                file: nativeFileForNewMaterial,
+                            }).unwrap();
+                        }
+                    }
+
+                    if (lesson.type === 'video') {
+                        if (lesson.materialId) {
+                            await patchMaterialStep({
+                                materialId: lesson.materialId,
+                                body: {
+                                    material_type: 'video',
+                                    material_name: lesson.lessonName,
+                                },
+                            }).unwrap();
+                        } else if (!wasExistingLesson && nativeFileForNewMaterial) {
+                            await createVideoMaterialStep({
+                                lessonId,
+                                file: nativeFileForNewMaterial,
+                                video_name: lesson.lessonName,
+                            }).unwrap();
+                        }
+                    }
+                } catch (lessonError) {
+                    if (createdNewLesson && lessonId) {
+                        try {
+                            await deleteLessonStep(lessonId).unwrap();
+                        } catch (rollbackError) {
+                            console.error('Rollback lesson creation failed', rollbackError);
+                        }
+                    }
+
+                    throw lessonError;
+                }
+
+                savedLessons.push({
+                    ...lesson,
+                    lessonId,
+                    moduleId,
+                    order: i + 1,
+                });
+            }
+
+            const savedQuizs = (data.quizs || []) as Array<{ lessonId?: string; moduleId?: string; createdAt: number }>;
+            const savedProjects = (data.projects || []) as Array<{ lessonId?: string; moduleId?: string; createdAt: number }>;
+
+            const lessonOrderByModule = [...savedLessons, ...savedQuizs, ...savedProjects]
+                .filter((item) => item.lessonId && item.moduleId)
+                .sort((a, b) => a.createdAt - b.createdAt)
+                .reduce((acc: Record<string, string[]>, item) => {
+                    const moduleId = item.moduleId as string;
+                    const lessonId = item.lessonId as string;
+
+                    if (!acc[moduleId]) {
+                        acc[moduleId] = [];
+                    }
+
+                    acc[moduleId].push(lessonId);
+                    return acc;
+                }, {});
+
+            for (const [moduleId, lessonIds] of Object.entries(lessonOrderByModule)) {
+                if (lessonIds.length > 0) {
+                    await reorderLessonsStep({
+                        moduleId,
+                        body: {
+                            lesson_ids: lessonIds,
+                        },
+                    }).unwrap();
+                }
+            }
+
+            message.success('Đã lưu tài liệu học tập');
+            onNext({ lessons: savedLessons });
+        } catch (error) {
+            console.error('Save step 3 failed', error);
+            message.error('Không thể lưu dữ liệu bước 3, vui lòng thử lại');
         }
-
-        handleClose();
-    };
-
-    const onFinishProject = (values: any) => {
-        const currentOrder = editingItem ? editingItem.item.order : (chapterItems[chapter] || 0) + 1;
-
-        const updatedProject: Project = {
-            ...values,
-            file: values.file?.fileList?.[0] || values.file,
-            audio: values.audio?.fileList?.[0] || values.audio,
-            chapter: chapter,
-            contentType: 'project',
-            order: currentOrder,
-            createdAt: editingItem ? editingItem.item.createdAt : Date.now()
-        };
-
-        if (editingItem) {
-            setProjects(prev => prev.map(l => l.createdAt === editingItem.item.createdAt ? updatedProject : l));
-        } else {
-            setProjects(prev => [...prev, updatedProject]);
-            // Tăng count của chapter lên 1 khi thêm mới
-            setChapterItems(prev => ({ ...prev, [chapter]: currentOrder }));
-        }
-        
-        handleClose();
-    };
-
-    const onFinalSubmit = () =>{
-        console.log("submit all here");
-        console.log(lessons);
-        console.log(quizs);
-        console.log(projects);
-    }
-
-    const handleClose = () => {
-        setModalVidDoc('');
-        setModalQuiz(false);
-        setModalProject(false);
-        
-        setFileLessonName('');
-        setEditingItem(null);
-
-        form.resetFields();
     };
 
     return (
         <main className="w-full min-h-screen flex justify-center">
             <div className="relative w-[var(--global-width)] top-[15vh] mb-[200px] z-10">
+                <CreateClassIntro step={3} title="Thêm tài liệu học tập" />
+
                 <ConfigProvider
                     theme={{
                         components: {
                             Collapse: {
-                            headerBg: 'transparent',
-                            contentPadding: '0px 16px',
-                            headerPadding: '12px 0px',
+                                headerBg: 'transparent',
+                                contentPadding: '0px 16px',
+                                headerPadding: '12px 0px',
                             },
                         },
                     }}
@@ -448,16 +426,16 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
                         expandIcon={({ isActive }) => (
                             <div className="flex items-center justify-center transition-all duration-300">
                                 {isActive ? (
-                                    <ChevronUp 
-                                        width={24} 
-                                        height={24} 
-                                        className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" 
-                                    /> 
+                                    <ChevronUp
+                                        width={24}
+                                        height={24}
+                                        className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"
+                                    />
                                 ) : (
-                                    <ChevronDown 
-                                        width={24} 
-                                        height={24} 
-                                        className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" 
+                                    <ChevronDown
+                                        width={24}
+                                        height={24}
+                                        className="md:w-[32px] md:h-[32px] !text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300"
                                     />
                                 )}
                             </div>
@@ -466,485 +444,112 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack}) =>{
                     />
                 </ConfigProvider>
 
-                <div className='w-full  flex justify-center gap-8'>
-                    <Button 
-                        type="primary" 
+                <div className="w-full flex justify-center gap-8">
+                    <Button
+                        type="primary"
                         size="large"
-                        className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)]  !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)] hover:!border-[var(--color-bg-white)]"
+                        onClick={onBack}
+                        className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)] hover:!border-[var(--color-bg-white)]"
                     >
                         Quay lại
                     </Button>
 
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         size="large"
-                        onClick={() => setModalSubmit(true)}
+                        onClick={onSubmitStep3}
+                        loading={
+                            isCreatingLesson ||
+                            isPatchingLesson ||
+                            isDeletingLesson ||
+                            isCreatingDocument ||
+                            isCreatingVideo ||
+                            isPatchingMaterial ||
+                            isReorderingLessons
+                        }
                         className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                     >
                         Tiếp tục
                     </Button>
                 </div>
-                {modalSubmit && (<SubmitModal onCancel={() => setModalSubmit(false)} onConfirm={onFinalSubmit}/>)}
-                        
-                {modalVidDoc != '' && (
-                    <div className='fixed inset-0 z-50 flex items-center justify-center'>
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose}/>
+
+                {modalLessonType && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
 
                         <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[60%] h-auto px-6 py-3">
-                            <div className='flex flex-row justify-end'>
-                                <button 
-                                    type='button' onClick={handleClose}
-                                    className="w-[2rem] h-[2rem] hover:scale-110 hover:drop-shadow-lg transition-transform active:opacity-70"
-                                >
-                                    <X width={24} height={24}/>
-                                </button>
-                            </div>
-
-                            <div className='w-full h-auto flex flex-col items-center'>
-                                <h2 className="text-2xl font-bold mb-2">Tạo bài giảng</h2>
-            
-                                <Form
-                                    form={form}
-                                    layout='vertical'
-                                    requiredMark={false}
-                                    onFinish={onFinishLesson}
-                                    className='w-full'
-                                >
-                                    <Form.Item 
-                                        name='lessonName' 
-                                        label={<span className='text-base'>Tên bài giảng</span>}
-                                        rules={[{ required: true, message: 'Vui lòng nhập tên bài giảng!' }]}
-                                    >
-                                        <Input size='large' placeholder='Tên bài giảng'/>
-                                    </Form.Item>
-
-                                    <Form.Item
-                                        name='file'
-                                        label={<span className='text-base'>{ modalVidDoc == 'document' ? "Tài liệu" : "Video" }</span>}
-                                        rules={[{ required: true, message: 'Vui lòng nhập file bài giảng!' }]}
-                                        valuePropName={"filelist"}
-                                    >
-                                        <Upload 
-                                            className='w-full' 
-                                            style={{ display: 'block' }}
-                                            showUploadList={false} 
-                                            beforeUpload={() => false}
-                                            onChange={changeFileLessonSelect}
-                                            accept={ modalVidDoc == 'document' ? ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ".mp4" }
-                                        >
-                                            <Input 
-                                                className='w-full'
-                                                placeholder= { modalVidDoc == 'document' ? "Tài liệu" : "Video" }
-                                                readOnly 
-                                                size="large"
-                                                value={fileLessonName}
-                                                suffix={<Image src={UploadIcon} alt="Doc" width={24} height={24} />}
-                                            />
-                                        </Upload>
-                                    </Form.Item>   
-
-                                    <Form.Item
-                                        name = "ai_test"
-                                    >
-                                        <Link href = "/teacher/create-slide" className = "text-blue-500 underline">
-                                            Thử nghiệm tạo video bài giảng bằng AI
-                                        </Link>
-                                    </Form.Item>
-
-                                    <Form.Item className='flex justify-center'>
-                                        <Button 
-                                            type="primary" 
-                                            htmlType="submit" 
-                                            size="large"
-                                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
-                                        >
-                                            Lưu thông tin
-                                        </Button>
-                                    </Form.Item>
-                                </Form>
-                            </div>
-                            
-                        </div>
-                    </div>
-                )}
-
-                {modalQuiz && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose}/>
-                        <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[60%] h-auto max-h-[70vh] px-6 py-3 overflow-hidden">
-            
-                            <div className='flex flex-row justify-end'>
+                            <div className="flex flex-row justify-end">
                                 <button
-                                    type='button' onClick={handleClose}
+                                    type="button"
+                                    onClick={handleClose}
                                     className="w-[2rem] h-[2rem] hover:scale-110 hover:drop-shadow-lg transition-transform active:opacity-70"
                                 >
                                     <X width={24} height={24} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">
-                                <div className="flex items-center justify-center px-8 py-4 border-b border-gray-100">
-                                    <h2 className="text-2xl font-bold text-gray-800">Tạo quiz</h2>
-                                </div>
+                            <div className="w-full h-auto flex flex-col items-center">
+                                <h2 className="text-2xl font-bold mb-2">Tạo bài giảng</h2>
 
                                 <Form
                                     form={form}
                                     layout="vertical"
                                     requiredMark={false}
-                                    onFinish={onFinishQuiz}
+                                    onFinish={onFinishLesson}
                                     className="w-full"
-                                    initialValues={{ questions: [{ question: '', score: 0, required: true, options: [''] }] }}
                                 >
-                                    <Form.Item 
-                                        name="quizName" 
-                                        label={<span className="font-semibold">Tên quiz</span>}
-                                        rules={[{ required: true, message: 'Vui lòng nhập tên quiz!' }]}
+                                    <Form.Item
+                                        name="lessonName"
+                                        label={<span className="text-base">Tên bài giảng</span>}
+                                        rules={[{ required: true, message: 'Vui lòng nhập tên bài giảng!' }]}
                                     >
-                                        <Input size="large" placeholder="Nhập tên quiz" className="rounded-lg" />
-                                    </Form.Item>
-
-                                    <Form.Item 
-                                        name="deadline" 
-                                        label={<span className="font-semibold">Hạn nộp</span>}
-                                        rules={[{ required: true, message: 'Vui lòng chọn hạn nộp!' }]}
-                                    >
-                                        <Input size="large" type="date" className="rounded-lg" />
-                                    </Form.Item>
-
-                                    <div className="mt-8">
-                                        <p className="text-base font-semibold mb-4 text-gray-700">Câu hỏi & câu trả lời</p>
-                        
-                                        <Form.List name="questions">
-                                            {(fields, { add, remove }) => (
-                                                <div className="flex flex-col gap-6">
-                                                    {fields.map(({ key, name, ...restField }, index) => (
-                                                        <div 
-                                                            key={key} 
-                                                            className="relative p-6 border border-gray-200 rounded-xl bg-white transition-all shadow-sm hover:shadow-md"
-                                                            style={{ borderLeft: index === fields.length - 1 ? '6px solid #1D61D5' : '1px solid #e5e7eb' }}
-                                                        >
-                                                            <div className="flex justify-between gap-4 mb-4">
-                                                                <Form.Item
-                                                                    {...restField}
-                                                                    name={[name, 'question']}
-                                                                    className="flex-1 mb-0"
-                                                                    layout="horizontal"
-                                                                    label={<span className='font-bold text-base'>Câu {key + 1}</span>}
-                                                                    rules={[{ required: true, message: 'Vui lòng nhập nội dung câu hỏi!' }]}
-                                                                >
-                                                                    <Input.TextArea 
-                                                                        autoSize 
-                                                                        className="text-lg font-medium border-none bg-gray-50 p-3 rounded-lg focus:bg-white"
-                                                                    />
-                                                                </Form.Item>
-                                                            </div>
-
-                                                            <Form.List name={[name, 'options']}>
-                                                                {(subFields, { add: addOpt, remove: removeOpt }) => (
-                                                                    <div className="ml-2 flex flex-col gap-3">
-                                                                        {subFields.map((subField) => {
-                                                                            const { key: subKey, ...subRest } = subField;
-                                                                                return (
-                                                                                    <div key={subKey} className="flex items-center gap-3 group">
-                                                                                        <div className="w-5 h-5 border-2 border-gray-300 rounded-full" />
-                                                                                        <Form.Item
-                                                                                            {...subRest}
-                                                                                            name={subField.name}
-                                                                                            className="flex-1 mb-0"
-                                                                                            style={{marginBottom: 0}}
-                                                                                            rules={[{ required: true, message: 'Vui lòng nhập tùy chọn!' }]}
-                                                                                        >
-                                                                                            <Input variant="borderless" placeholder={`Tùy chọn ${subField.name + 1}`} className="hover:bg-gray-50 mb-0" />
-                                                                                        </Form.Item>
-                                                                                        
-                                                                                        {subFields.length > 1 && (
-                                                                                            <button onClick={() => removeOpt(subField.name)} className="text-gray-300 hover:text-red-500">
-                                                                                                <X width={15} height={15} />
-                                                                                            </button>
-                                                                                        )}
-                                                                                    </div>
-                                                                                );
-                                                                        })}
-                                                                        <button 
-                                                                            type="button" 
-                                                                            onClick={() => addOpt()}
-                                                                            className="text-blue-500 text-sm font-medium w-fit ml-8 hover:underline"
-                                                                        >
-                                                                            + Thêm tùy chọn
-                                                                        </button>
-                                                                    </div>
-                                                                )}
-                                                            </Form.List>
-
-                                                            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end items-center gap-5">
-                                                                <div className="flex items-center gap-2 bg-gray-50 px-3 rounded-lg">
-                                                                    
-                                                                    <Form.Item 
-                                                                        {...restField} 
-                                                                        name={[name, 'score']} 
-                                                                        layout='horizontal'
-                                                                        label={<span className="text-gray-700 w-[5rem]">Điểm</span>}
-                                                                        style={{marginBottom: 0, width: '9rem'}}
-                                                                        rules={[{ required: true, message: '' }]}
-                                                                    >
-                                                                        <InputNumber min={0} max={10} controls={false} style={{width: '4rem'}}/>
-                                                                    </Form.Item>
-                                                                </div>
-
-                                                                <div className="h-6 w-[2px] bg-gray-200" />
-
-                                                                <Button type="text" danger icon={<Image src={CreateClassTrash} alt="Delete" width={20} height={20} />} onClick={() => remove(name)} />
-                                                                <Button type="text" icon={<Image src={CreateClassCopy} alt="Copy" width={20} height={20} />} onClick={() => add(form.getFieldValue(['questions', name]))} />
-                                                                
-                                                                <div className="h-6 w-[2px] bg-gray-200" />
-
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-gray-700">Bắt buộc</span>
-                                                                    <Form.Item {...restField} name={[name, 'required']} valuePropName="checked" noStyle>
-                                                                        <Switch size="small" />
-                                                                    </Form.Item>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    <button 
-                                                        type='button'
-                                                        onClick={() => add({ 
-                                                            question: '', 
-                                                            score: 0,        
-                                                            required: false, 
-                                                            options: ['']    
-                                                        })}
-                                                        className="relative w-[3rem] h-[3rem] group focus:outline-none transition-transform active:scale-95 mb-10"
-                                                    >
-                                                        <svg height="3rem" width="3rem" className="transition-colors group-hover:drop-shadow-lg">
-                                                            <circle
-                                                                r="1.3rem" 
-                                                                cx="1.5rem" 
-                                                                cy="1.5rem" 
-                                                                fill="white" 
-                                                                stroke="#1363DF" 
-                                                                strokeWidth="1.5"
-                                                                className="group-hover:stroke-blue-700"
-                                                            />
-                                                        </svg>
-
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <svg width="24" height="24" fill="currentColor" className="text-[#1363DF] group-hover:text-blue-700">
-                                                                <path d="M12 4a.5.5 0 0 1 .5.5v7h7a.5.5 0 0 1 0 1h-7v7a.5.5 0 0 1-1 0v-7h-7a.5.5 0 0 1 0-1h7v-7A.5.5 0 0 1 12 4z"/>
-                                                            </svg>
-                                                        </div>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </Form.List>
-                                    </div>
-
-                                    <Form.Item className='flex justify-center'>
-                                        <Button 
-                                            type="primary" 
-                                            htmlType="submit" 
-                                            size="large"
-                                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
-                                        >
-                                            Lưu thông tin
-                                        </Button>
-                                    </Form.Item>
-                                </Form>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {modalProject && (
-                    <div className='fixed inset-0 z-50 flex items-center justify-center mt-[10vh]'>
-                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose}/>
-
-                        <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[60%] h-auto px-6 py-3">
-                            <div className='flex flex-row justify-end'>
-                                <button 
-                                    type='button' onClick={handleClose}
-                                    className="w-[2rem] h-[2rem] hover:scale-110 hover:drop-shadow-lg transition-transform active:opacity-70"
-                                >
-                                    <X width={24} height={24}/>
-                                </button>
-                            </div>
-
-                            <div className='w-full h-auto flex flex-col items-center'>
-                                <h2 className="text-2xl font-bold mb-2">Tạo đồ án</h2>
-            
-                                <Form
-                                    form={form}
-                                    layout='vertical'
-                                    requiredMark={false}
-                                    onFinish={onFinishProject}
-                                    className='w-full'
-                                >
-                                    <Form.Item 
-                                        name='projectName' 
-                                        label={<span className='font-semibold'>Tên đồ án</span>}
-                                        rules={[{ required: true, message: 'Vui lòng nhập tên đồ án!' }]}
-                                    >
-                                        <Input size='large' placeholder='Tên đồ án'/>
-                                    </Form.Item>
-
-                                    <Form.Item 
-                                        name="deadline" 
-                                        label={<span className="font-semibold">Hạn nộp</span>}
-                                        rules={[{ required: true, message: 'Vui lòng chọn hạn nộp!' }]}
-                                    >
-                                        <Input size="large" type="date" className="rounded-lg" />
+                                        <Input size="large" placeholder="Tên bài giảng" />
                                     </Form.Item>
 
                                     <Form.Item
-                                        name='file'
-                                        label={<span className='font-semibold'>Tài liệu</span>}
+                                        name="file"
+                                        label={<span className="text-base">{modalLessonType === 'document' ? 'Tài liệu' : 'Video'}</span>}
                                         rules={[{ required: true, message: 'Vui lòng nhập file bài giảng!' }]}
-                                        valuePropName={"filelist"}
+                                        valuePropName="fileList"
+                                        getValueFromEvent={(e) => e?.fileList}
                                     >
-                                        <Upload 
-                                            className='w-full' 
+                                        <Upload
+                                            className="w-full"
                                             style={{ display: 'block' }}
-                                            showUploadList={false} 
+                                            showUploadList={false}
                                             beforeUpload={() => false}
-                                            onChange={changeFileProjectSelect}
-                                            // accept={ modalVidDoc == 'document' ? ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ".mp4" }
+                                            onChange={changeFileLessonSelect}
+                                            accept={modalLessonType === 'document' ? '.pdf,.doc,.docs,.docx,.odf,.odt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text' : '.mp4'}
                                         >
-                                            <Input 
-                                                className='w-full'
-                                                placeholder="Tài liệu"
-                                                readOnly 
+                                            <Input
+                                                className="w-full"
+                                                placeholder={modalLessonType === 'document' ? 'Tài liệu' : 'Video'}
+                                                readOnly
                                                 size="large"
-                                                value={fileProjectName}
-                                                suffix={<Image src={UploadIcon} alt="Doc" width={24} height={24} />}
+                                                value={fileLessonName}
+                                                suffix={<Image src={UploadIcon} alt="upload" width={24} height={24} />}
                                             />
                                         </Upload>
-                                    </Form.Item> 
-                                    
-                                    <Form.Item 
-                                        name='permit' 
-                                        label={<span className='font-semibold'>Cho phép dùng giọng nói của bạn để tạo giọng nói tự động trong tính năng Vấn đáp AI</span>}
-                                    >
-                                        <Radio.Group
-                                            style={{display:'flex', flexDirection: 'column', gap: 8}}
-                                            onChange={onChangeRadio}
-                                            value={radioVal}
-                                            options={[
-                                                { value: 1, label: 'Không cho phép' },
-                                                { value: 2, label: "Cho phép" }
-                                            ]}
-                                        />
                                     </Form.Item>
 
-                                    {radioVal === 2 && (
-                                        <Form.Item 
-                                            name="audio" 
-                                            label={
-                                                <div className='flex flex-col'>
-                                                    <p>Xin vui lòng đọc theo đoạn văn sau:</p>
-                                                    <p>“Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.”</p>
-                                                </div>
-                                            }
-                                            valuePropName={"filelist"}
-                                            rules={[{ required: true, message: 'Vui lòng nhập file!' }]}
-                                        >
-                                            <Upload 
-                                                className='w-full' 
-                                                style={{ display: 'block' }}
-                                                showUploadList={false} 
-                                                beforeUpload={() => false}
-                                                onChange={changeAudioProjectSelect}
-                                                // accept={ modalVidDoc == 'document' ? ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" : ".mp4" }
-                                            >
-                                                <Input 
-                                                    className='w-full'
-                                                    placeholder="Ghi âm"
-                                                    readOnly 
-                                                    size="large"
-                                                    value={audioProjectName}
-                                                    suffix={<Image src={UploadIcon} alt="Doc" width={24} height={24} />}
-                                                />
-                                            </Upload>
-                                        </Form.Item>
-                                    )}
-
-                                    <Form.Item className='flex justify-center'>
-                                        <Button 
-                                            type="primary" 
-                                            htmlType="submit" 
+                                    <Form.Item className="flex justify-center">
+                                        <Button
+                                            type="primary"
+                                            htmlType="submit"
                                             size="large"
-                                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                                            className="!w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                                         >
                                             Lưu thông tin
                                         </Button>
                                     </Form.Item>
                                 </Form>
                             </div>
-                            
                         </div>
                     </div>
                 )}
-
             </div>
         </main>
-        
     );
-}
-
-type submitProps = {
-    onCancel: () => void;
-    onConfirm: () => void;
 };
-
-function SubmitModal({ onCancel, onConfirm }: submitProps) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onCancel}
-            />
-
-            <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[40%] h-[35%] px-3 py-3">
-                <div className='flex flex-row justify-end mb-4'>
-                    <button 
-                        type='button' onClick={onCancel}
-                        className="w-[2rem] h-[2rem] hover:scale-110 hover:drop-shadow-lg transition-transform active:opacity-70"
-                    >
-                        <X width={24} height={24}/>
-                    </button>
-                </div>
-
-                <div className='w-full h-auto flex flex-col justify-center items-center text-center'>
-                    <h2 className="text-2xl font-bold mb-2">Xác nhận hoàn thành thiết lập môn học</h2>
-                    <p className="text-sm text-gray-600">
-                        Bạn đã cài đặt tất cả thông tin cho môn học này.
-                    </p>
-
-                    <p className="text-sm text-gray-600 mb-6">
-                        Hãy xác nhận thiết lập để khóa học có thể được sử dụng bởi tất cả học sinh!
-                    </p>
-
-                    <div className="flex justify-end gap-3">
-                        <Button
-                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
-                            onClick={onCancel}
-                        >
-                            Hủy
-                        </Button>
-
-                        <Button
-                            className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
-                            onClick={onConfirm}
-                        >
-                            Thiết lập
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    );
-}
 
 export default Step3;

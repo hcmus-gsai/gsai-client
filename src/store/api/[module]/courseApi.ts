@@ -1,9 +1,10 @@
 
 import { baseApi } from '../baseApi';
-import { CourseListResponse, CourseQueryParams, CourseResponse } from '../../../type/course.type';
+import { Course, CourseListResponse, CourseQueryParams, CourseResponse, CreateCourseRequest } from '../../../type/course.type';
 import { ModuleResponse } from '../../../type/module.type';
 import { store } from '@/store/store';
 import { get } from 'http';
+import { create } from 'domain';
 
 export const courseApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -70,6 +71,15 @@ export const courseApi = baseApi.injectEndpoints({
             providesTags: ['Course'],
         }),
         
+        // Teacher
+        createCourse: builder.mutation<string, CreateCourseRequest>({
+            query: (course) => ({
+                url: '/courses',
+                method: 'POST',
+                body: course,
+            }),
+            invalidatesTags: ['Course'],
+        }),
     }),
 });
 
@@ -87,4 +97,8 @@ export const {
     useLazyGetAllCategoriesQuery,
     useGetCoursesByTeacherQuery,
     useGetTeacherStatisticQuery,
+
+    // Teacher
+    useCreateCourseMutation,
+
 } = courseApi;

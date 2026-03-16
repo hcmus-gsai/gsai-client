@@ -8,8 +8,12 @@ import React from "react";
 
 const CourseDisplaySection = ({
     title,
+    isActive,
+    sectionClassName,
 }: {
     title: string;
+    isActive: boolean;
+    sectionClassName?: string;
 }) => {
 
     const { data: courses } = useGetCoursesByTeacherQuery({
@@ -23,25 +27,30 @@ const CourseDisplaySection = ({
     const coursesWithTeacherName = React.useMemo(() => {
         if (!courses?.data) return [];
 
-        return courses.data.map(course => ({
+        return courses.data
+            .filter(course => course.is_active === isActive)
+            .map(course => ({
             ...course,
             teacher_name: profile?.full_name || '',
         }));
-    }, [courses?.data, profile?.full_name]);
+    }, [courses?.data, isActive, profile?.full_name]);
 
     return (
-        <section className="w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]">
+        <section className={sectionClassName || "w-full min-h-[70vh] flex flex-col items-center mt-[2.5rem]"}>
             <div className="flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem] px-4">
-                <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">{title}</h1>
+                {title ? (
+                    <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">{title}</h1>
+                ) : null}
                 <div className="flex items-center justify-center w-full">
                     <CourseGrid
                         courseData={coursesWithTeacherName}
                         colWidth={6}
                         maxItems={4}
+                        routeInactiveTeacherCoursesToCreateClass={!isActive}
                     />
                 </div>
             </div>
-            {courses?.data.length && courses.data.length > 4 ?
+            {coursesWithTeacherName.length > 4 ?
                 (<div className="flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                     <RedirectButton
                         title={title}

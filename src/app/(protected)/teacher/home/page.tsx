@@ -29,8 +29,7 @@ export default function TeacherHomePage() {
             <StatisticBoxSection />
             <SubmissionHistorySection title="Lịch sử nộp bài" type="submission" />
             <SubmissionHistorySection title="Lịch sử tác vụ AI" type="ai_task" />
-            <CourseDisplaySection title="Môn học đã tạo" />
-            <FooterSection hasRegisterBox={false} />
+            <CourseDisplaySection title="Môn học đã tạo" isActive={true} />
         </main>
     )
 }

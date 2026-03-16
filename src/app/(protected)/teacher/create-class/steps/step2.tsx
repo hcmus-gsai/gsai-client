@@ -1,10 +1,18 @@
 'use client'
 
-import { Form, Button } from 'antd'
+import { Form, Button, message } from 'antd'
+import { useSearchParams } from 'next/navigation';
 
 import CreateClassIntro from '../components/create-class-intro'
 import CreateClassChapter from '../components/create-class-chapter'
 import { Step2Data } from '@/type/createClass.type'
+import {
+    useCreateModuleStepMutation,
+    useCreateModulesBatchStepMutation,
+    useDeleteModuleStepMutation,
+    usePatchModuleStepMutation,
+    useReorderModulesStepMutation,
+} from '@/store/api/[module]/createClassApi'
 
 interface Props {
   data: any; 
@@ -12,15 +20,148 @@ interface Props {
   onBack: () => void
 }
 
-const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
-    const [form] = Form.useForm();
+type ChapterDraft = {
+        chapterName: string;
+        description: string;
+        moduleId?: string;
+};
 
-    const handleFinish = (values: any) => {
+const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
+    const searchParams = useSearchParams();
+    const [form] = Form.useForm();
+    const [createModulesBatchStep, { isLoading: isBatchCreating }] = useCreateModulesBatchStepMutation();
+    const [createModuleStep, { isLoading: isCreatingOne }] = useCreateModuleStepMutation();
+    const [patchModuleStep, { isLoading: isPatching }] = usePatchModuleStepMutation();
+    const [deleteModuleStep, { isLoading: isDeleting }] = useDeleteModuleStepMutation();
+    const [reorderModulesStep, { isLoading: isReordering }] = useReorderModulesStepMutation();
+
+    const handleFinish = async (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
 
-        //Logic xử lý data từ step2
+        const resumeCourseId = searchParams.get('courseId') || undefined;
+        const courseId = (data.courseId as string | undefined) || resumeCourseId;
+        if (!courseId) {
+            message.error('Thiếu courseId. Vui lòng hoàn tất bước 1 trước.');
+            return;
+        }
 
-        onNext(values); // Gửi toàn bộ object values về file cha
+        const inputChapters: ChapterDraft[] = values.chapters || [];
+        const previousChapters: ChapterDraft[] = data.chapters || [];
+        const normalizedInputChapters: ChapterDraft[] = inputChapters.map((chapter, index, chapters) => {
+            if (!chapter.moduleId) {
+                return chapter;
+            }
+
+            const firstSeenIndex = chapters.findIndex((item) => item.moduleId === chapter.moduleId);
+            if (firstSeenIndex === index) {
+                return chapter;
+            }
+
+            // Duplicate moduleId means this chapter is a copied draft and must be created as a new module.
+            return {
+                ...chapter,
+                moduleId: undefined,
+            };
+        });
+
+        try {
+            let savedChapters: ChapterDraft[] = [];
+
+            const hasPersistedModules = previousChapters.some((chapter) => !!chapter.moduleId);
+
+            if (!hasPersistedModules) {
+                const batch = await createModulesBatchStep({
+                    courseId,
+                    modules: normalizedInputChapters.map((chapter, index) => ({
+                        module_name: chapter.chapterName,
+                        module_description: chapter.description,
+                        order_index: index + 1,
+                    })),
+                }).unwrap();
+
+                savedChapters = normalizedInputChapters.map((chapter, index) => ({
+                    ...chapter,
+                    moduleId: batch.modules[index]?.id,
+                }));
+            } else {
+                const previousById = new Map(
+                    previousChapters
+                        .filter((chapter) => Boolean(chapter.moduleId))
+                        .map((chapter) => [chapter.moduleId as string, chapter]),
+                );
+
+                const nextIds = new Set(
+                    normalizedInputChapters
+                        .map((chapter) => chapter.moduleId)
+                        .filter((id): id is string => Boolean(id)),
+                );
+
+                // 1) Delete removed modules (exist in previous but not in next)
+                for (const prevId of previousById.keys()) {
+                    if (!nextIds.has(prevId)) {
+                        await deleteModuleStep(prevId).unwrap();
+                    }
+                }
+
+                // 2) Upsert remaining modules following UI order
+                savedChapters = [];
+                for (let i = 0; i < normalizedInputChapters.length; i += 1) {
+                    const chapter = normalizedInputChapters[i];
+
+                    if (chapter.moduleId && previousById.has(chapter.moduleId)) {
+                        await patchModuleStep({
+                            moduleId: chapter.moduleId,
+                            body: {
+                                module_name: chapter.chapterName,
+                                module_description: chapter.description,
+                            },
+                        }).unwrap();
+
+                        savedChapters.push({
+                            ...chapter,
+                            moduleId: chapter.moduleId,
+                        });
+                        continue;
+                    }
+
+                    const created = await createModuleStep({
+                        courseId,
+                        body: {
+                            module_name: chapter.chapterName,
+                            module_description: chapter.description,
+                            order_index: i + 1,
+                        },
+                    }).unwrap();
+
+                    savedChapters.push({
+                        ...chapter,
+                        moduleId: created.id,
+                    });
+                }
+            }
+
+            const moduleIdsForReorder = savedChapters
+                .map((chapter) => chapter.moduleId)
+                .filter((moduleId): moduleId is string => Boolean(moduleId));
+
+            if (moduleIdsForReorder.length > 0) {
+                await reorderModulesStep({
+                    courseId,
+                    body: {
+                        module_ids: moduleIdsForReorder,
+                    },
+                }).unwrap();
+            }
+
+            message.success('Lưu thông tin chương thành công');
+            onNext({
+                courseId,
+                chapters: savedChapters,
+            });
+        } catch (error) {
+            console.error('Save modules error', error);
+            message.error('Không thể lưu chương học, vui lòng thử lại');
+        }
     };
 
     return (
@@ -31,7 +172,7 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
                 <Form 
                     form={form} 
                     onFinish={handleFinish} 
-                    initialValues={{ chapters: [{}] }} // Mặc định có 1 chương trống
+                    initialValues={{ chapters: data.chapters?.length ? data.chapters : [{}] }}
                     requiredMark={false}
                     labelCol={{
                         xs: { span: 4 }, 
@@ -98,6 +239,7 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
                             type="primary" 
                             size="large"
                             htmlType="submit"
+                            loading={isBatchCreating || isCreatingOne || isPatching || isDeleting || isReordering}
                             className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                         >
                             Tiếp tục

@@ -124,10 +124,6 @@ export default function TeacherHomePage() {
                     </div>
                 </div>
             </div>
-
-            <SubmissionHistorySection title="Lịch sử nộp bài" type="submission" />
-            <SubmissionHistorySection title="Lịch sử tác vụ AI" type="ai_task" />
-            <FooterSection hasRegisterBox={false} />
         </section>
     )
 }

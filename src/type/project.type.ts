@@ -1,6 +1,7 @@
 // ==================== Project Document ====================
 export interface ProjectDocumentResponse {
     file_url: string;
+    expired_date?: number;
 }
 
 export interface ProjectTranscriptResponse {
