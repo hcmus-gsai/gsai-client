@@ -13,7 +13,7 @@ export interface VideoMaterial {
 export const videoApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getVideoUrl: builder.query<VideoMaterial, string>({
-            query: (lessonId) => `/lessons/${lessonId}/video`,
+            query: (lessonId) => `/lessons/${lessonId}/videos`,
             providesTags: ['Video'],
         }),
     })
