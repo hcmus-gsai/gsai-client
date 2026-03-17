@@ -37,7 +37,18 @@ const SAMPLE_VIDEOS: AILectureVideo[] = [
         interactive: false,
         status: 'processing',
         courseId: 'demo-history',
+    }, 
+        {
+        id: 'v-001',
+        title: 'Hàm số bậc hai và đồ thị parabol',
+        duration: '12:20',
+        createdAt: '16/03/2026',
+        teacherVoice: true,
+        interactive: true,
+        status: 'ready',
+        courseId: 'demo-math',
     }, */
+
 ];
 
 const FEATURE_ITEMS = [
