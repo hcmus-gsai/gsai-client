@@ -415,8 +415,8 @@ const FooterSection = ({
                     </h1>
                     <div className="flex flex-col gap-2">
                         <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Cách hoạt động</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Điều khoản & Điều lệ</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Chính sách bảo mật</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/term")}>Điều khoản & Điều lệ</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/privacy")}>Chính sách bảo mật</p>
                     </div>
                 </div>
 
@@ -426,9 +426,9 @@ const FooterSection = ({
                         Về Epis
                     </h1>
                     <div className="flex flex-col gap-2">
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Giới thiệu</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Tầm nhìn</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Ban điều hành</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/about")}>Giới thiệu</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/vision")}>Tầm nhìn</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/team")}>Ban điều hành</p>
                     </div>
                 </div>
             </div>

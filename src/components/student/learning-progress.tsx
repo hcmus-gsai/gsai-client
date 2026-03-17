@@ -115,7 +115,7 @@ const LearningProgressSection = () => {
 
     if (enrollmentsLoading || calculating) {
         return (
-            <section className="w-full py-16 flex justify-center">
+            <section className="w-full py-10 sm:py-16 flex justify-center px-4">
                 <div className="animate-pulse text-[var(--color-primary)]">
                     Đang tải tiến độ học tập...
                 </div>
@@ -124,23 +124,23 @@ const LearningProgressSection = () => {
     }
 
     return (
-        <section className="w-full py-16 flex justify-center">
-            <div className="w-[var(--global-width)] flex flex-col gap-6">
+        <section className="w-full py-10 sm:py-16 flex justify-center">
+            <div className="w-full max-w-[var(--global-width)] px-4 sm:px-8 xl:px-0 flex flex-col gap-6">
                 {!enrollments.length ? (
-                    <h1 className="text-[2.5rem] font-bold text-[var(--color-primary)]">
+                    <h1 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.5rem] font-bold text-[var(--color-primary)]">
                         Bạn chưa đăng ký môn nào cả, hãy khám phá ngay!
                     </h1>
                 ) : !inProgressEnrollments.length ? (
-                    <h1 className="text-[2.5rem] font-bold text-[var(--color-primary)]">
+                    <h1 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.5rem] font-bold text-[var(--color-primary)]">
                         Bạn đã hoàn thành tất cả các môn học đã đăng ký!
                     </h1>
                 ) : (
                     <>
-                        <h1 className="text-[2.5rem] font-bold text-[var(--color-primary)]">
+                        <h1 className="text-[1.75rem] sm:text-[2rem] lg:text-[2.5rem] font-bold text-[var(--color-primary)]">
                             Tiếp tục môn học
                         </h1>
 
-                        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
+                        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-1 sm:pr-2">
                             {inProgressEnrollments.map(course => {
                                 const percent = getCompletionPercent(course.id);
                                 const lesson = getChosenLesson(course.id);
@@ -148,10 +148,20 @@ const LearningProgressSection = () => {
                                 return (
                                     <div
                                         key={course.id}
-                                        className="flex justify-between items-center p-6 border rounded-2xl bg-white"
+                                        className="
+                                            flex flex-col sm:flex-row
+                                            justify-between
+                                            items-start sm:items-center
+                                            gap-4 sm:gap-0
+                                            p-4 sm:p-6
+                                            border border-secondary rounded-2xl bg-white
+                                            shadow-sm
+                                            hover:shadow-lg
+                                            transition-all duration-300 ease-out
+                                        "
                                     >
-                                        <div className="flex-1">
-                                            <p className="font-semibold text-lg">
+                                        <div className="flex-1 w-full sm:w-auto">
+                                            <p className="font-semibold text-base sm:text-lg">
                                                 {course.course_code} - {course.course_name}
                                             </p>
 
@@ -166,9 +176,15 @@ const LearningProgressSection = () => {
                                             />
                                         </div>
 
-                                        <div className="flex items-center gap-6">
-                                            <div className="text-right">
-                                                <p className="font-semibold">
+                                        <div className="
+                                            flex flex-row
+                                            items-center
+                                            justify-between sm:justify-end
+                                            w-full sm:w-auto
+                                            gap-3 sm:gap-6
+                                        ">
+                                            <div className="text-left sm:text-right hidden xs:block sm:block">
+                                                <p className="font-semibold text-sm sm:text-base line-clamp-1">
                                                     {lesson?.lesson_name ?? "-"}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
@@ -179,6 +195,7 @@ const LearningProgressSection = () => {
 
                                             <Button
                                                 type="primary"
+                                                className="!shrink-0 !h-12 !px-8 !border !border-secondary !rounded-full !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black"
                                                 onClick={() =>
                                                     router.push(
                                                         `/student/courses/${course.course_id}/content`
@@ -188,7 +205,7 @@ const LearningProgressSection = () => {
                                                 Tiếp tục
                                             </Button>
 
-                                            <button className="p-2">
+                                            <button className="p-2 shrink-0">
                                                 <Image src={MoreIcon} alt="more" width={20} />
                                             </button>
                                         </div>
