@@ -12,50 +12,44 @@ export const metadata: Metadata = {
 
 const teamMembers = [
     {
-        name: 'Nguyễn Văn A',
-        role: 'Project Manager / Lead Researcher',
+        name: 'Phạm Gia B',
+        role: 'AI Engineer / Backend Developer',
         image: 'https://i.pravatar.cc/300?img=1', 
-        bio: 'Chuyên gia về AI trong giáo dục với hơn 5 năm nghiên cứu tại GSAI.',
         linkedin: '#',
         github: '#',
     },
     {
-        name: 'Trần Thị B',
-        role: 'Product Designer',
+        name: 'Nguyễn Văn Đ',
+        role: 'AI Engineer / Frontend Developer',
         image: 'https://i.pravatar.cc/300?img=5',
-        bio: 'Người kiến tạo trải nghiệm người dùng và giao diện sáng tạo cho Epis.',
         linkedin: '#',
         github: '#',
     },
     {
-        name: 'Lê Văn C',
-        role: 'Fullstack Developer',
+        name: 'Đinh Vũ Gia H',
+        role: 'AI Engineer / Frontend Developer / UI Designer',
         image: '#',
-        bio: 'Chịu trách nhiệm xây dựng hệ thống lõi và kiến trúc microservices.',
         linkedin: '#',
         github: '#',
     },
     {
-        name: 'Phạm Minh D',
-        role: 'AI Engineer',
+        name: 'Nguyễn Văn H',
+        role: 'AI Engineer / Backend Developer',
         image: 'https://i.pravatar.cc/300?img=4',
-        bio: 'Phát triển các thuật toán cá nhân hóa lộ trình học tập cho sinh viên.',
         linkedin: '#',
         github: '#',
     },
     {
-        name: 'Hoàng Anh E',
-        role: 'Content Strategy',
+        name: 'Trịnh Quốc H',
+        role: 'AI Engineer / Frontend Developer',
         image: 'https://i.pravatar.cc/300?img=10',
-        bio: 'Đảm bảo chất lượng học thuật và kết nối các giảng viên chuyên môn.',
         linkedin: '#',
         github: '#',
     },
     {
-        name: 'Vũ Đức F',
-        role: 'DevOps & Security',
+        name: 'Nguyễn Hoàng Khải M',
+        role: 'Project Manager / AI Engineer / Backend Developer',
         image: 'https://i.pravatar.cc/300?img=12',
-        bio: 'Vận hành hệ thống và bảo mật dữ liệu người dùng trên nền tảng.',
         linkedin: '#',
         github: '#',
     },
@@ -67,24 +61,26 @@ export default function LeadershipPage() {
             <DynamicNavbar />
             <main>
                 {/* Hero Section - Giữ nguyên style bạn yêu cầu */}
-                <section className="relative w-full py-28 flex items-center justify-center overflow-hidden bg-secondary/5">
-                    <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
-                    <div className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-accent/10 rounded-full blur-[80px] pointer-events-none" />
-                    <div className="container relative z-10 flex flex-col items-center text-center px-6">
-                        <span className="px-4 py-1.5 rounded-full border border-gray-200 bg-white/50 backdrop-blur-sm text-gray-500 text-xs font-medium tracking-widest uppercase shadow-sm mb-6">
-                            Đội Ngũ
-                        </span>
-                        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6 leading-tight tracking-tight">
-                            Ban Điều{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
-                                Hành Epis
+                <section className="relative w-full min-h-[100vh] flex items-center justify-center overflow-hidden bg-secondary/5">
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-secondary/10 rounded-full blur-[15px] animate-pulse"></div>
+                        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-accent/10 rounded-full blur-[15px] animate-pulse"></div>
+                    </div>
+
+                    <div className="container relative z-10 flex flex-col items-center text-center z-1">
+                       
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-sans font-bold text-primary mb-8 leading-[1.1] tracking-tight opacity-0 animate-[fadeSlideIn_0.8s_ease-out_0.2s_forwards]">
+                            Đội ngũ 
+                            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent ml-3">
+                                phát triển 
                             </span>
                         </h1>
-                        <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
-                            Những con người tâm huyết từ nhóm nghiên cứu GSAI, cùng chung mục tiêu nâng tầm giáo dục số.
+                        <p className="text-lg text-gray-500 max-w-xl leading-relaxed">
+                            Đội ngũ phát triển EPIS là các sinh viên trong nhóm GSAI thuộc trường Đại Học Khoa Học Tự Nhiên, ĐHQG-TPHCM.
                         </p>
                     </div>
                 </section>
+
 
                 {/* Team Grid Section */}
                 <section className="py-24 bg-white">
@@ -98,7 +94,7 @@ export default function LeadershipPage() {
                             {teamMembers.map((member, idx) => (
                                 <div key={idx} className="group relative">
                                     {/* Card Container */}
-                                    <div className="relative overflow-hidden rounded-[2.5rem] bg-gray-50 border border-gray-100 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-2">
+                                    <div className="h-96 relative overflow-hidden rounded-[2.5rem] bg-gray-50 border border-gray-100 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-2">
                                         
                                         {/* Avatar với vòng trang trí */}
                                         <div className="relative w-32 h-32 mx-auto mb-6">
@@ -119,20 +115,14 @@ export default function LeadershipPage() {
                                             <p className="text-sm font-semibold text-secondary/80 uppercase tracking-wider">
                                                 {member.role}
                                             </p>
-                                            <p className="text-gray-500 text-sm leading-relaxed px-2">
-                                                {member.bio}
-                                            </p>
                                         </div>
 
                                         {/* Social Links */}
                                         <div className="mt-8 pt-6 border-t border-gray-200/60 flex justify-center gap-4">
-                                            <a href={member.linkedin} className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-600 hover:shadow-md transition-all">
-                                                <FontAwesomeIcon icon={faLinkedin} />
-                                            </a>
-                                            <a href={member.github} className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-400 hover:text-black hover:shadow-md transition-all">
+                                            <a href={member.github} className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-black  transition-all">
                                                 <FontAwesomeIcon icon={faGithub} />
                                             </a>
-                                            <a href="#" className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-400 hover:text-secondary hover:shadow-md transition-all">
+                                            <a href="#" className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-secondary   transition-all">
                                                 <FontAwesomeIcon icon={faEnvelope} />
                                             </a>
                                         </div>

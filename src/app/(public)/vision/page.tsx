@@ -16,7 +16,7 @@ const visionPoints = [
     {
         icon: faGlobeAsia,
         title: 'Mục Tiêu Lớn Trong Tương Lai',
-        description: 'EPIS định hướng trở thành hệ sinh thái giáo dục số hàng đầu, không chỉ là một nền tảng học tập mà còn là một trung tâm tri thức kết nối hàng triệu người học và chuyên gia trên toàn cầu.',
+        description: 'EPIS hướng tới trở thành một nền tảng học ngôn ngữ dành cho sinh viên Việt Nam, giúp việc tiếp cận kiến thức trở nên linh hoạt và hiệu quả hơn. Thông qua việc ứng dụng AI và kết hợp nhiều phương thức học khác nhau, EPIS hỗ trợ người học tiếp cận nội dung theo cách phù hợp với nhu cầu và tốc độ của riêng mình. Nền tảng được xây dựng với mục tiêu đơn giản hóa quá trình học tập, đồng thời tạo ra một môi trường học tập hiện đại, dễ sử dụng và có tính ứng dụng cao.',
         tag: 'Quy mô & Ảnh hưởng',
         textColor: 'text-blue-600',
         bgColor: 'bg-blue-100',
@@ -25,7 +25,7 @@ const visionPoints = [
     {
         icon: faLightbulb,
         title: 'Giá Trị Mang Lại',
-        description: 'Chúng tôi xóa bỏ rào cản trong việc tiếp cận kiến thức chuyên sâu. EPIS giúp cá nhân hóa lộ trình phát triển, giúp người dùng giải quyết các vấn đề thực tế thông qua những khóa học chất lượng từ GSAI.',
+        description: 'EPIS giúp việc tiếp cận kiến thức chuyên sâu trở nên dễ dàng và rõ ràng hơn đối với sinh viên. Nền tảng hỗ trợ cá nhân hóa lộ trình học tập dựa trên nhu cầu và khả năng của từng người, đồng thời tập trung vào tính ứng dụng trong thực tế. Thông qua các tác nhân thông minh được phát triển từ GSAI, người học có thể từng bước cải thiện kỹ năng và giải quyết các vấn đề cụ thể trong quá trình học tập.',
         tag: 'Lợi ích bền vững',
         textColor: 'text-blue-600',
         bgColor: 'bg-blue-100',
@@ -34,7 +34,7 @@ const visionPoints = [
     {
         icon: faRocket,
         title: 'Định Hướng Phát Triển',
-        description: 'Tiên phong ứng dụng AI và Machine Learning để tối ưu hóa trải nghiệm học tập theo nhu cầu từng cá nhân. Chúng tôi không ngừng mở rộng quy mô công nghệ và sẵn sàng vươn ra thị trường quốc tế.',
+        description: 'EPIS tập trung ứng dụng AI và Học máy để cải thiện trải nghiệm học tập và cá nhân hóa nội dung cho từng người dùng. Đồng thời, nền tảng hướng tới việc mở rộng khả năng tiếp cận các công cụ AI đến với nhiều sinh viên hơn, giúp việc học trở nên dễ tiếp cận và hiệu quả hơn. Trong thời gian tới, EPIS sẽ tiếp tục hoàn thiện công nghệ và mở rộng phạm vi phục vụ.',
         tag: 'Công nghệ & Đổi mới',
         textColor: 'text-blue-600',
         bgColor: 'bg-blue-100',
@@ -57,21 +57,26 @@ export default function VisionPage() {
             <DynamicNavbar />
             <main>
                 {/* Hero Section */}
-                <section className="relative w-full py-28 flex items-center justify-center overflow-hidden bg-secondary/5">
-                    <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
-                    <div className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-accent/10 rounded-full blur-[80px] pointer-events-none" />
-                    <div className="container relative z-10 flex flex-col items-center text-center px-6">
-                        <span className="px-4 py-1.5 rounded-full border border-gray-200 bg-white/50 backdrop-blur-sm text-gray-500 text-xs font-medium tracking-widest uppercase shadow-sm mb-6">
-                            Vision
-                        </span>
-                        <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6 leading-tight tracking-tight">
-                            Định hướng{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">
-                                Tầm nhìn
+                <section className="relative w-full min-h-[100vh] flex items-center justify-center overflow-hidden bg-secondary/5">
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-secondary/10 rounded-full blur-[15px] animate-pulse"></div>
+                        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-accent/10 rounded-full blur-[15px] animate-pulse"></div>
+                    </div>
+
+                    <div className="container relative z-10 flex flex-col items-center text-center z-1">
+                       
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-sans font-bold text-primary mb-8 leading-[1.1] tracking-tight opacity-0 animate-[fadeSlideIn_0.8s_ease-out_0.2s_forwards]">
+                            Định hướng 
+                            <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent ml-3">
+                                Tầm nhìn 
                             </span>
                         </h1>
-                        <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
-                            Tại EPIS, chúng tôi không chỉ xây dựng một website, chúng tôi kiến tạo tương lai của giáo dục số dựa trên sức mạnh của trí tuệ nhân tạo.
+                        <p className="text-lg text-gray-500 max-w-xl leading-relaxed">
+                            EPIS hướng tới mở rộng khả năng tiếp cận tri thức ở mọi nơi.
+                        </p>
+                        <p className="text-lg text-gray-500 max-w-xl leading-relaxed">
+
+                        EPIS xây dựng nền tảng học tập có thể thích nghi và phục vụ người dùng ở nhiều bối cảnh khác nhau.
                         </p>
                     </div>
                 </section>
@@ -89,33 +94,22 @@ export default function VisionPage() {
                                         idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                                     }`}
                                 >
-                                    {/* Cột Icon được thiết kế lại như một Card nổi */}
                                     <div className="hidden md:flex flex-1 flex justify-center w-full">
-                                        <div className={`relative w-full max-w-[280px] aspect-square rounded-[3rem] ${item.bgColor} flex items-center justify-center shadow-lg transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl`}>
-                                            {/* Lớp phủ trắng mờ tạo hiệu ứng kính (glassmorphism) nhẹ */}
+                                        <div className={`relative w-full max-w-[280px] aspect-square rounded-[3rem] ${item.bgColor} flex items-center justify-center shadow-lg transition-all duration-500`}>
                                             <div className="absolute inset-2 bg-white/60 rounded-[2.5rem] backdrop-blur-sm" />
                                             
                                             <FontAwesomeIcon 
                                                 icon={item.icon} 
-                                                className={`relative z-10 text-7xl md:text-8xl ${item.textColor} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`} 
+                                                className={`w-40 h-40 relative z-10 text-7xl md:text-8xl ${item.textColor} transition duration-500`} 
                                             />
                                             
-                                            {/* Nút tròn nhỏ trang trí ở góc */}
-                                            <div className={`absolute -bottom-4 ${idx % 2 === 0 ? '-right-4' : '-left-4'} w-14 h-14 bg-white rounded-full shadow-xl border border-gray-100 flex items-center justify-center transition-transform duration-500 group-hover:-translate-y-2`}>
-                                                <FontAwesomeIcon icon={faArrowRight} className={`${item.textColor} text-xl ${idx % 2 !== 0 ? 'rotate-180' : '-rotate-45'}`} />
-                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Cột Nội dung */}
                                     <div className={`flex-1 space-y-6 ${idx % 2 === 0 ? 'md:pr-12' : 'md:pl-12 text-left md:text-right'}`}>
-                                        <div className={`inline-flex items-center justify-center ${idx % 2 !== 0 ? 'md:ml-auto' : ''}`}>
-                                            <span className={`px-4 py-1.5 rounded-full text-sm font-bold tracking-wide uppercase ${item.bgColor} ${item.textColor}`}>
-                                                {item.tag}
-                                            </span>
-                                        </div>
                                         
-                                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+                                        <h2 className="text-2xl md:text-3xl font-extrabold text-primary leading-tight">
                                             {item.title}
                                         </h2>
                                         
