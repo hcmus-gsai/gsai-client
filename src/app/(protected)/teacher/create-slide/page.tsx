@@ -1,12 +1,15 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 
-import { FooterSection } from "@/components/guest/ui/guest";
-import { CourseDisplaySection } from "@/components/teacher/course-display";
 
 import { useState, useEffect, useRef } from 'react';
-import { Button } from 'antd';
 import {pdfjs} from 'react-pdf';
+import { 
+    useAudioTranscribeMutation,
+    useGetRegisterVoiceQuery
+ } from '@/store/api/[module]/genVideoApi';
+
+import { useCloneVoiceMutation } from '@/store/api/[module]/voiceApi';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -27,8 +30,6 @@ interface VoicePickerModalProps {
     // voices: Voice[];
 }
 
-const voice_options = ["leonas","lnthanh","ngvanduc","ngvanhau"]
-
 const makeEmptySlides = (count: number): Slide[] => 
     Array.from({ length: count }, (_, i) => ({
     id: i + 1,
@@ -44,7 +45,7 @@ const makeEmptySlides = (count: number): Slide[] =>
 
 export default function SlideList() {
     
-    const [slides, setSlides] = useState<Slide[]>(makeEmptySlides(5));
+    const [slides, setSlides] = useState<Slide[]>(makeEmptySlides(3));
 
     const fileInputRef = useRef<{[key: number]:HTMLInputElement | null}>({});
 
@@ -54,11 +55,7 @@ export default function SlideList() {
         )
     }
 
-    const handleGenerateVoice = async (slideId: number)=>{
-        // updateSlide(id, {isGenerating:true});
-        //Generate voice for slide hook here
-        // updateSlide(slideId, {isGenerating:false, audioUrl:"#generated"})
-    };
+
 
     const handleAudioUpload = (id: number, file: File)=>{
         const objectUrl = URL.createObjectURL(file);
@@ -67,16 +64,53 @@ export default function SlideList() {
     
     const [thumbnail, setThumbnail] = useState<{file: File; url: string}|null>(null);
     const [voiceSample, setVoiceSample] = useState<{file:File; url:string}|null>(null);
+    const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+    const [recordingError, setRecordingError] = useState('');
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const [transcribeHint, setTranscribeHint] = useState('');
     const [textPrompt, setTextPrompt] = useState('');
     const [slideFile, setSlideFile]= useState<File|null>(null);
+    const [registeredVoices, setRegisteredVoices] = useState<Array<{ voice_name: string; audio_url: string }>>([]);
+    const [selectedRegisteredVoice, setSelectedRegisteredVoice] = useState('');
     
     const [isParsingSlide, setIsParsingSlide] = useState(false);
     const [previewSlide, setPreviewSlide] = useState<{url:string; title: string}|null >(null);
+    const [createVideoHint, setCreateVideoHint] = useState('');
+    const [isCreateVideoHintVisible, setIsCreateVideoHintVisible] = useState(false);
 
 
     const thumbnailRef = useRef<HTMLInputElement>(null);
     const voiceRef = useRef<HTMLInputElement>(null);
     const slideRef = useRef<HTMLInputElement>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const mediaStreamRef = useRef<MediaStream | null>(null);
+    const recordedChunksRef = useRef<Blob[]>([]);
+
+    // AI API
+    const [transcribeAudio] = useAudioTranscribeMutation();
+
+    const { data, isLoading, error } = useGetRegisterVoiceQuery();
+    useEffect(() => {
+        if (data) {
+            setRegisteredVoices(data);
+            if (data.length > 0) {
+                const firstVoiceName = data[0].voice_name;
+                setSelectedRegisteredVoice(firstVoiceName);
+                setSlides((prev) =>
+                    prev.map((slide) => ({
+                        ...slide,
+                        voice: data.some((voice) => voice.voice_name === slide.voice)
+                            ? slide.voice
+                            : firstVoiceName,
+                    }))
+                );
+            }
+        }
+    }, [data]);
+
+    const [cloneVoice] = useCloneVoiceMutation();
+    
+    
 
     const handleThumbnailUpload = (file: File) => {
         if (!file){
@@ -90,8 +124,96 @@ export default function SlideList() {
             return;
         }
         const url = URL.createObjectURL(file);
+        setRecordingError('');
         setVoiceSample({file, url});
     }
+
+    const handleStartRecording = async () => {
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+            setRecordingError('Trình duyệt không hỗ trợ ghi âm trực tiếp.');
+            return;
+        }
+
+        try {
+            setRecordingError('');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaStreamRef.current = stream;
+
+            const recorder = new MediaRecorder(stream);
+            recordedChunksRef.current = [];
+
+            recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunksRef.current.push(event.data);
+                }
+            };
+
+            recorder.onstop = () => {
+                const audioBlob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
+                const file = new File([audioBlob], `recorded-voice-${Date.now()}.webm`, { type: 'audio/webm' });
+                const url = URL.createObjectURL(audioBlob);
+
+                setVoiceSample({ file, url });
+                setIsRecordingVoice(false);
+
+                mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+                mediaStreamRef.current = null;
+                mediaRecorderRef.current = null;
+            };
+
+            recorder.start();
+            mediaRecorderRef.current = recorder;
+            setIsRecordingVoice(true);
+        } catch {
+            setRecordingError('Không thể truy cập microphone. Vui lòng cấp quyền và thử lại.');
+            setIsRecordingVoice(false);
+        }
+    };
+
+    const handleStopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+    };
+
+    const handleTranscribeByAI = async () => {
+        if (!voiceSample) {
+            setTranscribeHint('Vui lòng tải hoặc ghi âm giọng nói trước khi dùng AI Transcribe.');
+            return;
+        }
+
+        setTranscribeHint('');
+        setIsTranscribing(true);
+
+        // Placeholder cho API transcribe thật.
+        setTimeout(async () =>{
+            try {
+                const res = await transcribeAudio({ audioFile: voiceSample.file }).unwrap();
+                setTextPrompt(res.transcript);
+            } catch {
+                setTranscribeHint('Có lỗi xảy ra khi transcribe. Vui lòng thử lại.');
+            } finally {
+                setIsTranscribing(false);
+            }
+            setIsTranscribing(false);
+        }, 900);
+    };
+
+    const handleRegisterVoice = () => {
+        if (!voiceSample || !textPrompt.trim()) return;
+
+        const baseName = voiceSample.file.name.replace(/\.[^/.]+$/, '') || 'voice';
+        const voiceName = `${baseName}-${registeredVoices.length + 1}`;
+
+        setRegisteredVoices((prev) => [
+            ...prev,
+            {
+                voice_name: voiceName,
+                audio_url: voiceSample.url,
+            },
+        ]);
+        setSelectedRegisteredVoice(voiceName);
+    };
     
     const handleSlideFileUpload = async (file:File) => {
         if (!file){
@@ -151,32 +273,93 @@ export default function SlideList() {
             setIsParsingSlide(false)
         }   
     }
-    // useEffect(() => {
-    //     const saved = localStorage.getItem('slides');
-    //     if(saved) {
-    //         try {
-    //             const parsed = JSON.parse(saved);
-    //             setSlides(parsed);
-    //         }
-    //         catch{
-    //             setSlides(makeEmptySlides(5))
-    //         }
-    //     }
-    // },[]);
-    // useEffect(() => {
-    //     localStorage.setItem('slides', JSON.stringify(slides));
 
-    // },[slides]);
+    const handleGenerateVoice = async (slideId: number, slideContent: string, slideVoice: string)=>{
+        if (!slideContent.trim() || !slideVoice.trim()){
+            return;
+        }
+
+        const res = await cloneVoice({
+            text: slideContent,
+            voice_name: slideVoice,
+        }).unwrap();
+
+        updateSlide({id: slideId, fields:{audioUrl: res.cloned_audio_url}});
+        
+    };
+
+    const hasSlides = slides.length > 0;
+    const allSlidesHaveAudio = slides.every((slide) => Boolean(slide.audioFile || slide.audioUrl?.trim()));
+    const canCreateVideo = hasSlides && allSlidesHaveAudio;
+
+    const showCreateVideoHint = (message: string) => {
+        setCreateVideoHint(message);
+        setIsCreateVideoHintVisible(true);
+    };
+
+    const handleCreateVideo = async () => {
+        if (!hasSlides) {
+            showCreateVideoHint('Cần có ít nhất 1 slide để tạo video bài giảng.');
+            return;
+        }
+
+        if (!allSlidesHaveAudio) {
+            showCreateVideoHint('Mọi slide đều phải có âm thanh đi kèm trước khi tạo video.');
+            return;
+        }
+
+        setCreateVideoHint('');
+        setIsCreateVideoHintVisible(false);
+
+        // TODO: Gắn API tạo video tại đây khi backend sẵn sàng.
+        console.log('Create video payload:', slides);
+    };
+
+    useEffect(() => {
+        if (!createVideoHint) {
+            return;
+        }
+
+        setIsCreateVideoHintVisible(true);
+        const fadeTimer = window.setTimeout(() => {
+            setIsCreateVideoHintVisible(false);
+        }, 2400);
+
+        const clearTimer = window.setTimeout(() => {
+            setCreateVideoHint('');
+        }, 3000);
+
+        return () => {
+            window.clearTimeout(fadeTimer);
+            window.clearTimeout(clearTimer);
+        };
+    }, [createVideoHint]);
+
+    useEffect(() => {
+        if (canCreateVideo && createVideoHint) {
+            setCreateVideoHint('');
+            setIsCreateVideoHintVisible(false);
+        }
+    }, [canCreateVideo, createVideoHint]);
+
+    useEffect(() => {
+        return () => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+                mediaRecorderRef.current.stop();
+            }
+            mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        };
+    }, []);
 
     return (
         <section className="w-full flex flex-col items-center justify-center mt-[5rem] mb-[10rem]">
             <div className = "w-[var(--global-width)] px-4 mt-[2.5rem]">
                 <h1 className = "text-center text-2xl font-bold text-[var(--color-secondary)] mb-8 tracking-wide ">
-                    Điền đầy đủ thông tin của Giọng nói, hình ảnh, slide trước khi tạo bài giảng
+                    1. ĐĂNG KÝ GIỌNG NÓI
                 </h1>
 
                 <div className = "grid grid-cols-1 md:grid-cols-2 md:grid-cols-2 gap-4">
-                    <div className="md:row-span-2 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
+                    <div className="relative md:row-span-3 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
                         <div className = "flex items-center gap-2.5 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -225,6 +408,12 @@ export default function SlideList() {
                                 <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-blue-400 font-medium">chọn file</span></span>
                             </label>
                         )}
+
+                        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-white/60 backdrop-blur-[2px]">
+                            <span className="rounded-full border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-[var(--color-secondary)] shadow-sm">
+                                Đang phát triển
+                            </span>
+                        </div>
                     </div>
 
                     <div className="group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
@@ -256,8 +445,57 @@ export default function SlideList() {
                             ref = {voiceRef} className = "hidden"
                             onChange = {(e)=>{const f = e.target.files?.[0]; if (f) handleVoiceUpload(f);}}
                         />
+
+                        <div className="flex items-stretch gap-2">
+                            <label
+                                onClick={() => voiceRef.current?.click()}
+                                className="flex-1 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-blue-500/20 rounded-lg py-7 cursor-pointer hover:border-blue-400/50 transition-all"
+                            >
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-blue-400/50">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-blue-400 font-medium">chọn file</span></span>
+                            </label>
+
+                            <button
+                                type="button"
+                                onClick={isRecordingVoice ? handleStopRecording : handleStartRecording}
+                                className={`w-[92px] shrink-0 rounded-lg border flex flex-col items-center justify-center px-2 py-3 transition-all ${
+                                    isRecordingVoice
+                                        ? 'border-red-300 bg-red-50 text-red-600 shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
+                                        : 'border-blue-500/20 bg-white text-[var(--color-secondary)] hover:border-blue-400/60'
+                                }`}
+                                title={isRecordingVoice ? 'Dừng ghi âm' : 'Ghi âm trực tiếp'}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-1">
+                                    <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="currentColor"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                                </svg>
+
+                                {isRecordingVoice ? (
+                                    <div className="flex items-end gap-[2px] h-4 mb-1" aria-label="recording-wave">
+                                        <span className="w-[2px] h-2 bg-red-500 rounded animate-pulse" />
+                                        <span className="w-[2px] h-4 bg-red-500 rounded animate-pulse [animation-delay:120ms]" />
+                                        <span className="w-[2px] h-3 bg-red-500 rounded animate-pulse [animation-delay:220ms]" />
+                                        <span className="w-[2px] h-4 bg-red-500 rounded animate-pulse [animation-delay:320ms]" />
+                                        <span className="w-[2px] h-2 bg-red-500 rounded animate-pulse [animation-delay:420ms]" />
+                                    </div>
+                                ) : (
+                                    <div className="h-4 mb-1" />
+                                )}
+
+                                <span className="text-[11px] font-medium text-center leading-tight">
+                                    {isRecordingVoice ? 'Đang thu' : 'Mic'}
+                                </span>
+                            </button>
+                        </div>
+
+                        {recordingError && (
+                            <p className="mt-2 text-xs text-red-500">{recordingError}</p>
+                        )}
+
                         {voiceSample ? (
-                            <div className="space-y-2">
+                            <div className="space-y-2 mt-3">
                                 <div className="flex items-center gap-2 bg-blue-500/10 rounded-lg px-3 py-2">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-blue-400 shrink-0">
                                     <path d="M9 18V5l12-2v13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -274,17 +512,7 @@ export default function SlideList() {
                                     Đổi file khác
                                 </button>
                             </div>
-                        ) : (
-                            <label
-                                onClick={() => voiceRef.current?.click()}
-                                className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-blue-500/20 rounded-lg py-7 cursor-pointer hover:border-blue-400/50 transition-all"
-                                >
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-blue-400/50">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-blue-400 font-medium">chọn file</span></span>
-                            </label>
-                        )}
+                        ) : null}
                     </div>
 
                     <div className="group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
@@ -304,21 +532,47 @@ export default function SlideList() {
                                 </span>
                             )}
                         </div>
-                        <textarea
-                            className="w-full min-h-[108px] border border-blue-500/15 rounded-lg text-sm px-3.5 py-3 resize-none outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition bg-transparent"
-                            placeholder="VD: Bài giảng về trí tuệ nhân tạo bằng ngôn ngữ đa phương thức..."
-                            value={textPrompt}
-                            onChange={(e) => setTextPrompt(e.target.value)}
-                        />
+                        <div className="flex items-stretch gap-2">
+                            <textarea
+                                className="flex-1 min-h-[108px] border border-blue-500/15 rounded-lg text-sm px-3.5 py-3 resize-none outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition bg-transparent"
+                                placeholder="VD: Bài giảng về trí tuệ nhân tạo bằng ngôn ngữ đa phương thức..."
+                                value={textPrompt}
+                                onChange={(e) => setTextPrompt(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={handleTranscribeByAI}
+                                disabled={isTranscribing}
+                                className={`w-[92px] shrink-0 rounded-lg border flex flex-col items-center justify-center px-2 py-3 transition-all ${
+                                    isTranscribing
+                                        ? 'border-blue-300 bg-blue-50 text-[var(--color-secondary)]'
+                                        : 'border-blue-500/20 bg-white text-[var(--color-secondary)] hover:border-blue-400/60'
+                                } disabled:cursor-not-allowed`}
+                                title="AI Transcribe"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="mb-1">
+                                    <path d="M12 4l1.6 3.4L17 9l-3.4 1.6L12 14l-1.6-3.4L7 9l3.4-1.6L12 4z" fill="currentColor"/>
+                                    <path d="M18.5 14l.8 1.7L21 16.5l-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8.8-1.7z" fill="currentColor" opacity="0.9"/>
+                                    <path d="M5.5 14l.8 1.7L8 16.5l-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8.8-1.7z" fill="currentColor" opacity="0.75"/>
+                                </svg>
+                                <span className="text-[11px] font-medium text-center leading-tight">
+                                    {isTranscribing ? 'Đang xử lý' : 'AI Transcribe'}
+                                </span>
+                            </button>
+                        </div>
+
+                        {transcribeHint && (
+                            <p className="mt-2 text-xs text-slate-500">{transcribeHint}</p>
+                        )}
+                        
                     </div>
 
-                    <div className = "md:col-span-2 h-auto group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
+                    <div className = "md:col-span-1 md:col-start-2 h-auto group rounded-xl ">
                             <button
                                 disabled={!thumbnail || !voiceSample || !textPrompt.trim()}
-                                onClick={() => {
-                                    // TODO: gọi API đăng ký giọng nói
-                                }}
-                                className="cursor-pointer bg-secondary py-5 w-full h-full shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150
+                                onClick={handleRegisterVoice}
+                                className="cursor-pointer bg-secondary w-full h-[3rem] shrink-0 flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-semibold transition-all duration-150
                                     disabled:cursor-not-allowed 
                                 "
                                 >
@@ -326,10 +580,59 @@ export default function SlideList() {
                                     <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="white"/>
                                     <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
-                                <span className = "text-white text-2xl">Đăng ký giọng nói</span>
+                                <span className = "text-white text-base">Đăng ký giọng nói</span>
                             </button>
 
                     </div>
+
+                    <div className="md:col-span-2 rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-4 md:p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-[1fr_3fr] gap-3 items-center">
+                            <div>
+                                <p className="text-sm font-semibold text-[var(--color-secondary)] pb-2 pl-2">Giọng nói đã đăng ký</p>
+                                <select
+                                    className="w-full border border-blue-500/20 rounded-lg text-sm px-3 py-2 outline-none focus:border-indigo-500/50 transition disabled:cursor-not-allowed"
+                                    value={selectedRegisteredVoice}
+                                    onChange={(e) => setSelectedRegisteredVoice(e.target.value)}
+                                    disabled={registeredVoices.length === 0}
+                                >
+                                    <option value="">
+                                        {registeredVoices.length === 0 ? 'Chưa có giọng đã đăng ký' : 'Chọn giọng để nghe lại'}
+                                    </option>
+                                    {registeredVoices.map((voice) => (
+                                        <option key={voice.voice_name} value={voice.voice_name}>
+                                            {voice.voice_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <p className="text-sm font-semibold text-[var(--color-secondary)] pb-2 pl-2">Nghe lại</p>
+                                {registeredVoices.length === 0 ? (
+                                    <div className="h-10 rounded-lg border border-dashed border-blue-500/20 text-slate-400 text-sm flex items-center justify-center">
+                                        Chưa có dữ liệu giọng nói
+                                    </div>
+                                ) : !selectedRegisteredVoice ? (
+                                    <div className="h-10 rounded-lg border border-dashed border-blue-500/20 text-slate-400 text-sm flex items-center justify-center">
+                                        Vui lòng chọn một giọng để nghe lại
+                                    </div>
+                                ) : (
+                                    <audio
+                                        controls
+                                        className="w-full h-10 rounded"
+                                        src={registeredVoices.find((voice) => voice.voice_name === selectedRegisteredVoice)?.audio_url}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="md:col-span-2 pt-5">
+                    <h1 className = "text-center text-2xl font-bold text-[var(--color-secondary)] mb-8 tracking-wide ">
+                        2. TẠO NỘI DUNG GIẢNG DẠY
+                    </h1>
+                    </div>
+
 
                     <div className="md:col-span-2 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
                         <div className="flex items-center gap-2.5 mb-4">
@@ -395,22 +698,17 @@ export default function SlideList() {
                     </div>
                 </div>
             </div>
-            <div className = "w-[var(--global-width)] px-4 mt-[2.5rem]">
-                <h1 className = "text-center text-2xl font-bold text-[var(--color-secondary)] mb-8 tracking-wide ">
-                    Danh sách slide bài giảng
-                </h1>
+            <div className = "w-full max-w-[1680px] px-4 md:px-6 lg:px-8 mt-[2.5rem]">
                 <div className = "hidden lg:block rounded-xl overflow-hidden border border-blue-500/20 py-2">
-                    <div className="hidden lg:grid grid-cols-[130px_1fr_210px_150px] gap-4 px-5 py-3 text-center">
-                    <div className="text-sm  font-medium border-r border-slate-400">STT</div>
+                    <div className="hidden lg:grid grid-cols-[2fr_4fr_3fr] gap-4 px-5 py-3 text-center">
+                    <div className="text-sm  font-medium border-r border-slate-400">Slide</div>
 
                         <div className="text-sm font-medium border-r border-slate-400">Nội dung</div>
 
-                        <div className="text-sm  font-medium border-r border-slate-400">Tạo giọng nói</div>
-
-                        <div className="text-sm  font-medium">Tải Audio</div>
+                        <div className="text-sm  font-medium">Audio</div>
                     </div>
                 </div>
-                <div className = "divide-y divide-[var(--color-secondary)] rounded-xl py-4 max-h-[1024px] overflow-y-auto">
+                <div className = "divide-y divide-[var(--color-secondary)] rounded-xl py-4 max-h-[1024px] overflow-y-scroll">
                     {isParsingSlide && (
                     <div className="flex items-center justify-center gap-3 py-8 text-sm text-slate-400">
                         <svg className="animate-spin text-blue-400" width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -419,14 +717,17 @@ export default function SlideList() {
                         Đang phân tích slide...
                     </div>
                     )}
-                    {slides.map((slide)=>(
+                    {slides.map((slide)=>{
+                        const hasAnyAudio = Boolean(slide.audioUrl);
+
+                        return (
                         <div
                             key = {slide.id}
-                            className = "grid grid-cols-1 md:grid-cols-[130px_1fr_210px_150px] gap-4 px-5 py-5 first:rounded-tl-xl first:rounded-tr-xl first:border-t last:rounded-bl-xl last:rounded-br-xl last:border-b border-l border-r border-blue-500/20 hover:bg-blue-500/5 transition-colors items-center "
+                            className = "group grid grid-cols-1 md:grid-cols-[2fr_4fr_1.5fr_1.5fr] gap-4 px-5 py-5 first:rounded-tl-xl first:rounded-tr-xl first:border-t last:rounded-bl-xl last:rounded-br-xl last:border-b border-l border-r border-blue-500/20 hover:bg-blue-500/5 transition-colors items-center "
                         >
                             <div className="flex flex-col items-center gap-1.5">
                                 {slide.slideImageUrl ?(
-                                    <div className = "w-24 h-16 rounded-lg overflow-hidden border border-blue-500/30 cursor-pointer hover:border-blue-400/70 hover:scale-105 transition-all duration-150 shadow-md"
+                                    <div className = "w-full aspect-video rounded-lg overflow-hidden border border-blue-500/30 cursor-pointer hover:border-blue-400/70 hover:scale-105 transition-all duration-150 shadow-md"
                                         onClick={() => setPreviewSlide({ url: slide.slideImageUrl!, title: slide.title })}
                                     >
                                         <img
@@ -453,77 +754,126 @@ export default function SlideList() {
                                 <div>{slide.id}</div>
                             </div>
 
-                            <div>
+                            <div className="h-full">
                                 <textarea
-                                    className = "w-full min-h-[90px]  border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
+                                    className = "w-full h-[90%] border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
                                     value = {slide.content}
                                     onChange = {(e)=>updateSlide({id: slide.id, fields: {content: e.target.value}})}
                                     placeholder="Nhập nội dung slide..."
                                 />
                             </div>
 
-                            <div className = "flex flex-col gap-2.5">
-                                <select
-                                    className = "border border-blue-500/20 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-indigo-500/50 cursor-pointer transition"
-                                    value = {slide.voice}
-                                    onChange = {(e)=>updateSlide({id: slide.id, fields: {voice: e.target.value}})}
-                                >
-                                    {voice_options.map((v) => (
-                                        <option key={v} value={v} className = "text-[var(--color-primary)]">{v}</option>
-                                    ))}
-                                </select>
-
-                                <button
-                                    onClick = {()=>handleGenerateVoice(slide.id)}
-                                    disabled={slide.isGenerating}
-                                    className = "flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 px-4 rounded-lg shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150"
-                                >
-                                    {slide.isGenerating ? (
-                                        <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none">
-                                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="10" />
-                                        </svg>
+                            <div className = "grid grid-cols-1 sm:grid-cols-2 gap-0 md:col-span-2 ">
+                                <div className="rounded-lg bg-transparent p-2 transition-colors duration-150">
+                                    <select
+                                        className = "w-full bg-transparent border border-blue-500/20 rounded-lg text-sm px-2.5 py-1.5 outline-none focus:border-indigo-500/50 cursor-pointer transition"
+                                        value = {slide.voice}
+                                        onChange = {(e)=>updateSlide({id: slide.id, fields: {voice: e.target.value}})}
+                                    >
+                                        {registeredVoices.length === 0 ? (
+                                            <option value="" className = "text-[var(--color-primary)]">
+                                                Chưa có giọng đã đăng ký
+                                            </option>
                                         ) : (
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="currentColor" />
-                                            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                        </svg>
-                                    )}
-                                    {slide.isGenerating ? "Đang tạo..." : "Tạo giọng nói"}
-                                </button>
-        
-                                {slide.audioUrl === "#generated" && (
-                                    <p className="text-xs text-blue-400 text-center font-medium">Đã tạo giọng nói</p>
-                                )}
-                                {slide.audioUrl && slide.audioUrl !== "#generated" && (
-                                    <audio controls className="w-full h-8 rounded" src={slide.audioUrl} />
-                                )}
-                            </div>
+                                            registeredVoices.map((voice) => (
+                                                <option
+                                                    key={voice.voice_name}
+                                                    value={voice.voice_name}
+                                                    className = "text-[var(--color-primary)]"
+                                                >
+                                                    {voice.voice_name}
+                                                </option>
+                                            ))
+                                        )}
+                                    </select>
+                                </div>
 
-                            <div className = "flex justify-center">
-                                <input
-                                    type = "file"
-                                    accept = "audio/*"
-                                    ref={(el) => { fileInputRef.current[slide.id] = el; }}
-                                    className = "hidden"
-                                    onChange = {(e)=>{
-                                        const file = e.target.files?.[0];
-                                        if (file) handleAudioUpload(slide.id, file)
-                                    }}
-                                />
-                                <button
-                                    onClick={() => fileInputRef.current[slide.id]?.click()}
-                                    className="cursor-pointer flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-sm text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-150 whitespace-nowrap"
-                                >
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                    {slide.audioFile ? slide.audioFile.name.slice(0, 10) + "…" : "Tải Audio"}
-                                </button>
+                                <div className="rounded-lg bg-transparent p-2 transition-colors duration-150">
+                                    <button
+                                        onClick = {()=>handleGenerateVoice(slide.id, slide.content, slide.voice)}
+                                        disabled={slide.isGenerating}
+                                        className = "w-full flex items-center justify-center gap-1.5 bg-secondary hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-1.5 px-2.5 rounded-lg transition-all duration-150"
+                                    >
+                                        {slide.isGenerating ? (
+                                            <svg className="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="10" />
+                                            </svg>
+                                            ) : (
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" fill="currentColor" />
+                                                <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                            </svg>
+                                        )}
+                                        {slide.isGenerating ? "Đang tạo..." : "Tạo giọng nói"}
+                                    </button>
+                                    </div>
+
+                                    <div className="sm:col-span-2 rounded-lg bg-transparent p-0 flex items-center justify-center transition-colors duration-150">
+                                        <p className="text-xs text-center text-slate-400 font-medium">hoặc</p>
+                                </div>
+
+                                    <div className="sm:col-span-2 rounded-lg bg-transparent p-2 flex items-center justify-center transition-colors duration-150">
+                                        <input
+                                            type = "file"
+                                            accept = "audio/*"
+                                            ref={(el) => { fileInputRef.current[slide.id] = el; }}
+                                            className = "hidden"
+                                            onChange = {(e)=>{
+                                                const file = e.target.files?.[0];
+                                                if (file) handleAudioUpload(slide.id, file)
+                                            }}
+                                        />
+                                    <button
+                                        onClick={() => fileInputRef.current[slide.id]?.click()}
+                                        className="cursor-pointer w-full bg-transparent hover:bg-transparent flex items-center justify-center gap-1.5 border border-blue-500/20 hover:border-blue-500/40 text-sm text-[var(--color-secondary)] font-medium py-1.5 px-2.5 rounded-lg transition-all duration-150 whitespace-nowrap"
+                                    >
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                        {slide.audioFile ? 'Đổi audio' : 'Tải audio'}
+                                    </button>
+                                </div>
+
+                                <div className="h-[85%] rounded-lg bg-transparent p-2 flex flex-col items-center justify-center min-h-[64px] sm:col-span-2 transition-colors duration-150">
+                                    {hasAnyAudio ? (
+                                        slide.audioUrl === '#generated' ? (
+                                            <p className="text-xs text-blue-500 text-center font-medium">Đã tạo giọng nói</p>
+                                        ) : (
+                                            <>
+                                                <audio controls className="w-full h-7 rounded" src={slide.audioUrl || undefined} />
+                                                {slide.audioFile && (
+                                                    <p className="text-[11px] text-slate-500 text-center truncate max-w-full mt-0.5">{slide.audioFile.name}</p>
+                                                )}
+                                            </>
+                                        )
+                                    ) : (
+                                        <p className="text-sm text-slate-400 text-center">Chưa có âm thanh</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    ))}
+                    )})}
                 </div>
-            </div>    
+            </div>
+
+            <div className="w-full max-w-[1680px] px-4 md:px-6 lg:px-8 mt-6 flex flex-col items-center">
+                <button
+                    type="button"
+                    onClick={handleCreateVideo}
+                    className="w-full sm:w-auto sm:min-w-[260px] h-[3rem] px-6 rounded-lg bg-secondary text-white text-base font-semibold transition-all duration-150 hover:bg-secondary/80"
+                >
+                    Tạo video bài giảng
+                </button>
+                {createVideoHint && (
+                    <p
+                        className={`mt-2 text-sm text-red-500 transition-opacity duration-500 ${
+                            isCreateVideoHintVisible ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    >
+                        {createVideoHint}
+                    </p>
+                )}
+            </div>
 
             {previewSlide && (
                 <div
