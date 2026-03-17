@@ -426,9 +426,9 @@ const FooterSection = ({
                         Về Epis
                     </h1>
                     <div className="flex flex-col gap-2">
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Giới thiệu</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Tầm nhìn</p>
-                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline">Ban điều hành</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/about")}>Giới thiệu</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/vision")}>Tầm nhìn</p>
+                        <p className="text-[var(--color-primary)] cursor-pointer hover:underline" onClick={() => router.push("/team")}>Ban điều hành</p>
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { Switch } from "antd";
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, notFound } from "next/navigation";
 
 // Section imports
@@ -112,6 +112,7 @@ export default function LectureVideoPage() {
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
@@ -161,11 +162,11 @@ export default function LectureVideoPage() {
     };
 
     const handlePause = () => {
-        setIsPlaying(false); // Cập nhật icon Play/Pause
-        if (videoRef.current) {
-            const boxes = getOCRForTime(videoRef.current.currentTime);
-            setActiveBoxes(boxes); // Hiển thị các ô đỏ
-        }
+        // setIsPlaying(false);
+        // if (videoRef.current) {
+        //     const boxes = getOCRForTime(videoRef.current.currentTime);
+        //     setActiveBoxes(boxes); 
+        // }
     };
 
     const handlePlay = () => {
@@ -261,16 +262,24 @@ export default function LectureVideoPage() {
         if (videoState.paused) {
             videoState.play();
             setIsPlaying(true);
+
+            setActiveBoxes([]);
+            setSelectedItem(null);
         }
         else {
             videoState.pause();
             setIsPlaying(false);
+
+            if (videoRef.current) {
+                const boxes = getOCRForTime(videoRef.current.currentTime);
+                setActiveBoxes(boxes); 
+            }
         }
     }
 
     //===========Video Controller Bar============//
     // Source
-    const [getVideoUrl, { data: video, isLoading, error }] = useLazyGetVideoUrlQuery();
+    const [getVideoUrl, { data: video }] = useLazyGetVideoUrlQuery();
     useEffect(() => {
         if (lessonId) {
             getVideoUrl(lessonId as string);
@@ -428,20 +437,53 @@ export default function LectureVideoPage() {
         }
     }
 
-    const handleSeek = (seconds: number) => {
+    const handleSeek = useCallback((seconds: number) => {
         if (!videoRef.current) {
             console.error('Video element not found');
             return;
         }
 
-        videoRef.current.currentTime += seconds;
-        if (videoRef.current.currentTime < 0) {
-            videoRef.current.currentTime = 0;
-        }
-        else if (videoRef.current.currentTime > duration) {
-            videoRef.current.currentTime = duration;
-        }
-    }
+        let newTime = videoRef.current.currentTime + seconds;
+        if (newTime < 0) newTime = 0;
+        if (newTime > duration) newTime = duration;
+
+        videoRef.current.currentTime = newTime;
+    }, [duration]);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Kiểm tra nếu người dùng đang gõ trong ô Input hoặc Textarea thì không nhảy video
+            const activeElement = document.activeElement;
+            if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            switch (event.code) {
+                case 'Space':
+                    event.preventDefault(); //Ngăn trình duyệt cuộn trang xuống
+                    togglePlayPause();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault(); 
+                    handleSeek(10);
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    handleSeek(-10);
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        // Đăng ký sự kiện
+        window.addEventListener('keydown', handleKeyDown);
+
+        // Quan trọng: Phải remove event listener khi component bị unmount để tránh rò rỉ bộ nhớ
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [handleSeek, togglePlayPause]);
 
     // Video Slider
     const sliderRef = useRef<HTMLDivElement | null>(null);
@@ -565,11 +607,22 @@ export default function LectureVideoPage() {
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}
-                        onPlay={handlePlay}
-                        onPause={handlePause}
+                        // onPlay={handlePlay}
+                        // onPause={handlePause}
                         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+
+                        onWaiting={() => setIsLoading(true)}
+                        onSeeking={() => setIsLoading(true)}
+                        onPlaying={() => setIsLoading(false)}
+                        onSeeked={() => setIsLoading(false)}
+                        onCanPlay={() => setIsLoading(false)}
                     />
+                    {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
+                        </div>
+                    )}
 
                     {/* Lớp phủ Bounding Boxes */}
                     <div className="video-ocr-overlay" style={{

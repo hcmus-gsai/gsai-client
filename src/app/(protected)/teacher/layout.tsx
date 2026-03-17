@@ -373,7 +373,7 @@ const DynamicTeacherNavbar = () => {
         <Dropdown menu={{ items: notificationItems }} trigger={['click']}
             placement="bottomRight"
             overlayStyle={{ minWidth: 280, maxHeight: 400, overflow: 'auto' }}>
-            <Button className="!h-10 !w-10 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
+            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
                 <Image src={NotificationIcon} alt="Thông báo" width={22} height={22} className="object-contain" />
                 {notifications.length > 0 && (
                     <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-0.5 leading-none">
@@ -387,7 +387,7 @@ const DynamicTeacherNavbar = () => {
     const AvatarBtn = () => (
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']}
             placement="bottomRight" overlayStyle={{ minWidth: 150 }}>
-            <Button className="!h-10 !w-10 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
+            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
                 {avatar_url
                     ? <Image src={avatar_url} alt="Avatar" width={36} height={36}
                         className="absolute inset-0 w-[90%] h-[90%] m-auto object-cover rounded-full" />
@@ -403,15 +403,11 @@ const DynamicTeacherNavbar = () => {
             {/* ══════════════════════ NAVBAR ══════════════════════ */}
             <nav className="fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20">
                 <div className="w-[var(--global-width)] flex items-center justify-between">
- 
-                    {/* Logo */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-
+                    <div className="mr-20 flex items-center gap-3 flex-shrink-0 min-w-0">
                         <div className="flex-shrink-0 focus:outline-none">
                             <Image src={Epis} alt="EPIS" width={100} height={34} className="w-auto h-auto" />
                         </div>
-    
-                        {/* Nav links — md+ */}
+
                         <div className="hidden md:flex items-center gap-1 flex-shrink-0">
                             {NAV_ITEMS.map(({ key, label, path }) => (
                                 <button key={key} onClick={() => router.push(path)}
@@ -430,25 +426,17 @@ const DynamicTeacherNavbar = () => {
                                 </button>
                             ))}
                         </div>
-    
-                        {/* Search — flex-1, CourseSearch tự xử lý collapsed trên mobile */}
-                        {/* <div className="w-48 md:w-56 lg:w-90 min-w-0">
-                            <CourseSearch />
-                        </div> */}
-
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="w-44 md:w-56 lg:w-90">
+
+                    <div className="flex items-center justify-end lg:justify-between flex-1 gap-2">
+                        <div className="w-44 md:w-56 lg:w-90 flex-shrink-0">
                             <CourseSearch />
                         </div>
-    
-                        {/* Icons — md+ */}
+                        
                         <div className="hidden md:flex items-center gap-1 flex-shrink-0">
                             <NotifBtn />
                             <AvatarBtn />
                         </div>
-    
-                        {/* Mobile: notif + hamburger */}
                         <div className="flex md:hidden items-center gap-1 flex-shrink-0">
                             <NotifBtn />
                             <Button
