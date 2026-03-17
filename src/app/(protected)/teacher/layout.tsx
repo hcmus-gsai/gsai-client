@@ -23,6 +23,7 @@ import { baseApi } from '@/store/api/baseApi';
 
 import { FooterSection } from "@/components/guest/ui/guest";
 import { Trykker } from 'next/font/google';
+import { Sparkles } from "lucide-react";
 
 const TeacherNavbar = () => {
 
@@ -192,6 +193,7 @@ const TeacherNavbar = () => {
                                         key: "courses",
                                         label: <span>Môn học</span>
                                     },
+
                                 ]}
                                 className='!bg-transparent !border-none !w-full !flex !items-center !justify-start [&_.ant-menu-item]:!font-normal [&_.ant-menu-item]:!text-gray-700 [&_.ant-menu-item]:!relative [&_.ant-menu-item:hover]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!font-semibold [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)] [&_.ant-menu-item::after]:!content-[""] [&_.ant-menu-item::after]:!absolute [&_.ant-menu-item::after]:!bottom-0 [&_.ant-menu-item::after]:!left-0 [&_.ant-menu-item::after]:!h-[2px] [&_.ant-menu-item::after]:!w-full [&_.ant-menu-item::after]:!bg-[var(--color-secondary)] [&_.ant-menu-item::after]:!origin-center [&_.ant-menu-item::after]:!scale-x-0 [&_.ant-menu-item::after]:!transition-transform [&_.ant-menu-item::after]:!duration-500 [&_.ant-menu-item::after]:!ease-in-out [&_.ant-menu-item::after]:!border-none [&_.ant-menu-item:hover::after]:!scale-x-[80%] [&_.ant-menu-item-selected::after]:!scale-x-[80%]'
                             />
@@ -254,6 +256,29 @@ const TeacherNavbar = () => {
 const NAV_ITEMS = [
     { key: "homepage", label: "Trang chủ", path: "/teacher/home" },
     { key: "courses",  label: "Môn học",   path: "/teacher/courses" },
+    {
+        key: "aistudio",
+        path: "/teacher/ai-studio",
+        label: (
+        <span className="relative inline-block group">
+            <span>AI Studio</span>
+
+            <Sparkles
+            size={10}
+            className="
+                absolute -top-1 -right-3
+                text-[var(--color-secondary)]
+                fill-[var(--color-secondary)]
+                stroke-[var(--color-secondary)]
+                transition-transform duration-500
+                group-hover:rotate-[360deg]
+                group-hover:scale-125
+                drop-shadow-[0_0_4px_rgba(71,181,255,0.9)]
+            "
+            />
+        </span>
+        )
+    },
 ];
  
 const DynamicTeacherNavbar = () => {
@@ -267,6 +292,7 @@ const DynamicTeacherNavbar = () => {
     const selectedKey =
         pathname.startsWith("/teacher/home")    ? "homepage" :
         pathname.startsWith("/teacher/courses") ? "courses"  :
+        pathname.startsWith("/teacher/ai-studio") ? "aistudio" :
         pathname.startsWith("/teacher/about")   ? "about"    : "";
  
     const dispatch = useAppDispatch();
@@ -347,7 +373,7 @@ const DynamicTeacherNavbar = () => {
         <Dropdown menu={{ items: notificationItems }} trigger={['click']}
             placement="bottomRight"
             overlayStyle={{ minWidth: 280, maxHeight: 400, overflow: 'auto' }}>
-            <Button className="!h-10 !w-10 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
+            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
                 <Image src={NotificationIcon} alt="Thông báo" width={22} height={22} className="object-contain" />
                 {notifications.length > 0 && (
                     <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-0.5 leading-none">
@@ -361,7 +387,7 @@ const DynamicTeacherNavbar = () => {
     const AvatarBtn = () => (
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']}
             placement="bottomRight" overlayStyle={{ minWidth: 150 }}>
-            <Button className="!h-10 !w-10 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
+            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
                 {avatar_url
                     ? <Image src={avatar_url} alt="Avatar" width={36} height={36}
                         className="absolute inset-0 w-[90%] h-[90%] m-auto object-cover rounded-full" />
@@ -377,20 +403,16 @@ const DynamicTeacherNavbar = () => {
             {/* ══════════════════════ NAVBAR ══════════════════════ */}
             <nav className="fixed top-0 left-0 right-0 w-full h-[5rem] flex items-center justify-center border-b border-gray-200 bg-white z-20">
                 <div className="w-[var(--global-width)] flex items-center justify-between">
- 
-                    {/* Logo */}
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-
+                    <div className="mr-20 flex items-center gap-3 flex-shrink-0 min-w-0">
                         <div className="flex-shrink-0 focus:outline-none">
                             <Image src={Epis} alt="EPIS" width={100} height={34} className="w-auto h-auto" />
                         </div>
-    
-                        {/* Nav links — md+ */}
+
                         <div className="hidden md:flex items-center gap-1 flex-shrink-0">
                             {NAV_ITEMS.map(({ key, label, path }) => (
                                 <button key={key} onClick={() => router.push(path)}
                                     className={`
-                                        relative px-3 py-1.5 text-sm rounded-md whitespace-nowrap
+                                        relative px-3 py-1.5 text-sm rounded-md whitespace-nowrap cursor-pointer
                                         transition-colors duration-200
                                         after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
                                         after:h-[2px] after:bg-[var(--color-secondary)]
@@ -404,25 +426,17 @@ const DynamicTeacherNavbar = () => {
                                 </button>
                             ))}
                         </div>
-    
-                        {/* Search — flex-1, CourseSearch tự xử lý collapsed trên mobile */}
-                        {/* <div className="w-48 md:w-56 lg:w-90 min-w-0">
-                            <CourseSearch />
-                        </div> */}
-
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="w-44 md:w-56 lg:w-90">
+
+                    <div className="flex items-center justify-end lg:justify-between flex-1 gap-2">
+                        <div className="w-44 md:w-56 lg:w-90 flex-shrink-0">
                             <CourseSearch />
                         </div>
-    
-                        {/* Icons — md+ */}
+                        
                         <div className="hidden md:flex items-center gap-1 flex-shrink-0">
                             <NotifBtn />
                             <AvatarBtn />
                         </div>
-    
-                        {/* Mobile: notif + hamburger */}
                         <div className="flex md:hidden items-center gap-1 flex-shrink-0">
                             <NotifBtn />
                             <Button

@@ -60,11 +60,34 @@ const StudentGreetingSection = (
             </div>
             
             <div className = "w-full h-full flex flex-col items-center z-10">
-                <div className = "w-[var(--global-width)] h-[242px] mt-[15vh] mb-[3rem] flex items-center justify-between">
-                    <div className = "h-full w-[546px] flex flex-col items-start justify-between">
+                <div className="
+                    w-full max-w-[var(--global-width)]
+                    px-4 sm:px-8 xl:px-0
+                    mt-[20vh] sm:mt-[20vh] lg:mt-[20vh]
+                    mb-8 lg:mb-[3rem]
+                    flex flex-col lg:flex-row
+                    items-start lg:items-center
+                    justify-between
+                    gap-6 lg:gap-0
+                    min-h-0 lg:h-[242px]
+                ">
+                    <div className={`
+                        w-full lg:w-[546px]
+                        flex flex-col items-start
+                        justify-between
+                        ${isCourse ? 'gap-4' : 'gap-0'}
+                    `}>
                         <div className = {`flex flex-col items-start justify-between w-full ${isCourse ? '' : 'mb-[5.0625rem]'}`}>                    
-                            <p className = {`${titleSize} font-bold text-[var(--color-primary)]`}>{title}</p>
-                            <p className = "text-[1rem]  text-[var(--color-primary)] mb-[2rem]">{description}</p>
+                            <p className={`
+                                text-[2rem] sm:text-[2.75rem] lg:${titleSize}
+                                font-bold text-[var(--color-primary)]
+                                leading-tight
+                            `}>
+                                {title}
+                            </p>
+                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)] mt-2 mb-4 sm:mb-[2rem]">
+                                {description}
+                            </p>
                             {isCourse && (
                                 <div className = "flex items-center justify-center gap-2 mb-[2rem]">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
@@ -79,22 +102,22 @@ const StudentGreetingSection = (
                                     <p className = "text-[1rem] text-[var(--color-primary)]">Ths. Nguyễn Văn B</p>
                                 </div> 
                             )}
-                        </div>
-                        <div className = "w-full flex items-center justify-start mb-[2rem]">
-                            <Button 
-                                onClick = {() => router.push(`/student/learning-progress`)}
-                                className = "!w-[38%] !h[54px] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-8 !py-6 !rounded-full !text-[1rem]"
-                            >
-                                {buttonText}
-                            </Button>
+
+                            <div className = "w-full flex items-center justify-start mb-4 sm:mb-[2rem]">
+                                <Button 
+                                    onClick = {() => router.push(`/student/learning-progress`)}
+                                    className = "!w-full sm:!w-[60%] lg:!w-[38%] !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black !px-6 !py-5 sm:!px-8 sm:!py-6 !rounded-full !text-[0.95rem] sm:!text-[1rem]"
+                                >
+                                    {buttonText}
+                                </Button>
+                            </div>
+                            
                         </div>
 
                         {isCourse && (
-                            <p className = "text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>  
+                            <p className = "text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>  
                         )}
-                        
                     </div>
-                    
                 </div>
                 {isCourse && (
                     <CourseHighLightComponent/>

@@ -19,6 +19,9 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
         }, index + 1); 
     };
 
+    const sharedLabelCol = {xs: { span: 24 }, sm: { span: 4 }, lg: { span: 3 }};
+    const sharedWrapperCol = {xs: { span: 24 }, sm: { span: 20 }, lg: { span: 21 }}
+
     return (
         <div className='border-1 border-gray-500/50 rounded-2xl px-[3rem] py-[2rem] mb-[1rem]'>
             <p className='mb-[2rem] text-2xl font-bold'>Chương {index + 1}</p>
@@ -28,6 +31,10 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
                 name={[name, 'chapterName']}
                 label={<span className='font-bold text-base'>Tên chương</span>}
                 rules={[{ required: true, message: 'Vui lòng nhập tên chương!' }]}
+                
+                labelCol={sharedLabelCol}
+                wrapperCol={sharedWrapperCol}
+                labelAlign="left"
             >
                 <Input size="large"/>
             </Form.Item>
@@ -37,7 +44,10 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
                 name={[name, 'description']}
                 label={<span className='font-bold text-base'>Mô tả</span>} 
                 rules={[{ required: true, message: 'Vui lòng nhập mô tả chương!' }]}
-                labelCol={{xs: { span: 4 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 3 }, }}
+                
+                labelCol={sharedLabelCol}
+                wrapperCol={sharedWrapperCol}
+                labelAlign="left"
             >
                 <TextArea 
                     rows={3}
@@ -60,7 +70,7 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
                 <button 
                     type='button' 
                     onClick={() => remove(name)}
-                    className="group focus:outline-none transition-transform active:scale-95"
+                    className="cursor-pointer group focus:outline-none transition-transform active:scale-95"
                 >
                     <Image src={TrashIcon} alt="Delete" width={24} height={24} />
                 </button>
@@ -68,7 +78,7 @@ const CreateClassChapter = ({ index, name, restField, remove, add, form}: any) =
                 <button 
                     type='button' 
                     onClick={handleCopy}
-                    className="group focus:outline-none transition-transform active:scale-95"
+                    className="cursor-pointer group focus:outline-none transition-transform active:scale-95"
                 >
                     <Image src={CopyIcon} alt="Copy" width={24} height={24} />
                 </button>
