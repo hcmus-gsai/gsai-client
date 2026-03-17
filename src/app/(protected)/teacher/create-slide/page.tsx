@@ -359,7 +359,7 @@ export default function SlideList() {
                 </h1>
 
                 <div className = "grid grid-cols-1 md:grid-cols-2 md:grid-cols-2 gap-4">
-                    <div className="relative md:row-span-3 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
+                    <div className="relative isolate z-0 md:row-span-3 group rounded-xl border border-blue-500/20 bg-blue-500/[0.02] p-5 hover:border-blue-400/40 hover:bg-blue-500/[0.05] transition-all duration-200">
                         <div className = "flex items-center gap-2.5 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
