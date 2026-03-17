@@ -201,7 +201,7 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
                                 <button 
                                     type='button'
                                     onClick={() => add()}
-                                    className="relative w-[3rem] h-[3rem] group focus:outline-none transition-transform active:scale-95 mb-10"
+                                    className="cursor-pointer relative w-[3rem] h-[3rem] group focus:outline-none transition-transform active:scale-95 mb-10"
                                 >
                                     <svg height="3rem" width="3rem" className="transition-colors group-hover:drop-shadow-lg">
                                         <circle

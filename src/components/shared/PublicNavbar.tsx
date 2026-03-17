@@ -142,7 +142,7 @@ export const DynamicNavbar = () => {
 
                 <div className = "flex items-center gap-3">
                     <button
-                        className="hidden md:flex items-center w-46 h-[3rem] rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors pr-1 pl-4"
+                        className="cursor-pointer hidden md:flex items-center w-46 h-[3rem] rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors pr-1 pl-4"
                         onClick = {()=>router.push("/auth/signin")}
                     >
                         <span className="flex-1 text-white text-[1rem] text-left">Tham gia ngay</span>
@@ -152,7 +152,7 @@ export const DynamicNavbar = () => {
                     </button>
 
                     <button
-                        className="md:hidden flex items-center justify-center w-10 h-10 rounded-md text-white hover:bg-white/15 transition-colors"
+                        className="cursor-pointer md:hidden flex items-center justify-center w-10 h-10 rounded-md text-white hover:bg-white/15 transition-colors"
                         onClick={() => setOpen(!open)}
                         aria-label="Toggle menu"
                         >
@@ -188,7 +188,7 @@ export const DynamicNavbar = () => {
             <div className="h-px bg-white/20 my-2" />
 
             <button
-                className="flex items-center rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors py-2 pl-5 pr-2 gap-3"
+                className="cursor-pointer flex items-center rounded-full border border-white bg-transparent hover:bg-white/10 transition-colors py-2 pl-5 pr-2 gap-3"
                 onClick={() => { router.push("/auth/signin"); setOpen(false); }}
             >
                 <span className="flex-1 text-white text-[1rem] text-left">Tham gia ngay</span>
