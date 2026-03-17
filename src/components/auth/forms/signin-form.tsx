@@ -14,7 +14,7 @@ const SignInForm = () => {
     const formData = formInstance[0];
     const [isLoading, setIsLoading] = useState(false);
 
-    const [signIn] = useSignInMutation()
+    const [signIn] = useSignInMutation();
     const dispatch = useAppDispatch();
 
     const router = useRouter();
@@ -45,7 +45,6 @@ const SignInForm = () => {
             }));
         }
         catch (error) {
-            console.error('Sign in failed:', error);
             dispatch(addNotification({
                 type: 'error',
                 message: 'Đăng nhập thất bại',
