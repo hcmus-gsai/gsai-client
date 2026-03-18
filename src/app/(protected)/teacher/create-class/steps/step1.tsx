@@ -6,7 +6,7 @@ import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
 import CreateClassIntro from '../components/create-class-intro';
-import { useCreateCourseStepMutation, usePatchCourseStepMutation } from '@/store/api/[module]/createClassApi';
+import { useCreateCourseStepMutation, useGetAllCategoryQuery, usePatchCourseStepMutation } from '@/store/api/[module]/createClassApi';
 import { useSearchParams } from 'next/navigation';
 
 const { TextArea } = Input;
@@ -19,6 +19,7 @@ interface Props {
 const Step1: React.FC<Props> = ({ data, onNext }) =>{
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
+    const { data: categoryData } = useGetAllCategoryQuery();
     const [createCourseStep, { isLoading: isCreating }] = useCreateCourseStepMutation();
     const [patchCourseStep, { isLoading: isUpdating }] = usePatchCourseStepMutation();
 
@@ -68,6 +69,10 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                 message.success('Cập nhật thông tin môn học thành công');
             } else {
                 const created = await createCourseStep(courseData).unwrap();
+                if (!created || !created.id) {
+                    message.error(created?.message || 'Không thể tạo môn học, vui lòng thử lại');
+                    return;
+                }
                 courseId = created.id;
                 message.success('Tạo môn học thành công');
             }
@@ -152,7 +157,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phân loại</span>}
                         rules={[{ required: true, message: 'Vui lòng chọn phân loại môn học!' }]}
                     >
-                        <Select size='large' mode="multiple" allowClear options={options}/>
+                        <Select size='large' mode="multiple" allowClear options={categoryData?.data?.map((category) => ({ label: category, value: category }))}/>
                     </Form.Item>
                     
                     <Form.Item 
