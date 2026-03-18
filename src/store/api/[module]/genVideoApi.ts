@@ -15,6 +15,21 @@ export const videoApi = baseApi.injectEndpoints({
             },
         }),
 
+        // Register voice of user
+        registerVoice: builder.mutation<{ message: string }, { voice_name: string, audio_file: File, audio_transcript: string }>({
+            query: ({ voice_name, audio_file, audio_transcript }) => {
+                const formData = new FormData();
+                formData.append('file', audio_file);
+                formData.append('voice_name', voice_name);
+                formData.append('audio_transcript', audio_transcript); //
+                return {
+                    url: '/voice-cloning/register',
+                    method: 'POST',
+                    body: formData,
+                };
+            },
+        }),
+
         // Get, Create Register Voice of user
         getRegisterVoice: builder.query<
             { voice_name: string; audio_url: string }[], 
@@ -35,6 +50,7 @@ export const {
     useAudioTranscribeMutation,
 
     // Get, Create Register Voice of user
+    useRegisterVoiceMutation,
     useGetRegisterVoiceQuery,
 
 
