@@ -6,7 +6,11 @@ import { useState, useEffect, useRef } from 'react';
 import {pdfjs} from 'react-pdf';
 import { 
     useAudioTranscribeMutation,
-    useGetRegisterVoiceQuery
+    useGetRegisterVoiceQuery,
+    useCreateVideoGenJobMutation,
+    useUploadVoiceMutation,
+    useUploadSlideMutation,
+    useStartGenerationMutation
  } from '@/store/api/[module]/genVideoApi';
 
 import { useCloneVoiceMutation } from '@/store/api/[module]/voiceApi';
@@ -23,6 +27,14 @@ interface Slide {
     isGenerating: boolean;
     slideImageUrl: string | null;
 }
+
+interface VideoGeneration {
+    id: string;
+    slide: File | null;
+    audios: File[];
+}
+
+const videoGen: VideoGeneration = { id: "", slide: null, audios: [] };
 
 interface VoicePickerModalProps {
     value: string;
@@ -41,7 +53,6 @@ const makeEmptySlides = (count: number): Slide[] =>
     isGenerating: false,
     slideImageUrl: null,
   }));
-
 
 export default function SlideList() {
     
@@ -88,6 +99,12 @@ export default function SlideList() {
 
     // AI API
     const [transcribeAudio] = useAudioTranscribeMutation();
+
+    // VIDEO GENERATION API
+    const [createJob] = useCreateVideoGenJobMutation();
+    const [uploadVoices] = useUploadVoiceMutation();
+    const [uploadSlide] = useUploadSlideMutation();
+    const [startGeneration] = useStartGenerationMutation();
 
     const { data, isLoading, error } = useGetRegisterVoiceQuery();
     useEffect(() => {
@@ -264,6 +281,7 @@ export default function SlideList() {
 
             }
             setSlides(newSlides);
+            videoGen.slide = file;
         }
 
         catch (err) {
@@ -311,8 +329,50 @@ export default function SlideList() {
         setCreateVideoHint('');
         setIsCreateVideoHintVisible(false);
 
+        const urlToFile = async (url: string, filename: string): Promise<File> => {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            return new File([blob], filename, { type: blob.type });
+        };
+
+        const audioFiles = await Promise.all(
+            slides.map(async (slide, index) => {
+                if (slide.audioFile) return slide.audioFile;
+                if (slide.audioUrl) {
+                    return await urlToFile(slide.audioUrl, `audio-${slide.id || index}.mp3`)
+                }
+
+                return new File([], `empty-${index}.mp3`);
+            })
+        );
+
+        videoGen.audios = audioFiles;
+
         // TODO: Gắn API tạo video tại đây khi backend sẵn sàng.
         console.log('Create video payload:', slides);
+
+        // Create Video generation job
+        const videoName = "Video Generation"
+        try {
+            const createJobRes = await createJob({ videoName: videoName }).unwrap();
+            console.log("Your new Job ID is:", createJobRes.videoGenJob.id);
+            videoGen.id = createJobRes.videoGenJob.id;
+
+            await uploadVoices({ jobId: videoGen.id, audios: videoGen.audios }).unwrap();
+
+            // Right before you call the upload API:
+            if (!videoGen.slide) {
+                showCreateVideoHint('Cần có ít nhất 1 slide để tạo video bài giảng.');
+                return; // This early return is the magic key!
+            }
+
+            await uploadSlide({ jobId: videoGen.id, slide: videoGen.slide }).unwrap();
+
+            const startJobRes = await startGeneration({ jobId: videoGen.id }).unwrap();
+            console.log(startJobRes.message);
+        } catch (err) {
+            console.error("Failed to create the job: ", err);
+        }
     };
 
     useEffect(() => {
