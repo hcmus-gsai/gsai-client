@@ -7,6 +7,7 @@ import {pdfjs} from 'react-pdf';
 import { 
     useAudioTranscribeMutation,
     useGetRegisterVoiceQuery,
+    useRegisterVoiceMutation,
     useCreateVideoGenJobMutation,
     useUploadVoiceMutation,
     useUploadSlideMutation,
@@ -80,6 +81,10 @@ export default function SlideList() {
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [transcribeHint, setTranscribeHint] = useState('');
     const [textPrompt, setTextPrompt] = useState('');
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+    const [registerVoiceName, setRegisterVoiceName] = useState('');
+    const [registerVoiceError, setRegisterVoiceError] = useState('');
+    const [registerVoiceHint, setRegisterVoiceHint] = useState('');
     const [slideFile, setSlideFile]= useState<File|null>(null);
     const [registeredVoices, setRegisteredVoices] = useState<Array<{ voice_name: string; audio_url: string }>>([]);
     const [selectedRegisteredVoice, setSelectedRegisteredVoice] = useState('');
@@ -99,6 +104,7 @@ export default function SlideList() {
 
     // AI API
     const [transcribeAudio] = useAudioTranscribeMutation();
+    const [registerVoice, { isLoading: isRegisteringVoice }] = useRegisterVoiceMutation();
 
     // VIDEO GENERATION API
     const [createJob] = useCreateVideoGenJobMutation();
@@ -106,7 +112,7 @@ export default function SlideList() {
     const [uploadSlide] = useUploadSlideMutation();
     const [startGeneration] = useStartGenerationMutation();
 
-    const { data, isLoading, error } = useGetRegisterVoiceQuery();
+    const { data, isLoading, error, refetch } = useGetRegisterVoiceQuery();
     useEffect(() => {
         if (data) {
             setRegisteredVoices(data);
@@ -216,20 +222,85 @@ export default function SlideList() {
         }, 900);
     };
 
-    const handleRegisterVoice = () => {
-        if (!voiceSample || !textPrompt.trim()) return;
+    const normalizeVoiceName = (name: string) => name.trim().toLocaleLowerCase();
+
+    const isVoiceNameDuplicated = (name: string) => {
+        const normalized = normalizeVoiceName(name);
+        return registeredVoices.some((voice) => normalizeVoiceName(voice.voice_name) === normalized);
+    };
+
+    const handleOpenRegisterVoiceModal = () => {
+        if (!voiceSample || !textPrompt.trim()) {
+            setRegisterVoiceHint('Vui lòng tải giọng nói và nhập/transcribe văn bản trước khi đăng ký.');
+            return;
+        }
 
         const baseName = voiceSample.file.name.replace(/\.[^/.]+$/, '') || 'voice';
-        const voiceName = `${baseName}-${registeredVoices.length + 1}`;
+        setRegisterVoiceName(baseName);
+        setRegisterVoiceError('');
+        setRegisterVoiceHint('');
+        setIsRegisterModalOpen(true);
+    };
 
-        setRegisteredVoices((prev) => [
-            ...prev,
-            {
-                voice_name: voiceName,
-                audio_url: voiceSample.url,
-            },
-        ]);
-        setSelectedRegisteredVoice(voiceName);
+    const handleCloseRegisterVoiceModal = () => {
+        if (isRegisteringVoice) {
+            return;
+        }
+
+        setIsRegisterModalOpen(false);
+        setRegisterVoiceError('');
+    };
+
+    const handleConfirmRegisterVoice = async () => {
+        if (!voiceSample) {
+            setRegisterVoiceError('Vui lòng tải hoặc ghi âm giọng nói trước.');
+            return;
+        }
+
+        const trimmedName = registerVoiceName.trim();
+        if (!trimmedName) {
+            setRegisterVoiceError('Vui lòng nhập tên giọng nói.');
+            return;
+        }
+
+        if (isVoiceNameDuplicated(trimmedName)) {
+            setRegisterVoiceError('Đã đăng ký tên này. Vui lòng chọn tên khác.');
+            return;
+        }
+
+        if (!textPrompt.trim()) {
+            setRegisterVoiceError('Vui lòng nhập hoặc AI transcribe văn bản trước khi đăng ký.');
+            return;
+        }
+
+        setRegisterVoiceError('');
+
+        try {
+            const res = await registerVoice({
+                voice_name: trimmedName,
+                audio_file: voiceSample.file,
+                audio_transcript: textPrompt.trim(),
+            }).unwrap();
+
+            setIsRegisterModalOpen(false);
+            setSelectedRegisteredVoice(trimmedName);
+            setRegisterVoiceHint(res.message || 'Đăng ký giọng nói thành công.');
+
+            try {
+                await refetch();
+            } catch {
+                setRegisteredVoices((prev) => [
+                    ...prev,
+                    { voice_name: trimmedName, audio_url: voiceSample.url },
+                ]);
+            }
+        } catch (err: any) {
+            const apiMessage =
+                err?.data?.message ||
+                err?.error ||
+                'Đăng ký giọng nói thất bại. Vui lòng thử lại.';
+            setRegisterVoiceError(Array.isArray(apiMessage) ? apiMessage[0] : apiMessage);
+        }
     };
     
     const handleSlideFileUpload = async (file:File) => {
@@ -630,8 +701,8 @@ export default function SlideList() {
 
                     <div className = "md:col-span-1 md:col-start-2 h-auto group rounded-xl ">
                             <button
-                                disabled={!thumbnail || !voiceSample || !textPrompt.trim()}
-                                onClick={handleRegisterVoice}
+                                disabled={!voiceSample || !textPrompt.trim()}
+                                onClick={handleOpenRegisterVoiceModal}
                                 className="cursor-pointer bg-secondary w-full h-[3rem] shrink-0 flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-semibold transition-all duration-150
                                     disabled:cursor-not-allowed 
                                 "
@@ -642,6 +713,10 @@ export default function SlideList() {
                                 </svg>
                                 <span className = "text-white text-base">Đăng ký giọng nói</span>
                             </button>
+
+                            {registerVoiceHint && (
+                                <p className="mt-2 text-xs text-emerald-600">{registerVoiceHint}</p>
+                            )}
 
                     </div>
 
@@ -960,7 +1035,63 @@ export default function SlideList() {
 
                     </div>
                 </div>
-            )}        
+            )}
+
+            {isRegisterModalOpen && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4"
+                    onClick={handleCloseRegisterVoiceModal}
+                >
+                    <div
+                        className="w-full max-w-md rounded-2xl border border-blue-500/20 bg-white shadow-2xl p-5"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-lg font-semibold text-[var(--color-secondary)]">Đăng ký giọng nói</h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Nhập tên giọng nói trước khi xác nhận đăng ký.
+                        </p>
+
+                        <div className="mt-4 space-y-2">
+                            <label className="text-sm font-medium text-[var(--color-secondary)]">Tên giọng nói</label>
+                            <input
+                                type="text"
+                                value={registerVoiceName}
+                                onChange={(e) => {
+                                    setRegisterVoiceName(e.target.value);
+                                    if (registerVoiceError) {
+                                        setRegisterVoiceError('');
+                                    }
+                                }}
+                                placeholder="VD: giong-co-ban"
+                                className="w-full border border-blue-500/20 rounded-lg text-sm px-3 py-2.5 outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10"
+                                autoFocus
+                            />
+                            {registerVoiceError && (
+                                <p className="text-xs text-red-500">{registerVoiceError}</p>
+                            )}
+                        </div>
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={handleCloseRegisterVoiceModal}
+                                disabled={isRegisteringVoice}
+                                className="px-4 py-2 rounded-lg text-sm border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmRegisterVoice}
+                                disabled={isRegisteringVoice}
+                                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary text-white hover:bg-secondary/90 disabled:cursor-not-allowed"
+                            >
+                                {isRegisteringVoice ? 'Đang đăng ký...' : 'Xác nhận'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     )
 

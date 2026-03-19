@@ -1,3 +1,4 @@
+import { get } from 'http';
 import { baseApi } from '../baseApi';
 import { CreateCourseRequest } from '@/type/course.type';
 
@@ -91,6 +92,15 @@ const toNativeFile = (input: unknown): File | null => {
 
 export const createClassApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
+        getAllCategory: builder.query<{ message: string; data: string[] }, void>({
+            query: () => ({
+                url: '/courses/categories',
+                method: 'GET',
+            }),
+            providesTags: ['Course'],
+        }),
+
+
         createCourseStep: builder.mutation<CreateCourseResponse, CreateCourseRequest>({
             query: (course) => ({
                 url: '/courses',
@@ -301,6 +311,7 @@ export const createClassApi = baseApi.injectEndpoints({
 });
 
 export const {
+    useGetAllCategoryQuery,
     useCreateCourseStepMutation,
     usePatchCourseStepMutation,
     useDeleteCourseStepMutation,
