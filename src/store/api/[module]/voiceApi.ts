@@ -10,7 +10,9 @@ export const voiceApi = baseApi.injectEndpoints({
                 body: formData,
             }),
         }),
-        cloneVoice: builder.mutation<VoiceCloneResponse, {text: string, voice_name:string, teacher_id:string}>({
+
+        // If teacher call this api, do not add teacher_id to body, let server get teacher_id from token. 
+        cloneVoice: builder.mutation<VoiceCloneResponse, {text: string, voice_name:string, teacher_id?:string}>({
             query: (body) => ({
                 url: "/voice-cloning/clone",
                 method: "POST",

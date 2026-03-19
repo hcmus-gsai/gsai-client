@@ -153,7 +153,7 @@ const LearningProgressSection = () => {
                                             justify-between
                                             items-start sm:items-center
                                             gap-4 sm:gap-0
-                                            p-4 sm:p-6
+                                            sm:py-5 sm:px-15
                                             border border-secondary rounded-2xl bg-white
                                             shadow-sm
                                             hover:shadow-lg
@@ -166,7 +166,7 @@ const LearningProgressSection = () => {
                                             </p>
 
                                             <p className="text-sm text-gray-500">
-                                                Hoàn thành {percent}% · {course.duration}
+                                                Hoàn thành {percent}% · Dự kiến hoàn thành trong {course.duration}
                                             </p>
 
                                             <Progress
@@ -176,18 +176,21 @@ const LearningProgressSection = () => {
                                             />
                                         </div>
 
+                                        <div className="w-[30%]">
+                                        </div>
+
                                         <div className="
                                             flex flex-row
                                             items-center
                                             justify-between sm:justify-end
                                             w-full sm:w-auto
-                                            gap-3 sm:gap-6
+                                            sm:gap-20
                                         ">
                                             <div className="text-left sm:text-right hidden xs:block sm:block">
                                                 <p className="font-semibold text-sm sm:text-base line-clamp-1">
                                                     {lesson?.lesson_name ?? "-"}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-sm text-gray-500">
                                                     {lesson?.estimated_completion_time ?? "-"} ·{" "}
                                                     {typeTranslate[lesson?.type ?? ""] ?? "-"}
                                                 </p>
@@ -204,10 +207,6 @@ const LearningProgressSection = () => {
                                             >
                                                 Tiếp tục
                                             </Button>
-
-                                            <button className="p-2 shrink-0">
-                                                <Image src={MoreIcon} alt="more" width={20} />
-                                            </button>
                                         </div>
                                     </div>
                                 );

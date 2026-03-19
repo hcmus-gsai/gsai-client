@@ -23,6 +23,7 @@ import { baseApi } from '@/store/api/baseApi';
 
 import { FooterSection } from "@/components/guest/ui/guest";
 import { Trykker } from 'next/font/google';
+import { Sparkles } from "lucide-react";
 
 const TeacherNavbar = () => {
 
@@ -192,6 +193,7 @@ const TeacherNavbar = () => {
                                         key: "courses",
                                         label: <span>Môn học</span>
                                     },
+
                                 ]}
                                 className='!bg-transparent !border-none !w-full !flex !items-center !justify-start [&_.ant-menu-item]:!font-normal [&_.ant-menu-item]:!text-gray-700 [&_.ant-menu-item]:!relative [&_.ant-menu-item:hover]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!text-[var(--color-primary)] [&_.ant-menu-item-selected]:!font-semibold [&_.ant-menu-item:hover]:[text-shadow:0_0_0.75px_var(--color-primary)] [&_.ant-menu-item::after]:!content-[""] [&_.ant-menu-item::after]:!absolute [&_.ant-menu-item::after]:!bottom-0 [&_.ant-menu-item::after]:!left-0 [&_.ant-menu-item::after]:!h-[2px] [&_.ant-menu-item::after]:!w-full [&_.ant-menu-item::after]:!bg-[var(--color-secondary)] [&_.ant-menu-item::after]:!origin-center [&_.ant-menu-item::after]:!scale-x-0 [&_.ant-menu-item::after]:!transition-transform [&_.ant-menu-item::after]:!duration-500 [&_.ant-menu-item::after]:!ease-in-out [&_.ant-menu-item::after]:!border-none [&_.ant-menu-item:hover::after]:!scale-x-[80%] [&_.ant-menu-item-selected::after]:!scale-x-[80%]'
                             />
@@ -254,6 +256,29 @@ const TeacherNavbar = () => {
 const NAV_ITEMS = [
     { key: "homepage", label: "Trang chủ", path: "/teacher/home" },
     { key: "courses",  label: "Môn học",   path: "/teacher/courses" },
+    {
+        key: "aistudio",
+        path: "/teacher/ai-studio",
+        label: (
+        <span className="relative inline-block group">
+            <span>AI Studio</span>
+
+            <Sparkles
+            size={10}
+            className="
+                absolute -top-1 -right-3
+                text-[var(--color-secondary)]
+                fill-[var(--color-secondary)]
+                stroke-[var(--color-secondary)]
+                transition-transform duration-500
+                group-hover:rotate-[360deg]
+                group-hover:scale-125
+                drop-shadow-[0_0_4px_rgba(71,181,255,0.9)]
+            "
+            />
+        </span>
+        )
+    },
 ];
  
 const DynamicTeacherNavbar = () => {
@@ -267,6 +292,7 @@ const DynamicTeacherNavbar = () => {
     const selectedKey =
         pathname.startsWith("/teacher/home")    ? "homepage" :
         pathname.startsWith("/teacher/courses") ? "courses"  :
+        pathname.startsWith("/teacher/ai-studio") ? "aistudio" :
         pathname.startsWith("/teacher/about")   ? "about"    : "";
  
     const dispatch = useAppDispatch();
