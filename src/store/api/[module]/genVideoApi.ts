@@ -1,44 +1,5 @@
 import { baseApi } from '../baseApi';
-
-export enum JobStatus {
-    CREATED = 'CREATED',
-    PROCESSING = 'PROCESSING',
-    COMPLETED = 'COMPLETED',
-    FAILED = 'FAILED',
-}
-
-export interface VideoGenerationJob {
-    id: string;
-    teacher_id: string;
-    lesson_id: string;
-
-    video_name: string;
-
-    job_status: JobStatus;
-    lipsync_status: JobStatus;
-    ocr_status: JobStatus;
-
-    lipsync_image_url?: string;
-
-    voice_sample_audio_url: string[];
-
-    slide_file_url?: string;
-
-    transcript_text?: string;
-    error_message?: string;
-
-    generated_video_url?: string;
-
-    ocr_json?: string;
-
-    create_at: string;
-    completed_at: string;   
-}
-
-export interface VideoGenJobRes {
-    videoGenJob: VideoGenerationJob;
-    message: string;
-}
+import { IVideoGenJobResponse } from '@/type/videoGenJob';
 
 export const videoApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -67,19 +28,18 @@ export const videoApi = baseApi.injectEndpoints({
         }),
 
         // Create Generation job
-        createVideoGenJob: builder.mutation<VideoGenJobRes, { videoName: string }>({
+        createVideoGenJob: builder.mutation<IVideoGenJobResponse, { videoName: string }>({
             query: ({ videoName }) => {
-                const formData = new FormData();
-                formData.append('videoName', videoName);
                 return {
                     url: '/video-generation/requests',
                     method: 'POST',
+                    body: { videoName },
                 };
             },
         }),
 
         // Upload Voice for Video Generation
-        uploadVoice: builder.mutation<VideoGenJobRes, { jobId: string, audios: File[] }>({
+        uploadVoice: builder.mutation<IVideoGenJobResponse, { jobId: string, audios: File[] }>({
             query: ({ jobId, audios }) => {
                 const formData = new FormData();
                 audios.forEach((file) => {
@@ -94,7 +54,7 @@ export const videoApi = baseApi.injectEndpoints({
         }),
 
         // Upload Slide for Video Generation
-        uploadSlide: builder.mutation<VideoGenJobRes, { jobId: string, slide: File }>({
+        uploadSlide: builder.mutation<IVideoGenJobResponse, { jobId: string, slide: File }>({
             query: ({ jobId, slide }) => {
                 const formData = new FormData();
                 formData.append('file', slide);
