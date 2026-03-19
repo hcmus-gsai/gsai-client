@@ -891,7 +891,7 @@ export default function SlideList() {
 
                             <div className="h-full">
                                 <textarea
-                                    className = "w-full h-[90%] border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
+                                    className = "w-full max-h-[400px] min-h-[100px] border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
                                     value = {slide.content}
                                     onChange = {(e)=>updateSlide({id: slide.id, fields: {content: e.target.value}})}
                                     placeholder="Nhập nội dung slide..."

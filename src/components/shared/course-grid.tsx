@@ -82,7 +82,10 @@ export const CourseGrid = (
     }
 
     const CourseCard = ({c}: {c:Course}) => (
-        <Card className = "md:w-full px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 md: transition-all duration-300 cursor-pointer !rounded-[24px]"
+        //border border-blue-200/60 bg-gradient-to-r from-[var(--color-neutral)]
+        <Card 
+            className="w-[300px] md:w-full md:h-full px-6 py-8 cursor-pointer !rounded-[24px] transition-all duration-500 ease-in-out bg-white border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-[var(--color-neutral)]/20"
+            // className = "md:w-full px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 md: transition-all duration-300 cursor-pointer !rounded-[24px]"
             onClick = {() => handleCardClick(c)}
         >
             <div className="flex flex-col items-center justify-center">
@@ -106,7 +109,7 @@ export const CourseGrid = (
                 <p className="text-[0.875rem] font-light text-gray-600 text-center">
                     Thời lượng: {c.duration}
                 </p>
-                <div className="flex items-center justify-center w-full gap-x-[0.5rem] flex-wrap gap-y-[0.25rem]">
+                <div className="flex flex-wrap items-center justify-center gap-x-[0.5rem] gap-y-[0.25rem] w-full min-h-[64px] content-start overflow-hidden">
                     {c.category
                         .toString()
                         .split(",")
@@ -124,7 +127,7 @@ export const CourseGrid = (
                                     );
                                 }}
                             >
-                                <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
+                                <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1 truncate">
                                     {category}
                                 </p>
                             </div>
@@ -213,14 +216,14 @@ export const CourseGrid = (
             }
         </Row> */}
         <div className = "flex flex-col items-center justify-center md:hidden gap-4">
-            <div className = "flex md:hidden w-full overflow-x-auto gap-x-[1rem] pb-[0.75rem] snap-x snap-mandatory snap-always -mx-4"
+            <div className = "flex md:hidden w-full overflow-x-auto gap-x-[1rem] pb-[0.75rem] snap-x snap-mandatory snap-always"
                 style={{
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
                     touchAction: "pan-x",
                     overscrollBehaviorX: "contain",
                     willChange: "transform",       
-                    height: "300px"
+                    height: "400px",
                 }}
                 ref = {scrollRef}
                 onScroll = {horizontalScroll}
