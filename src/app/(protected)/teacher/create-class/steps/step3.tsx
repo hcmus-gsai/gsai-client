@@ -11,7 +11,7 @@ import DocumentIcon from '@/../public/shared/DocumentIcon.svg';
 import UploadIcon from '@/../public/shared/UploadIcon.svg';
 import CreateClassEdit from '@/../public/teacher/createClassEdit.svg';
 import CreateClassTrashRed from '@/../public/teacher/createClassTrashRed.svg';
-
+import Link from "next/link";
 import { Lesson, Step3Data } from '@/type/createClass.type';
 import CreateClassIntro from '../components/create-class-intro';
 import {
@@ -530,7 +530,15 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
                                                 suffix={<Image src={UploadIcon} alt="upload" width={24} height={24} />}
                                             />
                                         </Upload>
+                                        
                                     </Form.Item>
+
+                                    <Link
+                                        href="/teacher/create-slide"
+                                        className="text-sm text-blue-500 hover:underline"
+                                    >
+                                        Thử nghiệm tạo video bằng AI?
+                                    </Link>
 
                                     <Form.Item className="flex justify-center">
                                         <Button

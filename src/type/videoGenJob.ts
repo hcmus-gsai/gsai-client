@@ -1,4 +1,4 @@
-enum JobStatus {
+export enum JobStatus {
     CREATED = "created",
     QUEUED = "queued",
     PROCESSING = "processing",
@@ -9,15 +9,14 @@ enum JobStatus {
 interface IVideoGenJob {
     id: string;
     teacher_id: string;
-    lesson_id: string;
     video_name: string;
     job_status: JobStatus;
-    lipsync_status: JobStatus;
+    video_gen_status: JobStatus;
     ocr_status: JobStatus;
-    lipsync_image_url?: string; // Dùng dấu ? vì có nullable: true
+    // lipsync_image_url?: string; // Dùng dấu ? vì có nullable: true
     voice_sample_audio_url: string[]; // Mảng string cho array: true
     slide_file_url?: string;
-    transcript_text?: string;
+    // transcript_text?: string;
     error_message?: string;
     generated_video_url?: string;
     /**
@@ -32,4 +31,15 @@ interface IVideoGenJob {
 export interface IVideoGenJobResponse {
     videoGenJob: IVideoGenJob;
     message: string;
+}
+
+export interface IVideoStatusCard {
+    id: string;
+    videoName: string;
+    jobStatus: JobStatus;
+    videoGenStatus: JobStatus;
+    ocrStatus: JobStatus;
+    createAt: string | Date;
+    completedAt: string | Date;
+    errorMessage?: string;
 }
