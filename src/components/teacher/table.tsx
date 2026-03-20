@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 type HistoryItem = {
     id: number;
@@ -41,6 +42,7 @@ type TableProps = SubmissionTableProps | AITaskTableProps;
 
 export const Table = (props: TableProps) => {
     const { columns, data, maxItems, type, className = "" } = props;
+    const router = useRouter();
 
     const tableData = useMemo(() => {
         return maxItems ? data.slice(0, maxItems) : data;
@@ -51,7 +53,7 @@ export const Table = (props: TableProps) => {
     return (
         <div className={`w-full rounded-[16px] overflow-hidden ${className}`}>
             <div className={`bg-blue-600 text-white font-semibold px-6 py-4 ${
-                type === "submission" ? "grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr_1fr]" : "grid grid-cols-[3fr_1.5fr_1.5fr_1fr_1fr]"
+                "grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr_1fr]"
             }`}>
                 {columns.map((col, index) => (
                     <div key={index} className="text-sm">
@@ -103,7 +105,7 @@ export const Table = (props: TableProps) => {
                 return (
                     <div
                         key={aiItem.id}
-                        className={`grid grid-cols-[3fr_1.5fr_1.5fr_1fr_1fr] px-6 py-4 text-sm items-center
+                        className={`grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr_1fr] px-6 py-4 text-sm items-center
                         ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                     >
                         <div className="text-blue-600 hover:underline cursor-pointer">
@@ -112,7 +114,10 @@ export const Table = (props: TableProps) => {
                         <div>{aiItem.status}</div>
                         <div>{aiItem.createdAt}</div>
                         <div>{aiItem.endedAt ?? "--"}</div>
-                        <div className="text-blue-600 text-right hover:underline cursor-pointer">
+                        <div
+                            className="text-blue-600 text-center hover:underline cursor-pointer"
+                            onClick={() => router.push('/teacher/ai-studio')}
+                        >
                             Chi tiết
                         </div>
                     </div>

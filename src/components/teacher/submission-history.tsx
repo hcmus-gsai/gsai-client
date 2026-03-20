@@ -3,6 +3,7 @@
 import { RedirectButton } from "@/components/shared/redirect-button";
 import { Table } from "@/components/teacher/table";
 import { useGetAllSubmissionsQuery } from "@/store/api/[module]/projectApi";
+import { useGetVideoGenerationRequestsQuery } from "@/store/api/[module]/aiStudioApi";
 
 const SubmissionHistorySection = ({
     title,
@@ -12,6 +13,22 @@ const SubmissionHistorySection = ({
     type?: "submission" | "ai_task";
 }) => {
     const { data: submissionsData, isLoading } = useGetAllSubmissionsQuery(null);
+    const { data: aiTasksData = [], isLoading: isAiTasksLoading } = useGetVideoGenerationRequestsQuery();
+
+    const formatDateTime = (value?: string | Date | null) => {
+        if (!value) return "-";
+
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return "-";
+
+        const hh = String(parsed.getHours()).padStart(2, "0");
+        const mm = String(parsed.getMinutes()).padStart(2, "0");
+        const dd = String(parsed.getDate()).padStart(2, "0");
+        const month = String(parsed.getMonth() + 1).padStart(2, "0");
+        const yyyy = parsed.getFullYear();
+
+        return `${hh}:${mm} ${dd}/${month}/${yyyy}`;
+    };
 
     const historyData = submissionsData?.data?.map((item, index) => ({
         id: index + 1,
@@ -24,12 +41,23 @@ const SubmissionHistorySection = ({
         grading_status: item.grading_status,
     })) || [];
 
+    const aiTaskHistoryData = aiTasksData.map((item, index) => ({
+        id: index + 1,
+        lessonName: 'Tạo Video AI: ' + item.videoName,
+        status: item.jobStatus,
+        createdAt: formatDateTime(item.createAt),
+        endedAt: item.completedAt ? formatDateTime(item.completedAt) : "-",
+    }));
+
+    const isTableLoading = type === "submission" ? isLoading : isAiTasksLoading;
+    const tableDataLength = type === "submission" ? historyData.length : aiTaskHistoryData.length;
+
     return (
         <section className="w-full flex flex-col items-center gap-6 mt-10 mb-10">
             <div className="flex flex-col items-center justify-center w-[var(--global-width)] gap-[1.5rem] px-4">
                 <h1 className="text-[2rem] md:text-[2.5rem] font-bold w-full text-[var(--color-primary)] text-center md:text-left">{title}</h1>
                 <div className="flex items-center justify-center w-full">
-                    {isLoading ? (
+                    {isTableLoading ? (
                         <div className="text-center py-8">Đang tải...</div>
                     ) : type === "submission" ? (
                         <Table
@@ -41,13 +69,13 @@ const SubmissionHistorySection = ({
                     ) : (
                         <Table
                             columns={AITaskColumnName}
-                            data={AITaskHistoryData}
+                            data={aiTaskHistoryData}
                             maxItems={4}
                             type={type}
                         />)}
                 </div>
             </div>
-            {historyData?.length && historyData.length > 4 ?
+            {tableDataLength > 4 ?
                 (<div className="flex items-center justify-center w-[var(--global-width)] py-[2rem]">
                     <RedirectButton
                         title={title}
@@ -68,28 +96,5 @@ const ColumnName = ["Bài tập", "Học sinh", "Ngày nộp", "Điểm số"];
 // Mock data removed - now using API data from useGetAllSubmissionsQuery
 
 const AITaskColumnName = ["Tác vụ AI", "Trạng thái", "Bắt đầu", "Kết thúc"];
-const AITaskHistoryData = [
-    {
-        id: 1,
-        lessonName: "Tác vụ AI 1: Phân loại hình ảnh",
-        status: "Đang tạo",
-        createdAt: "23/02/2026",
-        endedAt: null,
-    },
-    {
-        id: 2,
-        lessonName: "Tác vụ AI 2: Dự đoán chuỗi thời gian",
-        status: "Lỗi",
-        createdAt: "24/02/2026",
-        endedAt: null,
-    },
-    {
-        id: 3,
-        lessonName: "Tác vụ AI 3: Phân tích cảm xúc",
-        status: "Đã hoàn thành",
-        createdAt: "25/02/2026",
-        endedAt: "26/02/2026",
-    }
-]
 
 export { SubmissionHistorySection };

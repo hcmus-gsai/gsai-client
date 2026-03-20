@@ -131,6 +131,8 @@ const ChatbotSection = () => {
                         sender: "user",
                         text: transcript
                     }]);
+
+                    await sendMessageToBot(transcript);
                 } catch (error) {
                     console.error(error);
                     setMessages(prev => [...prev, {
@@ -176,6 +178,8 @@ const ChatbotSection = () => {
             };
 
             animate();
+
+            
         } else if (recording && mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
             setRecording(false);
@@ -193,6 +197,82 @@ const ChatbotSection = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
+    const answerModeRef = useRef<'text' | 'audio'>('text');
+    const moduleIdRef = useRef<string | null>(moduleId ?? null);
+    const activeBotAudioRef = useRef<HTMLAudioElement | null>(null);
+    const hasAutoPlayedFirstBotAudioRef = useRef(false);
+
+    useEffect(() => {
+        answerModeRef.current = answerMode;
+    }, [answerMode]);
+
+    useEffect(() => {
+        moduleIdRef.current = moduleId ?? null;
+    }, [moduleId]);
+
+    const sendMessageToBot = async (messageText: string) => {
+        const trimmedMessage = messageText?.trim();
+        if (!trimmedMessage) return;
+
+        const currentModuleId = moduleIdRef.current;
+        if (!currentModuleId) {
+            setMessages((prev) => [
+                ...prev,
+                { sender: "bot", text: "Không tìm thấy module. Vui lòng quay lại trang khóa học và chọn bài học." },
+            ]);
+            return;
+        }
+
+        try {
+            const response = await sendMessageV2({
+                module_id: currentModuleId,
+                content_type: ContentType.TEXT,
+                message_text: trimmedMessage,
+                answer_mode: answerModeRef.current,
+            }).unwrap();
+
+            const botAudioUrl = response.bot_response.audio_url;
+
+            setMessages((prev) => [
+                ...prev,
+                { sender: "bot", text: response.bot_response.message_text, audio: botAudioUrl },
+            ]);
+
+            if (botAudioUrl && !hasAutoPlayedFirstBotAudioRef.current) {
+                hasAutoPlayedFirstBotAudioRef.current = true;
+                handlePlayBotAudio(botAudioUrl);
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+            setMessages((prev) => [
+                ...prev,
+                { sender: "bot", text: "Có lỗi xảy ra, vui lòng thử lại." },
+            ]);
+        }
+    };
+
+    const handlePlayBotAudio = (audioUrl: string) => {
+        // Stop any media currently playing in page (lesson video/audio) before playing latest bot audio.
+        document.querySelectorAll('video, audio').forEach((media) => {
+            const mediaElement = media as HTMLMediaElement;
+            if (!mediaElement.paused) {
+                mediaElement.pause();
+            }
+        });
+
+        // Stop previous chatbot audio instance (created with new Audio) if still active.
+        if (activeBotAudioRef.current) {
+            activeBotAudioRef.current.pause();
+            activeBotAudioRef.current.currentTime = 0;
+        }
+
+        const nextAudio = new Audio(audioUrl);
+        activeBotAudioRef.current = nextAudio;
+        nextAudio.currentTime = 0;
+        nextAudio.play().catch((error) => {
+            console.error('Error playing audio response:', error);
+        });
+    };
 
     // Ref để track xem đã load history lần đầu chưa
     const isInitialLoad = useRef(true);
@@ -236,6 +316,15 @@ const ChatbotSection = () => {
         setIsHydrated(true);
     }, [historyData]);
 
+    useEffect(() => {
+        return () => {
+            if (activeBotAudioRef.current) {
+                activeBotAudioRef.current.pause();
+                activeBotAudioRef.current.currentTime = 0;
+            }
+        };
+    }, []);
+
 
     const handleMessageSubmit = async () => {
         const data = formData.getFieldsValue();
@@ -249,38 +338,7 @@ const ChatbotSection = () => {
         formData.resetFields(['chatMessage']);
         setRow(1);
 
-        // Gọi API để gửi message đến chatbot
-
-        if (!moduleId) {
-            setMessages((prev) => [
-                ...prev,
-                { sender: "bot", text: "Không tìm thấy module. Vui lòng quay lại trang khóa học và chọn bài học." },
-            ]);
-            return;
-        }
-
-        try {
-            const response = await sendMessageV2({
-                module_id: moduleId,
-                content_type: ContentType.TEXT,
-                message_text: data.chatMessage,
-                answer_mode: answerMode
-            }).unwrap();
-
-            console.log(response);
-
-            // Thêm response từ bot vào messages
-            setMessages((prev) => [
-                ...prev,
-                { sender: "bot", text: response.bot_response.message_text, audio: response.bot_response.audio_url },
-            ]);
-        } catch (error) {
-            console.error("Error sending message:", error);
-            setMessages((prev) => [
-                ...prev,
-                { sender: "bot", text: "Có lỗi xảy ra, vui lòng thử lại." },
-            ]);
-        }
+        await sendMessageToBot(data.chatMessage);
     }
     //=======================================//
 
@@ -504,13 +562,7 @@ const ChatbotSection = () => {
                                 {/* Nếu có audio response, hiển thị thêm nút play */}
                                 {msg.audio && (
                                     <Button
-                                        onClick={() => {
-                                            const audio = new Audio(msg.audio);
-                                            audio.play().catch(error => {
-                                                console.error('Error playing audio response:', error);
-                                            }
-                                            );
-                                        }}
+                                        onClick={() => handlePlayBotAudio(msg.audio as string)}
                                         className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
                                         icon={<Play className="!w-[16px] !h-[16px]" />}
                                     ></Button>

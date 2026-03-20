@@ -23,11 +23,24 @@ const QuizAIContent = ({ lessonId }: { lessonId: string }) => {
                         Tận dụng AI để ôn luyện để đảm bảo bạn có sự chuẩn bị hoàn hảo nhất.
                     </div>
 
+                    {/*
+                      TODO (khi feature AI Quiz hoàn thiện):
+                      1) Xóa overlay "Đang phát triển" bên dưới.
+                      2) Bỏ disabled ở nút Bắt đầu bản hoạt động này để mở chức năng.
+                    */}
+
                     <Button
+                        disabled
                         className="!w-[155px] !h-[54px] !rounded-full !flex !items-center !justify-center !bg-[var(--color-secondary)] !text-white !border !border-[var(--color-secondary)] hover:!bg-neutral hover:!text-[var(--color-secondary)]"
                     >
                         Bắt đầu
                     </Button>
+                </div>
+
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[20px] bg-white/60 backdrop-blur-[2px]">
+                    <span className="rounded-full border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-[var(--color-secondary)] shadow-sm">
+                        Đang phát triển
+                    </span>
                 </div>
             </Card>
         </div>
