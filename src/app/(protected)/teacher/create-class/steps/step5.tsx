@@ -29,6 +29,38 @@ interface Props {
     onBack: () => void;
 }
 
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
+
 const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -500,20 +532,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                                         rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                                     >
-                                        <Space.Compact style={{ width: '100%' }} >
-                                            <InputNumber min={1} size="large" style={{ width: '100%' }}/>
-                                            <Button 
-                                                disabled 
-                                                size="large"
-                                                style={{ 
-                                                    color: 'rgba(0, 0, 0, 0.88)',
-                                                    backgroundColor: '#fafafa'  
-                                                }}
-                                                className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit" //This to remove stopid icon when hovering disabled Button
-                                            >
-                                                ngày
-                                            </Button>
-                                        </Space.Compact>
+                                        <CustomInput content='ngày'/>
                                     </Form.Item>
 
                                     <Form.Item

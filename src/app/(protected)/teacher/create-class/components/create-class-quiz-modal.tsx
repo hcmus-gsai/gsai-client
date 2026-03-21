@@ -16,6 +16,63 @@ type Props = {
     onSubmit: (values: any) => void;
 };
 
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
+
+const DeadlineInput: React.FC<InputProps> = ({ value, onChange, id }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            ngày
+        </Button>
+    </Space.Compact>
+);
+
 const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmit }) => {
     if (!visible) {
         return null;
@@ -67,20 +124,7 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                             label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                             rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                         >
-                            <Space.Compact style={{ width: '100%' }} >
-                                <InputNumber min={1} size="large" style={{ width: '100%' }}/>
-                                <Button 
-                                    disabled 
-                                    size="large"
-                                    style={{ 
-                                        color: 'rgba(0, 0, 0, 0.88)', 
-                                        backgroundColor: '#fafafa'  
-                                    }}
-                                    className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit" //This to remove stopid icon when hovering disabled Button
-                                >
-                                    %
-                                </Button>
-                            </Space.Compact>
+                            <CustomInput content="ngày" />
                         </Form.Item>
 
                         <Form.Item
@@ -88,20 +132,7 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                             label={<span className="font-semibold">Thời gian làm bài (phút)</span>}
                             rules={[{ required: true, message: 'Vui lòng nhập thời gian làm quiz!' }]}
                         >
-                            <Space.Compact style={{ width: '100%' }} >
-                                <InputNumber min={1} size="large" style={{ width: '100%' }}/>
-                                <Button 
-                                    disabled 
-                                    size="large"
-                                    style={{ 
-                                        color: 'rgba(0, 0, 0, 0.88)',
-                                        backgroundColor: '#fafafa'  
-                                    }}
-                                    className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit" //This to remove stopid icon when hovering disabled Button
-                                >
-                                    minute
-                                </Button>
-                            </Space.Compact>
+                            <CustomInput content="phút" />
                         </Form.Item>
 
                         <div className="mt-8">
@@ -139,7 +170,9 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                                             return (
                                                                                 <Radio
                                                                                     checked={selected === subName}
-                                                                                    onChange={() => form.setFieldValue(['questions', name, 'correctOption'], subName)}
+                                                                                    onChange={(e) => {
+                                                                                        form.setFieldValue(['questions', name, 'correctOption'], subName);
+                                                                                    }}
                                                                                 />
                                                                             );
                                                                         }}
@@ -197,11 +230,12 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                         <Form.Item
                                                             {...restField}
                                                             name={[name, 'score']}
-                                                            label={<span className="text-gray-700 w-[5rem]">Điểm</span>}
+                                                            label={<span className="text-gray-700 w-[6rem]">Điểm</span>}
                                                             style={{ marginBottom: 0, width: '9rem' }}
                                                             rules={[{ required: true, message: '' }]}
+                                                            layout="horizontal"
                                                         >
-                                                            <InputNumber min={0} max={10} controls={false} style={{ width: '4rem' }} />
+                                                            <InputNumber min={0} max={10} controls={false} style={{ width: '2.5rem' }} />
                                                         </Form.Item>
                                                     </div>
 

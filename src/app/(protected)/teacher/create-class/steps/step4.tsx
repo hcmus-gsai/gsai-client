@@ -47,6 +47,7 @@ const extractApiErrorMessage = (error: any) => {
 const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
+    // form.resetFields();
 
     const [createLessonStep, { isLoading: isCreatingLesson }] = useCreateLessonStepMutation();
     const [patchLessonStep, { isLoading: isPatchingLesson }] = usePatchLessonStepMutation();
@@ -96,6 +97,7 @@ const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
             duration: item.duration,
             questions: item.questions,
         });
+        console.log(item);
     };
 
     const onFinishQuiz = (values: any) => {
