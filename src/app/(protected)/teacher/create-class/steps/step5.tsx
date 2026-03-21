@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, InputNumber, Upload, UploadProps, Radio, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, Input, Space, InputNumber, Upload, UploadProps, Radio, message } from 'antd';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -500,7 +500,20 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                                         rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                                     >
-                                        <InputNumber min={1} size="large" style={{ width: '100%' }} addonAfter="ngày" />
+                                        <Space.Compact style={{ width: '100%' }} >
+                                            <InputNumber min={1} size="large" style={{ width: '100%' }}/>
+                                            <Button 
+                                                disabled 
+                                                size="large"
+                                                style={{ 
+                                                    color: 'rgba(0, 0, 0, 0.88)',
+                                                    backgroundColor: '#fafafa'  
+                                                }}
+                                                className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit" //This to remove stopid icon when hovering disabled Button
+                                            >
+                                                ngày
+                                            </Button>
+                                        </Space.Compact>
                                     </Form.Item>
 
                                     <Form.Item
