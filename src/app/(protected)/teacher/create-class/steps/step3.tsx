@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, Input, Upload, UploadProps, App } from 'antd';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
@@ -31,6 +31,8 @@ interface Props {
 }
 
 const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
 

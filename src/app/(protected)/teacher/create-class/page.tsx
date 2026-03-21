@@ -1,7 +1,7 @@
 'use client'; 
 
 import { useEffect, useState } from 'react';
-import { message } from 'antd';
+import { message, App } from 'antd';
 import { useSearchParams } from 'next/navigation';
 import Step1 from '@/app/(protected)/teacher/create-class/steps/step1';
 import Step2 from '@/app/(protected)/teacher/create-class/steps/step2';
@@ -325,14 +325,16 @@ export default function CreateClassPage() {
 	}
 
 	return (
-		<main>
-			<h1>Tạo lớp học mới</h1>
+		<App>
+			<main>
+				<h1>Tạo lớp học mới</h1>
 
-			{currentStep === 1 && <Step1 onNext={next} data={classData} />}
-			{currentStep === 2 && <Step2 onNext={next} onBack={back} data={classData}/>}
-			{currentStep === 3 && <Step3 onNext={next} onBack={back} data={classData}/>}
-			{currentStep === 4 && <Step4 onNext={next} onBack={back} data={classData}/>}
-			{currentStep === 5 && <Step5 onNext={next} onBack={back} data={classData}/>}
-		</main>
+				{currentStep === 1 && <Step1 onNext={next} data={classData} />}
+				{currentStep === 2 && <Step2 onNext={next} onBack={back} data={classData}/>}
+				{currentStep === 3 && <Step3 onNext={next} onBack={back} data={classData}/>}
+				{currentStep === 4 && <Step4 onNext={next} onBack={back} data={classData}/>}
+				{currentStep === 5 && <Step5 onNext={next} onBack={back} data={classData}/>}
+			</main>
+		</App>
 	);
 }
