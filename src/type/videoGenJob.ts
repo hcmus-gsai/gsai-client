@@ -1,4 +1,4 @@
-enum JobStatus {
+export enum JobStatus {
     CREATED = "created",
     QUEUED = "queued",
     PROCESSING = "processing",
@@ -31,4 +31,15 @@ interface IVideoGenJob {
 export interface IVideoGenJobResponse {
     videoGenJob: IVideoGenJob;
     message: string;
+}
+
+export interface IVideoStatusCard {
+    id: string;
+    videoName: string;
+    jobStatus: JobStatus;
+    videoGenStatus: JobStatus;
+    ocrStatus: JobStatus;
+    createAt: string | Date;
+    completedAt: string | Date;
+    errorMessage?: string;
 }

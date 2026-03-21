@@ -3,6 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {pdfjs} from 'react-pdf';
 import { 
     useAudioTranscribeMutation,
@@ -56,6 +57,7 @@ const makeEmptySlides = (count: number): Slide[] =>
   }));
 
 export default function SlideList() {
+    const router = useRouter();
     
     const [slides, setSlides] = useState<Slide[]>(makeEmptySlides(3));
 
@@ -93,6 +95,8 @@ export default function SlideList() {
     const [previewSlide, setPreviewSlide] = useState<{url:string; title: string}|null >(null);
     const [createVideoHint, setCreateVideoHint] = useState('');
     const [isCreateVideoHintVisible, setIsCreateVideoHintVisible] = useState(false);
+    const [videoName, setVideoName] = useState('');
+    const [isSubmittingVideo, setIsSubmittingVideo] = useState(false);
 
 
     const thumbnailRef = useRef<HTMLInputElement>(null);
@@ -131,7 +135,7 @@ export default function SlideList() {
         }
     }, [data]);
 
-    const [cloneVoice] = useCloneVoiceMutation();
+    const [cloneVoice, { isLoading: isCloneVoiceLoading }] = useCloneVoiceMutation();
     
     
 
@@ -364,16 +368,24 @@ export default function SlideList() {
     }
 
     const handleGenerateVoice = async (slideId: number, slideContent: string, slideVoice: string)=>{
-        if (!slideContent.trim() || !slideVoice.trim()){
+        const targetSlide = slides.find((slide) => slide.id === slideId);
+
+        if (!slideContent.trim() || !slideVoice.trim() || targetSlide?.isGenerating || isCloneVoiceLoading){
             return;
         }
 
-        const res = await cloneVoice({
-            text: slideContent,
-            voice_name: slideVoice,
-        }).unwrap();
+        updateSlide({id: slideId, fields:{isGenerating: true}});
 
-        updateSlide({id: slideId, fields:{audioUrl: res.cloned_audio_url}});
+        try {
+            const res = await cloneVoice({
+                text: slideContent,
+                voice_name: slideVoice,
+            }).unwrap();
+
+            updateSlide({id: slideId, fields:{audioUrl: res.cloned_audio_url}});
+        } finally {
+            updateSlide({id: slideId, fields:{isGenerating: false}});
+        }
         
     };
 
@@ -387,6 +399,17 @@ export default function SlideList() {
     };
 
     const handleCreateVideo = async () => {
+        if (isSubmittingVideo) {
+            return;
+        }
+
+        const trimmedVideoName = videoName.trim();
+
+        if (!trimmedVideoName) {
+            showCreateVideoHint('Vui lòng nhập tên video trước khi tạo.');
+            return;
+        }
+
         if (!hasSlides) {
             showCreateVideoHint('Cần có ít nhất 1 slide để tạo video bài giảng.');
             return;
@@ -423,9 +446,10 @@ export default function SlideList() {
         console.log('Create video payload:', slides);
 
         // Create Video generation job
-        const videoName = "Video Generation"
         try {
-            const createJobRes = await createJob({ videoName: videoName }).unwrap();
+            setIsSubmittingVideo(true);
+
+            const createJobRes = await createJob({ videoName: trimmedVideoName }).unwrap();
             console.log("Your new Job ID is:", createJobRes.videoGenJob.id);
             videoGen.id = createJobRes.videoGenJob.id;
 
@@ -441,8 +465,13 @@ export default function SlideList() {
 
             const startJobRes = await startGeneration({ jobId: videoGen.id }).unwrap();
             console.log(startJobRes.message);
+
+            router.push('/teacher/ai-studio');
         } catch (err) {
             console.error("Failed to create the job: ", err);
+            showCreateVideoHint('Tạo job video thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsSubmittingVideo(false);
         }
     };
 
@@ -891,7 +920,7 @@ export default function SlideList() {
 
                             <div className="h-full">
                                 <textarea
-                                    className = "w-full h-[90%] border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
+                                    className = "w-full max-h-[400px] min-h-[100px] border border-blue-500/20 rounded-lg  text-sm px-3.5 py-3 resize-y outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 placeholder-slate-600 leading-relaxed transition"
                                     value = {slide.content}
                                     onChange = {(e)=>updateSlide({id: slide.id, fields: {content: e.target.value}})}
                                     placeholder="Nhập nội dung slide..."
@@ -992,12 +1021,26 @@ export default function SlideList() {
             </div>
 
             <div className="w-full max-w-[1680px] px-4 md:px-6 lg:px-8 mt-6 flex flex-col items-center">
+                <div className="w-full sm:w-[420px] mb-3">
+                    <label className="block text-sm font-semibold text-[var(--color-secondary)] mb-1.5">
+                        Tên video
+                    </label>
+                    <input
+                        type="text"
+                        value={videoName}
+                        onChange={(e) => setVideoName(e.target.value)}
+                        placeholder="VD: Bài giảng AI - Chương 1"
+                        className="w-full h-[2.8rem] rounded-lg border border-blue-500/20 px-3 text-sm outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10"
+                    />
+                </div>
+
                 <button
                     type="button"
                     onClick={handleCreateVideo}
-                    className="w-full sm:w-auto sm:min-w-[260px] h-[3rem] px-6 rounded-lg bg-secondary text-white text-base font-semibold transition-all duration-150 hover:bg-secondary/80"
+                    disabled={isSubmittingVideo}
+                    className="w-full sm:w-auto sm:min-w-[260px] h-[3rem] px-6 rounded-lg bg-secondary text-white text-base font-semibold transition-all duration-150 hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                    Tạo video bài giảng
+                    {isSubmittingVideo ? 'Đang gửi yêu cầu...' : 'Tạo video bài giảng'}
                 </button>
                 {createVideoHint && (
                     <p
