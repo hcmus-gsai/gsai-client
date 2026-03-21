@@ -3,7 +3,7 @@ import '@ant-design/v5-patch-for-react-19';
 
 import { Switch } from "antd";
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, useLayoutEffect } from 'react';
 import { useParams, notFound } from "next/navigation";
 
 // Section imports
@@ -31,11 +31,9 @@ interface OcrItem {
     text: string;
 }
 
-const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
+const ContentPopover_old = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return null;
-
-    console.log(detectedLang);
 
     // 1. Tính toán vị trí tương đối của Box so với Video Container
     const relativeTop = rect.top - containerRect.top;
@@ -81,32 +79,117 @@ const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any
     );
 };
 
+const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
+    const popoverRef = useRef<HTMLDivElement>(null);
+    const [style, setStyle] = useState<any>({ opacity: 0 });
+
+    useLayoutEffect(() => {
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        const popoverRect = popoverRef.current?.getBoundingClientRect();
+
+        if (!containerRect || !popoverRect) return;
+
+        // 1. Tọa độ tương đối của điểm giữa box
+        const relativeLeft = rect.left - containerRect.left;
+        const centerX = relativeLeft + rect.width / 2;
+        const relativeTop = rect.top - containerRect.top;
+
+        // 2. Tính toán vị trí 'left' tối ưu
+        const margin = 10; // Khoảng cách an toàn với rìa video
+        const popoverHalfWidth = popoverRect.width / 2;
+
+        // Giới hạn 'left' để không tràn lề trái và lề phải
+        let optimizedLeft = Math.max(
+            popoverHalfWidth + margin, 
+            Math.min(centerX, containerRect.width - popoverHalfWidth - margin)
+        );
+
+        // 3. Tính toán vị trí mũi tên (Triangle)
+        // Mũi tên phải luôn chỉ vào centerX, dù Popover bị dịch chuyển
+        const arrowOffset = centerX - (optimizedLeft - popoverHalfWidth);
+
+        setStyle({
+            top: relativeTop + rect.height + 12,
+            left: `${optimizedLeft}px`,
+            transform: 'translateX(-50%)',
+            opacity: 1,
+            arrowLeft: `${arrowOffset}px`
+        });
+    }, [rect, containerRef]);
+
+    return (
+        <>
+            <div className="absolute inset-0 z-[40]" onClick={onClose} />
+
+            <div
+                ref={popoverRef}
+                className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200 pointer-events-auto transition-opacity duration-200"
+                style={{
+                    top: style.top,
+                    left: style.left,
+                    transform: style.transform,
+                    opacity: style.opacity,
+                    minWidth: `${rect.width + 50}px`,
+                    maxWidth: '300px'
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Mũi tên được căn chỉnh động */}
+                <div
+                    className="absolute -top-2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white/95"
+                    style={{ left: style.arrowLeft, transform: 'translateX(-50%)' }}
+                />
+
+                <div className="flex justify-between items-start mb-2">
+                    <span className="font-bold text-blue-600 text-[10px] uppercase">{detectedLang} → vi</span>
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500">✕</button>
+                </div>
+                <p className="text-sm text-gray-700">
+                    <span className="block text-[11px] text-gray-400 italic mb-1">{data.text}</span>
+                    {data.translatedText}
+                </p>
+            </div>
+        </>
+    );
+};
+
 export default function LectureVideoPage() {
     const { lessonId } = useParams();
-    const { data } = useGetVideoGenJobByIdQuery(lessonId as string);
-    const jobDetail = data?.videoGenJob;
 
-    const ocrJson = jobDetail?.ocr_json;
+    const [getVideoUrl, { data: video }] = useLazyGetVideoUrlQuery();
+    useEffect(() => {
+        if (lessonId) {
+            getVideoUrl(lessonId as string);
+        }
+    }, [lessonId, getVideoUrl]);
+
+    // const { data } = useGetVideoGenJobByIdQuery(lessonId as string);
+    // const jobDetail = data?.videoGenJob;
+
+    // const ocrJson = jobDetail?.ocr_json;
+    const ocrJson = video?.ocr_json;
     const parsedOcrData = useMemo(() => {
         if (!ocrJson || typeof ocrJson !== 'string') return [];
 
         try {
             const rawData = JSON.parse(ocrJson);
-            if (!Array.isArray(rawData)) return [];
 
-            let accumulatedTime = 0;
-            return rawData.map((item) => {
-                accumulatedTime += item.renderTime;
+            const timeKeys = Object.keys(rawData);
+            const formattedData = timeKeys.map((time) => {
                 return {
-                    ...item,
-                    renderTime: accumulatedTime
+                    timestamp: Number(time), 
+                    data: rawData[time]  
                 };
             });
+
+            // Sắp xếp lại theo thời gian tăng dần (đảm bảo chắc chắn)
+            return formattedData.sort((a, b) => a.timestamp - b.timestamp);
         } catch (e) {
             console.error("Lỗi parse OCR JSON:", e);
             return [];
         }
     }, [ocrJson]);
+    console.log(parsedOcrData);
 
     //===========Video OCR Service============//
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
@@ -129,17 +212,18 @@ export default function LectureVideoPage() {
         const videoRatio = video.videoWidth / video.videoHeight;
         const containerRatio = container.clientWidth / container.clientHeight;
 
+        const containerRect = container.getBoundingClientRect();
         let width, height, left, top;
 
         if (containerRatio > videoRatio) {
             // Video bị giới hạn bởi chiều cao (Pillarboxing - trống 2 bên)
-            height = container.clientHeight;
+            height = containerRect.height
             width = height * videoRatio;
             top = 0;
             left = (container.clientWidth - width) / 2;
         } else {
             // Video bị giới hạn bởi chiều rộng (Letterboxing - trống trên dưới)
-            width = container.clientWidth;
+            width = containerRect.width;;
             height = width / videoRatio;
             left = 0;
             top = (container.clientHeight - height) / 2;
@@ -152,27 +236,13 @@ export default function LectureVideoPage() {
         if (!Array.isArray(parsedOcrData)) return [];
         let closestFrame = parsedOcrData[0];
         for (const frame of parsedOcrData) {
-            if (frame.renderTime >= time) {
+            if (frame.timestamp >= time) {
                 closestFrame = frame;
                 break;
             }
         }
 
         return closestFrame?.data || [];
-    };
-
-    const handlePause = () => {
-        // setIsPlaying(false);
-        // if (videoRef.current) {
-        //     const boxes = getOCRForTime(videoRef.current.currentTime);
-        //     setActiveBoxes(boxes); 
-        // }
-    };
-
-    const handlePlay = () => {
-        setIsPlaying(true);
-        setActiveBoxes([]);
-        setSelectedItem(null);
     };
 
     useEffect(() => {
@@ -205,20 +275,20 @@ export default function LectureVideoPage() {
         if (!containerRect) return;
 
         try {
-            const languageDetectResult = await fetch(`${process.env.LIBERTRANS}/detect`, {
+            const languageDetectResult = await fetch(`${process.env.NEXT_PUBLIC_LIBERTRANS}/detect`, {
                 method: "POST",
                 body: JSON.stringify({ q: item.text }),
                 headers: { "Content-Type": "application/json" }
             }).then(res => res.json());
-
+            // console.log("ML 2");
             const lang = languageDetectResult[0].language;
 
-            const translateResult = await fetch(`${process.env.LIBERTRANS}/translate`, {
+            const translateResult = await fetch(`${process.env.NEXT_PUBLIC_LIBERTRANS}/translate`, {
                 method: "POST",
                 body: JSON.stringify({ q: item.text, source: lang, target: "vi" }),
                 headers: { "Content-Type": "application/json" }
             }).then(res => res.json());
-
+            // console.log("ML 3");
             const translatedText = translateResult.translatedText;
 
             setSelectedItem({
@@ -272,20 +342,13 @@ export default function LectureVideoPage() {
 
             if (videoRef.current) {
                 const boxes = getOCRForTime(videoRef.current.currentTime);
+                // console.log(boxes);
                 setActiveBoxes(boxes); 
             }
         }
     }
 
     //===========Video Controller Bar============//
-    // Source
-    const [getVideoUrl, { data: video }] = useLazyGetVideoUrlQuery();
-    useEffect(() => {
-        if (lessonId) {
-            getVideoUrl(lessonId as string);
-        }
-    }, [lessonId, getVideoUrl]);
-    
     useEffect(() => {
         const videoElement = videoRef.current;
         const url = video?.video_url;
@@ -603,12 +666,9 @@ export default function LectureVideoPage() {
                         id='video'
                         ref={videoRef}
                         className="w-full h-full object-contain"
-                        // src={video?.file_url}
                         controls={false}
                         autoPlay={false}
                         onClick={togglePlayPause}
-                        // onPlay={handlePlay}
-                        // onPause={handlePause}
                         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
 
@@ -631,6 +691,7 @@ export default function LectureVideoPage() {
                         top: `${videoDisplayRect.top}px`,
                         width: `${videoDisplayRect.width}px`,
                         height: `${videoDisplayRect.height}px`,
+                        // border: '2px solid red',
                         pointerEvents: 'none',
                         overflow: 'hidden'
                     }}>
@@ -648,6 +709,7 @@ export default function LectureVideoPage() {
                                         height: `${h * 100}%`,
                                         cursor: 'pointer',
                                         pointerEvents: 'auto',
+                                        // background: "yellow"
                                     }}
 
                                     onClick={(e) => {

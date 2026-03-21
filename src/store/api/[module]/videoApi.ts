@@ -3,6 +3,7 @@ import { baseApi } from '../baseApi';
 export interface VideoMaterial {
     id: string;
     lesson_id: string;
+    ocr_json: string;
     video_name: string;
     video_url: string;
     video_duration: number;

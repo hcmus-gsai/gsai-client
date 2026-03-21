@@ -630,10 +630,6 @@ export default function LearningProgressPage() {
                                             >
                                                 {isCompleted ? "Xem lại" : "Tiếp tục"}
                                             </Button>
-
-                                            <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                                                <Image src={MoreIcon} alt="More Icon" width={20} height={20} />
-                                            </button>
                                         </div>
                                     </div>
                                 );

@@ -46,7 +46,7 @@ const ChatbotSection = () => {
 
     const { data: courseResult } = useGetCoursesByLessonIdQuery(params.lessonId as string);
     const teacherId = courseResult?.data?.teacher_id;
-    console.log('Teacher id in chatbot:', teacherId);
+    // console.log('Teacher id in chatbot:', teacherId);
 
 
     useEffect(() => {
