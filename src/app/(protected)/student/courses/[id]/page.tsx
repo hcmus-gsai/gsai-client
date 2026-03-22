@@ -10,7 +10,7 @@ import { QASection } from "@/components/student/qna";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { useParams, notFound } from "next/navigation";
 import { RightOutlined } from "@ant-design/icons";
-import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+import { useGetCourseByIdQuery, useGetTotalEnrollmentQuery } from "@/store/api/[module]/courseApi";
 
 import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
@@ -108,7 +108,7 @@ const CourseRegisterModal = ({ isOpen, onClose, children }: {
     )
 }
 
-const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, courseId: string }) => {
+const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseData: Course, courseId: string, totalEnrollment: number }) => {
 
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -174,7 +174,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={EmptyLayout}
+                                            src={courseData?.teacher_avatar_url}
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -200,7 +200,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 )}
                             </div>
 
-                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>
+                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">{totalEnrollment} học viên tham gia</p>
 
                         </div>
 
@@ -268,7 +268,8 @@ export default function StudentCoursePage() {
     const { id } = useParams();
     const { data: courseInfo, isLoading, error } = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
-    console.log('This is course data: ', courseData);
+    const { data: teacherStatistc} = useGetTotalEnrollmentQuery(id as string);
+    const totalEnrollment = teacherStatistc ?? 0;
 
     if (isLoading) {
         return <div className="w-full min-h-screen flex items-center justify-center">Đang tải...</div>;
@@ -295,7 +296,7 @@ export default function StudentCoursePage() {
                 </div>
             </section>
 
-            <CourseInfoSection courseData={courseData} courseId={id as string} />
+            <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment} />
             <CourseSyllabusSection />
 
             <CourseDisplaySection

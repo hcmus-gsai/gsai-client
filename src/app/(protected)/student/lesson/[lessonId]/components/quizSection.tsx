@@ -17,7 +17,6 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
         quiz?.quiz_id!, {
         skip: !quiz?.quiz_id,
     });
-    console.log(latestAttempt);
 
     const [isCompleted, setIsCompleted] = useState(false);
     useEffect(() => {

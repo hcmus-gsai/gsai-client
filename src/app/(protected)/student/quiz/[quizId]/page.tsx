@@ -53,8 +53,6 @@ const QuizSection = () => {
                 time_used: used,
             }).unwrap();
 
-            console.log(submitQuizRes);
-
             const gradeQuizRes = await gradeQuiz({ attempt_id: submitQuizRes.id }).unwrap();
 
             setAttempt(submitQuizRes);
