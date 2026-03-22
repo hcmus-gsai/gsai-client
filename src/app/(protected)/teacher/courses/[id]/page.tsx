@@ -14,7 +14,7 @@ import EmptyLayout from "@/../public/EmptyLayout.svg";
 
 import { Course } from '@/type/course.type';
 
-const CourseSyllabusSection = () => {
+const CourseSyllabusSection = ({ category }: { category: string }) => {
     const achievableKnowledge = [
         {
             title: 'Mô hình hóa toán học',
@@ -33,16 +33,7 @@ const CourseSyllabusSection = () => {
             description: 'Hiểu cách thu thập, sắp xếp, làm sạch và diễn giải dữ liệu thực tế.'
         }
     ]
-
-    const achievableSkills = [
-        'Python',
-        'Trực quan hóa',
-        'PowerBI',
-        'Excel',
-        'Toán ứng dụng',
-        'Scikit-learn',
-        'Thống kê'
-    ]
+    const achievableSkills: string[] = category.split(",");
 
     return (
         <section className="w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
@@ -76,7 +67,6 @@ const CourseSyllabusSection = () => {
 }
 
 const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseData: Course, courseId: string, totalEnrollment: number }) => {
-
     const router = useRouter();
 
     return (
@@ -98,7 +88,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={courseData?.teacher_avatar_url}
+                                            src={ courseData?.teacher_avatar_url || EmptyLayout }
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -202,7 +192,7 @@ export default function StudentCoursePage() {
             </div>
 
             <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment}/>
-            <CourseSyllabusSection />
+            <CourseSyllabusSection category={courseData?.category as string}/>
         </main>
     )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, Space, InputNumber, Upload, UploadProps, Radio, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, Input, Space, InputNumber, Upload, UploadProps, Radio, App } from 'antd';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -62,6 +62,8 @@ const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => 
 );
 
 const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const { message } = App.useApp();
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
@@ -548,6 +550,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                             showUploadList={false}
                                             beforeUpload={() => false}
                                             onChange={changeFileProjectSelect}
+                                            accept=".pdf"
                                         >
                                             <Input
                                                 className="w-full"
@@ -589,6 +592,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                                 showUploadList={false}
                                                 beforeUpload={() => false}
                                                 onChange={changeAudioProjectSelect}
+                                                accept='.mp4, .wav'
                                             >
                                                 <Input
                                                     className="w-full"

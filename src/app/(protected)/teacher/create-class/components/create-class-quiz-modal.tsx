@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react';
-import { Form, Button, Input, Space, InputNumber, Radio, Switch, message } from 'antd';
+import { Form, Button, Input, Space, InputNumber, Radio, Switch } from 'antd';
 import type { FormInstance } from 'antd';
 import Image from 'next/image';
 import { X } from '@deemlol/next-icons';

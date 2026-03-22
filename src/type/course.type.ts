@@ -12,7 +12,7 @@ export interface Course {
     duration: string;
     thumbnail_url: string;
     tuition_fee: number;
-    category: string | string[];
+    category: string;
     is_active: boolean;
     teacher_id: string;
     teacher_name: string;
@@ -20,7 +20,9 @@ export interface Course {
     is_enrolled: boolean;
 }
 
-
+export interface CreateCoursePayload extends Omit<Course, 'category'> {
+    category: string | string[]; 
+}
 
 export interface CourseQueryParams {
     name?: string;

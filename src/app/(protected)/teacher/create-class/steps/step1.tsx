@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Button, Select, Form, Input, InputNumber, Radio, message } from 'antd';
+import { Button, Select, Form, Input, Space, InputNumber, Radio, message } from 'antd';
 import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
@@ -10,6 +10,38 @@ import { useCreateCourseStepMutation, useGetAllCategoryQuery, usePatchCourseStep
 import { useSearchParams } from 'next/navigation';
 
 const { TextArea } = Input;
+
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
 
 interface Props {
   data: any; // Dữ liệu hiện có từ cha (nếu quay lại từ bước 2)
@@ -41,6 +73,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
 
     const handleFinish = async (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
+        let buffer = values.duration + " tháng";
 
         //Logic xử lý data từ step1
         const courseData = {
@@ -48,7 +81,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
             course_code: values.courseCode,
             course_name: values.courseName,
             course_description: values.description,
-            duration: values.duration,
+            duration: buffer,
             thumbnail_url: values.thumbnail_url || undefined,
             tuition_fee: values.price || 0,
             category: values.categories,
@@ -148,7 +181,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Thời lượng</span>}
                         rules={[{ required: true, message: 'Vui lòng nhập thời lượng môn học!' }]}
                     >
-                        <Input size="large"/>
+                        <CustomInput content="Tháng" />
                     </Form.Item>
 
                     <Form.Item 
@@ -181,12 +214,13 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                             wrapperCol={{ xs: { offset: 4 }, sm: { offset: 4 }, md: { offset: 4 }, lg: { offset: 2 }}}
                             rules={[{ required: true, message: 'Vui lòng nhập học phí!' }]}
                         >
-                            <InputNumber<number> 
+                            <CustomInput content="VND" />
+                            {/* <InputNumber<number> 
                                 formatter={formatter} 
                                 size="large" 
                                 suffix="VND" 
                                 style={{ width: '100%' }} 
-                            />
+                            /> */}
                         </Form.Item>
                     )}
 

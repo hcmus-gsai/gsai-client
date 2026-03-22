@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, App } from 'antd';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from '@deemlol/next-icons';
@@ -45,6 +45,8 @@ const extractApiErrorMessage = (error: any) => {
 };
 
 const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
     // form.resetFields();

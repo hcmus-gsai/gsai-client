@@ -535,12 +535,12 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         
                                     </Form.Item>
 
-                                    <Link
+                                    {/* <Link
                                         href="/teacher/create-slide"
                                         className="text-sm text-blue-500 hover:underline"
                                     >
                                         Thử nghiệm tạo video bằng AI?
-                                    </Link>
+                                    </Link> */}
 
                                     <Form.Item className="flex justify-center">
                                         <Button
