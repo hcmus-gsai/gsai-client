@@ -16,6 +16,7 @@ export interface Course {
     is_active: boolean;
     teacher_id: string;
     teacher_name: string;
+    teacher_avatar_url: string;
     is_enrolled: boolean;
 }
 

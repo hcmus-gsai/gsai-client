@@ -80,6 +80,11 @@ export const courseApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Course'],
         }),
+
+        getTotalEnrollment: builder.query<number, string>({
+            query: (course_id) => `/courses/${course_id}/enrollment`,
+            providesTags: ['Course'],
+        }),
     }),
 });
 
@@ -100,5 +105,7 @@ export const {
 
     // Teacher
     useCreateCourseMutation,
+
+    useGetTotalEnrollmentQuery,
 
 } = courseApi;
