@@ -55,12 +55,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
     const [createCourseStep, { isLoading: isCreating }] = useCreateCourseStepMutation();
     const [patchCourseStep, { isLoading: isUpdating }] = usePatchCourseStepMutation();
 
-    const options = [
-        { label: 'React', value: 'react' },
-        { label: 'TypeScript', value: 'typescript' },
-        { label: 'Node.js', value: 'nodejs' },
-    ];
-    const [radioVal, setRadioVal] = useState(data.pricingType || 1);
+    const [radioVal, setRadioVal] = useState(1);
     const onChangeRadio = (e: RadioChangeEvent) => {
         setRadioVal(e.target.value);
     };
@@ -196,11 +191,11 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     <Form.Item 
                         name="pricingType"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phí</span>}
+                        rules={[{ required: true, message: 'Vui lòng chọn kiểu học phí!' }]}
                     >
                         <Radio.Group
                             style={{display:'flex', flexDirection: 'column', gap: 8}}
                             onChange={onChangeRadio}
-                            value={radioVal}
                             options={[
                                 { value: 1, label: 'Miễn phí' },
                                 { value: 2, label: "Có phí" }
@@ -215,21 +210,16 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                             rules={[{ required: true, message: 'Vui lòng nhập học phí!' }]}
                         >
                             <CustomInput content="VND" />
-                            {/* <InputNumber<number> 
-                                formatter={formatter} 
-                                size="large" 
-                                suffix="VND" 
-                                style={{ width: '100%' }} 
-                            /> */}
                         </Form.Item>
                     )}
 
                     <Form.Item className='flex justify-center'>
-                        <Button
+                        <Button 
                             type="primary"
                             htmlType="submit"
                             size="large"
                             loading={isCreating || isUpdating}
+                            className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                         >
                             Tiếp tục
                         </Button>

@@ -3,14 +3,37 @@ import '@ant-design/v5-patch-for-react-19';
 
 import React, { useEffect } from 'react';
 import { Spin } from "antd";
-import { useLazyGetDocumentQuery, useGetDocumentQuery } from '@/store/api/[module]/documentApi';
-import { useParams } from 'next/navigation';
+import { useLazyGetDocumentQuery } from '@/store/api/[module]/documentApi';
+import { useParams, redirect } from 'next/navigation';
 import ChatbotSection from '../components/chatbotSection';
+
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error;
+}
 
 export default function LectureDocPage() {
     const { lessonId } = useParams();
-    console.log('Lesson ID: ', lessonId);
     const [getDocument, { data: document, isLoading, error }] = useLazyGetDocumentQuery();
+
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (isFetchBaseQueryError(error) && error.status === 403) {
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Cần quyền truy cập',
+                description: 'Bạn chưa đăng ký môn học này!',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
+            redirect('/student/home'); 
+        }
+    }, [error]);
+
     useEffect(() => {
         if (lessonId) {
             getDocument(lessonId as string);

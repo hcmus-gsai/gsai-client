@@ -15,6 +15,16 @@ import { useLazyGetVideoUrlQuery } from '@/store/api/[module]/videoApi';
 // HLS
 import Hls from 'hls.js';
 
+//403 handle
+import { redirect } from 'next/navigation';
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error;
+}
+
 interface OCRItem {
     bbox: [number, number, number, number];
     text: string;
@@ -25,59 +35,6 @@ interface ContentItem {
     text: string;
     translatedText?: string;
 }
-
-interface OcrItem {
-    renderTime: string;
-    text: string;
-}
-
-const ContentPopover_old = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (!containerRect) return null;
-
-    // 1. Tính toán vị trí tương đối của Box so với Video Container
-    const relativeTop = rect.top - containerRect.top;
-    const relativeLeft = rect.left - containerRect.left;
-
-    // 2. Tính điểm giữa (Center) của OCR Box
-    const centerX = relativeLeft + rect.width / 2
-
-    return (
-        <>
-            {/* 1. Backdrop: z-index thấp hơn Popover nhưng cao hơn OCR boxes */}
-            <div
-                className="absolute inset-0 z-[40] cursor-default"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onClose();
-                }}
-            />
-
-            {/* 2. Popover Content: z-index cao hơn Backdrop */}
-            <div
-                className="absolute z-[50] bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-2xl border border-gray-200  pointer-events-auto"
-                style={{
-                    top: relativeTop + rect.height + 12,
-                    left: `${centerX}px`,
-                    transform: 'translateX(-100%)',
-                    minWidth: `${rect.width + 50}px`,
-                    maxWidth: '300px'
-                }}
-                onClick={(e) => e.stopPropagation()} // Quan trọng: chặn click lọt xuống video
-            >
-                <div
-                    className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white/95"
-                />
-
-                <div className="flex justify-between items-start mb-2">
-                    <span className="font-bold text-blue-600 text-[10px] uppercase tracking-tighter">{detectedLang} --&gt; vi</span>
-                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">✕</button>
-                </div>
-                <p className="text-sm text-gray-700 leading-snug">{data.text} --&gt; {data.translatedText}</p>
-            </div>
-        </>
-    );
-};
 
 const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any) => {
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -156,12 +113,28 @@ const ContentPopover = ({ detectedLang, data, rect, containerRef, onClose }: any
 export default function LectureVideoPage() {
     const { lessonId } = useParams();
 
-    const [getVideoUrl, { data: video }] = useLazyGetVideoUrlQuery();
+    const [getVideoUrl, { data: video, error }] = useLazyGetVideoUrlQuery();
+
     useEffect(() => {
         if (lessonId) {
             getVideoUrl(lessonId as string);
         }
     }, [lessonId, getVideoUrl]);
+
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (isFetchBaseQueryError(error) && error.status === 403) {
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Cần quyền truy cập',
+                description: 'Bạn chưa đăng ký môn học này!',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
+            redirect('/student/home'); 
+        }
+    }, [error]);
 
     // const { data } = useGetVideoGenJobByIdQuery(lessonId as string);
     // const jobDetail = data?.videoGenJob;

@@ -5,7 +5,7 @@ export interface CourseResponse {
 
 export interface Course {
     id: string;
-    course_id?: string; // alias cho id (backward compatibility)
+    course_id?: string;
     course_code: string;
     course_name: string;
     course_description: string;
@@ -18,10 +18,6 @@ export interface Course {
     teacher_name: string;
     teacher_avatar_url: string;
     is_enrolled: boolean;
-}
-
-export interface CreateCoursePayload extends Omit<Course, 'category'> {
-    category: string | string[]; 
 }
 
 export interface CourseQueryParams {

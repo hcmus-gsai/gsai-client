@@ -33,6 +33,7 @@ const CourseSyllabusSection = ({ category }: { category: string }) => {
             description: 'Hiểu cách thu thập, sắp xếp, làm sạch và diễn giải dữ liệu thực tế.'
         }
     ]
+
     const achievableSkills: string[] = category.split(",");
 
     return (
@@ -192,7 +193,7 @@ export default function StudentCoursePage() {
             </div>
 
             <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment}/>
-            <CourseSyllabusSection category={courseData?.category as string}/>
+            <CourseSyllabusSection category={courseData?.category}/>
         </main>
     )
 }

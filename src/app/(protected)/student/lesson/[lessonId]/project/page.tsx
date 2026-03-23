@@ -5,13 +5,20 @@ import React, { useEffect, useState } from 'react';
 import { Spin, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { useLazyGetDocumentQuery } from '@/store/api/[module]/documentApi';
-import { useParams } from 'next/navigation';
+import { useParams, redirect } from 'next/navigation';
 import LectureProjContent from '../components/project/project-content';
 import LectureProjSubmit from '../components/project/project-submit';
 import LectureProjQA from '../components/project/project-qa';
 
 import { useAppDispatch } from '@/store/hook';
 import { setFullWidthMode } from '@/store/slice/lessonSlice';
+
+import { addNotification } from '@/store/slice/notifySlice';
+
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error;
+}
 
 export default function LectureProjPage() {
     const { lessonId: projectId } = useParams();
@@ -37,6 +44,21 @@ export default function LectureProjPage() {
         getProjectDocument,
         { data: projectDoc, isLoading, error }
     ] = useLazyGetDocumentQuery();
+
+    const dispatch_error = useAppDispatch();
+    useEffect(() => {
+        if (isFetchBaseQueryError(error) && error.status === 403) {
+            dispatch_error(addNotification({
+                type: 'error',
+                message: 'Cần quyền truy cập',
+                description: 'Bạn chưa đăng ký môn học này!',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
+            redirect('/student/home'); 
+        }
+    }, [error]);
 
     useEffect(() => {
         if (projectId && activeTab === 'content') {

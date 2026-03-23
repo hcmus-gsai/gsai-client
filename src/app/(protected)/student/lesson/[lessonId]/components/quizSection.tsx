@@ -6,12 +6,35 @@ import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
 import { useGetQuizByLessonIdQuery, useGetLatestQuizAttemptQuery } from '@/store/api/[module]/quizApi';
 import { useRouter } from 'next/dist/client/components/navigation';
 
+import { redirect } from 'next/navigation';
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error;
+}
+
 const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
     const router = useRouter();
 
-    const { data: quizRes } = useGetQuizByLessonIdQuery(lessonId);
+    const dispatch = useAppDispatch();
+    const { data: quizRes, error } = useGetQuizByLessonIdQuery(lessonId);
     const quiz = quizRes;
+    useEffect(() => {
+        if (isFetchBaseQueryError(error) && error.status === 403) {
+            dispatch(addNotification({
+                type: 'error',
+                message: 'Cần quyền truy cập',
+                description: 'Bạn chưa đăng ký môn học này!',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+
+            redirect('/student/home'); 
+        }
+    }, [error]);
 
     const { data: latestAttempt } = useGetLatestQuizAttemptQuery(
         quiz?.quiz_id!, {

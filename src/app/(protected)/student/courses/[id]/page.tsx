@@ -22,7 +22,7 @@ import { Course } from '@/type/course.type';
 import { XCircle } from "@deemlol/next-icons";
 import { useEnrollInCourseMutation } from '@/store/api/[module]/enrollmentApi';
 import { useCreateLearningProgressMutation } from '@/store/api/[module]/lessonProgressApi';
-const CourseSyllabusSection = () => {
+const CourseSyllabusSection = ({ category }: { category: string }) => {
     const achievableKnowledge = [
         {
             title: 'Mô hình hóa toán học',
@@ -42,15 +42,7 @@ const CourseSyllabusSection = () => {
         }
     ]
 
-    const achievableSkills = [
-        'Python',
-        'Trực quan hóa',
-        'PowerBI',
-        'Excel',
-        'Toán ứng dụng',
-        'Scikit-learn',
-        'Thống kê'
-    ]
+    const achievableSkills: string[] = category.split(",");
 
     return (
         <section className="w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
@@ -281,15 +273,6 @@ export default function StudentCoursePage() {
 
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            {/* <StudentGreetingSection
-                title = {courseInfo?.data?.course_name || ""}
-                titleSize = "text-[2.5rem]"
-                description = { ""}
-                buttonText = "Tham gia ngay"
-                isCourse = {true}
-                hasTopGradient = {false}
-                hasCurveSpace = {false}
-            /> */}
             <section className="w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
                 <div className="w-[var(--global-width)] h-full flex items-center justify-start">
                     Môn học <span className="ml-2 mr-2"><RightOutlined className="text-[var(--color-primary)]" /></span> {courseData?.category}
@@ -297,7 +280,7 @@ export default function StudentCoursePage() {
             </section>
 
             <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment} />
-            <CourseSyllabusSection />
+            <CourseSyllabusSection category={courseData?.category}/>
 
             <CourseDisplaySection
                 title="Môn học tương tự"
