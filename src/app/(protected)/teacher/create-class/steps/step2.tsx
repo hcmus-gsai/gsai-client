@@ -1,6 +1,6 @@
 'use client'
 
-import { Form, Button, message } from 'antd'
+import { Form, Button, App } from 'antd'
 import { useSearchParams } from 'next/navigation';
 
 import CreateClassIntro from '../components/create-class-intro'
@@ -27,6 +27,8 @@ type ChapterDraft = {
 };
 
 const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
     const [createModulesBatchStep, { isLoading: isBatchCreating }] = useCreateModulesBatchStepMutation();

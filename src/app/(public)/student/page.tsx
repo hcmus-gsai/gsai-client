@@ -72,7 +72,7 @@ export default function TeacherLandingPage() {
                     button: "Tìm hiểu thêm",
                 }}
             /> */}
-            <WorkFlowSection />
+            <WorkFlowSection role='student' />
             {/* <TestimonialSection /> */}
             {/* <QASection /> */}
             <FooterSection />

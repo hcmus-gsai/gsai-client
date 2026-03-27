@@ -201,7 +201,7 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
     const genHeader = (title: string, index: number) => (
         <>
             <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
-                <span className="text-2xl font-bold text-[#1D3557]">
+                <span className="text-xl md:text-2xl font-bold text-[#1D3557]">
                     Chương {index}: {title}
                 </span>
                 <div className="flex gap-4 text-gray-500">
@@ -451,7 +451,7 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
                         type="primary"
                         size="large"
                         onClick={onBack}
-                        className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)] hover:!border-[var(--color-bg-white)]"
+                        className="!w-[6rem] !h[3rem] md:!w-[8.5rem] md:!h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)] hover:!border-[var(--color-bg-white)]"
                     >
                         Quay lại
                     </Button>
@@ -469,7 +469,7 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
                             isPatchingMaterial ||
                             isReorderingLessons
                         }
-                        className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                        className="!w-[6rem] !h[3rem] md:!w-[8.5rem] md:!h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                     >
                         Tiếp tục
                     </Button>
@@ -534,13 +534,6 @@ const Step3: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         </Upload>
                                         
                                     </Form.Item>
-
-                                    {/* <Link
-                                        href="/teacher/create-slide"
-                                        className="text-sm text-blue-500 hover:underline"
-                                    >
-                                        Thử nghiệm tạo video bằng AI?
-                                    </Link> */}
 
                                     <Form.Item className="flex justify-center">
                                         <Button

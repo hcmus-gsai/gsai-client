@@ -244,7 +244,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
     const genHeader = (title: string, index: number) => (
         <>
             <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
-                <span className="text-2xl font-bold text-[#1D3557]">
+                <span className="text-xl md:text-2xl font-bold text-[#1D3557]">
                     Chương {index}: {title}
                 </span>
                 <div className="flex gap-4 text-gray-500">

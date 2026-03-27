@@ -32,6 +32,8 @@ import pickClassIcon from "../../../../public/guest/pickClassIcon.svg";
 import AITutorIcon from "../../../../public/guest/AITutorIcon.svg";
 import Epis from "../../../../public/shared/EPIS.svg";
 import workFlowPic from "../../../../public/guest/workflowPic.svg";
+import docUpload from "../../../../public/guest/docUpload.svg";
+import diagram from "../../../../public/guest/diagram.svg";
 
 import testimonialPic from "../../../../public/guest/testimonialPic.svg";
 
@@ -592,100 +594,9 @@ const FunctionSection = (
     );
 };
 
-const WorkFlowSection = () => {
+const WorkFlowSection = ({role} : {role: string}) => {
 
     return (
-        // <section
-        //     className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
-        // >
-        //     <div className="w-[var(--global-width)] h-full py-19 grid grid-cols-12">
-        //         <div className="col-span-7 flex flex-col">
-        //             <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <div className="flex items-center justify-center mr-6">
-        //                     <p className="text-[4.7vw] leading-none py-0">01</p>
-        //                 </div>
-
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={createAccIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Tạo tài khoản</p>
-        //                             <p className="text-[0.9vw]">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-        //             </div>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={pickClassIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Đăng tải môn học</p>
-        //                             <p className="text-[0.9vw]">Xây dựng môn học dẫn đầu xu thế.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-
-        //                 <div className="flex items-center justify-center ml-6">
-        //                     <p className="text-[5vw]">02</p>
-        //                 </div>
-        //             </div>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <div className="flex items-center justify-center mr-6">
-        //                     <p className="text-[4.7vw] leading-none py-0">03</p>
-        //                 </div>
-
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={AITutorIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Phân tích thông tin môn học</p>
-        //                             <p className="text-[0.9vw]">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-        //             </div>
-        //         </div>
-
-        //         <div className="col-span-4 col-start-9">
-        //             <Image
-        //                 src={workFlowPic}
-        //                 alt="workflow pic"
-        //                 width={0} height={0}
-        //                 className="w-full h-full object-contain"
-        //             />
-        //         </div>
-        //     </div>
-        // </section>
-
          <section className="w-full flex flex-col items-center justify-center bg-white py-12 sm:py-16 lg:py-20">
             <div className="w-[var(--global-width)] flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-0">
                 
@@ -693,19 +604,20 @@ const WorkFlowSection = () => {
                     <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-8">Cách hoạt động</p>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">01</p>
+                        <div className="flex items-center justify-center mr-4 sm:mr-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">01</p>
                         </div>
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
                                     src={createAccIcon}
                                     alt="create account icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Tạo tài khoản</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">Tạo tài khoản</p>
                                     <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
                                 </div>
                             </div>
@@ -713,40 +625,40 @@ const WorkFlowSection = () => {
                     </div>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
-                                    src={pickClassIcon}
+                                    src={role === "teacher" ? docUpload : pickClassIcon}
                                     alt="pick class icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Đăng tải môn học</p>
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Xây dựng môn học dẫn đầu xu thế.</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">{role === 'teacher' ? 'Đăng tải môn học' : 'Chọn môn học phù hợp' }</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">{role === 'teacher' ? 'Xây dựng môn học dẫn đầu xu thế.' : 'Một môn học giúp bạn nâng cao kĩ năng của bản thân.' }</p>
                                 </div>
                             </div>
                         </Card>
-                        <div className="flex items-center justify-center ml-4 sm:ml-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">02</p>
+                        <div className="flex items-center justify-center ml-4 sm:ml-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">02</p>
                         </div>
                     </div>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">03</p>
+                        <div className="flex items-center justify-center mr-4 sm:mr-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">03</p>
                         </div>
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
-                                    src={AITutorIcon}
+                                    src={role === "teacher" ? diagram : AITutorIcon}
                                     alt="AI tutor icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Phân tích thông tin môn học</p>
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">{role === 'teacher' ? 'Phân tích thông tin môn học' : 'Bất đầu học cùng giá sư AI'}</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">{role === 'teacher' ? 'Nắm bắt thông tin môn học qua bảng điều khiển trực quan.' : 'Khám phá các tính năng AI hỗ trợ quá trình học của bạn.'}</p>
                                 </div>
                             </div>
                         </Card>

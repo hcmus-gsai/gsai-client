@@ -321,8 +321,8 @@ const DynamicTeacherNavbar = () => {
     // ── User dropdown items ─────────────────────────────────────────────────
     const userMenuItems: MenuProps['items'] = [
         { key: '1', label: <span onClick={() => router.push("/teacher/profile")}>Trang cá nhân</span> },
-        { key: '2', label: <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span> },
-        { key: '3', label: <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span> },
+        // { key: '2', label: <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span> },
+        { key: '2', label: <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span> },
     ];
  
     // ── Notification dropdown items ─────────────────────────────────────────
@@ -505,7 +505,7 @@ const DynamicTeacherNavbar = () => {
                     </p>
                     {[
                         { label: 'Trang cá nhân', path: '/teacher/profile' },
-                        { label: 'Quá trình học',  path: '/teacher/learning-progress' },
+                        // { label: 'Quá trình học',  path: '/teacher/learning-progress' },
                     ].map(({ label, path }) => (
                         <button key={path} onClick={() => handleNavigate(path)}
                             className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-[var(--color-primary)] transition-colors">

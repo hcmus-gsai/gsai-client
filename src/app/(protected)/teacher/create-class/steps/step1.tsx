@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Button, Select, Form, Input, Space, InputNumber, Radio, message } from 'antd';
+import { Button, Select, Form, Input, Space, InputNumber, Radio, App } from 'antd';
 import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
@@ -49,6 +49,8 @@ interface Props {
 }
 
 const Step1: React.FC<Props> = ({ data, onNext }) =>{
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
     const { data: categoryData } = useGetAllCategoryQuery();
@@ -126,7 +128,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     initialValues={data} // Chỗ này load data get từ server
                     requiredMark={false}
                     labelCol={{
-                            xs: { span: 4 }, // Mặc định cho màn siêu nhỏ
+                            xs: { span: 7 }, // Mặc định cho màn siêu nhỏ
                             sm: { span: 4 }, // Màn nhỏ
                             md: { span: 4 }, // Medium và trở xuống 
                             lg: { span: 2 }, // Từ màn hình Large (992px+) trở lên thì dùng 2
@@ -153,7 +155,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     <Form.Item 
                         name="description"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px'}}>Mô tả</span>} 
-                        labelCol={{xs: { span: 4 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
+                        labelCol={{xs: { span: 7 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
                         rules={[{ required: true, message: 'Vui lòng nhập mô tả môn học!' }]}
                     >
                         <TextArea
