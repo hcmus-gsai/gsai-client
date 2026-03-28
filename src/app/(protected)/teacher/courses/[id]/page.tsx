@@ -1,6 +1,6 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 import Image from "next/image";
 
 import { Card, Button } from "antd";
@@ -185,10 +185,20 @@ export default function StudentCoursePage() {
     }
 
     return (
-        <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <div className="w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
-                <div className="w-[var(--global-width)] h-full flex items-center justify-start">
+        <main className="w-full grow flex min-h-screen flex-col items-center justify-center overflow-x-clip">
+            <div className="w-[var(--global-width)] h-[3rem] mt-[5rem] flex items-center justify-between border-b border-gray-200">
+                <div className="w-full h-full flex items-center justify-start">
                     Chế độ xem
+                </div>
+
+                <div>
+                    <Button 
+                        type="primary"
+                        onClick={() => redirect(`/teacher/courses/${id}/content`)}
+                        className="!text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                    >
+                        Xem nội dung
+                    </Button>
                 </div>
             </div>
 

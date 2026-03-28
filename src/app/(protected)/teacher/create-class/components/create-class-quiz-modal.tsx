@@ -159,70 +159,60 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                     </Form.Item>
                                                 </div>
 
-                                                <Form.List name={[name, 'options']}>
-                                                    {(subFields, { add: addOpt, remove: removeOpt }) => (
-                                                        <div className="ml-2 flex flex-col gap-3">
-                                                            {subFields.map(({ key: subKey, name: subName, ...restSubField }) => (
-                                                                <div key={subKey} className="flex items-center gap-3 group">
-                                                                    <Form.Item shouldUpdate noStyle>
-                                                                        {() => {
-                                                                            const selected = form.getFieldValue(['questions', name, 'correctOption']);
-                                                                            return (
-                                                                                <Radio
-                                                                                    checked={selected === subName}
-                                                                                    onChange={(e) => {
-                                                                                        form.setFieldValue(['questions', name, 'correctOption'], subName);
-                                                                                    }}
-                                                                                />
-                                                                            );
-                                                                        }}
-                                                                    </Form.Item>
-
-                                                                    <Form.Item
-                                                                        {...restSubField} 
-                                                                        name={[subName, 'value']}
-                                                                        className="flex-1 mb-0"
-                                                                        style={{ marginBottom: 0 }}
-                                                                        rules={[{ required: true, message: 'Vui lòng nhập tùy chọn!' }]}
-                                                                    >
-                                                                        <Input variant="borderless" placeholder={`Tùy chọn ${subName + 1}`} className="hover:bg-gray-50 mb-0" />
-                                                                    </Form.Item>
-
-                                                                    {subFields.length > 2 && (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                const removedOptionIndex = Number(subName);
-                                                                                // ... rest of your delete logic
-                                                                                removeOpt(subName);
-                                                                                // ...
-                                                                            }}
-                                                                            className="text-gray-300 hover:text-red-500"
-                                                                        >
-                                                                            <X width={15} height={15} />
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => addOpt({ value: '' })}
-                                                                className="text-blue-500 text-sm font-medium w-fit ml-8 hover:underline"
-                                                            >
-                                                                + Thêm tùy chọn
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </Form.List>
-
                                                 <Form.Item
                                                     {...restField}
                                                     name={[name, 'correctOption']}
                                                     rules={[{ required: true, message: 'Vui lòng chọn đáp án đúng!' }]}
-                                                    hidden
+                                                    className="mb-0"
                                                 >
-                                                    <InputNumber />
+                                                    <Radio.Group className="w-full">
+                                                        <Form.List name={[name, 'options']}>
+                                                            {(subFields, { add: addOpt, remove: removeOpt }) => (
+                                                                <div className="ml-2 flex flex-col gap-3">
+                                                                    {subFields.map(({ key: subKey, name: subName, ...restSubField }) => (
+                                                                        <div key={subKey} className="flex items-center gap-3 group">
+                                                                            {/* No onChange or checked logic needed here! 
+                                                                            The parent Radio.Group handles it automatically based on value={subName} 
+                                                                            */}
+                                                                            <Radio value={subName} />
+
+                                                                            <Form.Item
+                                                                                {...restSubField}
+                                                                                name={[subName, 'value']}
+                                                                                className="flex-1 mb-0"
+                                                                                style={{ marginBottom: 0 }}
+                                                                                rules={[{ required: true, message: 'Vui lòng nhập tùy chọn!' }]}
+                                                                            >
+                                                                                <Input 
+                                                                                    variant="borderless" 
+                                                                                    placeholder={`Tùy chọn ${subName + 1}`} 
+                                                                                    className="hover:bg-gray-50 mb-0" 
+                                                                                />
+                                                                            </Form.Item>
+
+                                                                            {subFields.length > 2 && (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => removeOpt(subName)}
+                                                                                    className="text-gray-300 hover:text-red-500"
+                                                                                >
+                                                                                    <X width={15} height={15} />
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => addOpt({ value: '' })}
+                                                                        className="text-blue-500 text-sm font-medium w-fit ml-8 hover:underline text-left mt-2"
+                                                                    >
+                                                                        + Thêm tùy chọn
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </Form.List>
+                                                    </Radio.Group>
                                                 </Form.Item>
 
                                                 <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end items-center gap-5">
@@ -235,7 +225,7 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                             rules={[{ required: true, message: '' }]}
                                                             layout="horizontal"
                                                         >
-                                                            <InputNumber min={0} max={10} controls={false} style={{ width: '2.5rem' }} />
+                                                            <InputNumber min={0.25} max={10} step={0.25} controls={false} style={{ width: '3.5rem' }} />
                                                         </Form.Item>
                                                     </div>
 

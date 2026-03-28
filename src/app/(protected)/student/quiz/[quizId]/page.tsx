@@ -66,7 +66,7 @@ const QuizSection = () => {
     };
 
     const responseMap = useMemo(() => {
-        if (!grade) return {};
+        if (Object.keys(grade).length === 0) return {};
         return Object.fromEntries(
             grade.map((r: any) => [r.quession_id, r])
         );

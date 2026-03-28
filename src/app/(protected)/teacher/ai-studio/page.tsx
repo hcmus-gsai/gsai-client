@@ -197,7 +197,7 @@ export default function TeacherAIStudioPage() {
                                 <button
                                     type="button"
                                     onClick={() => handleDeleteVideo(video.id)}
-                                    disabled={deletingJobId === video.id}
+                                    disabled={deletingJobId === video.id || video.jobStatus === JobStatus.PROCESSING}
                                     title="Xóa video"
                                     aria-label="Xóa video"
                                     className="absolute right-4 top-4 inline-flex h-6 w-6 items-center justify-center rounded-full border border-red-200 text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
@@ -255,12 +255,14 @@ export default function TeacherAIStudioPage() {
                                     <Button
                                         className="!rounded-full !border-[var(--color-secondary)] !text-[var(--color-secondary)]"
                                         onClick={() => handleOpenPreview(video.id)}
+                                        disabled={video.jobStatus === JobStatus.PROCESSING}
                                     >
                                         Xem Video
                                     </Button>
                                     <Button
                                         className="!rounded-full !border-none !bg-[var(--color-secondary)] !text-white hover:!bg-[var(--color-primary)]"
                                         onClick={() => handleOpenAssign(video.id)}
+                                        disabled={video.jobStatus === JobStatus.PROCESSING}
                                     >
                                         Sắp xếp vào môn học
                                     </Button>
