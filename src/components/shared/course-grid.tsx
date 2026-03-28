@@ -82,20 +82,19 @@ export const CourseGrid = (
     }
 
     const CourseCard = ({c}: {c:Course}) => (
-        //border border-blue-200/60 bg-gradient-to-r from-[var(--color-neutral)]
         <Card 
-            className="w-[300px] md:w-full md:h-full px-6 py-8 cursor-pointer !rounded-[24px] transition-all duration-500 ease-in-out bg-white border border-gray-100 shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-[var(--color-neutral)]/20"
-            // className = "md:w-full px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 md: transition-all duration-300 cursor-pointer !rounded-[24px]"
+            styles = {{ body: { padding: 0 } }}
+            className=" w-[360px] md:w-full md:h-full cursor-pointer !rounded-[24px] !overflow-hidden transition-all duration-500 ease-in-out bg-white !border !border-[#EBEBEB] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-[var(--color-neutral)]/20"
             onClick = {() => handleCardClick(c)}
         >
-            <div className="flex flex-col items-center justify-center">
+            <div className="w-full aspect-[16/9]">
                 <Image
-                    width={300}
-                    height={200}
-                    src={c.thumbnail_url || EmptyLayout}
+                    src={c.thumbnail_url  || EmptyLayout}
                     alt={c.course_name || "Empty Layout"}
-                    className="w-full object-cover rounded-lg mb-[1rem]"
+                    className="w-full h-full object-cover px-2 py-2 rounded-[24px]"
                 />
+            </div>
+            <div className = "flex flex-col">
                 <h3 className="text-[1.125rem] font-semibold text-center line-clamp-1">
                     {c.course_name}
                 </h3>
@@ -109,27 +108,47 @@ export const CourseGrid = (
                 <p className="text-[0.875rem] font-light text-gray-600 text-center">
                     Thời lượng: {c.duration}
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-x-[0.5rem] gap-y-[0.25rem] w-full min-h-[64px] content-start overflow-hidden">
+                <div className="pt-3 flex flex-wrap items-center justify-center  w-full min-h-[64px] content-start overflow-hidden">
                     {c.category
                         .toString()
                         .split(",")
                         .map((category, idx) => (
-                            <div
-                                key={idx}
-                                className="flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full h-[27px] px-[1rem] py-[0.5rem]"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    dispatch(setTitle(category));
-                                    router.push(
-                                        `/${role}/category/${category
-                                            .toLowerCase()
-                                            .replace(/ /g, "-")}`
-                                    );
-                                }}
-                            >
-                                <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1 truncate">
-                                    {category}
-                                </p>
+                            // <div
+                            //     key={idx}
+                            //     className="flex items-center justify-center bg-[var(--color-bg_white)]  rounded-full h-[27px] px-1 py-2"
+                            //     onClick={(e) => {
+                            //         e.stopPropagation();
+                            //         dispatch(setTitle(category));
+                            //         router.push(
+                            //             `/${role}/category/${category
+                            //                 .toLowerCase()
+                            //                 .replace(/ /g, "-")}`
+                            //         );
+                            //     }}
+                            // >
+                            //     <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1 truncate">
+                            //         {category}
+                            //     </p>
+                            // </div>
+                            <div key={idx} className="flex items-center">
+                                <div
+                                    className="cursor-pointer hover:underline"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        dispatch(setTitle(category));
+                                        router.push(`/${role}/category/${category.toLowerCase().trim().replace(/ /g, "-")}`);
+                                    }}
+                                >
+                                    <p className="text-[0.875rem] font-light text-gray-600 line-clamp-1 truncate">
+                                        {category}
+                                    </p>
+                                </div>
+                                
+                                {idx !== c.category.toString().split(",").length - 1 && (
+                                    <span className="mx-2 text-gray-400 flex items-center justify-center text-[10px] select-none">
+                                        •
+                                    </span>
+                                )}
                             </div>
                         ))}
                 </div>
@@ -139,82 +158,6 @@ export const CourseGrid = (
 
     return (
         <>
-        {/* <Row gutter={[16, 16]} className={`w-[100%] mx-auto ${className}`}>
-            {
-                courseData.slice(0, maxItems).map((c, index) => {
-
-                    return (
-                        <Col
-                            key={index}
-                            className="!flex !items-center !justify-center"
-                            xs={24}
-                            sm={12}
-                            md={12}
-                            lg={colWidth}
-                        >
-                            <Card
-                                className="w-[100%] px-[1rem] py-[1.5rem] hover:shadow-[5px_5px_20px_var(--color-neutral)] hover:scale-105 transition-all duration-300 cursor-pointer !rounded-[24px]"
-                                onClick={() => {
-                                    const shouldResumeDraft =
-                                        routeInactiveTeacherCoursesToCreateClass &&
-                                        role === 'teacher' &&
-                                        c.is_active === false;
-
-                                    if (shouldResumeDraft) {
-                                        router.push(`/teacher/create-class?courseId=${c.id}`);
-                                        return;
-                                    }
-
-                                    router.push(`/${role}/courses/${c.id}`);
-                                }}
-                            >
-                                <div className="flex flex-col items-center justify-center">
-                                    <Image
-                                        width={300} height={200}
-                                        src={c.thumbnail_url || EmptyLayout}
-                                        alt={c.course_name || "Empty Layout"}
-                                        className="w-full object-cover rounded-lg mb-[1rem]"
-                                    />
-                                    <h3 className="text-[1.125rem] font-semibold text-center text-truncate line-clamp-1">{c.course_name}</h3>
-
-                                    <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">
-                                        GV. {c?.teacher_name}
-                                    </p>
-
-                                    <div className="flex items-center justify-center">
-                                        <StarFilled className="!text-yellow-400" />
-                                        <span className="font-bold text-gray-600 text-center ml-[2px]">5</span>
-                                    </div>
-
-                                    <p className="text-[0.875rem] font-light text-gray-600 text-center">Thời lượng: {c.duration}</p>
-
-                                    <div className="flex items-center justify-center w-full gap-x-[0.5rem]">
-                                        {
-                                            c.category.toString().split(',').map((category, idx) => {
-                                                return (
-                                                    <div key={idx} className="flex items-center justify-center bg-[var(--color-bg_white)] border border-solid border-gray-200 rounded-full  h-[27px] px-[1rem] py-[0.5rem]"
-
-                                                        onClick={
-                                                            (e) => {
-                                                                e.stopPropagation();
-                                                                dispatch(setTitle(category));
-                                                                router.push(`/${role}/category/${category.toLowerCase().replace(/ /g, '-')}`);
-                                                            }
-                                                        }
-                                                    >
-                                                        <p className="text-[0.875rem] font-light text-gray-600 text-center line-clamp-1">{category}</p>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
-                                </div>
-                            </Card>
-                        </Col>
-                    )
-                })
-            }
-        </Row> */}
         <div className = "flex flex-col items-center justify-center md:hidden gap-4">
             <div className = "flex md:hidden w-full overflow-x-auto gap-x-[1rem] pb-[0.75rem] snap-x snap-mandatory snap-always"
                 style={{
@@ -255,9 +198,9 @@ export const CourseGrid = (
         </div>
 
         <div
-            className={`hidden md:grid w-full gap-[1rem] ${className}`}
+            className={`hidden md:grid  w-full gap-6 ${className}`}
             style={{
-                gridTemplateColumns: `repeat(auto-fill, minmax(220px, 1fr))`,
+                gridTemplateColumns: `repeat(auto-fill, minmax(280px, 1fr))`,
             }}
         >
             {sliced.map((c, index) => (

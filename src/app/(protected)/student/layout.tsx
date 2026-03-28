@@ -294,10 +294,27 @@ const DynamicStudentNavbar = () => {
         setMobileMenuOpen(false);
     }
 
+    // const userMenuItems: MenuProps['items'] = [
+    //     { key: '1', label: <span onClick={() => router.push("/student/profile")}>Trang cá nhân</span> },
+    //     { key: '2', label: <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span> },
+    //     { key: '3', label: <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span> },
+    // ]
     const userMenuItems: MenuProps['items'] = [
-        { key: '1', label: <span onClick={() => router.push("/student/profile")}>Trang cá nhân</span> },
-        { key: '2', label: <span onClick={() => router.push("/student/learning-progress")}>Quá trình</span> },
-        { key: '3', label: <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span> },
+        { 
+            key: '1', 
+            label: 'Trang cá nhân',
+            onClick: () => router.push("/student/profile")
+        },
+        { 
+            key: '2', 
+            label: 'Quá trình',
+            onClick: () => router.push("/student/learning-progress")
+        },
+        { 
+            key: '3', 
+            label: 'Đăng xuất',
+            onClick: () => setShowLogoutModal(true),
+        },
     ]
 
     const notificationItems: MenuProps['items'] = notifications.length > 0 ? [
@@ -348,7 +365,7 @@ const DynamicStudentNavbar = () => {
             placement="bottomRight"
             overlayStyle={{ minWidth: 280, maxHeight: 400, overflow: 'auto' }}
         >
-            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
+            <Button className="!w-10 !h-10 !p-0 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
                 <Image src={NotificationIcon} alt="Thông báo" width={22} height={22} className="object-contain" />
                 {notifications.length > 0 && (
                     <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-0.5 leading-none">
@@ -362,7 +379,7 @@ const DynamicStudentNavbar = () => {
     const AvatarBtn = () => (
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']}
             placement="bottomRight" overlayStyle={{ minWidth: 150 }}>
-            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
+            <Button className="!w-10 !h-10 !p-0 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
                 {avatar_url
                     ? <Image src={avatar_url} alt="Avatar" width={36} height={36}
                         className="absolute inset-0 w-[90%] h-[90%] m-auto object-cover rounded-full" />
