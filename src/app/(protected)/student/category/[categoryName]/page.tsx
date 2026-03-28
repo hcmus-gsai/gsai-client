@@ -57,7 +57,7 @@ export const CategorySlider = () => {
     return (
         <section className="w-full flex flex-col items-center justify-center relative mt-20 mb-20">
             <div className="w-[var(--global-width)] flex flex-col items-center justify-center">
-                <h1 className="text-[2.5rem] font-bold w-full text-[var(--color-primary)]">{title}</h1>
+                <h1 className="text-[2rem] md:text-[2.5rem] text-center md:text-left font-bold w-full text-[var(--color-primary)]">{title}</h1>
                 <div className="w-full overflow-x-hidden py-4">
                     <div
                         className="flex transition-transform duration-500 ease-in-out w-full"
@@ -75,7 +75,7 @@ export const CategorySlider = () => {
                     </div>
                 </div>
 
-                <div className="flex justify-center gap-2">
+                <div className="hidden md:flex justify-center gap-2">
                     <Button icon={<LeftOutlined />} onClick={prevSlide} className="!border-none !bg-transparent" />
                     {slides.map((_, index) => (
                         <Button

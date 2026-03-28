@@ -140,7 +140,7 @@ const LearningProgressSection = () => {
                             Tiếp tục môn học
                         </h1>
 
-                        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-1 sm:pr-2">
+                        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-1 sm:pr-2 pb-6">
                             {inProgressEnrollments.map(course => {
                                 const percent = getCompletionPercent(course.id);
                                 const lesson = getChosenLesson(course.id);
@@ -149,19 +149,20 @@ const LearningProgressSection = () => {
                                     <div
                                         key={course.id}
                                         className="
-                                            flex flex-col sm:flex-row
-                                            justify-between
-                                            items-start sm:items-center
-                                            gap-4 sm:gap-0
-                                            sm:py-5 sm:px-15
-                                            border border-secondary rounded-2xl bg-white
+                                            flex flex-col md:flex-row 
+                                            justify-between 
+                                            items-start md:items-center 
+                                            gap-4 md:gap-6 
+                                            p-4 sm:p-5 
+                                            border-2 border-[#E7F1F7] rounded-2xl bg-white
                                             shadow-sm
-                                            hover:shadow-lg
+                                            hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]
                                             transition-all duration-300 ease-out
+                                            cursor-pointer
                                         "
                                     >
-                                        <div className="flex-1 w-full sm:w-auto">
-                                            <p className="font-semibold text-base sm:text-lg">
+                                        <div className="w-full flex-1 flex flex-col gap-1.5 md:mr-4">
+                                            <p className="font-semibold text-base sm:text-lg line-clamp-2 md:line-clamp-1">
                                                 {course.course_code} - {course.course_name}
                                             </p>
 
@@ -173,6 +174,7 @@ const LearningProgressSection = () => {
                                                 percent={percent}
                                                 showInfo={false}
                                                 strokeColor="#1363DF"
+                                                className="!m-0"
                                             />
                                         </div>
 
@@ -180,13 +182,15 @@ const LearningProgressSection = () => {
                                         </div>
 
                                         <div className="
-                                            flex flex-row
-                                            items-center
-                                            justify-between sm:justify-end
-                                            w-full sm:w-auto
-                                            sm:gap-20
+                                            flex flex-col sm:flex-row 
+                                            items-start sm:items-center 
+                                            w-full
+                                            md:w-[300px] 
+                                            md:justify-between
+                                            gap-4 sm:gap-6 
+                                            shrink-0
                                         ">
-                                            <div className="text-left sm:text-right hidden xs:block sm:block">
+                                            <div className="text-left md:text-right w-full sm:w-auto">
                                                 <p className="font-semibold text-sm sm:text-base line-clamp-1">
                                                     {lesson?.lesson_name ?? "-"}
                                                 </p>
@@ -198,7 +202,12 @@ const LearningProgressSection = () => {
 
                                             <Button
                                                 type="primary"
-                                                className="!shrink-0 !h-12 !px-8 !border !border-secondary !rounded-full !bg-[var(--color-secondary)] !text-white hover:!bg-white hover:!text-black"
+                                                className="
+                                                    w-full sm:w-auto !shrink-0 !h-[2.75rem] sm:!h-12 !px-8 
+                                                    !border !border-secondary !rounded-full !bg-[var(--color-secondary)] !text-white 
+                                                    hover:!bg-white hover:!text-[var(--color-secondary)]
+                                                    transition-all duration-300 ease-in-out
+                                                "
                                                 onClick={() =>
                                                     router.push(
                                                         `/student/courses/${course.course_id}/content`
