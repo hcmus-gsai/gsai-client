@@ -427,16 +427,17 @@ export default function LearningProgressPage() {
     return (
         <>
 
-            <section className="h-full w-full flex flex-col items-center justify-center mt-[10rem]">
-                <div className="w-[var(--global-width)] flex items-stretch justify-between gap-[1rem] mb-[1.5rem]">
-                    <div className="flex-1 flex flex-col items-start justify-start">
-                        <div className="mb-[1rem]">
-                            <p className="text-[2.5rem] font-bold text-[var(--color-primary)]">Xin chào {name}!</p>
-                            <p className="text-[1rem] text-[var(--color-primary)]">Học tập là quá trình không ngừng nghỉ, hãy luôn giữ vững tinh thần ham học hỏi bạn nhé!</p>
-                        </div>
-                        <div className="flex-1 flex flex-col w-full gap-[1rem]">
-                            <div className="w-full grid grid-cols-[64%_34%] grid-rows-[auto_auto] gap-[1rem]">
-                                <div className="flex flex-col bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+            <section className="bg-[#F8F9FC] w-full min-h-screen pt-[5rem] pb-8 px-4 sm:px-6 lg:px-8 xl:px-0 flex flex-col items-center">
+                <div className="w-full max-w-[var(--global-width)] flex flex-col">
+                    <div className="pt-4 mb-2">
+                        <p className="text-2xl sm:text-3xl lg:text-[2.25rem] font-bold text-[var(--color-primary)] leading-tight">Xin chào {name}!</p>
+                        <p className="mt-1 text-sm sm:text-base text-gray-500">Học tập là quá trình không ngừng nghỉ, hãy luôn giữ vững tinh thần ham học hỏi bạn nhé!</p>
+                    </div>
+                    <div className="flex flex-col xl:flex-row gap-4">
+                        {/* ── LEFT: Stats column ── */}
+                        <div className="flex-1 flex flex-col w-full gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="bg-white rounded-2xl border border-[#EBEBEB] p-4 flex flex-col gap-2 shadow-sm">
                                     {/* Header */}
                                     <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem] text-center w-full">
                                         Tình trạng học tập
@@ -488,8 +489,8 @@ export default function LearningProgressPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                                    <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Chuỗi học liên tiếp</p>
+                                <div className="bg-white rounded-2xl border border-[#EBEBEB] p-4 flex flex-col gap-2 shadow-sm">
+                                    <p className="text-[1rem] text-center font-bold text-[var(--color-primary)] mb-[1rem]">Chuỗi học liên tiếp</p>
 
                                     <div className="flex flex-col items-center justify-start">
                                         <Image src={StreakLogo} alt="Streak Logo" width={48} height={48}
@@ -500,34 +501,39 @@ export default function LearningProgressPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-full flex-1 min-h-[200px] bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
+                            <div className="flex-1 bg-white rounded-2xl border border-[#EBEBEB] p-4 flex flex-col gap-2 shadow-sm">
                                 <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem]">Số bài học đã hoàn thành trong tuần</p>
-                                <div className="w-full h-[90%]">
+                                <div className="w-full h-[280px] min-h-[180px]">
                                     <WeeklyLessonBarChart data={weeklyChartData} />
                                 </div>
                             </div>
                         </div>
+                        {/* ── RIGHT: Calendar column ── */}
+                        <div className="w-full xl:w-[300px] 2xl:w-[320px] bg-white rounded-2xl border border-[#EBEBEB] shadow-sm flex flex-col overflow-hidden">
 
-                    </div>
-                    <div className="w-[26%] flex flex-col items-center justify-start">
 
-                        <div className="w-full flex flex-col items-center justify-start bg-[var(--color-bg-white)] rounded-[20px] border-[1px] border-solid border-[#DCDCDC] p-[1rem]">
-                            <CustomCalendar
-                                processedQuizzes={processedQuizzes}
-                                chosenDate={chosenDate}
-                                setChosenDate={setChosenDate}
-                            />
-
-                            <div className="bg-gray-200 w-full h-[1px] mt-1[rem] mb-[1rem]">
+                            <div className="p-4 border-b border-gray-100">
+                                <CustomCalendar
+                                    processedQuizzes={processedQuizzes}
+                                    chosenDate={chosenDate}
+                                    setChosenDate={setChosenDate}
+                                />
                             </div>
 
-                            <div
-                                className="w-full h-[350px] p-[1rem] max-h-[350px] overflow-y-auto custom-scrollbar"
-                            >
-                                <p className="text-[1rem] font-bold text-[var(--color-primary)] mb-[1rem] ">
-                                    Sự kiện sắp tới
-                                </p>
-                                <div className="flex-1 overflow-y-auto flex flex-col gap-[0.5rem] pr-2 custom-scrollbar">
+                            {/* Upcoming events */}
+                            <div className="flex-1 flex flex-col min-h-0">
+                                <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+                                    <p className="text-sm font-semibold text-[var(--color-primary)]">Sự kiện sắp tới</p>
+                                    {chosenDate && (
+                                        <button
+                                            onClick={() => setChosenDate(null)}
+                                            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            Xem tất cả
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-2 custom-scrollbar" style={{ maxHeight: 280 }}>
                                     {quizzesFromDate.length > 0 ? (
                                         quizzesFromDate.map((quiz) => (
                                             <QuizCard
@@ -538,26 +544,21 @@ export default function LearningProgressPage() {
                                             />
                                         ))
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center mt-10 opacity-50">
-                                            <p className="text-sm text-gray-400 text-center">
-                                                Không có sự kiện nào
-                                            </p>
+                                        <div className="flex flex-col items-center justify-center py-8 opacity-50">
+                                            <p className="text-xs text-gray-400 text-center">Không có sự kiện nào</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="w-[var(--global-width)] flex flex-col items-start justify-start">
-                    <div className="flex gap-3 mb-6">
-                        <TabButton id="ongoing" label="Đang học" />
-                        <TabButton id="completed" label="Đã hoàn thành" />
-                        <TabButton id="all" label="Tất cả" />
-                    </div>
-
-                    <div className="w-full flex flex-col">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex gap-3 mt-4">
+                            <TabButton id="ongoing" label="Đang học" />
+                            <TabButton id="completed" label="Đã hoàn thành" />
+                            <TabButton id="all" label="Tất cả" />
+                        </div>
                         <div
                             ref={courseListRef}
                             className="w-full flex flex-col items-center justify-start gap-[1.5rem] mb-[2rem] max-h-[500px] overflow-y-auto custom-scrollbar"
@@ -578,7 +579,8 @@ export default function LearningProgressPage() {
                                 return (
                                     <div
                                         key={course.id}
-                                        className="flex items-center justify-between w-full p-6 rounded-2xl border border-[#E5E7EB] bg-white shadow-sm hover:shadow-md hover:border-[#1363DF]/30 transition-all duration-200"
+                                        className = "w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6  p-4 sm:p-5  border-2 border-[#E7F1F7] rounded-2xl bg-white shadow-sm transition-all duration-300 ease-out"
+                                        // className="flex items-center justify-between w-full p-6 rounded-2xl border border-[#E5E7EB] bg-white shadow-sm hover:shadow-md hover:border-[#1363DF]/30 transition-all duration-200"
                                     >
                                         <div className="mr-4">
                                             {getCompletionPercent(course.id) === 100 ? (
@@ -609,13 +611,20 @@ export default function LearningProgressPage() {
                                             />
                                         </div>
 
-                                        <div className="flex items-center gap-6 shrink-0">
+                                        <div className="
+                                            flex flex-col sm:flex-row 
+                                            items-start sm:items-center 
+                                            w-full
+                                            md:w-[300px] 
+                                            md:justify-between
+                                            gap-4 sm:gap-6 
+                                            shrink-0
+                                        ">
                                             <div className="text-right">
                                                 <p className="text-base font-semibold text-[var(--color-primary)] max-w-[200px] truncate">
                                                     {chosenLesson?.lesson_name || '-'}
                                                 </p>
                                                 <div className="flex items-center justify-end gap-2 mt-1">
-                                                    {/* <Image src={VideoIcon} alt="Type Icon" width={16} height={16} /> */}
                                                     <p className="text-xs text-gray-500">
                                                         {chosenLesson?.estimated_completion_time || '-'} &#9679; {typeTranslate[chosenLesson?.type || '']?.label || '-'}
                                                     </p>
@@ -625,8 +634,13 @@ export default function LearningProgressPage() {
                                             <Button
                                                 type="primary"
                                                 onClick={() => router.push(`/student/courses/${course.course_id}/content`)}
-                                                className=" !w-32 !h-11 !rounded-full !bg-[var(--color-secondary)] hover:!bg-white hover:!text-[var(--color-secondary)] !border hover:!border-[var(--color-secondary)]  !font-bold !shadow-sm"
-
+                                                // className=" !w-32 !h-11 !rounded-full !bg-[var(--color-secondary)] hover:!bg-white hover:!text-[var(--color-secondary)] !border hover:!border-[var(--color-secondary)]  !font-bold !shadow-sm"
+                                                className="
+                                                    w-full sm:w-auto !shrink-0 !h-[2.75rem] sm:!h-12 !px-8 
+                                                    !border !border-secondary !rounded-full !bg-[var(--color-secondary)] !text-white 
+                                                    hover:!bg-white hover:!text-[var(--color-secondary)]
+                                                    transition-all duration-300 ease-in-out
+                                                "
                                             >
                                                 {isCompleted ? "Xem lại" : "Tiếp tục"}
                                             </Button>
@@ -637,8 +651,8 @@ export default function LearningProgressPage() {
                         </div>
 
                     </div>
-
                 </div>
+
             </section>
             <FooterSection hasRegisterBox={false} />
 

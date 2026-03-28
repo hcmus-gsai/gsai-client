@@ -22,7 +22,7 @@ export default function StudentHomePage() {
 
 
     return (
-        <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
+        <main className="bg-[#F8F9FC] w-full grow flex min-h-screen flex-col overflow-x-clip">
             <TagDisplaySession />
             {/* <LearningPathSection /> */}
             <CourseDisplaySection title="Môn học phổ biến hiện nay" />

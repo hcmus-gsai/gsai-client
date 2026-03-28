@@ -373,7 +373,7 @@ const FooterSection = ({
     const isPageA = pathname === '/student' || pathname === '/teacher';
 
     return (
-        <section className={`w-full flex flex-col items-center justify-center bg-neural ${isPageA ? "" : "border-t border-gray-200"}`}>
+        <section className={`bg-white w-full flex flex-col items-center justify-center bg-neural ${isPageA ? "" : "border-t border-gray-200"}`}>
 
             {/* MAIN GRID: Mobile: 1 cột, Tablet: 2 cột, Desktop: 4 cột */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[var(--global-width)]">

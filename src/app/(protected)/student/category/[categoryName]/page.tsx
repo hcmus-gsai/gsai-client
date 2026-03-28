@@ -95,7 +95,7 @@ export const CategorySlider = () => {
 }
 export default function CategoriesPage() {
     return (
-        <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
+        <main className="bg-[#F8F9FC] w-full grow flex min-h-screen flex-col overflow-x-clip">
             <CategorySlider />
             {/* <CourseDisplaySection title = "Môn học phổ biến hiện nay"/> */}
             {/* <LearningPathSection /> */}

@@ -71,7 +71,7 @@ const ProfileModal = ({ isOpen, onClose, children }: {
 
     return (
         <div className="fixed inset-0 bg-black/40 bg-opacity-40 z-50 flex items-center justify-center" onClick={onClose}>
-            <div className="relative bg-[var(--color-bg-white)] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] rounded-[20px] p-4 w-[500px] flex flex-col items-center justify-top" onClick={(e) => e.stopPropagation()}>
+            <div className="relative bg-[var(--color-bg-white,#ffffff)] w-full h-full sm:h-auto sm:max-w-[500px] sm:max-h-[90vh] rounded-none sm:rounded-[20px] shadow-2xl p-6 overflow-hidden flex flex-col items-center justify-start" onClick={(e) => e.stopPropagation()}>
                 <Button
                     className="!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md !absolute !top-2 !right-2"
                     onClick={onClose}
@@ -264,18 +264,15 @@ export default function PersonalProfilePage() {
 
 
     return (
-        console.log('This is profile: ', gender),
         <>
             <section className="w-full flex flex-col items-center justify-center mt-[5rem] mb-[10rem]">
-                <div className="flex items-center justify-start w-[var(--global-width)]">
-                    <p className="text-[3.5rem] font-bold text-[var(--color-primary)]">Hồ sơ của tôi</p>
+                <div className="w-full max-w-[var(--global-width,1200px)] mt-6 mb-6 md:mb-8">
+                    <p className="text-3xl md:text-[3.5rem] font-bold text-[var(--color-primary)] text-center md:text-left">Hồ sơ của tôi</p>
                 </div>
 
-                <div className="flex items-center justify-between h-[90%] gap-4 w-[var(--global-width)]">
-                    <div className="w-[40%] h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)]">
-                        <div
-                            className="w-full h-full flex items-center justify-center"
-                        >
+                <div className="flex flex-col md:flex-row items-center items-stretch justify-center gap-6 w-full max-w-[var(--global-width,1200px)]">
+                    <div className="w-full md:w-[40%] h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)]">
+                        <div className="w-full h-full flex items-center justify-center">
                             <Image
                                 src={profileUpload.previewUrl || profile?.avatar_url || EmptyLayout}
                                 alt="User Avatar"
@@ -288,7 +285,8 @@ export default function PersonalProfilePage() {
                         <div className="w-full h-[12rem] flex items-top justify-center gap-4">
                             <label
                                 htmlFor="profileImage"
-                                className="w-[178px] h-[54px] cursor-pointer flex items-center justify-center rounded-full bg-[var(--color-secondary)] text-white"
+                                className="w-[140px] md:w-[160px] h-[45px] md:h-[50px] cursor-pointer flex items-center justify-center rounded-full bg-[var(--color-secondary)] text-white hover:opacity-90 transition-opacity"
+                                // className="w-[178px] h-[54px] cursor-pointer flex items-center justify-center rounded-full bg-[var(--color-secondary)] text-white"
                             >
                                 <Input
                                     type="file"
@@ -297,23 +295,24 @@ export default function PersonalProfilePage() {
                                     onChange={handleProfileUpload}
                                     className="!hidden"
                                 />
-                                <p className="!text-[1rem] ">Tải ảnh lên</p>
+                                <p className="text-[0.9rem] md:text-[1rem] font-medium">Tải ảnh lên</p>
                             </label>
 
                             <Button
                                 onClick={() => { handleDeleteAvatar(); }}
-                                className="!w-[178px] !h-[54px] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md"
+                                className="!w-[140px] md:!w-[160px] !h-[45px] md:!h-[50px] !bg-white !border-2 !border-[var(--color-secondary)] !text-[var(--color-secondary)] !rounded-full !text-[0.9rem] md:!text-[1rem] hover:!bg-gray-50"
+                                // className="!w-[178px] !h-[54px] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md"
                             >
                                 Xóa ảnh
                             </Button>
                         </div>
                     </div>
 
-                    <div className="!w-[60%] !h-[410px] !flex !flex-col !items-center !justify-center !bg-[var(--color-bg_white)] !rounded-[20px] !shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] !p-[30px] [&_.ant-card-body]:!flex [&_.ant-card-body]:!flex-col [&_.ant-card-body]:!gap-4">
-                        <div className="w-full h-[10%] flex items-center justify-center">
-                            <p className="text-[1.5rem] font-bold text-[var(--color-primary)] w-full text-left">Thông tin cá nhân</p>
+                    <div className="w-full md:w-[60%] md:h-[410px] flex flex-col items-center justify-center bg-[var(--color-bg_white)] rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.1)] p-6 md:p-8">
+                        <div className="flex items-center justify-between mb-2 w-full">
+                            <p className="text-xl md:text-[1.5rem] font-bold text-[var(--color-primary)]">Thông tin cá nhân</p>
                             <Button
-                                className="!w-[2rem] !h-[2rem] !bg-[var(--color-secondary)] !rounded-full !text-white !p-2 !text-md"
+                                className="!text-white !w-10 !h-10 !bg-[var(--color-secondary)] hover:!opacity-90 !border-none !rounded-full !flex !items-center !justify-center"
                                 onClick={openModal}
                             >
                                 <EditOutlined />
@@ -427,28 +426,28 @@ export default function PersonalProfilePage() {
 
                         <div className="w-full h-full flex flex-col items-center justify-start">
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Họ và tên</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{name}</div>
+                                <div className="w-[50%]  ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Họ và tên</div>
+                                <div className="w-full mr-auto text-right p-2">{name}</div>
                             </div>
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Ngày sinh</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{dob}</div>
+                                <div className="w-[50%]  ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Ngày sinh</div>
+                                <div className="w-full mr-auto text-right p-2">{dob}</div>
                             </div>
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Giới tính</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{!gender ? '' : gender === 'male' ? 'Nam' : 'Nữ'}</div>
+                                <div className="w-[50%]  ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Giới tính</div>
+                                <div className="w-full mr-auto text-right p-2">{!gender ? '' : gender === 'male' ? 'Nam' : 'Nữ'}</div>
                             </div>
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Tỉnh</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{location}</div>
+                                <div className="w-[50%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Tỉnh</div>
+                                <div className="w-full mr-auto text-right p-2">{location}</div>
                             </div>
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Số điện thoại</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{phone_number}</div>
+                                <div className= "w-[50%]  ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Số điện thoại</div>
+                                <div className="w-full mr-auto text-right p-2">{phone_number}</div>
                             </div>
                             <div className="flex items-center justify-center gap-2 w-full">
-                                <div className="w-[25%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Email</div>
-                                <div className="w-[75%] mr-auto text-right p-2">{email}</div>
+                                <div className="w-[50%] ml-auto p-2 text-[1rem] font-bold text-[var(--color-primary)]">Email</div>
+                                <div className="w-full mr-auto text-right p-2">{email}</div>
                             </div>
                         </div>
                     </div>

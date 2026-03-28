@@ -84,7 +84,7 @@ export const CourseGrid = (
     const CourseCard = ({c}: {c:Course}) => (
         <Card 
             styles = {{ body: { padding: 0 } }}
-            className=" w-[360px] md:w-full md:h-full cursor-pointer !rounded-[24px] !overflow-hidden transition-all duration-500 ease-in-out bg-white !border-2 !border-[#E7F1F7] shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-[var(--color-neutral)]/20"
+            className=" w-[360px] md:w-full md:h-full cursor-pointer !rounded-[24px] !overflow-hidden transition-all duration-500 ease-in-out bg-white !border !border-[#EBEBEB] shadow-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-[var(--color-neutral)]/20"
             onClick = {() => handleCardClick(c)}
         >
             <div className="w-full aspect-[16/9]">
