@@ -13,6 +13,8 @@ import {
     PlayCircleOutlined,
 } from '@ant-design/icons';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import AudioWaveForm from '@/../public/student/AudioWaveForm.svg';
 import AudioWaveFormHover from '@/../public/student/AudioWaveFormHover.svg';
 import {
@@ -95,6 +97,34 @@ const ProjectSocraticChat = ({
         if (typeof msg.content === 'string') return msg.content;
         return msg.content?.response || msg.content?.text || '';
     };
+
+    const renderMarkdown = (content: string) => (
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+                code({ className, children, ...props }) {
+                    const isBlock = Boolean(className);
+                    if (!isBlock) {
+                        return (
+                            <code className="rounded bg-black/10 px-1 py-0.5 font-mono text-[0.85em]" {...props}>
+                                {children}
+                            </code>
+                        );
+                    }
+
+                    return (
+                        <pre className="my-2 overflow-x-auto rounded-lg bg-slate-900 p-3 text-slate-100">
+                            <code className={`${className} font-mono text-[13px] leading-relaxed`} {...props}>
+                                {children}
+                            </code>
+                        </pre>
+                    );
+                },
+            }}
+        >
+            {content}
+        </ReactMarkdown>
+    );
 
     const sessions = useMemo(() => sessionsData?.sessions || [], [sessionsData]);
 
@@ -379,7 +409,7 @@ const ProjectSocraticChat = ({
                                         {sessionsLoading ? (
                                             <div className="flex items-center justify-center py-4"><Spin size="small" /></div>
                                         ) : sessions.length === 0 ? (
-                                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chua co session" />
+                                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có session" />
                                         ) : (
                                             sessions.map((session) => (
                                                 <div
@@ -419,7 +449,7 @@ const ProjectSocraticChat = ({
                                 </div>
                             ) : messages.length === 0 ? (
                                 <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                                    Chua co tin nhan
+                                    Chưa có tin nhắn
                                 </div>
                             ) : (
                                 messages
@@ -427,7 +457,9 @@ const ProjectSocraticChat = ({
                                     .map((msg) => (
                                         <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                             <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-[var(--color-secondary)] text-white shadow-sm' : 'bg-white text-gray-800 border border-gray-200 shadow-sm'}`}>
-                                                {normalizeText(msg)}
+                                                <div className={`${msg.role === 'user' ? '[&_a]:text-white [&_a]:underline [&_code]:bg-white/20 [&_pre]:bg-black/25 [&_pre]:text-white' : '[&_a]:text-[var(--color-secondary)] [&_a]:underline'} [&_blockquote]:border-l-2 [&_blockquote]:border-current/30 [&_blockquote]:pl-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-1 [&_ul]:list-disc [&_ul]:pl-5`}>
+                                                    {renderMarkdown(normalizeText(msg))}
+                                                </div>
                                                 {msg.role === 'assistant' && msg.audio_url && (
                                                     <Button
                                                         type="text"
@@ -469,7 +501,7 @@ const ProjectSocraticChat = ({
                                         classNames={{
                                             textarea: '!border-none !outline-none focus:!shadow-none',
                                         }}
-                                        placeholder="Dat cau hoi ve tai lieu project..."
+                                        placeholder="Đặt câu hỏi về project..."
                                         onPressEnter={(e) => {
                                             if (!e.shiftKey) {
                                                 e.preventDefault();
@@ -526,7 +558,7 @@ const ProjectSocraticChat = ({
                                         </div>
                                     }
                                     className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
-                                    title="Che do phan hoi bang am thanh"
+                                    title="Chế độ phản hồi bằng giọng nói"
                                 />
 
 
