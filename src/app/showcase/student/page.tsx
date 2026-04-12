@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { Spin } from "antd";
 import ShowcaseCourseCard from "../components/ShowcaseCourseCard";
-import { getShowcaseCourses } from "../mock-data";
+import { useGetShowcaseCoursesQuery } from "@/store/api/[module]/showcaseApi";
 
 export default function ShowcaseStudentPage() {
-    const courses = getShowcaseCourses();
+    const showcaseCodes = ['JF0001'];
+    const { data, isLoading } = useGetShowcaseCoursesQuery(showcaseCodes);
+    const course = data?.courses?.[0];
 
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip bg-[radial-gradient(800px_340px_at_15%_-10%,rgba(71,181,255,0.24),transparent),linear-gradient(180deg,#f8fcff_0%,#ffffff_100%)]">
@@ -30,16 +35,18 @@ export default function ShowcaseStudentPage() {
                         </Link>
                     </div>
 
-                    {courses.length === 0 ? (
+                    {isLoading ? (
+                        <div className="w-full rounded-2xl border border-dashed border-gray-300 bg-[var(--color-bg-white-soft)] py-16 text-center text-gray-600 text-lg">
+                            <Spin />
+                        </div>
+                    ) : !course ? (
                         <div className="w-full rounded-2xl border border-dashed border-gray-300 bg-[var(--color-bg-white-soft)] py-16 text-center text-gray-600 text-lg">
                             Hiện chưa có môn học showcase
                         </div>
                     ) : (
                         <div className="rounded-3xl border border-[#d9ebff] bg-white/90 p-5 sm:p-6 shadow-[0_14px_38px_rgba(19,99,223,0.1)]">
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-                                {courses.map((course) => (
-                                    <ShowcaseCourseCard key={course.id} course={course} />
-                                ))}
+                                <ShowcaseCourseCard key={course.id} course={course} />
                             </div>
                         </div>
                     )}
