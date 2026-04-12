@@ -4,6 +4,7 @@ import { FooterSection } from "@/components/guest/ui/guest";
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu, Play } from "@deemlol/next-icons";
 import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
+import type { TextAreaRef } from 'antd/es/input/TextArea';
 import { RobotOutlined } from '@ant-design/icons';
 
 //For Voice Recorder
@@ -254,6 +255,7 @@ const ChatbotSection = ({
     const [isHydrated, setIsHydrated] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const chatInputRef = useRef<TextAreaRef>(null);
     const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
     const answerModeRef = useRef<'text' | 'audio'>('text');
     const moduleIdRef = useRef<string | null>(moduleId ?? null);
@@ -267,6 +269,12 @@ const ChatbotSection = ({
     useEffect(() => {
         moduleIdRef.current = moduleId ?? null;
     }, [moduleId]);
+
+    const focusChatInput = () => {
+        requestAnimationFrame(() => {
+            chatInputRef.current?.focus();
+        });
+    };
 
     const sendMessageToBot = async (messageText: string) => {
         const trimmedMessage = messageText?.trim();
@@ -395,6 +403,7 @@ const ChatbotSection = ({
 
         formData.resetFields(['chatMessage']);
         setRow(1);
+        focusChatInput();
 
         await sendMessageToBot(data.chatMessage);
     }
@@ -655,6 +664,7 @@ const ChatbotSection = ({
                     >
                         <Form.Item name="chatMessage" className="!mb-0 flex-1">
                             <Input.TextArea
+                                ref={chatInputRef}
                                 placeholder="Nhập câu hỏi"
                                 autoSize={{ minRows: 1, maxRows: 7 }}
                                 classNames={{

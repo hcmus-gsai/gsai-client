@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Form, Input, Spin, Empty } from 'antd';
+import type { TextAreaRef } from 'antd/es/input/TextArea';
 import {
     RobotOutlined,
     PlusOutlined,
@@ -47,6 +48,7 @@ const ProjectSocraticChat = ({
     const [form] = Form.useForm();
     const panelRef = useRef<HTMLElement | null>(null);
     const chatBodyRef = useRef<HTMLDivElement>(null);
+    const chatInputRef = useRef<TextAreaRef>(null);
 
     const isControlled = typeof open === 'boolean';
     const [internalOpen, setInternalOpen] = useState(false);
@@ -87,6 +89,12 @@ const ProjectSocraticChat = ({
             setInternalOpen(next);
         }
         onOpenChange?.(next);
+    };
+
+    const focusChatInput = () => {
+        requestAnimationFrame(() => {
+            chatInputRef.current?.focus();
+        });
     };
 
     const normalizeText = (msg: SocraticMessage): string => {
@@ -210,6 +218,7 @@ const ProjectSocraticChat = ({
         if (!text) return;
         form.resetFields(['chatMessage']);
         setRow(1);
+        focusChatInput();
         await sendMessageText(text);
     };
 
@@ -497,6 +506,7 @@ const ProjectSocraticChat = ({
                             >
                                 <Form.Item name="chatMessage" className="!mb-0 flex-1">
                                     <Input.TextArea
+                                        ref={chatInputRef}
                                         autoSize={{ minRows: 1, maxRows: 4 }}
                                         classNames={{
                                             textarea: '!border-none !outline-none focus:!shadow-none',
