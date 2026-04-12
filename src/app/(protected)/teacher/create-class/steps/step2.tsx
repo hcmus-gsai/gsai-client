@@ -72,19 +72,26 @@ const Step2: React.FC<Props> = ({ data, onNext, onBack}) =>{
             const hasPersistedModules = previousChapters.some((chapter) => !!chapter.moduleId);
 
             if (!hasPersistedModules) {
-                const batch = await createModulesBatchStep({
-                    courseId,
-                    modules: normalizedInputChapters.map((chapter, index) => ({
-                        module_name: chapter.chapterName,
-                        module_description: chapter.description,
-                        order_index: index + 1,
-                    })),
-                }).unwrap();
 
-                savedChapters = normalizedInputChapters.map((chapter, index) => ({
-                    ...chapter,
-                    moduleId: batch.modules[index]?.id,
-                }));
+                try {
+                    const batch = await createModulesBatchStep({
+                        courseId,
+                        modules: normalizedInputChapters.map((chapter, index) => ({
+                            module_name: chapter.chapterName,
+                            module_description: chapter.description,
+                            order_index: index + 1,
+                        })),
+                    }).unwrap();
+
+                    savedChapters = normalizedInputChapters.map((chapter, index) => ({
+                        ...chapter,
+                        moduleId: batch.modules[index]?.id,
+                    }));
+                }
+                catch {
+                    message.error('Không thể để trống chương môn học');
+                    return;
+                }
             } else {
                 const previousById = new Map(
                     previousChapters

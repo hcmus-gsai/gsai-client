@@ -2,7 +2,7 @@
 
 import '@ant-design/v5-patch-for-react-19';
 import { ChevronDown, ChevronUp, X, Check, Plus, ChevronRight, Send, Mic, Menu, Circle } from "@deemlol/next-icons";
-import { Button, Card, Form, Input, Switch, Progress, Calendar } from "antd";
+import { Button, Card, Drawer } from "antd";
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from "next/navigation";
@@ -25,12 +25,30 @@ const ContentSection = () => {
 
     //===========Extendable Navbar============//
     const [extendableNavbar, setExtendableNavbar] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
     const toggleExtendableNavbar = () => {
         setExtendableNavbar(!extendableNavbar);
     }
 
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 980; // 768px là breakpoint 'md' của Tailwind
+            setIsMobile(mobile);
+            
+            if (mobile) {
+                setExtendableNavbar(false); // Tự động gập ở mobile
+            } else {
+                setExtendableNavbar(true);  // Tự động mở ở desktop
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const dispatch = useAppDispatch();
-    const moduleId = useAppSelector((state) => state.lesson.moduleId);
+    // const moduleId = useAppSelector((state) => state.lesson.moduleId);
     const router = useRouter();
     const params = useParams();
     const lessonId = params.lessonId as string;
@@ -118,37 +136,23 @@ const ContentSection = () => {
     };
 
     // 
-
-    return (
-         
-        <>
-            {/* Toggle Button - shows when navbar is collapsed */}
-            {!extendableNavbar && (
+    const NavbarContent = (
+        <div className={`transition-all duration-300 opacity-100`}>
+            {/* Header chứa Tên khoá học và Nút X */}
+            <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem] relative">
+                <p className="flex-1 text-[1rem] font-bold text-[var(--color-secondary)] break-words whitespace-nowrap truncate">
+                    {course?.course_name}
+                </p>
                 <Button
                     onClick={toggleExtendableNavbar}
-                    className="!w-[48px] !h-[48px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border border-gray-200 !rounded-full transition-all duration-300"
-                    icon={
-                        <Menu className="!text-white text-[22px]" />
-                    }
+                    className="shrink-0 !w-[32px] !h-[32px] !flex !items-center !justify-center !border-none !bg-transparent hover:!bg-gray-100 !rounded-full !transition-colors"
+                    icon={<X className="!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
                 />
+            </div>
 
-            )}
-
-            {/* Extendable Navbar with smooth transition */}
-            <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar ? 'w-[24%] opacity-100' : 'w-0 opacity-0 !p-0 !border-0'}`}>
-
-                <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
-                        <p className="text-[1rem] font-bold text-[var(--color-secondary)] break-words whitespace-nowrap">{course?.course_name}</p>
-                    </div>
-                    <Button
-                        onClick={toggleExtendableNavbar}
-                        className="!absolute !top-4 !right-4 !w-[32px] !h-[32px] !flex !items-center !justify-center !border-none !bg-transparent hover:!bg-gray-100 !rounded-full !transition-colors"
-                        icon={<X className="!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
-                    />
-
-                    <div className="overflow-y-auto max-h-[60vh]">
-                        {modules.map((module: any) => (
+            {/* Vùng scroll chứa danh sách module (Copy y nguyên code cũ của bạn) */}
+            <div className="overflow-y-auto max-h-[60vh] md:max-h-[80vh]">
+                {modules.map((module: any) => (
                             <div key={module.id} className="w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
                                 <div className="flex items-center flex-col justify-center gap-2">
                                     <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -172,7 +176,7 @@ const ContentSection = () => {
                                         <div className="overflow-hidden">
                                             <div className="flex flex-col gap-[0.5rem]">
                                                 {(lessonsMap[module.id] ?? []).map((lesson, index) => (
-                                                    console.log("Lesson Data:", lesson),
+                                                    // console.log("Lesson Data:", lesson),
                                                     <Card
                                                         key={lesson.id}
                                                         className="!w-full !min-h-[2.5625rem] !h-auto !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
@@ -232,10 +236,145 @@ const ContentSection = () => {
                                     </div>
                                 </div>
                             </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    return (
+         
+        <>
+            {/* Toggle Button - shows when navbar is collapsed */}
+            {!extendableNavbar && (
+                <Button
+                    onClick={toggleExtendableNavbar}
+                    className="!w-[48px] !h-[48px] !p-0 !flex !items-center !justify-center !bg-[var(--color-secondary)] !border border-gray-200 !rounded-full transition-all duration-300"
+                    icon={
+                        <Menu className="!text-white text-[22px]" />
+                    }
+                />
+
+            )}
+
+            <nav className={`hidden md:block h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar ? 'w-[24%] opacity-100' : 'w-0 opacity-0 !p-0 !border-0'}`}>
+                {extendableNavbar && NavbarContent}
+            </nav>
+
+            <Drawer
+                title={null}           // Ẩn title mặc định vì đã có header trong NavbarContent
+                placement="left"       // Trượt từ trái qua
+                closable={false}       // Bỏ nút X mặc định của Drawer antd
+                onClose={() => setExtendableNavbar(false)}
+                open={isMobile && extendableNavbar} // Chỉ mở khi ở chế độ mobile và state là true
+                width="85%"            // Chiếm 85% màn hình mobile (sẽ không bị ép hẹp nữa)
+                style={{ padding: 0 }}
+                className="md:hidden"  // Chắc chắn ẩn hoàn toàn khi ở màn hình lớn
+            >
+                {NavbarContent}
+            </Drawer>
+
+            {/* Extendable Navbar with smooth transition */}
+            {/* <nav className={`h-full p-[1.5rem] border border-gray-200 rounded-[20px] overflow-hidden relative transition-all duration-300 ease-in-out ${extendableNavbar ? 'w-[24%] opacity-100' : 'w-0 opacity-0 !p-0 !border-0'}`}>
+
+                <div className={`transition-all duration-300 ${extendableNavbar ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className="w-full flex items-center justify-start border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                        <p className="text-[1rem] font-bold text-[var(--color-secondary)] break-words whitespace-nowrap">{course?.course_name}</p>
+                    </div>
+                    <Button
+                        onClick={toggleExtendableNavbar}
+                        className="!absolute !top-4 !right-4 !w-[32px] !h-[32px] !flex !items-center !justify-center !border-none !bg-transparent hover:!bg-gray-100 !rounded-full !transition-colors"
+                        icon={<X className="!w-[16px] !h-[16px] !text-[var(--color-primary)]" />}
+                    />
+
+                    <div className="overflow-y-auto max-h-[60vh]">
+                        {modules.map((module: any) => (
+                            <div key={module.id} className="w-full border-b border-gray-200 pb-[1rem] mb-[1rem]">
+                                <div className="flex items-center flex-col justify-center gap-2">
+                                    <div className="w-full flex flex-col items-center justify-center gap-2">
+                                        <div className="w-full flex items-center justify-center gap-2">
+                                            <div className="w-full flex items-start justify-start gap-2">
+                                                <div className="text-[0.875rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">
+                                                    {module.module_name}
+                                                </div>
+                                                <div className="ml-auto shrink-0">
+                                                    <Button onClick={() => handleToggleChapter(module.id)} className="!border-none !p-0 !m-0">
+                                                        {chapterState.find((cs) => cs.id === module.id)?.isExtended ?
+                                                            <ChevronDown width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" /> :
+                                                            <ChevronRight width={32} height={32} className="!text-[var(--color-primary)] !rounded-full !cursor-pointer hover:!text-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-all duration-300" />}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={`w-full grid transition-[grid-template-rows] duration-300 ease-out ${chapterState.find((cs) => cs.id === module.id)?.isExtended ? "grid-rows-[1fr] mt-[0.5rem]" : "grid-rows-[0fr] mt-0"}`}>
+                                        <div className="overflow-hidden">
+                                            <div className="flex flex-col gap-[0.5rem]">
+                                                {(lessonsMap[module.id] ?? []).map((lesson, index) => (
+                                                    console.log("Lesson Data:", lesson),
+                                                    <Card
+                                                        key={lesson.id}
+                                                        className="!w-full !min-h-[2.5625rem] !h-auto !flex !items-center !justify-start !rounded-none !border-none hover:!bg-gray-100 !transition-colors !duration-200 !cursor-pointer"
+                                                        onClick={() => {
+                                                            dispatch(setModuleId(module.id as string));
+                                                            router.push(`/student/lesson/${lesson.id}/${lesson.type}`);
+                                                        }}
+                                                    >
+                                                        
+                                                        <div className = "flex items-stretch gap-4 p-2 w-full">
+                                                            <div className="flex items-center justify-start gap-2">
+                                                        
+                                                                <Button
+                                                                    type="primary"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleUpdateLesson(
+                                                                            lesson.id,
+                                                                            module.id,
+                                                                            lesson.type as 'video' | 'document' | 'quiz'
+                                                                        );
+                                                                    }}
+                                                                    className="flex items-center justify-center !bg-transparent !border-none !p-0 !m-0 !shadow-none"
+                                                                    icon={
+                                                                        lessonCompletionStatus[lesson.id] ? (
+                                                                            <Check
+                                                                                width={24}
+                                                                                height={24}
+                                                                                className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
+                                                                            />
+                                                                        ) : (
+                                                                            <Circle
+                                                                                width={24}
+                                                                                height={24}
+                                                                                className="md:w-[32px] md:h-[32px] !rounded-full !text-[var(--color-secondary)] !bg-[var(--color-neutral)] !p-1 md:!p-2 cursor-pointer"
+                                                                            />
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </div>
+                                                            <div className="w-full flex flex-col items-start justify-start">
+                                                                <p className="text-[0.75rem] font-bold text-[var(--color-primary)] break-words whitespace-normal">{lesson.lesson_name}</p>
+                                                                <div className="w-full flex items-center justify-start gap-2">
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">
+                                                                        {lesson.type === 'video'? 'Video': lesson.type === 'quiz'? 'Quiz'    : 'Bài đọc'}
+                                                                    </p>
+                                                                    <p className="text-[0.75rem] font-light text-[var(--color-primary)]">{lesson.estimated_completion_time}</p>
+                                                                </div>
+                                                            </div>
+ 
+                                                        </div>
+                                                        
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
-            </nav>
+            </nav> */}
         </>
     );
 };

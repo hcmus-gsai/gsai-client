@@ -162,7 +162,6 @@ export default function LectureVideoPage() {
             return [];
         }
     }, [ocrJson]);
-    console.log(parsedOcrData);
 
     //===========Video OCR Service============//
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
