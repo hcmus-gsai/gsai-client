@@ -155,3 +155,50 @@ export interface SubmissionHistoryItem {
         grading_status: string;
     }[];
 }
+
+// ==================== Project Socratic Chat ====================
+export interface SocraticSessionItem {
+    session_id: string;
+    created_at: string;
+    last_message_at: string;
+    message_count: number;
+}
+
+export interface CreateSocraticSessionResponse {
+    session_id: string;
+    created_at: string;
+}
+
+export interface ListSocraticSessionsResponse {
+    lessonId: string;
+    userId: string;
+    sessions: SocraticSessionItem[];
+}
+
+export interface SocraticMessage {
+    id: string;
+    session_id: string;
+    lesson_id: string;
+    user_id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: any;
+    audio_url?: string;
+    timestamp: string;
+}
+
+export interface SocraticSessionMessagesResponse {
+    lessonId: string;
+    userId: string;
+    session_id: string;
+    messages: SocraticMessage[];
+}
+
+export interface SendSocraticMessageRequest {
+    message: string;
+    answer_mode?: 'text' | 'audio';
+}
+
+export interface SendSocraticMessageResponse {
+    userMessage: SocraticMessage;
+    assistantMessage: SocraticMessage;
+}

@@ -678,6 +678,67 @@ const WorkFlowSection = ({role} : {role: string}) => {
     );
 };
 
+const showcaseCards = [
+    {
+        title: "AI Tutor Demo",
+        description: "Hỏi đáp tức thì với trợ lý AI theo từng chủ đề học tập.",
+    },
+    {
+        title: "Project QA",
+        description: "Phân tích bài làm và nhận góp ý rõ ràng trong vài giây.",
+    },
+    {
+        title: "Interactive Video",
+        description: "Tương tác trực tiếp trên video bài học",
+    },
+    {
+        title: "Voice Assistant",
+        description: "Trao đổi với AI Tutor thông qua giọng nói.",
+    },
+];
+
+const ShowcaseSection = () => {
+    return (
+        <section className="relative overflow-hidden w-full flex items-center justify-center bg-[linear-gradient(135deg,var(--color-neutral)_0%,#eef8ff_45%,var(--color-bg-white-soft)_100%)] py-12 sm:py-16 lg:py-20">
+            <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-[var(--color-accent)]/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-[var(--color-secondary)]/15 blur-3xl" />
+            <div className="w-[var(--global-width)] flex flex-col">
+                <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-[0.08em] text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] drop-shadow-[0_0_12px_rgba(19,99,223,0.2)]">
+                        JOB FAIR 2026 SHOWCASE
+                    </h2>
+                    <p className="text-base sm:text-lg lg:text-xl text-gray-600 mt-3">
+                        Trải nghiệm các tính năng đặc biệt
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+                    {showcaseCards.map((card) => (
+                        <Card
+                            key={card.title}
+                            className="h-full !rounded-2xl !bg-white border border-gray-200 hover:border-[var(--color-secondary)]/35 hover:-translate-y-1 hover:!shadow-[0_16px_34px_rgba(19,99,223,0.15)] transition-all duration-300"
+                        >
+                            <div className="flex flex-col h-full">
+                                <p className="text-lg sm:text-xl font-bold text-[var(--color-primary)] mb-2">{card.title}</p>
+                                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{card.description}</p>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                <div className="mt-8 sm:mt-10 flex justify-center">
+                    <Link
+                        href="/showcase"
+                        className="inline-flex items-center justify-center rounded-full px-8 py-3.5 text-base sm:text-lg font-semibold text-white bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] shadow-[0_0_0_1px_rgba(19,99,223,0.2),0_10px_28px_rgba(19,99,223,0.32)] hover:scale-105 hover:shadow-[0_0_0_1px_rgba(19,99,223,0.35),0_16px_36px_rgba(19,99,223,0.4)] transition-all duration-300"
+                    >
+                        Showcase
+                    </Link>
+                </div>
+            </div>
+        </section>
+    );
+};
+
 const TestimonialSection = () => {
 
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -911,4 +972,4 @@ const QASection = () => {
     );
 };
 
-export { GreetingSection, CourseDisplaySection, FooterSection, FunctionSection, WorkFlowSection, TestimonialSection, QASection };
+export { GreetingSection, CourseDisplaySection, FooterSection, FunctionSection, WorkFlowSection, ShowcaseSection, TestimonialSection, QASection };

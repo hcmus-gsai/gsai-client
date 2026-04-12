@@ -32,7 +32,21 @@ interface Message {
     audio?: string; // URL của audio nếu có
 }
 
-const ChatbotSection = () => {
+type ChatbotSectionProps = {
+    variant?: 'floating' | 'inline';
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    showTrigger?: boolean;
+    onPanelWidthChange?: (width: number) => void;
+};
+
+const ChatbotSection = ({
+    variant = 'floating',
+    open,
+    onOpenChange,
+    showTrigger = true,
+    onPanelWidthChange,
+}: ChatbotSectionProps) => {
 
     // const [sendMessage, { isLoading: isMessagingLoading }] = useSendMessageMutation();
     const [sendMessageV2, { isLoading: isMessagingLoading}] = useSendMessageV2Mutation();
@@ -40,8 +54,19 @@ const ChatbotSection = () => {
     const params = useParams();
 
     const [extendableNavbar, setExtendableNavbar] = useState(false);
+    const isControlled = typeof open === 'boolean';
+    const isOpen = isControlled ? (open as boolean) : extendableNavbar;
+    const panelRef = useRef<HTMLElement | null>(null);
+
+    const setOpenState = (next: boolean) => {
+        if (!isControlled) {
+            setExtendableNavbar(next);
+        }
+        onOpenChange?.(next);
+    };
+
     const toggleExtendableNavbar = () => {
-        setExtendableNavbar(prev => !prev);
+        setOpenState(!isOpen);
     };
 
     const { data: courseResult } = useGetCoursesByLessonIdQuery(params.lessonId as string);
@@ -51,6 +76,39 @@ const ChatbotSection = () => {
 
     useEffect(() => {
     }, [moduleId]);
+
+    useEffect(() => {
+        if (variant !== 'floating' || !onPanelWidthChange) {
+            return;
+        }
+
+        if (!isOpen) {
+            onPanelWidthChange(0);
+            return;
+        }
+
+        const panel = panelRef.current;
+        if (!panel) {
+            return;
+        }
+
+        const updateWidth = () => {
+            onPanelWidthChange(Math.ceil(panel.getBoundingClientRect().width));
+        };
+
+        updateWidth();
+
+        if (typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        const observer = new ResizeObserver(() => {
+            updateWidth();
+        });
+        observer.observe(panel);
+
+        return () => observer.disconnect();
+    }, [isOpen, onPanelWidthChange, variant]);
 
 
     // Skip query nếu moduleId chưa có (tránh gọi API với moduleId undefined)
@@ -507,16 +565,16 @@ const ChatbotSection = () => {
 
     return (
         <>
-            {!extendableNavbar && (
+            {showTrigger && !isOpen && (
                 <Button
                     onClick={toggleExtendableNavbar}
-                    style={{
+                    style={variant === 'floating' ? {
                         position: "fixed",
                         bottom: 24,
                         right: 24,
                         zIndex: 9999,
-                    }}
-                    className="!w-[56px] !h-[56px] !p-0 !rounded-full !bg-[var(--color-secondary)]"
+                    } : undefined}
+                    className={`!w-[56px] !h-[56px] !p-0 !rounded-full !bg-[var(--color-secondary)] ${variant === 'inline' ? '!static !shadow-md' : ''}`}
                     icon={<RobotOutlined className="!text-white text-[24px]" />}
                 />
 
@@ -524,7 +582,14 @@ const ChatbotSection = () => {
 
 
 
-            <nav className={`fixed bottom-6 right-6 z-50 h-[480px] flex flex-col border border-gray-200 rounded-[20px] bg-white shadow-xl transition-all duration-300 ${extendableNavbar ? 'w-[360px]' : 'w-0 opacity-0 pointer-events-none'}`}>
+            <nav
+                ref={panelRef}
+                className={
+                    variant === 'floating'
+                        ? `fixed bottom-6 right-6 z-50 h-[480px] flex flex-col border border-gray-200 rounded-[20px] bg-white shadow-xl transition-all duration-300 ${isOpen ? 'w-[360px]' : 'w-0 opacity-0 pointer-events-none'}`
+                        : `h-[520px] min-h-[420px] flex flex-col border border-gray-200 rounded-[20px] bg-white shadow-xl transition-all duration-300 overflow-hidden ${isOpen ? 'w-[360px] opacity-100' : 'w-0 opacity-0 pointer-events-none'}`
+                }
+            >
                 <div className="h-[48px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
                     <span className="font-semibold text-[var(--color-primary)]">
                         Trợ lý học tập
