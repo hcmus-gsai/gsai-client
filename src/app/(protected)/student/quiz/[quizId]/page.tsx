@@ -111,6 +111,8 @@ const QuizSection = () => {
         return () => clearInterval(interval);
     }, [quiz?.duration]);
 
+    // console.log(typeof(quiz?.expired_date));
+
     const formatTime = (s: number) => {
         const hours = Math.floor(s / 3600);
         const minutes = Math.floor((s % 3600) / 60);
@@ -118,12 +120,26 @@ const QuizSection = () => {
         return { hours, minutes, seconds };
     }
 
+    const formatExpiredDate = (isoString?: string | null) => {
+        if (!isoString) return "";
+        const date = new Date(isoString);
+        
+        const h = date.getHours().toString().padStart(2, '0');
+        const m = date.getMinutes().toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        const mo = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+
+        return `${h}:${m} ngày ${d}/${mo}/${y}`;
+    };
+
     // Questions Info
     const { quizId } = useParams();
     const { data: questionRes } = useGetQuizQuestionsByQuizIdQuery(quizId as string, { skip: !quizId });
     const questions = questionRes;
     const [answers, setAnswers] = useState<Record<string, string>>({});
     // const totalQuestions = questions?.length ?? 0;
+    const [isPaletteExpanded, setIsPaletteExpanded] = useState(false);
 
     // Handle loading state
     if (!lessonId) return <div>Đang tải bài học...</div>;
@@ -145,19 +161,21 @@ const QuizSection = () => {
                         </div>
                     </div>
 
-                    <p className="text-sm text-gray-500">
-                        Hết hạn vào {quiz?.expired_date}
+                    <p className="hidden md:block text-xs lg:text-sm text-gray-500">
+                        Hết hạn vào {formatExpiredDate(quiz?.expired_date)}
                     </p>
                 </div>
             </nav>
 
             {/* QA section */}
-            <div className="max-w-[var(--global-width)] w-full grid grid-cols-[1fr_20rem] gap-8">
+            {/* <div className="max-w-[var(--global-width)] w-full grid grid-cols-[1fr_20rem] gap-8"> */}
+            <div className="max-w-[var(--global-width)] w-full grid grid-cols-1 lg:grid-cols-[1fr_20rem] gap-8">
                 {!isCompleted ? (
                     // In-progress
                     <>
                         {/* LEFT: Questions */}
-                        <div className="flex flex-col gap-6">
+                        {/* <div className="flex flex-col gap-6"> */}
+                        <div className="flex flex-col gap-6 order-2 lg:order-1">
                             {questions?.map((q) => (
                                 <div
                                     key={q.id}
@@ -206,9 +224,10 @@ const QuizSection = () => {
                         </div>
 
                         {/* RIGHT: Timer & Progress */}
-                        <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4">
+                        {/* <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4"> */}
+                        <aside className="sticky top-[6rem] lg:top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4 bg-white z-10 order-1 lg:order-2 shadow-sm lg:shadow-none">
                             <h2 className="text-xl font-semibold">Thời gian còn lại</h2>
-                            <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
+                            <div className="text-xl lg:text-3xl font-bold mb-4 flex gap-6 justify-center">
                                 <div className="flex items-center gap-6">
                                     <div className="flex flex-col items-center">
                                         <div>{formatTime(timeLeft).hours.toString().padStart(2, '0')}</div>
@@ -225,22 +244,37 @@ const QuizSection = () => {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {questions?.map((q) => (
-                                    <div
-                                        key={q.id}
-                                        className={`w-10 h-10 flex items-center justify-center rounded-md text-sm font-medium ${answers[q.id]
-                                            ? "bg-[var(--color-neutral)] text-[var(--color-secondary)]"
-                                            : "bg-gray-200"
+                            <div className="w-full flex flex-col items-center">
+                                <div 
+                                    className={`w-full overflow-hidden transition-[max-height] duration-300 ease-in-out flex flex-wrap gap-2 justify-center
+                                    ${isPaletteExpanded ? 'max-h-[50rem]' : 'max-h-[2.2rem] lg:max-h-[50rem]'}`}
+                                >
+                                    {questions?.map((q) => (
+                                        <div
+                                            key={q.id}
+                                            className={`w-7 h-7 text-xs lg:w-10 lg:h-10 lg:text-sm shrink-0 flex items-center justify-center rounded-md font-medium ${
+                                                answers[q.id]
+                                                    ? "bg-[var(--color-neutral)] text-[var(--color-secondary)]"
+                                                    : "bg-gray-200"
                                             }`}
+                                        >
+                                            {q.order_index}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {questions && questions.length > 12 && (
+                                    <button
+                                        onClick={() => setIsPaletteExpanded(!isPaletteExpanded)}
+                                        className="mt-3 text-sm text-gray-500 hover:text-[var(--color-secondary)] lg:hidden flex items-center justify-center w-full py-2 border-t border-gray-100"
                                     >
-                                        {q.order_index}
-                                    </div>
-                                ))}
+                                        {isPaletteExpanded ? 'Thu gọn ▲' : 'Xem tất cả ▼'}
+                                    </button>
+                                )}
                             </div>
 
                             <Button
-                                className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                                className="!form_button !w-[6rem] !h-[2rem] lg:!w-[12.5rem] lg:!h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                                 onClick={() => setModalType("confirm")}
                             >
                                 Nộp bài
@@ -251,7 +285,7 @@ const QuizSection = () => {
                     // Completed
                     <>
                         {/* LEFT: Questions */}
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-6 order-2 lg:order-1">
                             {questions?.map((q) => (
                                 <div
                                     key={q.id}
@@ -294,11 +328,11 @@ const QuizSection = () => {
                         </div>
 
                         {/* RIGHT: Timer & Progress */}
-                        <aside className="sticky top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4">
+                        <aside className="sticky top-[6rem] lg:top-24 h-fit flex flex-col items-center border border-gray-200 rounded-lg p-3 gap-4 bg-white z-10 order-1 lg:order-2 shadow-sm lg:shadow-none">
                             <h2 className="text-xl font-semibold">Thời gian hoàn thành</h2>
 
                             {timeUsed !== null && (
-                                <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
+                                <div className="text-xl lg:text-3xl font-bold mb-4 flex gap-6 justify-center">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col items-center">
                                             <div>{formatTime(timeUsed).hours.toString().padStart(2, '0')}</div>
@@ -314,6 +348,22 @@ const QuizSection = () => {
                                         </div>
                                     </div>
                                 </div>
+                                // <div className="text-3xl font-bold mb-4 flex gap-6 justify-center">
+                                //     <div className="flex items-center gap-6">
+                                //         <div className="flex flex-col items-center">
+                                //             <div>{formatTime(timeUsed).hours.toString().padStart(2, '0')}</div>
+                                //             <p className="text-sm font-normal">giờ</p>
+                                //         </div>
+                                //         <div className="flex flex-col items-center">
+                                //             <div>{formatTime(timeUsed).minutes.toString().padStart(2, '0')}</div>
+                                //             <p className="text-sm font-normal">phút</p>
+                                //         </div>
+                                //         <div className="flex flex-col items-center">
+                                //             <div>{formatTime(timeUsed).seconds.toString().padStart(2, '0')}</div>
+                                //             <p className="text-sm font-normal">giây</p>
+                                //         </div>
+                                //     </div>
+                                // </div>
                             )}
 
                             <p className="text-base font-medium m-4">
@@ -323,30 +373,43 @@ const QuizSection = () => {
                                 </span>
                             </p>
 
-                            <div className="flex flex-wrap gap-2 justify-center">
-                                {questions?.map((q) => {
-                                    const res = responseMap[q.id];
+                            <div className="w-full flex flex-col items-center">
+                                <div 
+                                    className={`w-full overflow-hidden transition-[max-height] duration-300 ease-in-out flex flex-wrap gap-2 justify-center
+                                    ${isPaletteExpanded ? 'max-h-[50rem]' : 'max-h-[2.2rem] lg:max-h-[50rem]'}`}
+                                >
+                                    {questions?.map((q) => {
+                                        const res = responseMap[q.id];
+                                        let bgClass = "bg-gray-200";
 
-                                    let bgClass = "bg-gray-200";
-                                    if (res) {
-                                        bgClass = res.is_correct
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700";
-                                    }
+                                        if (res) {
+                                            bgClass = res.is_correct
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700";
+                                        }
+                                        return (
+                                            <div
+                                                key={q.id}
+                                                className={`w-7 h-7 text-xs lg:w-10 lg:h-10 lg:text-sm shrink-0 flex items-center justify-center rounded-md font-medium ${bgClass}`}
+                                            >
+                                                {q.order_index}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
 
-                                    return (
-                                        <div
-                                            key={q.id}
-                                            className={`w-10 h-10 flex items-center justify-center rounded-md text-sm font-medium ${bgClass}`}
-                                        >
-                                            {q.order_index}
-                                        </div>
-                                    );
-                                })}
+                                {questions && questions.length > 12 && (
+                                    <button
+                                        onClick={() => setIsPaletteExpanded(!isPaletteExpanded)}
+                                        className="mt-3 text-sm text-gray-500 hover:text-[var(--color-secondary)] lg:hidden flex items-center justify-center w-full py-2 border-t border-gray-100"
+                                    >
+                                        {isPaletteExpanded ? 'Thu gọn ▲' : 'Xem tất cả ▼'}
+                                    </button>
+                                )}
                             </div>
 
                             <Button
-                                className="!form_button !w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                                className="!form_button !w-[6rem] !h-[2rem] lg:!w-[12.5rem] lg:!h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
                                 onClick={() => setModalType("retry")}
                             >
                                 Làm lại
