@@ -1,12 +1,12 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 import Image from "next/image";
 
 import { Card, Button } from "antd";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { useParams } from "next/navigation";
-import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+import { useGetCourseByIdQuery, useGetTotalEnrollmentQuery } from "@/store/api/[module]/courseApi";
 
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
 import starSVG from "@/../public/student/Star.svg";
@@ -14,7 +14,7 @@ import EmptyLayout from "@/../public/EmptyLayout.svg";
 
 import { Course } from '@/type/course.type';
 
-const CourseSyllabusSection = () => {
+const CourseSyllabusSection = ({ category }: { category: string }) => {
     const achievableKnowledge = [
         {
             title: 'Mô hình hóa toán học',
@@ -34,15 +34,7 @@ const CourseSyllabusSection = () => {
         }
     ]
 
-    const achievableSkills = [
-        'Python',
-        'Trực quan hóa',
-        'PowerBI',
-        'Excel',
-        'Toán ứng dụng',
-        'Scikit-learn',
-        'Thống kê'
-    ]
+    const achievableSkills: string[] = category.split(",");
 
     return (
         <section className="w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
@@ -75,8 +67,7 @@ const CourseSyllabusSection = () => {
     )
 }
 
-const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, courseId: string }) => {
-
+const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseData: Course, courseId: string, totalEnrollment: number }) => {
     const router = useRouter();
 
     return (
@@ -98,7 +89,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={EmptyLayout}
+                                            src={ courseData?.teacher_avatar_url || EmptyLayout }
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -115,7 +106,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 </Button>
                             </div>
 
-                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>
+                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">{totalEnrollment} học viên tham gia</p>
 
                         </div>
 
@@ -178,6 +169,12 @@ export default function StudentCoursePage() {
     const { id } = useParams();
     const { data: courseInfo, isLoading, error } = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
+    const { data: teacherStatistic } = useGetTotalEnrollmentQuery(id as string);
+    let totalEnrollment = teacherStatistic;
+    
+    if (!totalEnrollment) {
+        totalEnrollment = 0;
+    }
 
     if (isLoading) {
         return <div className="w-full min-h-screen flex items-center justify-center">Đang tải...</div>;
@@ -188,15 +185,25 @@ export default function StudentCoursePage() {
     }
 
     return (
-        <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            <div className="w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
-                <div className="w-[var(--global-width)] h-full flex items-center justify-start">
+        <main className="w-full grow flex min-h-screen flex-col items-center justify-center overflow-x-clip">
+            <div className="w-[var(--global-width)] h-[3rem] mt-[5rem] flex items-center justify-between border-b border-gray-200">
+                <div className="w-full h-full flex items-center justify-start">
                     Chế độ xem
+                </div>
+
+                <div>
+                    <Button 
+                        type="primary"
+                        onClick={() => redirect(`/teacher/courses/${id}/content`)}
+                        className="!text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                    >
+                        Xem nội dung
+                    </Button>
                 </div>
             </div>
 
-            <CourseInfoSection courseData={courseData} courseId={id as string} />
-            <CourseSyllabusSection />
+            <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment}/>
+            <CourseSyllabusSection category={courseData?.category}/>
         </main>
     )
 }

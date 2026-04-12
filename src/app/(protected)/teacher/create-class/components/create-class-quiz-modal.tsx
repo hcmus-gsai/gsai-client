@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react';
-import { Form, Button, Input, InputNumber, Radio, Switch, message } from 'antd';
+import { Form, Button, Input, Space, InputNumber, Radio, Switch } from 'antd';
 import type { FormInstance } from 'antd';
 import Image from 'next/image';
 import { X } from '@deemlol/next-icons';
@@ -15,6 +15,63 @@ type Props = {
     onClose: () => void;
     onSubmit: (values: any) => void;
 };
+
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
+
+const DeadlineInput: React.FC<InputProps> = ({ value, onChange, id }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            ngày
+        </Button>
+    </Space.Compact>
+);
 
 const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmit }) => {
     if (!visible) {
@@ -67,7 +124,7 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                             label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                             rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                         >
-                            <InputNumber min={1} size="large" style={{ width: '100%' }} addonAfter="ngày" />
+                            <CustomInput content="ngày" />
                         </Form.Item>
 
                         <Form.Item
@@ -75,7 +132,7 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                             label={<span className="font-semibold">Thời gian làm bài (phút)</span>}
                             rules={[{ required: true, message: 'Vui lòng nhập thời gian làm quiz!' }]}
                         >
-                            <InputNumber min={1} size="large" style={{ width: '100%' }} addonAfter="minute" />
+                            <CustomInput content="phút" />
                         </Form.Item>
 
                         <div className="mt-8">
@@ -102,86 +159,60 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                     </Form.Item>
                                                 </div>
 
-                                                <Form.List name={[name, 'options']}>
-                                                    {(subFields, { add: addOpt, remove: removeOpt }) => (
-                                                        <div className="ml-2 flex flex-col gap-3">
-                                                            {subFields.map((subField) => (
-                                                                <div key={subField.key} className="flex items-center gap-3 group">
-                                                                    <Form.Item shouldUpdate noStyle>
-                                                                        {() => {
-                                                                            const selected = form.getFieldValue(['questions', name, 'correctOption']);
-                                                                            return (
-                                                                                <Radio
-                                                                                    checked={selected === subField.name}
-                                                                                    onChange={() => form.setFieldValue(['questions', name, 'correctOption'], subField.name)}
-                                                                                />
-                                                                            );
-                                                                        }}
-                                                                    </Form.Item>
-
-                                                                    <Form.Item
-                                                                        {...subField}
-                                                                        name={[subField.name, 'value']}
-                                                                        className="flex-1 mb-0"
-                                                                        style={{ marginBottom: 0 }}
-                                                                        rules={[{ required: true, message: 'Vui lòng nhập tùy chọn!' }]}
-                                                                    >
-                                                                        <Input variant="borderless" placeholder={`Tùy chọn ${subField.name + 1}`} className="hover:bg-gray-50 mb-0" />
-                                                                    </Form.Item>
-
-                                                                    {subFields.length > 2 && (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                const removedOptionIndex = Number(subField.name);
-                                                                                const selectedCorrectOption = form.getFieldValue(['questions', name, 'correctOption']);
-
-                                                                                if (subFields.length === 3 && selectedCorrectOption === removedOptionIndex) {
-                                                                                    message.warning('Không thể xóa đáp án đúng khi câu hỏi chỉ còn 3 lựa chọn. Vui lòng chọn đáp án đúng khác trước khi xóa.');
-                                                                                    return;
-                                                                                }
-
-                                                                                removeOpt(subField.name);
-
-                                                                                if (typeof selectedCorrectOption !== 'number') {
-                                                                                    return;
-                                                                                }
-
-                                                                                if (selectedCorrectOption === removedOptionIndex) {
-                                                                                    form.setFieldValue(['questions', name, 'correctOption'], 0);
-                                                                                    return;
-                                                                                }
-
-                                                                                if (selectedCorrectOption > removedOptionIndex) {
-                                                                                    form.setFieldValue(['questions', name, 'correctOption'], selectedCorrectOption - 1);
-                                                                                }
-                                                                            }}
-                                                                            className="text-gray-300 hover:text-red-500"
-                                                                        >
-                                                                            <X width={15} height={15} />
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => addOpt({ value: '' })}
-                                                                className="text-blue-500 text-sm font-medium w-fit ml-8 hover:underline"
-                                                            >
-                                                                + Thêm tùy chọn
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </Form.List>
-
                                                 <Form.Item
                                                     {...restField}
                                                     name={[name, 'correctOption']}
                                                     rules={[{ required: true, message: 'Vui lòng chọn đáp án đúng!' }]}
-                                                    hidden
+                                                    className="mb-0"
                                                 >
-                                                    <InputNumber />
+                                                    <Radio.Group className="w-full">
+                                                        <Form.List name={[name, 'options']}>
+                                                            {(subFields, { add: addOpt, remove: removeOpt }) => (
+                                                                <div className="ml-2 flex flex-col gap-3">
+                                                                    {subFields.map(({ key: subKey, name: subName, ...restSubField }) => (
+                                                                        <div key={subKey} className="flex items-center gap-3 group">
+                                                                            {/* No onChange or checked logic needed here! 
+                                                                            The parent Radio.Group handles it automatically based on value={subName} 
+                                                                            */}
+                                                                            <Radio value={subName} />
+
+                                                                            <Form.Item
+                                                                                {...restSubField}
+                                                                                name={[subName, 'value']}
+                                                                                className="flex-1 mb-0"
+                                                                                style={{ marginBottom: 0 }}
+                                                                                rules={[{ required: true, message: 'Vui lòng nhập tùy chọn!' }]}
+                                                                            >
+                                                                                <Input 
+                                                                                    variant="borderless" 
+                                                                                    placeholder={`Tùy chọn ${subName + 1}`} 
+                                                                                    className="hover:bg-gray-50 mb-0" 
+                                                                                />
+                                                                            </Form.Item>
+
+                                                                            {subFields.length > 2 && (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => removeOpt(subName)}
+                                                                                    className="text-gray-300 hover:text-red-500"
+                                                                                >
+                                                                                    <X width={15} height={15} />
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => addOpt({ value: '' })}
+                                                                        className="text-blue-500 text-sm font-medium w-fit ml-8 hover:underline text-left mt-2"
+                                                                    >
+                                                                        + Thêm tùy chọn
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </Form.List>
+                                                    </Radio.Group>
                                                 </Form.Item>
 
                                                 <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end items-center gap-5">
@@ -189,11 +220,12 @@ const CreateClassQuizModal: React.FC<Props> = ({ visible, form, onClose, onSubmi
                                                         <Form.Item
                                                             {...restField}
                                                             name={[name, 'score']}
-                                                            label={<span className="text-gray-700 w-[5rem]">Điểm</span>}
+                                                            label={<span className="text-gray-700 w-[6rem]">Điểm</span>}
                                                             style={{ marginBottom: 0, width: '9rem' }}
                                                             rules={[{ required: true, message: '' }]}
+                                                            layout="horizontal"
                                                         >
-                                                            <InputNumber min={0} max={10} controls={false} style={{ width: '4rem' }} />
+                                                            <InputNumber min={0.25} max={10} step={0.25} controls={false} style={{ width: '3.5rem' }} />
                                                         </Form.Item>
                                                     </div>
 

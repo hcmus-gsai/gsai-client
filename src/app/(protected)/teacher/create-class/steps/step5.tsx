@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, Input, InputNumber, Upload, UploadProps, Radio, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, Input, Space, InputNumber, Upload, UploadProps, Radio, App } from 'antd';
 import Image from 'next/image';
 import { ChevronDown, ChevronUp, X } from '@deemlol/next-icons';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -29,7 +29,41 @@ interface Props {
     onBack: () => void;
 }
 
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
+
 const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const { message } = App.useApp();
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
@@ -210,7 +244,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
     const genHeader = (title: string, index: number) => (
         <>
             <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
-                <span className="text-2xl font-bold text-[#1D3557]">
+                <span className="text-xl md:text-2xl font-bold text-[#1D3557]">
                     Chương {index}: {title}
                 </span>
                 <div className="flex gap-4 text-gray-500">
@@ -500,7 +534,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                                         rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                                     >
-                                        <InputNumber min={1} size="large" style={{ width: '100%' }} addonAfter="ngày" />
+                                        <CustomInput content='ngày'/>
                                     </Form.Item>
 
                                     <Form.Item
@@ -516,6 +550,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                             showUploadList={false}
                                             beforeUpload={() => false}
                                             onChange={changeFileProjectSelect}
+                                            accept=".pdf"
                                         >
                                             <Input
                                                 className="w-full"
@@ -557,6 +592,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                                 showUploadList={false}
                                                 beforeUpload={() => false}
                                                 onChange={changeAudioProjectSelect}
+                                                accept='.mp4, .wav'
                                             >
                                                 <Input
                                                     className="w-full"

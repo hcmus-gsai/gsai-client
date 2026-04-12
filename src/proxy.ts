@@ -63,5 +63,5 @@ export async function proxy(req: any) {
 
 // Áp dụng middleware cho các route cần bảo vệ
 export const config = {
-  matcher: ['/student/:path*', '/teacher/:path*'], //'/auth/:path*'
+  matcher: ['/student/:path*', '/teacher/:path*', '/auth/:path*'], //'/auth/:path*'
 };

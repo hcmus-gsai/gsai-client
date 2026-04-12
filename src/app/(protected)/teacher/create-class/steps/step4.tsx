@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react';
-import { Collapse, ConfigProvider, Form, Button, message } from 'antd';
+import { Collapse, ConfigProvider, Form, Button, App } from 'antd';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { ChevronDown, ChevronUp } from '@deemlol/next-icons';
@@ -45,8 +45,11 @@ const extractApiErrorMessage = (error: any) => {
 };
 
 const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
+    // form.resetFields();
 
     const [createLessonStep, { isLoading: isCreatingLesson }] = useCreateLessonStepMutation();
     const [patchLessonStep, { isLoading: isPatchingLesson }] = usePatchLessonStepMutation();
@@ -96,6 +99,7 @@ const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
             duration: item.duration,
             questions: item.questions,
         });
+        console.log(item);
     };
 
     const onFinishQuiz = (values: any) => {
@@ -145,7 +149,7 @@ const Step4: React.FC<Props> = ({ data, onNext, onBack }) => {
     const genHeader = (title: string, index: number) => (
         <>
             <div className="flex items-center justify-between w-full pr-4 mb-[2rem]">
-                <span className="text-2xl font-bold text-[#1D3557]">
+                <span className="text-xl md:text-2xl font-bold text-[#1D3557]">
                     Chương {index}: {title}
                 </span>
                 <div className="flex gap-4 text-gray-500">

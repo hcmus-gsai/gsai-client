@@ -319,11 +319,15 @@ const DynamicTeacherNavbar = () => {
     };
  
     // ── User dropdown items ─────────────────────────────────────────────────
-    const userMenuItems: MenuProps['items'] = [
-        { key: '1', label: <span onClick={() => router.push("/teacher/profile")}>Trang cá nhân</span> },
-        { key: '2', label: <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span> },
-        { key: '3', label: <span onClick={() => setShowLogoutModal(true)}>Đăng xuất</span> },
-    ];
+    // const userMenuItems: MenuProps['items'] = [
+    //     // { key: '2', label: <span onClick={() => router.push("/teacher/learning-progress")}>Quá trình</span> },
+    //     { key: '2', label: onClick={() => setShowLogoutModal(true)}>Đăng xuất },
+    // ];
+
+    const userMenuItems : MenuProps['items'] = [
+        { key: '1', label: 'Trang cá nhân', onClick: () => router.push("/teacher/profile") },
+        { key: '2', label: 'Đăng xuất', onClick: () => setShowLogoutModal(true),},
+    ]
  
     // ── Notification dropdown items ─────────────────────────────────────────
     const notificationItems: MenuProps['items'] = notifications.length > 0 ? [
@@ -373,7 +377,7 @@ const DynamicTeacherNavbar = () => {
         <Dropdown menu={{ items: notificationItems }} trigger={['click']}
             placement="bottomRight"
             overlayStyle={{ minWidth: 280, maxHeight: 400, overflow: 'auto' }}>
-            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
+            <Button className="!h-10 !w-10 !p-0 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100">
                 <Image src={NotificationIcon} alt="Thông báo" width={22} height={22} className="object-contain" />
                 {notifications.length > 0 && (
                     <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-0.5 leading-none">
@@ -387,7 +391,7 @@ const DynamicTeacherNavbar = () => {
     const AvatarBtn = () => (
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']}
             placement="bottomRight" overlayStyle={{ minWidth: 150 }}>
-            <Button className="!rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
+            <Button className="!h-10 !w-10 !p-0 !rounded-full !border-none !flex !items-center !justify-center !relative !bg-transparent hover:!bg-gray-100 overflow-hidden">
                 {avatar_url
                     ? <Image src={avatar_url} alt="Avatar" width={36} height={36}
                         className="absolute inset-0 w-[90%] h-[90%] m-auto object-cover rounded-full" />
@@ -505,7 +509,7 @@ const DynamicTeacherNavbar = () => {
                     </p>
                     {[
                         { label: 'Trang cá nhân', path: '/teacher/profile' },
-                        { label: 'Quá trình học',  path: '/teacher/learning-progress' },
+                        // { label: 'Quá trình học',  path: '/teacher/learning-progress' },
                     ].map(({ label, path }) => (
                         <button key={path} onClick={() => handleNavigate(path)}
                             className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-[var(--color-primary)] transition-colors">
@@ -575,16 +579,12 @@ function ConfirmationModal({ onCancel, onConfirm }: Props) {
     );
 }
 
-
-
-
 export default function PublicLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     return (
-
         <div className="min-h-screen flex flex-col">
             {/* <TeacherNavbar /> */}
             <DynamicTeacherNavbar/>

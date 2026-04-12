@@ -11,7 +11,12 @@ import {
     SendQAMessageResponse,
     QAHistoryResponse,
     SubmissionMuatationResponse,
-    SubmissionHistoryItem
+    SubmissionHistoryItem,
+    CreateSocraticSessionResponse,
+    ListSocraticSessionsResponse,
+    SocraticSessionMessagesResponse,
+    SendSocraticMessageRequest,
+    SendSocraticMessageResponse,
 } from '@/type/project.type';
 import { baseApi } from '../baseApi';
 
@@ -188,6 +193,55 @@ export const projectApi = baseApi.injectEndpoints({
             query: () => `projects-submission/all`,
         }),
 
+        // ==================== Project Socratic Chat Endpoints ====================
+
+        createSocraticSession: builder.mutation<CreateSocraticSessionResponse, string>({
+            query: (lessonId) => ({
+                url: `/lessons/${lessonId}/socratic/sessions`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, lessonId) => [
+                { type: 'ChatModule', id: `socratic-${lessonId}` }
+            ],
+        }),
+
+        listSocraticSessions: builder.query<ListSocraticSessionsResponse, string>({
+            query: (lessonId) => `/lessons/${lessonId}/socratic/sessions`,
+            providesTags: (result, error, lessonId) => [
+                { type: 'ChatModule', id: `socratic-${lessonId}` }
+            ],
+        }),
+
+        getSocraticSessionMessages: builder.query<SocraticSessionMessagesResponse, { lessonId: string; sessionId: string }>({
+            query: ({ lessonId, sessionId }) => `/lessons/${lessonId}/socratic/sessions/${sessionId}/messages`,
+            providesTags: (result, error, { lessonId, sessionId }) => [
+                { type: 'ChatModule', id: `socratic-${lessonId}-${sessionId}` }
+            ],
+        }),
+
+        sendSocraticMessage: builder.mutation<SendSocraticMessageResponse, { lessonId: string; sessionId: string } & SendSocraticMessageRequest>({
+            query: ({ lessonId, sessionId, message, answer_mode }) => ({
+                url: `/lessons/${lessonId}/socratic/sessions/${sessionId}/messages`,
+                method: 'POST',
+                body: { message, answer_mode },
+            }),
+            invalidatesTags: (result, error, { lessonId, sessionId }) => [
+                { type: 'ChatModule', id: `socratic-${lessonId}` },
+                { type: 'ChatModule', id: `socratic-${lessonId}-${sessionId}` }
+            ],
+        }),
+
+        deleteSocraticSession: builder.mutation<void, { lessonId: string; sessionId: string }>({
+            query: ({ lessonId, sessionId }) => ({
+                url: `/lessons/${lessonId}/socratic/sessions/${sessionId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: (result, error, { lessonId, sessionId }) => [
+                { type: 'ChatModule', id: `socratic-${lessonId}` },
+                { type: 'ChatModule', id: `socratic-${lessonId}-${sessionId}` }
+            ],
+        }),
+
 
     }),
 });
@@ -217,5 +271,12 @@ export const {
 
     // Teacher view hooks
     useGetAllSubmissionsQuery,
+
+    // Project Socratic hooks
+    useCreateSocraticSessionMutation,
+    useListSocraticSessionsQuery,
+    useLazyGetSocraticSessionMessagesQuery,
+    useSendSocraticMessageMutation,
+    useDeleteSocraticSessionMutation,
     
 } = projectApi;

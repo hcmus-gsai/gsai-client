@@ -75,27 +75,25 @@ export default function VideoPreviewModal({ open, jobId, onClose }: VideoPreview
     }, [videoDetail?.ocrJson]);
 
     const calculateVideoDisplaySize = () => {
-        const videoElement = videoRef.current;
+        const video = videoRef.current;
         const container = videoContainerRef.current;
-        if (!videoElement || !container || !videoElement.videoWidth || !videoElement.videoHeight) {
-            return;
-        }
+        if (!video || !container) return;
 
-        const videoRatio = videoElement.videoWidth / videoElement.videoHeight;
+        const videoRatio = video.videoWidth / video.videoHeight;
         const containerRatio = container.clientWidth / container.clientHeight;
 
-        let width: number;
-        let height: number;
-        let left: number;
-        let top: number;
+        const containerRect = container.getBoundingClientRect();
+        let width, height, left, top;
 
         if (containerRatio > videoRatio) {
-            height = container.clientHeight;
+            // Video bị giới hạn bởi chiều cao (Pillarboxing - trống 2 bên)
+            height = containerRect.height
             width = height * videoRatio;
             top = 0;
             left = (container.clientWidth - width) / 2;
         } else {
-            width = container.clientWidth;
+            // Video bị giới hạn bởi chiều rộng (Letterboxing - trống trên dưới)
+            width = containerRect.width;;
             height = width / videoRatio;
             left = 0;
             top = (container.clientHeight - height) / 2;

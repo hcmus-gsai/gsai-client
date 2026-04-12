@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GreetingSection, FunctionSection, WorkFlowSection, TestimonialSection, QASection, FooterSection } from "@/components/guest/ui/guest";
+import { GreetingSection, FunctionSection, WorkFlowSection, ShowcaseSection, TestimonialSection, QASection, FooterSection } from "@/components/guest/ui/guest";
 
 import GradientTopLeft from "@/../public/guest/gradient_top_left.svg";
 import GradientTopRight from "@/../public/guest/gradient_top_right.svg";
@@ -72,7 +72,8 @@ export default function TeacherLandingPage() {
                     button: "Tìm hiểu thêm",
                 }}
             /> */}
-            <WorkFlowSection />
+            <ShowcaseSection />
+            <WorkFlowSection role='student' />
             {/* <TestimonialSection /> */}
             {/* <QASection /> */}
             <FooterSection />

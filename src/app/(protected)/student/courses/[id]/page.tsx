@@ -10,7 +10,7 @@ import { QASection } from "@/components/student/qna";
 import { FooterSection } from "@/components/guest/ui/guest";
 import { useParams, notFound } from "next/navigation";
 import { RightOutlined } from "@ant-design/icons";
-import { useGetCourseByIdQuery } from "@/store/api/[module]/courseApi";
+import { useGetCourseByIdQuery, useGetTotalEnrollmentQuery } from "@/store/api/[module]/courseApi";
 
 import AbstractTop from "@/../public/student/AbstractTop.svg";
 import AbstractMiddle from "@/../public/student/AbstractMiddle.svg";
@@ -22,7 +22,7 @@ import { Course } from '@/type/course.type';
 import { XCircle } from "@deemlol/next-icons";
 import { useEnrollInCourseMutation } from '@/store/api/[module]/enrollmentApi';
 import { useCreateLearningProgressMutation } from '@/store/api/[module]/lessonProgressApi';
-const CourseSyllabusSection = () => {
+const CourseSyllabusSection = ({ category }: { category: string }) => {
     const achievableKnowledge = [
         {
             title: 'Mô hình hóa toán học',
@@ -42,15 +42,7 @@ const CourseSyllabusSection = () => {
         }
     ]
 
-    const achievableSkills = [
-        'Python',
-        'Trực quan hóa',
-        'PowerBI',
-        'Excel',
-        'Toán ứng dụng',
-        'Scikit-learn',
-        'Thống kê'
-    ]
+    const achievableSkills: string[] = category.split(",");
 
     return (
         <section className="w-full py-[8vh] sm:py-[12vh] flex flex-col items-center justify-center">
@@ -108,7 +100,7 @@ const CourseRegisterModal = ({ isOpen, onClose, children }: {
     )
 }
 
-const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, courseId: string }) => {
+const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseData: Course, courseId: string, totalEnrollment: number }) => {
 
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -174,7 +166,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={EmptyLayout}
+                                            src={courseData?.teacher_avatar_url}
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -200,7 +192,7 @@ const CourseInfoSection = ({ courseData, courseId }: { courseData: Course, cours
                                 )}
                             </div>
 
-                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">10 học viên tham gia</p>
+                            <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-primary)]">{totalEnrollment} học viên tham gia</p>
 
                         </div>
 
@@ -268,7 +260,8 @@ export default function StudentCoursePage() {
     const { id } = useParams();
     const { data: courseInfo, isLoading, error } = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
-    console.log('This is course data: ', courseData);
+    const { data: teacherStatistc} = useGetTotalEnrollmentQuery(id as string);
+    const totalEnrollment = teacherStatistc ?? 0;
 
     if (isLoading) {
         return <div className="w-full min-h-screen flex items-center justify-center">Đang tải...</div>;
@@ -280,23 +273,14 @@ export default function StudentCoursePage() {
 
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip">
-            {/* <StudentGreetingSection
-                title = {courseInfo?.data?.course_name || ""}
-                titleSize = "text-[2.5rem]"
-                description = { ""}
-                buttonText = "Tham gia ngay"
-                isCourse = {true}
-                hasTopGradient = {false}
-                hasCurveSpace = {false}
-            /> */}
             <section className="w-full h-[3rem] mt-[5rem] flex flex-col items-center justify-center border-b border-gray-200">
                 <div className="w-[var(--global-width)] h-full flex items-center justify-start">
                     Môn học <span className="ml-2 mr-2"><RightOutlined className="text-[var(--color-primary)]" /></span> {courseData?.category}
                 </div>
             </section>
 
-            <CourseInfoSection courseData={courseData} courseId={id as string} />
-            <CourseSyllabusSection />
+            <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment} />
+            <CourseSyllabusSection category={courseData?.category}/>
 
             <CourseDisplaySection
                 title="Môn học tương tự"

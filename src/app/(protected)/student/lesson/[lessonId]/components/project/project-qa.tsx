@@ -2,7 +2,7 @@
 
 import '@ant-design/v5-patch-for-react-19';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Button, Form, Input, Spin, Tree, Select, Empty, Tabs } from 'antd';
+import { Button, Form, Input, Spin, Tree, Select, Empty, Drawer, Tabs } from 'antd';
 import { Send as SendIcon, Folder as FolderIcon, File as FileIcon, Menu as MenuIcon, Play } from '@deemlol/next-icons';
 import { useParams } from 'next/navigation';
 import {
@@ -25,6 +25,13 @@ import { AudioOutlined, StopOutlined, DeleteOutlined, BorderOutlined } from '@an
 import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
 import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
 import { ContentType } from '@/type/chat.type';
+
+import { useAppDispatch } from '@/store/hook';
+import { addNotification } from '@/store/slice/notifySlice';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error;
+}
 
 interface FileNode {
     name: string;
@@ -70,7 +77,6 @@ const IGNORED_EXTENSIONS = new Set([
 const IGNORED_FOLDERS = new Set([
     '.git', '.vs', '.vscode', '.idea', 'bin', 'obj', 'debug', 'release', 'x64', 'x86'
 ]);
-
 const LectureProjQA = () => {
     const { lessonId } = useParams();
     const [formData] = Form.useForm();
@@ -219,11 +225,24 @@ const LectureProjQA = () => {
         refetchOnFocus: false,
     });
 
-    const [startSession, { isLoading: startingSession }] = useStartQASessionMutation();
+    const [startSession, { isLoading: startingSession, error }] = useStartQASessionMutation();
     const [sendMessage, { isLoading: sendingMessage }] = useSendQAMessageMutation();
     const { data: submitJsonData, isLoading: jsonLoading } = useGetSubmitJsonQuery(lessonId as string, {
         skip: !lessonId,
     });
+
+    const dispatch_error = useAppDispatch();
+    useEffect(() => {
+        if (isFetchBaseQueryError(error) && error.status === 404) {
+            dispatch_error(addNotification({
+                type: 'error',
+                message: 'Chưa có bài nộp',
+                description: 'Hãy nộp bài để có thể tiếp tục!',
+                createdAt: Date.now(),
+                isShown: false
+            }));
+        }
+    }, [error]);
 
     // Load history on mount - only once
     const hasLoadedHistory = useRef(false);
@@ -392,6 +411,234 @@ const LectureProjQA = () => {
         }
     };
 
+
+    //
+    const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+    // --- Khối File Explorer ---
+    const FileExplorerContent = (
+        <div className="flex flex-col h-full bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold mb-3 uppercase text-gray-500">File Explorer</h3>
+
+            {jsonLoading ? (
+                <div className="flex-1 flex items-center justify-center">
+                    <Spin />
+                </div>
+            ) : treeData.length > 0 ? (
+                <div className="flex-1 overflow-y-auto">
+                    <Tree
+                        showIcon
+                        defaultExpandAll
+                        treeData={treeData}
+                        onSelect={onSelect}
+                        className="bg-transparent"
+                        blockNode
+                    />
+                </div>
+            ) : (
+                <div className="flex-1 flex items-center justify-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No files found" />
+                </div>
+            )}
+        </div>
+    );
+
+    // --- Khối Code Editor ---
+    const CodeEditorContent = (
+        <div className="flex-1 flex flex-col bg-[#1e1e1e] rounded-lg h-full overflow-hidden">
+            <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-[#3e3e3e]">
+                <div className="flex items-center gap-2">
+                    <MenuIcon 
+                        className="md:hidden text-white cursor-pointer" 
+                        onClick={() => setIsMobileDrawerOpen(true)} 
+                    />
+                    <span className="text-gray-300 text-sm font-mono">{selectedFileName || 'No file selected'}</span>
+                </div>
+
+                <Select
+                    className="w-32"
+                    size="small"
+                    value={selectedLanguage}
+                    onChange={setSelectedLanguage}
+                    options={Object.values(EXTENSION_TO_LANGUAGE).filter((v, i, a) => a.indexOf(v) === i).map(l => ({ label: l, value: l }))}
+                // Style select for dark theme if possible, otherwise Antd default
+                />
+            </div>
+            {/* Monaco Editor */}
+            <div className="flex-1 relative">
+                <Editor
+                    height="100%"
+                    language={selectedLanguage}
+                    value={selectedFileContent}
+                    theme="vs-dark"
+                    options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        fontSize: 13,
+                        wordWrap: 'on',
+                        automaticLayout: true,
+                    }}
+                />
+            </div>
+        </div>
+    );
+
+    // --- Khối Chat QA ---
+    const ChatQAContent = (
+        <div className="flex flex-col bg-white rounded-lg h-full p-3 pb-0">
+            <h3 className="text-lg font-semibold mb-4 border-b pb-0">Vấn đáp về Dự án</h3>
+
+            {!isSessionStarted && messages.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                    <p className="text-gray-500 text-center">
+                        Bắt đầu phiên hỏi đáp để nhận được sự hỗ trợ từ AI về dự án của bạn
+                    </p>
+                    <Button
+                        type="primary"
+                        size="large"
+                        loading={startingSession}
+                        onClick={handleStartSession}
+                    >
+                        Bắt đầu hỏi đáp
+                    </Button>
+                </div>
+            ) : (
+                <>
+                    {/* Messages container */}
+                    <div
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2"
+                    >
+                        {messages.map((msg, index) =>
+                            msg.role === 'user' ? (
+                                <div
+                                    key={index}
+                                    className="ml-auto w-fit max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem] text-white"
+                                >
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {getMessageText(msg)}
+                                    </ReactMarkdown>
+                                </div>
+                            ) : (
+                                <div
+                                    key={index}
+                                    className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
+                                >
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {getMessageText(msg)}
+                                    </ReactMarkdown>
+                                    {/* Nếu có audio response, hiển thị thêm nút play */}
+                                    {msg.audio_url && (
+                                        <Button
+                                            onClick={() => {
+                                                const audio = new Audio(msg.audio_url);
+                                                audio.play().catch(error => {
+                                                    console.error('Error playing audio response:', error);
+                                                });
+                                            }}
+                                            className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
+                                            icon={<Play className="!w-[16px] !h-[16px]" />}
+                                        />
+                                    )}
+                                </div>
+                            )
+                        )}
+                        {sendingMessage && (
+                            <div className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
+                                <div className="flex space-x-1 h-6 items-center w-12 pl-1">
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Input form */}
+                    <div className="border-t border-gray-200 p-[0.5rem] flex-shrink-0">
+                        <Form
+                            form={formData}
+                            onFinish={handleMessageSubmit}
+                            className={`w-full flex items-end gap-2 !bg-white !border border-gray-200 !px-[0.5rem] !py-[0.5rem] ${row >= 2 ? 'rounded-[20px]' : 'rounded-full'}`}
+                        >
+                            <Form.Item name="chatMessage" className="!mb-0 flex-1">
+                                <Input.TextArea
+                                    placeholder="Nhập câu hỏi"
+                                    autoSize={{ minRows: 1, maxRows: 7 }}
+                                    classNames={{
+                                        textarea: "!border-none !outline-none focus:!shadow-none",
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            formData.submit();
+                                        }
+                                    }}
+                                    onChange={(e) => {
+                                        const lines = e.target.value.split('\n').length;
+                                        setRow(lines);
+                                    }}
+                                />
+                            </Form.Item>
+
+                            <Button
+                                onClick={handleAudioRecording}
+                                className="!rounded-full !border-none !relative !flex !items-center !justify-center"
+                            >
+                                {recording ? (
+                                    <div className="flex items-center gap-[3px] h-[22px]">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span
+                                                key={i}
+                                                className="w-[3px] bg-[var(--color-secondary)] rounded"
+                                                style={{
+                                                    height: `${Math.min(
+                                                        22,
+                                                        Math.max(4, volume * 0.8 * Math.random())
+                                                    )}px`,
+                                                    transition: "height 0.08s linear",
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <AudioOutlined />
+                                )}
+                            </Button>
+
+                            <Button
+                                onClick={() => setAnswerMode(prev => prev === 'text' ? 'audio' : 'text')}
+                                icon={
+                                    <div className="relative w-6 h-6">
+                                        <Image
+                                            src={AudioWaveForm}
+                                            alt="Audio Wave Form"
+                                            width={24}
+                                            height={24}
+                                            className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
+                                        />
+                                        <Image
+                                            src={AudioWaveFormHover}
+                                            alt="Audio wave form hover"
+                                            width={24}
+                                            height={24}
+                                            className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                        />
+                                    </div>
+                                }
+                                className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
+                                title="Chế độ phản hồi bằng âm thanh"
+                            />
+                        </Form>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+    //
+
+
     // Auto-select first file
     useEffect(() => {
         if (!selectedFileName && treeData.length > 0) {
@@ -447,217 +694,330 @@ const LectureProjQA = () => {
 
     return (
         // Add bottom padding to prevent content from being hidden by the bottom bar
+        // <div className="w-full h-[calc(100vh-8rem)] flex gap-4 overflow-hidden pb-4">
+        //     {/* Left Column: File Tree */}
+        //     <div className="w-[20%] min-w-[200px] max-w-[300px] flex flex-col bg-white rounded-lg border border-gray-200 p-4">
+        //         <h3 className="text-sm font-semibold mb-3 uppercase text-gray-500">File Explorer</h3>
+        //         {jsonLoading ? (
+        //             <div className="flex-1 flex items-center justify-center">
+        //                 <Spin />
+        //             </div>
+        //         ) : treeData.length > 0 ? (
+        //             <div className="flex-1 overflow-y-auto">
+        //                 <Tree
+        //                     showIcon
+        //                     defaultExpandAll
+        //                     treeData={treeData}
+        //                     onSelect={onSelect}
+        //                     className="bg-transparent"
+        //                     blockNode
+        //                 />
+        //             </div>
+        //         ) : (
+        //             <div className="flex-1 flex items-center justify-center">
+        //                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No files found" />
+        //             </div>
+        //         )}
+        //     </div>
+
+        //     {/* Middle Column: Code Editor */}
+        //     <div className="flex-1 min-w-0 flex flex-col bg-[#1e1e1e] rounded-lg border border-gray-700 overflow-hidden shadow-lg">
+        //         {/* Editor Header */}
+        //         <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-[#3e3e3e]">
+        //             <div className="flex items-center gap-2">
+        //                 <span className="text-gray-300 text-sm font-mono">{selectedFileName || 'No file selected'}</span>
+        //             </div>
+        //             <Select
+        //                 className="w-32"
+        //                 size="small"
+        //                 value={selectedLanguage}
+        //                 onChange={setSelectedLanguage}
+        //                 options={Object.values(EXTENSION_TO_LANGUAGE).filter((v, i, a) => a.indexOf(v) === i).map(l => ({ label: l, value: l }))}
+        //             // Style select for dark theme if possible, otherwise Antd default
+        //             />
+        //         </div>
+
+        //         {/* Monaco Editor */}
+        //         <div className="flex-1 relative">
+        //             <Editor
+        //                 height="100%"
+        //                 language={selectedLanguage}
+        //                 value={selectedFileContent}
+        //                 theme="vs-dark"
+        //                 options={{
+        //                     readOnly: true,
+        //                     minimap: { enabled: false },
+        //                     scrollBeyondLastLine: false,
+        //                     fontSize: 13,
+        //                     wordWrap: 'on',
+        //                     automaticLayout: true,
+        //                 }}
+        //             />
+        //         </div>
+        //     </div>
+
+        //     {/* Right Column: Chat QA */}
+        //     <div className="w-[30%] min-w-[320px] max-w-[450px] flex flex-col bg-white rounded-lg border border-gray-200 p-3 pb-0">
+        //         <h3 className="text-lg font-semibold mb-4 border-b pb-0">Vấn đáp về Dự án</h3>
+
+        //         {!isSessionStarted && messages.length === 0 ? (
+        //             <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        //                 <p className="text-gray-500 text-center">
+        //                     Bắt đầu phiên hỏi đáp để nhận được sự hỗ trợ từ AI về dự án của bạn
+        //                 </p>
+        //                 <Button
+        //                     type="primary"
+        //                     size="large"
+        //                     loading={startingSession}
+        //                     onClick={handleStartSession}
+        //                 >
+        //                     Bắt đầu hỏi đáp
+        //                 </Button>
+        //             </div>
+        //         ) : (
+        //             <>
+        //                 {/* Messages container */}
+        //                 <div
+        //                     ref={chatContainerRef}
+        //                     className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2"
+        //                 >
+        //                     {messages.map((msg, index) =>
+        //                         msg.role === 'user' ? (
+        //                             <div
+        //                                 key={index}
+        //                                 className="ml-auto w-fit max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem] text-white"
+        //                             >
+        //                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        //                                     {getMessageText(msg)}
+        //                                 </ReactMarkdown>
+        //                             </div>
+        //                         ) : (
+        //                             <div
+        //                                 key={index}
+        //                                 className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
+        //                             >
+        //                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        //                                     {getMessageText(msg)}
+        //                                 </ReactMarkdown>
+        //                                 {/* Nếu có audio response, hiển thị thêm nút play */}
+        //                                 {msg.audio_url && (
+        //                                     <Button
+        //                                         onClick={() => {
+        //                                             const audio = new Audio(msg.audio_url);
+        //                                             audio.play().catch(error => {
+        //                                                 console.error('Error playing audio response:', error);
+        //                                             });
+        //                                         }}
+        //                                         className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
+        //                                         icon={<Play className="!w-[16px] !h-[16px]" />}
+        //                                     />
+        //                                 )}
+        //                             </div>
+        //                         )
+        //                     )}
+        //                     {sendingMessage && (
+        //                         <div className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
+        //                             <div className="flex space-x-1 h-6 items-center w-12 pl-1">
+        //                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+        //                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+        //                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+        //                             </div>
+        //                         </div>
+        //                     )}
+        //                 </div>
+
+        //                 {/* Input form */}
+        //                 <div className="border-t border-gray-200 p-[0.5rem] flex-shrink-0">
+        //                     <Form
+        //                         form={formData}
+        //                         onFinish={handleMessageSubmit}
+        //                         className={`w-full flex items-end gap-2 !bg-white !border border-gray-200 !px-[0.5rem] !py-[0.5rem] ${row >= 2 ? 'rounded-[20px]' : 'rounded-full'}`}
+        //                     >
+        //                         <Form.Item name="chatMessage" className="!mb-0 flex-1">
+        //                             <Input.TextArea
+        //                                 placeholder="Nhập câu hỏi"
+        //                                 autoSize={{ minRows: 1, maxRows: 7 }}
+        //                                 classNames={{
+        //                                     textarea: "!border-none !outline-none focus:!shadow-none",
+        //                                 }}
+        //                                 onKeyDown={(e) => {
+        //                                     if (e.key === 'Enter' && !e.shiftKey) {
+        //                                         e.preventDefault();
+        //                                         formData.submit();
+        //                                     }
+        //                                 }}
+        //                                 onChange={(e) => {
+        //                                     const lines = e.target.value.split('\n').length;
+        //                                     setRow(lines);
+        //                                 }}
+        //                             />
+        //                         </Form.Item>
+
+        //                         <Button
+        //                             onClick={handleAudioRecording}
+        //                             className="!rounded-full !border-none !relative !flex !items-center !justify-center"
+        //                         >
+        //                             {recording ? (
+        //                                 <div className="flex items-center gap-[3px] h-[22px]">
+        //                                     {[...Array(5)].map((_, i) => (
+        //                                         <span
+        //                                             key={i}
+        //                                             className="w-[3px] bg-[var(--color-secondary)] rounded"
+        //                                             style={{
+        //                                                 height: `${Math.min(
+        //                                                     22,
+        //                                                     Math.max(4, volume * 0.8 * Math.random())
+        //                                                 )}px`,
+        //                                                 transition: "height 0.08s linear",
+        //                                             }}
+        //                                         />
+        //                                     ))}
+        //                                 </div>
+        //                             ) : (
+        //                                 <AudioOutlined />
+        //                             )}
+        //                         </Button>
+
+        //                         <Button
+        //                             onClick={() => setAnswerMode(prev => prev === 'text' ? 'audio' : 'text')}
+        //                             icon={
+        //                                 <div className="relative w-6 h-6">
+        //                                     <Image
+        //                                         src={AudioWaveForm}
+        //                                         alt="Audio Wave Form"
+        //                                         width={24}
+        //                                         height={24}
+        //                                         className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
+        //                                     />
+        //                                     <Image
+        //                                         src={AudioWaveFormHover}
+        //                                         alt="Audio wave form hover"
+        //                                         width={24}
+        //                                         height={24}
+        //                                         className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        //                                     />
+        //                                 </div>
+        //                             }
+        //                             className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
+        //                             title="Chế độ phản hồi bằng âm thanh"
+        //                         />
+        //                     </Form>
+        //                 </div>
+        //             </>
+        //         )}
+        //     </div>
+
+        //     {/* DESKTOP LAYOUT (Ẩn trên màn hình nhỏ, hiện trên màn md trở lên) */}
+        //     <div className="hidden md:flex w-full h-full gap-4">
+        //         <div className="w-[20%] min-w-[200px]">
+        //             {FileExplorerContent}
+        //         </div>
+        //         <div className="flex-1 min-w-0">
+        //             {CodeEditorContent}
+        //         </div>
+        //         <div className="w-[30%] min-w-[320px]">
+        //             {ChatQAContent}
+        //         </div>
+        //     </div>
+
+        //     {/* MOBILE LAYOUT (Hiện trên màn hình nhỏ, ẩn trên md) */}
+        //     <div className="flex md:hidden w-full h-full flex-col">
+        //         <Tabs 
+        //             defaultActiveKey="code" 
+        //             className="h-full project-qa-mobile-tabs"
+        //             items={[
+        //                 {
+        //                     key: 'code',
+        //                     label: '💻 Code Editor',
+        //                     children: CodeEditorContent,
+        //                     className: "h-[calc(100vh-12rem)]" // Đảm bảo scroll đúng
+        //                 },
+        //                 {
+        //                     key: 'chat',
+        //                     label: '💬 Trợ lý QA',
+        //                     children: ChatQAContent,
+        //                     className: "h-[calc(100vh-12rem)]"
+        //                 }
+        //             ]}
+        //         />
+
+        //         {/* Drawer chứa File Explorer cho Mobile */}
+        //         <Drawer
+        //             title="File Explorer"
+        //             placement="left"
+        //             onClose={() => setIsMobileDrawerOpen(false)}
+        //             open={isMobileDrawerOpen}
+        //             width={280}
+        //             bodyStyle={{ padding: 0 }}
+        //         >
+        //             {/* Khi chọn file xong, tự động đóng Drawer */}
+        //             <div onClick={(e) => {
+        //                 // Nếu click vào một file (không phải folder), đóng drawer
+        //                 if((e.target as HTMLElement).closest('.ant-tree-treenode-switcher-open') === null) {
+        //                     setIsMobileDrawerOpen(false);
+        //                 }
+        //             }}>
+        //                 {FileExplorerContent}
+        //             </div>
+        //         </Drawer>
+        //     </div>
+        // </div>
+
         <div className="w-full h-[calc(100vh-8rem)] flex gap-4 overflow-hidden pb-4">
-            {/* Left Column: File Tree */}
-            <div className="w-[20%] min-w-[200px] max-w-[300px] flex flex-col bg-white rounded-lg border border-gray-200 p-4">
-                <h3 className="text-sm font-semibold mb-3 uppercase text-gray-500">File Explorer</h3>
-                {jsonLoading ? (
-                    <div className="flex-1 flex items-center justify-center">
-                        <Spin />
-                    </div>
-                ) : treeData.length > 0 ? (
-                    <div className="flex-1 overflow-y-auto">
-                        <Tree
-                            showIcon
-                            defaultExpandAll
-                            treeData={treeData}
-                            onSelect={onSelect}
-                            className="bg-transparent"
-                            blockNode
-                        />
-                    </div>
-                ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No files found" />
-                    </div>
-                )}
-            </div>
-
-            {/* Middle Column: Code Editor */}
-            <div className="flex-1 min-w-0 flex flex-col bg-[#1e1e1e] rounded-lg border border-gray-700 overflow-hidden shadow-lg">
-                {/* Editor Header */}
-                <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-[#3e3e3e]">
-                    <div className="flex items-center gap-2">
-                        <span className="text-gray-300 text-sm font-mono">{selectedFileName || 'No file selected'}</span>
-                    </div>
-                    <Select
-                        className="w-32"
-                        size="small"
-                        value={selectedLanguage}
-                        onChange={setSelectedLanguage}
-                        options={Object.values(EXTENSION_TO_LANGUAGE).filter((v, i, a) => a.indexOf(v) === i).map(l => ({ label: l, value: l }))}
-                    // Style select for dark theme if possible, otherwise Antd default
-                    />
+            {/* DESKTOP LAYOUT (Ẩn trên màn hình nhỏ, hiện trên màn md trở lên) */}
+            <div className="hidden md:flex w-full h-full gap-4">
+                <div className="w-[20%] min-w-[200px]">
+                    {FileExplorerContent}
                 </div>
-
-                {/* Monaco Editor */}
-                <div className="flex-1 relative">
-                    <Editor
-                        height="100%"
-                        language={selectedLanguage}
-                        value={selectedFileContent}
-                        theme="vs-dark"
-                        options={{
-                            readOnly: true,
-                            minimap: { enabled: false },
-                            scrollBeyondLastLine: false,
-                            fontSize: 13,
-                            wordWrap: 'on',
-                            automaticLayout: true,
-                        }}
-                    />
+                <div className="flex-1 min-w-0">
+                    {CodeEditorContent}
+                </div>
+                <div className="w-[30%] min-w-[320px]">
+                    {ChatQAContent}
                 </div>
             </div>
 
-            {/* Right Column: Chat QA */}
-            <div className="w-[30%] min-w-[320px] max-w-[450px] flex flex-col bg-white rounded-lg border border-gray-200 p-3 pb-0">
-                <h3 className="text-lg font-semibold mb-4 border-b pb-0">Vấn đáp về Dự án</h3>
+            {/* MOBILE LAYOUT (Hiện trên màn hình nhỏ, ẩn trên md) */}
+            <div className="flex md:hidden w-full h-full flex-col">
+                <Tabs 
+                    defaultActiveKey="code" 
+                    className="h-full project-qa-mobile-tabs"
+                    items={[
+                        {
+                            key: 'code',
+                            label: '💻 Code Editor',
+                            children: CodeEditorContent,
+                            className: "h-[calc(100vh-12rem)]" // Đảm bảo scroll đúng
+                        },
+                        {
+                            key: 'chat',
+                            label: '💬 Trợ lý QA',
+                            children: ChatQAContent,
+                            className: "h-[calc(100vh-12rem)]"
+                        }
+                    ]}
+                />
 
-                {!isSessionStarted && messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                        <p className="text-gray-500 text-center">
-                            Bắt đầu phiên hỏi đáp để nhận được sự hỗ trợ từ AI về dự án của bạn
-                        </p>
-                        <Button
-                            type="primary"
-                            size="large"
-                            loading={startingSession}
-                            onClick={handleStartSession}
-                        >
-                            Bắt đầu hỏi đáp
-                        </Button>
+                {/* Drawer chứa File Explorer cho Mobile */}
+                <Drawer
+                    title="File Explorer"
+                    placement="left"
+                    onClose={() => setIsMobileDrawerOpen(false)}
+                    open={isMobileDrawerOpen}
+                    width={280}
+                    // bodyStyle={{ padding: 0 }}
+                    style={{ padding: 0 }}
+                >
+                    {/* Khi chọn file xong, tự động đóng Drawer */}
+                    <div onClick={(e) => {
+                        // Nếu click vào một file (không phải folder), đóng drawer
+                        if((e.target as HTMLElement).closest('.ant-tree-treenode-switcher-open') === null) {
+                            setIsMobileDrawerOpen(false);
+                        }
+                    }}>
+                        {FileExplorerContent}
                     </div>
-                ) : (
-                    <>
-                        {/* Messages container */}
-                        <div
-                            ref={chatContainerRef}
-                            className="flex-1 overflow-y-auto mb-4 space-y-3 pr-2"
-                        >
-                            {messages.map((msg, index) =>
-                                msg.role === 'user' ? (
-                                    <div
-                                        key={index}
-                                        className="ml-auto w-fit max-w-[80%] bg-[var(--color-secondary)] rounded-[20px] px-[0.75rem] py-[0.5rem] text-white"
-                                    >
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {getMessageText(msg)}
-                                        </ReactMarkdown>
-                                    </div>
-                                ) : (
-                                    <div
-                                        key={index}
-                                        className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]"
-                                    >
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                            {getMessageText(msg)}
-                                        </ReactMarkdown>
-                                        {/* Nếu có audio response, hiển thị thêm nút play */}
-                                        {msg.audio_url && (
-                                            <Button
-                                                onClick={() => {
-                                                    const audio = new Audio(msg.audio_url);
-                                                    audio.play().catch(error => {
-                                                        console.error('Error playing audio response:', error);
-                                                    });
-                                                }}
-                                                className="!mt-2 !px-2 !py-1 !text-sm !rounded-full !bg-gray-300 !text-black"
-                                                icon={<Play className="!w-[16px] !h-[16px]" />}
-                                            />
-                                        )}
-                                    </div>
-                                )
-                            )}
-                            {sendingMessage && (
-                                <div className="w-fit max-w-[80%] bg-gray-200 rounded-[20px] px-[0.75rem] py-[0.5rem]">
-                                    <div className="flex space-x-1 h-6 items-center w-12 pl-1">
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Input form */}
-                        <div className="border-t border-gray-200 p-[0.5rem] flex-shrink-0">
-                            <Form
-                                form={formData}
-                                onFinish={handleMessageSubmit}
-                                className={`w-full flex items-end gap-2 !bg-white !border border-gray-200 !px-[0.5rem] !py-[0.5rem] ${row >= 2 ? 'rounded-[20px]' : 'rounded-full'}`}
-                            >
-                                <Form.Item name="chatMessage" className="!mb-0 flex-1">
-                                    <Input.TextArea
-                                        placeholder="Nhập câu hỏi"
-                                        autoSize={{ minRows: 1, maxRows: 7 }}
-                                        classNames={{
-                                            textarea: "!border-none !outline-none focus:!shadow-none",
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault();
-                                                formData.submit();
-                                            }
-                                        }}
-                                        onChange={(e) => {
-                                            const lines = e.target.value.split('\n').length;
-                                            setRow(lines);
-                                        }}
-                                    />
-                                </Form.Item>
-
-                                <Button
-                                    onClick={handleAudioRecording}
-                                    className="!rounded-full !border-none !relative !flex !items-center !justify-center"
-                                >
-                                    {recording ? (
-                                        <div className="flex items-center gap-[3px] h-[22px]">
-                                            {[...Array(5)].map((_, i) => (
-                                                <span
-                                                    key={i}
-                                                    className="w-[3px] bg-[var(--color-secondary)] rounded"
-                                                    style={{
-                                                        height: `${Math.min(
-                                                            22,
-                                                            Math.max(4, volume * 0.8 * Math.random())
-                                                        )}px`,
-                                                        transition: "height 0.08s linear",
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <AudioOutlined />
-                                    )}
-                                </Button>
-
-                                <Button
-                                    onClick={() => setAnswerMode(prev => prev === 'text' ? 'audio' : 'text')}
-                                    icon={
-                                        <div className="relative w-6 h-6">
-                                            <Image
-                                                src={AudioWaveForm}
-                                                alt="Audio Wave Form"
-                                                width={24}
-                                                height={24}
-                                                className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}
-                                            />
-                                            <Image
-                                                src={AudioWaveFormHover}
-                                                alt="Audio wave form hover"
-                                                width={24}
-                                                height={24}
-                                                className={`absolute top-0 left-1/2 -translate-x-1/2 transition-opacity duration-300 ease-in-out ${answerMode === 'audio' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                                            />
-                                        </div>
-                                    }
-                                    className={`group !rounded-full !border-none !relative !flex !items-center !justify-center !w-8 !h-8 !p-0 ${answerMode === 'audio' ? '!bg-blue-50' : ''}`}
-                                    title="Chế độ phản hồi bằng âm thanh"
-                                />
-                            </Form>
-                        </div>
-                    </>
-                )}
+                </Drawer>
             </div>
         </div>
     );

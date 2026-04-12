@@ -116,7 +116,7 @@ const SignInForm = () => {
             </Form.Item>
             <p className="flex items-center justify-end relative top-[-1rem]">
                 <span className="text-[var(--color-secondary)] font-md font-sm underline cursor-pointer"
-                    onClick={() => router.push("/auth/rename-password")}
+                    onClick={() => router.push("/auth/forgot-password")}
                 >Quên mật khẩu?</span>
             </p>
 

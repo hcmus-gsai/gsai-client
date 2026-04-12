@@ -5,21 +5,20 @@ export interface CourseResponse {
 
 export interface Course {
     id: string;
-    course_id?: string; // alias cho id (backward compatibility)
+    course_id?: string;
     course_code: string;
     course_name: string;
     course_description: string;
     duration: string;
     thumbnail_url: string;
     tuition_fee: number;
-    category: string | string[];
+    category: string;
     is_active: boolean;
     teacher_id: string;
     teacher_name: string;
+    teacher_avatar_url: string;
     is_enrolled: boolean;
 }
-
-
 
 export interface CourseQueryParams {
     name?: string;

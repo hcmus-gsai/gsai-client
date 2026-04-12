@@ -370,9 +370,9 @@ export default function SlideList() {
     const handleGenerateVoice = async (slideId: number, slideContent: string, slideVoice: string)=>{
         const targetSlide = slides.find((slide) => slide.id === slideId);
 
-        if (!slideContent.trim() || !slideVoice.trim() || targetSlide?.isGenerating || isCloneVoiceLoading){
+        /* if (!slideContent.trim() || !slideVoice.trim() || targetSlide?.isGenerating || isCloneVoiceLoading){
             return;
-        }
+        } */
 
         updateSlide({id: slideId, fields:{isGenerating: true}});
 

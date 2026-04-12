@@ -32,6 +32,8 @@ import pickClassIcon from "../../../../public/guest/pickClassIcon.svg";
 import AITutorIcon from "../../../../public/guest/AITutorIcon.svg";
 import Epis from "../../../../public/shared/EPIS.svg";
 import workFlowPic from "../../../../public/guest/workflowPic.svg";
+import docUpload from "../../../../public/guest/docUpload.svg";
+import diagram from "../../../../public/guest/diagram.svg";
 
 import testimonialPic from "../../../../public/guest/testimonialPic.svg";
 
@@ -371,7 +373,7 @@ const FooterSection = ({
     const isPageA = pathname === '/student' || pathname === '/teacher';
 
     return (
-        <section className={`w-full flex flex-col items-center justify-center bg-neural ${isPageA ? "" : "border-t border-gray-200"}`}>
+        <section className={`bg-white w-full flex flex-col items-center justify-center bg-neural ${isPageA ? "" : "border-t border-gray-200"}`}>
 
             {/* MAIN GRID: Mobile: 1 cột, Tablet: 2 cột, Desktop: 4 cột */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-center items-start pt-10 py-12 w-full px-6 md:px-0 md:w-[var(--global-width)]">
@@ -592,100 +594,9 @@ const FunctionSection = (
     );
 };
 
-const WorkFlowSection = () => {
+const WorkFlowSection = ({role} : {role: string}) => {
 
     return (
-        // <section
-        //     className="w-full min-h-[50vh] flex flex-col items-center justify-center bg-white"
-        // >
-        //     <div className="w-[var(--global-width)] h-full py-19 grid grid-cols-12">
-        //         <div className="col-span-7 flex flex-col">
-        //             <p className="text-[3.8vw] font-semibold mb-7">Cách hoạt động</p>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <div className="flex items-center justify-center mr-6">
-        //                     <p className="text-[4.7vw] leading-none py-0">01</p>
-        //                 </div>
-
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={createAccIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Tạo tài khoản</p>
-        //                             <p className="text-[0.9vw]">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-        //             </div>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={pickClassIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Đăng tải môn học</p>
-        //                             <p className="text-[0.9vw]">Xây dựng môn học dẫn đầu xu thế.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-
-        //                 <div className="flex items-center justify-center ml-6">
-        //                     <p className="text-[5vw]">02</p>
-        //                 </div>
-        //             </div>
-
-        //             <div className="w-full h-full flex items-stretch mb-5">
-        //                 <div className="flex items-center justify-center mr-6">
-        //                     <p className="text-[4.7vw] leading-none py-0">03</p>
-        //                 </div>
-
-        //                 <Card className="w-full justify-center items-center" style={{ borderRadius: "20px", boxShadow: " 5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
-        //                     <div className="flex">
-        //                         <span>
-        //                             <Image
-        //                                 src={AITutorIcon}
-        //                                 alt="create account icon"
-        //                                 width={0} height={0}
-        //                                 className="w-[4vw] h-[4vw]"
-        //                             />
-        //                         </span>
-
-        //                         <span className="flex flex-col ml-3">
-        //                             <p className="text-[1.3vw] font-semibold">Phân tích thông tin môn học</p>
-        //                             <p className="text-[0.9vw]">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
-        //                         </span>
-        //                     </div>
-        //                 </Card>
-        //             </div>
-        //         </div>
-
-        //         <div className="col-span-4 col-start-9">
-        //             <Image
-        //                 src={workFlowPic}
-        //                 alt="workflow pic"
-        //                 width={0} height={0}
-        //                 className="w-full h-full object-contain"
-        //             />
-        //         </div>
-        //     </div>
-        // </section>
-
          <section className="w-full flex flex-col items-center justify-center bg-white py-12 sm:py-16 lg:py-20">
             <div className="w-[var(--global-width)] flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-0">
                 
@@ -693,19 +604,20 @@ const WorkFlowSection = () => {
                     <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-8">Cách hoạt động</p>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">01</p>
+                        <div className="flex items-center justify-center mr-4 sm:mr-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">01</p>
                         </div>
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
                                     src={createAccIcon}
                                     alt="create account icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Tạo tài khoản</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">Tạo tài khoản</p>
                                     <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Hoàn thiện thông tin và khẳng định kỹ năng của bạn.</p>
                                 </div>
                             </div>
@@ -713,40 +625,40 @@ const WorkFlowSection = () => {
                     </div>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
-                                    src={pickClassIcon}
+                                    src={role === "teacher" ? docUpload : pickClassIcon}
                                     alt="pick class icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Đăng tải môn học</p>
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Xây dựng môn học dẫn đầu xu thế.</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">{role === 'teacher' ? 'Đăng tải môn học' : 'Chọn môn học phù hợp' }</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">{role === 'teacher' ? 'Xây dựng môn học dẫn đầu xu thế.' : 'Một môn học giúp bạn nâng cao kĩ năng của bản thân.' }</p>
                                 </div>
                             </div>
                         </Card>
-                        <div className="flex items-center justify-center ml-4 sm:ml-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">02</p>
+                        <div className="flex items-center justify-center ml-4 sm:ml-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">02</p>
                         </div>
                     </div>
 
                     <div className="w-full flex items-stretch mb-5">
-                        <div className="flex items-center justify-center mr-4 sm:mr-6 w-10 sm:w-14 flex-shrink-0">
-                            <p className="text-3xl sm:text-4xl lg:text-5xl font-light leading-none text-gray-300">03</p>
+                        <div className="flex items-center justify-center mr-4 sm:mr-10 flex-shrink-0">
+                            <p className="text-6xl sm:text-7xl lg:text-8xl font-light leading-none text-gray-300">03</p>
                         </div>
-                        <Card className="w-full" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
+                        <Card className="flex-1" style={{ borderRadius: "20px", boxShadow: "5px 10px 25px rgba(19, 99, 223, 0.25)" }}>
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Image
-                                    src={AITutorIcon}
+                                    src={role === "teacher" ? diagram : AITutorIcon}
                                     alt="AI tutor icon"
                                     width={0} height={0}
-                                    className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0"
                                 />
                                 <div className="flex flex-col">
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold">Phân tích thông tin môn học</p>
-                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Nắm bắt thông tin môn học qua bảng điều khiển trực quan.</p>
+                                    <p className="text-lg sm:text-xl lg:text-2xl font-bold">{role === 'teacher' ? 'Phân tích thông tin môn học' : 'Bất đầu học cùng giá sư AI'}</p>
+                                    <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">{role === 'teacher' ? 'Nắm bắt thông tin môn học qua bảng điều khiển trực quan.' : 'Khám phá các tính năng AI hỗ trợ quá trình học của bạn.'}</p>
                                 </div>
                             </div>
                         </Card>
@@ -760,6 +672,67 @@ const WorkFlowSection = () => {
                         width={0} height={0}
                         className="w-full h-full object-contain"
                     />
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const showcaseCards = [
+    {
+        title: "AI Tutor Demo",
+        description: "Hỏi đáp tức thì với trợ lý AI theo từng chủ đề học tập.",
+    },
+    {
+        title: "Project QA",
+        description: "Phân tích bài làm và nhận góp ý rõ ràng trong vài giây.",
+    },
+    {
+        title: "Interactive Video",
+        description: "Tương tác trực tiếp trên video bài học",
+    },
+    {
+        title: "Voice Assistant",
+        description: "Trao đổi với AI Tutor thông qua giọng nói.",
+    },
+];
+
+const ShowcaseSection = () => {
+    return (
+        <section className="relative overflow-hidden w-full flex items-center justify-center bg-[linear-gradient(135deg,var(--color-neutral)_0%,#eef8ff_45%,var(--color-bg-white-soft)_100%)] py-12 sm:py-16 lg:py-20">
+            <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-[var(--color-accent)]/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -right-20 h-80 w-80 rounded-full bg-[var(--color-secondary)]/15 blur-3xl" />
+            <div className="w-[var(--global-width)] flex flex-col">
+                <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-[0.08em] text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-[var(--color-accent)] drop-shadow-[0_0_12px_rgba(19,99,223,0.2)]">
+                        JOB FAIR 2026 SHOWCASE
+                    </h2>
+                    <p className="text-base sm:text-lg lg:text-xl text-gray-600 mt-3">
+                        Trải nghiệm các tính năng đặc biệt
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+                    {showcaseCards.map((card) => (
+                        <Card
+                            key={card.title}
+                            className="h-full !rounded-2xl !bg-white border border-gray-200 hover:border-[var(--color-secondary)]/35 hover:-translate-y-1 hover:!shadow-[0_16px_34px_rgba(19,99,223,0.15)] transition-all duration-300"
+                        >
+                            <div className="flex flex-col h-full">
+                                <p className="text-lg sm:text-xl font-bold text-[var(--color-primary)] mb-2">{card.title}</p>
+                                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{card.description}</p>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                <div className="mt-8 sm:mt-10 flex justify-center">
+                    <Link
+                        href="/showcase"
+                        className="inline-flex items-center justify-center rounded-full px-8 py-3.5 text-base sm:text-lg font-semibold text-white bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] shadow-[0_0_0_1px_rgba(19,99,223,0.2),0_10px_28px_rgba(19,99,223,0.32)] hover:scale-105 hover:shadow-[0_0_0_1px_rgba(19,99,223,0.35),0_16px_36px_rgba(19,99,223,0.4)] transition-all duration-300"
+                    >
+                        Showcase
+                    </Link>
                 </div>
             </div>
         </section>
@@ -999,4 +972,4 @@ const QASection = () => {
     );
 };
 
-export { GreetingSection, CourseDisplaySection, FooterSection, FunctionSection, WorkFlowSection, TestimonialSection, QASection };
+export { GreetingSection, CourseDisplaySection, FooterSection, FunctionSection, WorkFlowSection, ShowcaseSection, TestimonialSection, QASection };

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Button, Select, Form, Input, InputNumber, Radio, message } from 'antd';
+import { Button, Select, Form, Input, Space, InputNumber, Radio, App } from 'antd';
 import type { RadioChangeEvent, InputNumberProps } from 'antd';
 
 import { Step1Data } from '@/type/createClass.type'
@@ -11,24 +11,53 @@ import { useSearchParams } from 'next/navigation';
 
 const { TextArea } = Input;
 
+interface InputProps {
+    value?: number | null;
+    onChange?: (value: number | null) => void;
+    id?: string;
+    content: string
+}
+
+const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
+    <Space.Compact style={{ width: '100%' }}>
+        <InputNumber 
+            id={id}
+            value={value} 
+            onChange={onChange} 
+            min={1} 
+            step={1} 
+            size="large" 
+            style={{ width: '100%' }}
+        />
+        <Button 
+            disabled 
+            size="large"
+            style={{ 
+                color: 'rgba(0, 0, 0, 0.88)',
+                backgroundColor: '#fafafa'  
+            }}
+            className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
+        >
+            {content}
+        </Button>
+    </Space.Compact>
+);
+
 interface Props {
   data: any; // Dữ liệu hiện có từ cha (nếu quay lại từ bước 2)
   onNext: (data: Partial<Step1Data>) => void; // Hàm nhận vào dữ liệu của step 1
 }
 
 const Step1: React.FC<Props> = ({ data, onNext }) =>{
+    const { message } = App.useApp();
+
     const searchParams = useSearchParams();
     const [form] = Form.useForm();
     const { data: categoryData } = useGetAllCategoryQuery();
     const [createCourseStep, { isLoading: isCreating }] = useCreateCourseStepMutation();
     const [patchCourseStep, { isLoading: isUpdating }] = usePatchCourseStepMutation();
 
-    const options = [
-        { label: 'React', value: 'react' },
-        { label: 'TypeScript', value: 'typescript' },
-        { label: 'Node.js', value: 'nodejs' },
-    ];
-    const [radioVal, setRadioVal] = useState(data.pricingType || 1);
+    const [radioVal, setRadioVal] = useState(1);
     const onChangeRadio = (e: RadioChangeEvent) => {
         setRadioVal(e.target.value);
     };
@@ -41,6 +70,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
 
     const handleFinish = async (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
+        let buffer = values.duration + " tháng";
 
         //Logic xử lý data từ step1
         const courseData = {
@@ -48,7 +78,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
             course_code: values.courseCode,
             course_name: values.courseName,
             course_description: values.description,
-            duration: values.duration,
+            duration: buffer,
             thumbnail_url: values.thumbnail_url || undefined,
             tuition_fee: values.price || 0,
             category: values.categories,
@@ -98,7 +128,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     initialValues={data} // Chỗ này load data get từ server
                     requiredMark={false}
                     labelCol={{
-                            xs: { span: 4 }, // Mặc định cho màn siêu nhỏ
+                            xs: { span: 7 }, // Mặc định cho màn siêu nhỏ
                             sm: { span: 4 }, // Màn nhỏ
                             md: { span: 4 }, // Medium và trở xuống 
                             lg: { span: 2 }, // Từ màn hình Large (992px+) trở lên thì dùng 2
@@ -125,7 +155,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     <Form.Item 
                         name="description"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px'}}>Mô tả</span>} 
-                        labelCol={{xs: { span: 4 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
+                        labelCol={{xs: { span: 7 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
                         rules={[{ required: true, message: 'Vui lòng nhập mô tả môn học!' }]}
                     >
                         <TextArea
@@ -148,7 +178,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Thời lượng</span>}
                         rules={[{ required: true, message: 'Vui lòng nhập thời lượng môn học!' }]}
                     >
-                        <Input size="large"/>
+                        <CustomInput content="Tháng" />
                     </Form.Item>
 
                     <Form.Item 
@@ -163,11 +193,11 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     <Form.Item 
                         name="pricingType"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phí</span>}
+                        rules={[{ required: true, message: 'Vui lòng chọn kiểu học phí!' }]}
                     >
                         <Radio.Group
                             style={{display:'flex', flexDirection: 'column', gap: 8}}
                             onChange={onChangeRadio}
-                            value={radioVal}
                             options={[
                                 { value: 1, label: 'Miễn phí' },
                                 { value: 2, label: "Có phí" }
@@ -181,21 +211,17 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                             wrapperCol={{ xs: { offset: 4 }, sm: { offset: 4 }, md: { offset: 4 }, lg: { offset: 2 }}}
                             rules={[{ required: true, message: 'Vui lòng nhập học phí!' }]}
                         >
-                            <InputNumber<number> 
-                                formatter={formatter} 
-                                size="large" 
-                                suffix="VND" 
-                                style={{ width: '100%' }} 
-                            />
+                            <CustomInput content="VND" />
                         </Form.Item>
                     )}
 
                     <Form.Item className='flex justify-center'>
-                        <Button
+                        <Button 
                             type="primary"
                             htmlType="submit"
                             size="large"
                             loading={isCreating || isUpdating}
+                            className="!w-[8.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                         >
                             Tiếp tục
                         </Button>
