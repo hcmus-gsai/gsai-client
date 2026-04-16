@@ -6,6 +6,7 @@ export async function proxy(req: any) {
   console.log('Middleware triggered for:', req.nextUrl.pathname);
 
   const token = req.cookies.get('accessToken')?.value;
+  const showcaseModeCookie = req.cookies.get('showcaseMode')?.value;
 
   // Không có token → cho vào public routes
   const publicPaths = [
@@ -36,16 +37,26 @@ export async function proxy(req: any) {
 
     const role = decoded?.role;
     const path = req.nextUrl.pathname;
+    const email = decoded?.email as string | undefined;
+    const isShowcaseGuest = typeof email === 'string' && email.startsWith('showcase.guest.');
+    const isShowcaseMode = showcaseModeCookie === '1' || isShowcaseGuest;
+    const isStudentPath = path === '/student' || path.startsWith('/student/');
+    const isTeacherPath = path === '/teacher' || path.startsWith('/teacher/');
 
     console.log('Role:', role);
     console.log('Path:', path);
 
+    // Khi đang ở showcase mode thì không cho vào student/teacher chuẩn.
+    if (isShowcaseMode && (isStudentPath || isTeacherPath)) {
+      return NextResponse.redirect(new URL('/showcase/student', req.url));
+    }
+
     // Nếu user cố truy cập vùng không thuộc role của mình
-    if (path.startsWith('/student/') && role !== 'student') {
+    if (isStudentPath && role !== 'student') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
     }
 
-    if (path.startsWith('/teacher/') && role !== 'teacher') {
+    if (isTeacherPath && role !== 'teacher') {
       return NextResponse.redirect(new URL('/auth/signin', req.url));
     }
 

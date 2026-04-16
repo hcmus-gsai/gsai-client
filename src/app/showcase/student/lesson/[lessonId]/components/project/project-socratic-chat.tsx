@@ -136,6 +136,18 @@ const ProjectSocraticChat = ({
 
     const sessions = useMemo(() => sessionsData?.sessions || [], [sessionsData]);
 
+    const safeRefetchSessions = async () => {
+        if (!lessonId || !sessionsData) {
+            return;
+        }
+
+        try {
+            await refetchSessions();
+        } catch (error) {
+            console.error('Refetch socratic sessions skipped:', error);
+        }
+    };
+
     const openSession = async (sessionId: string) => {
         const response = await getSessionMessages({ lessonId, sessionId }).unwrap();
         setCurrentSessionId(sessionId);
@@ -144,14 +156,14 @@ const ProjectSocraticChat = ({
 
     const handleCreateSession = async () => {
         const created = await createSession(lessonId).unwrap();
-        await refetchSessions();
+        await safeRefetchSessions();
         await openSession(created.session_id);
         setShowHistory(false);
     };
 
     const handleDeleteSession = async (sessionId: string) => {
         await deleteSocraticSession({ lessonId, sessionId }).unwrap();
-        await refetchSessions();
+        await safeRefetchSessions();
 
         if (currentSessionId === sessionId) {
             const remaining = sessions.filter((s) => s.session_id !== sessionId);
@@ -196,7 +208,7 @@ const ProjectSocraticChat = ({
                 ...prev,
                 response.assistantMessage,
             ]);
-            await refetchSessions();
+            await safeRefetchSessions();
         } catch (error) {
             setMessages((prev) => [
                 ...prev,

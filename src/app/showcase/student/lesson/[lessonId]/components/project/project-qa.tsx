@@ -411,6 +411,27 @@ const LectureProjQA = () => {
         }
     };
 
+    // Helper to get message text string
+    function getMessageText(msg: QAMessage): string {
+        if (msg.role === 'user') {
+            const userText = typeof msg.content === 'string'
+                ? msg.content
+                : msg.content?.message || msg.content?.text || JSON.stringify(msg.content);
+            return typeof userText === 'string' ? userText : JSON.stringify(userText);
+        }
+
+        if (typeof msg.content === 'string') return msg.content;
+        if (msg.content?.response) {
+            return typeof msg.content.response === 'string'
+                ? msg.content.response
+                : JSON.stringify(msg.content.response);
+        }
+        if (msg.content) {
+            return JSON.stringify(msg.content, null, 2);
+        }
+        return '';
+    }
+
 
     //
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -662,27 +683,6 @@ const LectureProjQA = () => {
             }
         }
     }, [treeData, selectedFileName]);
-
-    // Helper to get message text string
-    const getMessageText = (msg: QAMessage): string => {
-        if (msg.role === 'user') {
-            const userText = typeof msg.content === 'string'
-                ? msg.content
-                : msg.content?.message || msg.content?.text || JSON.stringify(msg.content);
-            return typeof userText === 'string' ? userText : JSON.stringify(userText);
-        } else {
-            if (typeof msg.content === 'string') return msg.content;
-            if (msg.content?.response) {
-                return typeof msg.content.response === 'string'
-                    ? msg.content.response
-                    : JSON.stringify(msg.content.response);
-            }
-            if (msg.content) {
-                return JSON.stringify(msg.content, null, 2);
-            }
-            return '';
-        }
-    };
 
     if (historyLoading) {
         return (

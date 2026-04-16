@@ -13,10 +13,15 @@ export default function ShowcaseCourseCard({ course }: Props) {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
     const SHOWCASE_GUEST_EMAIL_KEY = 'showcaseGuestEmail';
     const SHOWCASE_GUEST_MANAGED_KEY = 'showcaseGuestManaged';
+    const SHOWCASE_MODE_COOKIE = 'showcaseMode';
 
     const lessonPath = course.first_lesson
         ? `/showcase/student/lesson/${course.first_lesson.id}/${course.first_lesson.type}`
         : '/showcase/student';
+
+    const enableShowcaseMode = () => {
+        document.cookie = `${SHOWCASE_MODE_COOKIE}=1; path=/; max-age=86400; samesite=lax`;
+    };
 
     const ensureGuestSession = async () => {
         const profileResponse = await fetch(`${API_BASE_URL}/users/profile`, {
@@ -25,6 +30,10 @@ export default function ShowcaseCourseCard({ course }: Props) {
         });
 
         if (profileResponse.ok) {
+            const managed = sessionStorage.getItem(SHOWCASE_GUEST_MANAGED_KEY);
+            if (managed === '1') {
+                enableShowcaseMode();
+            }
             return;
         }
 
@@ -50,6 +59,7 @@ export default function ShowcaseCourseCard({ course }: Props) {
 
         sessionStorage.setItem(SHOWCASE_GUEST_EMAIL_KEY, guestEmail);
         sessionStorage.setItem(SHOWCASE_GUEST_MANAGED_KEY, '1');
+        enableShowcaseMode();
     };
 
     const ensureEnrollment = async () => {
