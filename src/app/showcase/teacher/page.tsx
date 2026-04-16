@@ -8,17 +8,25 @@ export default function ShowcaseTeacherPage() {
                     <div className="rounded-3xl border border-[#d9ebff] bg-white p-8 sm:p-10 shadow-[0_14px_38px_rgba(19,99,223,0.1)]">
                         <p className="text-sm font-semibold text-[var(--color-secondary)] mb-2">Showcase</p>
                         <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-primary)] mb-3">
-                            Luồng giáo viên đang được cập nhật
+                            Demo AI Studio cho giáo viên
                         </h1>
                         <p className="text-gray-600 mb-6">
-                            Phần trải nghiệm cho giáo viên sẽ được bổ sung ở phiên bản tiếp theo.
+                            Trải nghiệm nhanh luồng generate video bài giảng bằng AI và quản lý video ngay trong showcase.
                         </p>
-                        <Link
-                            href="/showcase"
-                            className="inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-secondary)] hover:bg-[var(--color-accent)] transition-colors"
-                        >
-                            Quay lại chọn vai trò
-                        </Link>
+                        <div className="flex flex-wrap gap-3">
+                            <Link
+                                href="/showcase/teacher/ai-studio"
+                                className="inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold text-white bg-[var(--color-secondary)] hover:bg-[var(--color-accent)] transition-colors"
+                            >
+                                Mở AI Studio
+                            </Link>
+                            <Link
+                                href="/showcase"
+                                className="inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold text-[var(--color-secondary)] border border-[var(--color-secondary)] hover:bg-[var(--color-neutral)] transition-colors"
+                            >
+                                Quay lại chọn vai trò
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>
