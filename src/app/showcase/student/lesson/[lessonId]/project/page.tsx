@@ -5,12 +5,13 @@ import React, { useEffect, useState } from 'react';
 import { Button, Spin, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { useLazyGetProjectDocumentQuery } from '@/store/api/[module]/projectApi';
-import { useParams, redirect } from 'next/navigation';
+import { useParams, redirect, useRouter } from 'next/navigation';
+import { cleanupShowcaseGuestSession } from '@/app/showcase/utils/guestSession';
 import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import LectureProjContent from '../components/project/project-content';
 import LectureProjSubmit from '../components/project/project-submit';
-import LectureProjQA from '../components/project/project-qa';
+import LectureProjQAV2 from '../components/project/project-qa-v2';
 import ProjectSocraticChat from '../components/project/project-socratic-chat';
 
 import { useAppDispatch } from '@/store/hook';
@@ -134,6 +135,12 @@ const markdownComponents: Components = {
 export default function LectureProjPage() {
     const { lessonId: projectId } = useParams();
     const dispatch = useAppDispatch();
+    const router = useRouter();
+
+    const handleBackToHome = async () => {
+        await cleanupShowcaseGuestSession();
+        router.push('/');
+    };
 
     const [activeTab, setActiveTab] = useState<string>('content');
     const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
@@ -323,7 +330,7 @@ export default function LectureProjPage() {
                 return <LectureProjSubmit />;
 
             case 'qa':
-                return <LectureProjQA />;
+                return <LectureProjQAV2 />;
 
             default:
                 return null;
@@ -333,7 +340,13 @@ export default function LectureProjPage() {
     return (
         <>
             <div className="flex-1 flex flex-col gap-[0.5rem]">
-                {/* Tabs ở góc trên bên trái */}
+                <button
+                    onClick={handleBackToHome}
+                    className="self-start inline-flex items-center gap-2 text-sm font-semibold text-black hover:text-[var(--color-secondary)] transition-colors"
+                >
+                    <span aria-hidden>←</span>
+                    <span>Về trang chủ</span>
+                </button>
                 <Tabs
                     items={tabItems}
                     activeKey={activeTab}

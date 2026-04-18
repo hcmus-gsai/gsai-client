@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ShowcaseRoleSelection from "./components/ShowcaseRoleSelection";
 
+// Trang này KHÔNG tạo tài khoản showcase guest, chỉ chọn vai trò
 export default function ShowcasePage() {
     return (
         <main className="w-full grow flex min-h-screen flex-col overflow-x-clip bg-[radial-gradient(900px_420px_at_10%_-10%,rgba(71,181,255,0.28),transparent),radial-gradient(900px_480px_at_90%_10%,rgba(19,99,223,0.18),transparent),linear-gradient(180deg,#f6fbff_0%,#f9fcff_50%,#ffffff_100%)]">
