@@ -1,27 +1,5 @@
-'use client';
-
-import { useEffect, useRef } from 'react';
-import { cleanupShowcaseGuestSession } from '../utils/guestSession';
+import ShowcaseGuestLayout from '../ShowcaseGuestLayout';
 
 export default function ShowcaseStudentLayout({ children }: { children: React.ReactNode }) {
-    const unloadingRef = useRef(false);
-
-    useEffect(() => {
-        const onBeforeUnload = () => {
-            unloadingRef.current = true;
-        };
-
-        window.addEventListener('beforeunload', onBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', onBeforeUnload);
-            if (!unloadingRef.current) {
-                const path = window.location.pathname;
-                if (!path.startsWith('/showcase/student')) {
-                    void cleanupShowcaseGuestSession();
-                }
-            }
-        };
-    }, []);
-
-    return <>{children}</>;
+    return <ShowcaseGuestLayout role="student">{children}</ShowcaseGuestLayout>;
 }
