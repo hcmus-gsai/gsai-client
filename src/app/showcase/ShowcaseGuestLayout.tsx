@@ -27,7 +27,11 @@ export default function ShowcaseGuestLayout({
         };
 
         const onBeforeUnload = () => { isUnloadingRef.current = true; };
-        const onPageHide = () => { runCleanup(); };
+        const onPageHide = (event: PageTransitionEvent) => {
+            // persisted=true means the page is entering the bfcache (back-forward cache),
+            // not being unloaded — do NOT clean up, the user may come back.
+            if (!event.persisted) runCleanup();
+        };
 
         window.addEventListener('beforeunload', onBeforeUnload);
         window.addEventListener('pagehide', onPageHide);

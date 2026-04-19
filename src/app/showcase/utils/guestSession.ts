@@ -15,7 +15,13 @@ const clearShowcaseModeCookie = () => {
 };
 
 export const ensureShowcaseGuestSession = async (role: ShowcaseRole): Promise<void> => {
-    // Check if an active auth session already exists (ignore network errors — just proceed)
+    // Active showcase session exists in this tab — just re-arm the cookie
+    if (sessionStorage.getItem(SHOWCASE_SESSION_KEY)) {
+        setShowcaseModeCookie();
+        return;
+    }
+
+    // No session key. Check if there's any authenticated user via existing cookie.
     try {
         const profileResponse = await fetch(`${API_BASE_URL}/users/profile`, {
             method: 'GET',
@@ -23,16 +29,22 @@ export const ensureShowcaseGuestSession = async (role: ShowcaseRole): Promise<vo
         });
 
         if (profileResponse.ok) {
-            if (sessionStorage.getItem(SHOWCASE_SESSION_KEY)) {
+            const profile = await profileResponse.json();
+            // Real (non-guest) user — don't overwrite their session with a guest account.
+            // Guest accounts use the @gsai.local email domain; anything else is a real user.
+            if (!profile?.email?.endsWith('@gsai.local')) {
                 setShowcaseModeCookie();
+                return;
             }
-            return;
+            // Guest account detected but no session key — this is a race condition where
+            // cleanup already removed the key but the DELETE request hasn't completed yet
+            // (old JWT is still alive). Fall through to create a fresh guest account.
         }
     } catch {
         // Network error on profile check — proceed to create guest account
     }
 
-    // Not authenticated — create a new showcase guest account
+    // Create a new showcase guest account
     const response = await fetch(`${API_BASE_URL}/showcase/guest-account`, {
         method: 'POST',
         credentials: 'include',
