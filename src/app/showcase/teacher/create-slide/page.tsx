@@ -466,7 +466,7 @@ export default function SlideList() {
             const startJobRes = await startGeneration({ jobId: videoGen.id }).unwrap();
             console.log(startJobRes.message);
 
-            router.push('/teacher/ai-studio');
+            router.push('/showcase/teacher/ai-studio');
         } catch (err) {
             console.error("Failed to create the job: ", err);
             showCreateVideoHint('Tạo job video thất bại. Vui lòng thử lại.');
