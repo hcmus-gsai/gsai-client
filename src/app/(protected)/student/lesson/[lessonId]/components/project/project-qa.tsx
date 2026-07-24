@@ -415,6 +415,27 @@ const LectureProjQA = () => {
     //
     const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
+    // Helper to get message text string
+    const getMessageText = (msg: QAMessage): string => {
+        if (msg.role === 'user') {
+            const userText = typeof msg.content === 'string'
+                ? msg.content
+                : msg.content?.message || msg.content?.text || JSON.stringify(msg.content);
+            return typeof userText === 'string' ? userText : JSON.stringify(userText);
+        } else {
+            if (typeof msg.content === 'string') return msg.content;
+            if (msg.content?.response) {
+                return typeof msg.content.response === 'string'
+                    ? msg.content.response
+                    : JSON.stringify(msg.content.response);
+            }
+            if (msg.content) {
+                return JSON.stringify(msg.content, null, 2);
+            }
+            return '';
+        }
+    };
+
     // --- Khối File Explorer ---
     const FileExplorerContent = (
         <div className="flex flex-col h-full bg-white rounded-lg border border-gray-200 p-4">
@@ -448,9 +469,9 @@ const LectureProjQA = () => {
         <div className="flex-1 flex flex-col bg-[#1e1e1e] rounded-lg h-full overflow-hidden">
             <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-[#3e3e3e]">
                 <div className="flex items-center gap-2">
-                    <MenuIcon 
-                        className="md:hidden text-white cursor-pointer" 
-                        onClick={() => setIsMobileDrawerOpen(true)} 
+                    <MenuIcon
+                        className="md:hidden text-white cursor-pointer"
+                        onClick={() => setIsMobileDrawerOpen(true)}
                     />
                     <span className="text-gray-300 text-sm font-mono">{selectedFileName || 'No file selected'}</span>
                 </div>
@@ -662,27 +683,6 @@ const LectureProjQA = () => {
             }
         }
     }, [treeData, selectedFileName]);
-
-    // Helper to get message text string
-    const getMessageText = (msg: QAMessage): string => {
-        if (msg.role === 'user') {
-            const userText = typeof msg.content === 'string'
-                ? msg.content
-                : msg.content?.message || msg.content?.text || JSON.stringify(msg.content);
-            return typeof userText === 'string' ? userText : JSON.stringify(userText);
-        } else {
-            if (typeof msg.content === 'string') return msg.content;
-            if (msg.content?.response) {
-                return typeof msg.content.response === 'string'
-                    ? msg.content.response
-                    : JSON.stringify(msg.content.response);
-            }
-            if (msg.content) {
-                return JSON.stringify(msg.content, null, 2);
-            }
-            return '';
-        }
-    };
 
     if (historyLoading) {
         return (
@@ -979,8 +979,8 @@ const LectureProjQA = () => {
 
             {/* MOBILE LAYOUT (Hiện trên màn hình nhỏ, ẩn trên md) */}
             <div className="flex md:hidden w-full h-full flex-col">
-                <Tabs 
-                    defaultActiveKey="code" 
+                <Tabs
+                    defaultActiveKey="code"
                     className="h-full project-qa-mobile-tabs"
                     items={[
                         {
@@ -1011,7 +1011,7 @@ const LectureProjQA = () => {
                     {/* Khi chọn file xong, tự động đóng Drawer */}
                     <div onClick={(e) => {
                         // Nếu click vào một file (không phải folder), đóng drawer
-                        if((e.target as HTMLElement).closest('.ant-tree-treenode-switcher-open') === null) {
+                        if ((e.target as HTMLElement).closest('.ant-tree-treenode-switcher-open') === null) {
                             setIsMobileDrawerOpen(false);
                         }
                     }}>
