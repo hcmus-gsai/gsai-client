@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { RootState } from '../store';
 import { signOut } from '../slice/authSlice';
+import { refreshAccessToken } from './authRefresh';
 
 
 
@@ -17,9 +18,6 @@ const baseQuery = fetchBaseQuery({
 });
 
 
-// Mutex to prevent multiple refresh calls
-let refreshPromise: Promise<boolean> | null = null;
-
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -27,51 +25,11 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // Only attempt refresh if we get 401
+  // Only attempt refresh if we get 401. The refresh mutex is shared with the streaming chat
+  // client (`chatStream.ts`), which bypasses RTK Query with a hand-rolled `fetch` — sharing one
+  // promise means a token expiring mid-page never triggers two concurrent refresh calls.
   if (result.error?.status === 401) {
-
-    // If a refresh is already in progress, wait for it
-    if (refreshPromise) {
-      console.log('Refresh already in progress, waiting...');
-      const refreshSuccess = await refreshPromise;
-      if (refreshSuccess) {
-        // Retry the original request
-        return baseQuery(args, api, extraOptions);
-      } else {
-        // If refresh failed, we fail too (and let the logout happen from the first failure)
-        // api.dispatch(signOut()); // Redundant, handled below
-        return result;
-      }
-    }
-
-    console.log('Access token expired, attempting refresh...');
-
-    // Start a new refresh process
-    refreshPromise = (async () => {
-      try {
-        const refreshResult = await baseQuery(
-          '/auth/refresh-token',
-          api,
-          extraOptions
-        );
-        if (refreshResult.data) {
-          console.log("Token refreshed successfully");
-          return true;
-        } else {
-          console.log("Refresh token failed/expired");
-          api.dispatch(signOut());
-          return false;
-        }
-      } catch (e) {
-        console.error("Refresh error:", e);
-        api.dispatch(signOut());
-        return false;
-      }
-    })();
-
-    const success = await refreshPromise;
-    refreshPromise = null; // Reset mutex
-
+    const success = await refreshAccessToken(() => api.dispatch(signOut()));
     if (success) {
       result = await baseQuery(args, api, extraOptions);
     }
