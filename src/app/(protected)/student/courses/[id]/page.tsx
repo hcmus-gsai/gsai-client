@@ -166,7 +166,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={courseData?.teacher_avatar_url}
+                                            src={courseData?.teacher_avatar_url || starSVG}
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -260,7 +260,7 @@ export default function StudentCoursePage() {
     const { id } = useParams();
     const { data: courseInfo, isLoading, error } = useGetCourseByIdQuery(id as string);
     const courseData = courseInfo?.data;
-    const { data: teacherStatistc} = useGetTotalEnrollmentQuery(id as string);
+    const { data: teacherStatistc } = useGetTotalEnrollmentQuery(id as string);
     const totalEnrollment = teacherStatistc ?? 0;
 
     if (isLoading) {
@@ -280,7 +280,7 @@ export default function StudentCoursePage() {
             </section>
 
             <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment} />
-            <CourseSyllabusSection category={courseData?.category}/>
+            <CourseSyllabusSection category={courseData?.category} />
 
             <CourseDisplaySection
                 title="Môn học tương tự"

@@ -20,6 +20,35 @@ import {
 } from '@/type/project.type';
 import { baseApi } from '../baseApi';
 
+export type ShowcaseQAQuestion = {
+    question_id: string;
+    content: string;
+    intent: string;
+    rubric_ref: string | null;
+    difficulty: 'basic' | 'intermediate' | 'advanced';
+};
+
+export type ShowcaseQuestionScore = {
+    question_id: string;
+    question_content: string;
+    score: 0 | 1 | 2;
+    score_label: 'không hiểu' | 'hiểu một phần' | 'hiểu hoàn toàn';
+    what_student_got_right: string;
+    what_student_missed: string;
+    key_evidence: string;
+    rubric_criteria_met: string | null;
+};
+
+export type ShowcaseGradingReport = {
+    student_name: string | null;
+    total_score: number;
+    max_score: number;
+    percentage: number;
+    summary: string;
+    per_question: ShowcaseQuestionScore[];
+    generated_at: string;
+};
+
 export const projectApi = baseApi.injectEndpoints({
     overrideExisting: true,
     endpoints: (builder) => ({
@@ -188,6 +217,10 @@ export const projectApi = baseApi.injectEndpoints({
             ],
         }),
 
+        getProjectQAReport: builder.query<ShowcaseGradingReport, string>({
+            query: (lessonId) => `/lessons/${lessonId}/qa/report`,
+        }),
+
         // ==================== Teacher View Endpoints ====================
         getAllSubmissions: builder.query<SubmissionHistoryItem, null>({
             query: () => `projects-submission/all`,
@@ -268,6 +301,7 @@ export const {
     useLazyGetSubmissionQuery,
     useGetSubmitJsonQuery,
     useLazyGetSubmitJsonQuery,
+    useLazyGetProjectQAReportQuery,
 
     // Teacher view hooks
     useGetAllSubmissionsQuery,
@@ -278,5 +312,5 @@ export const {
     useLazyGetSocraticSessionMessagesQuery,
     useSendSocraticMessageMutation,
     useDeleteSocraticSessionMutation,
-    
+
 } = projectApi;
