@@ -2,7 +2,7 @@ export interface QuizResponse {
     lesson_id: string;
     lesson_name: string;
     quiz_id: string | null;
-    expired_date: string | null;
+    expired_date: string;
     duration: number | null;
     passing_score_percentage: number | null;
 }

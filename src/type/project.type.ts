@@ -112,6 +112,11 @@ export interface SendQAMessageResponse {
         audio_url?: string;
         timestamp: string;
     };
+    gradingResult?: {
+        completed: boolean;
+        score_out_of_10: number;
+        [key: string]: any;
+    };
 }
 
 export interface QAMessage {
@@ -128,6 +133,7 @@ export interface QAHistoryResponse {
     lessonId: string;
     enrollmentId: string;
     history: QAMessage[];
+    grading_status?: string;
 }
 
 export interface SubmitJsonNode {

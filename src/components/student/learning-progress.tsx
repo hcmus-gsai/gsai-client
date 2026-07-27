@@ -195,7 +195,7 @@ const LearningProgressSection = () => {
                                                     {lesson?.lesson_name ?? "-"}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    {lesson?.estimated_completion_time ?? "-"} ·{" "}
+                                                    {/* {lesson?.estimated_completion_time ?? "-"} ·{" "} */}
                                                     {typeTranslate[lesson?.type ?? ""] ?? "-"}
                                                 </p>
                                             </div>

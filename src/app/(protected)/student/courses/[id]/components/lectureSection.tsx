@@ -328,9 +328,9 @@ const LectureSection = () => {
                                                         <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
                                                             {LessonTypeLabel[lesson.type as LessonType] ?? 'Không xác định'}
                                                         </p>
-                                                        <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
+                                                        {/* <p className="text-sm md:text-[1rem] font-light text-[var(--color-primary)]">
                                                             {lesson.estimated_completion_time}
-                                                        </p>
+                                                        </p> */}
                                                     </div>
                                                 </div>
                                             </div>
