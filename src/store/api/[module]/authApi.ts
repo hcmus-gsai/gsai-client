@@ -37,7 +37,7 @@ export const authApi = baseApi.injectEndpoints({
         refreshToken: builder.mutation({
             query: () => ({
                 url: '/auth/refresh-token',
-                method: 'POST',
+                method: 'GET',
             }),
         }),
 
@@ -46,7 +46,7 @@ export const authApi = baseApi.injectEndpoints({
             query: () => ({
                 url: '/auth/sign-out',
                 method: 'POST',
-                credentials: 'include', 
+                credentials: 'include',
             }),
             async onQueryStarted(arg, { queryFulfilled }) {
                 try {
