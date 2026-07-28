@@ -17,6 +17,11 @@ import {
     SocraticSessionMessagesResponse,
     SendSocraticMessageRequest,
     SendSocraticMessageResponse,
+    QAV2CreateSessionResponse,
+    QAV2CurrentSessionResponse,
+    QAV2StartInterviewResponse,
+    QAV2RespondResponse,
+    QAV2GradingReport,
 } from '@/type/project.type';
 import { baseApi } from '../baseApi';
 
@@ -132,6 +137,75 @@ export const projectApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, lessonId) => [
                 { type: 'ChatModule', id: `qa-${lessonId}` }
             ],
+        }),
+
+        // ==================== Project Q&A v2 Endpoints ====================
+        // Luồng vấn đáp 3 câu + báo cáo chấm điểm chi tiết (giống showcase, nhưng
+        // chạy trên tài khoản thật — server tự lấy userId từ access token).
+
+        /**
+         * Create a Q&A v2 session (Agent 1 sinh câu hỏi)
+         * POST /lessons/:lessonId/qa/v2/sessions
+         */
+        createProjectQAV2Session: builder.mutation<QAV2CreateSessionResponse, string>({
+            query: (lessonId) => ({
+                url: `/lessons/${lessonId}/qa/v2/sessions`,
+                method: 'POST',
+            }),
+        }),
+
+        /**
+         * Get current Q&A v2 session state
+         * GET /lessons/:lessonId/qa/v2/sessions/current
+         */
+        getProjectQAV2Session: builder.query<QAV2CurrentSessionResponse, string>({
+            query: (lessonId) => `/lessons/${lessonId}/qa/v2/sessions/current`,
+        }),
+
+        /**
+         * Start interview / get next question
+         * POST /lessons/:lessonId/qa/v2/start-interview
+         */
+        startProjectQAV2Interview: builder.mutation<QAV2StartInterviewResponse, string>({
+            query: (lessonId) => ({
+                url: `/lessons/${lessonId}/qa/v2/start-interview`,
+                method: 'POST',
+            }),
+        }),
+
+        /**
+         * Send student answer
+         * POST /lessons/:lessonId/qa/v2/respond
+         */
+        respondProjectQAV2: builder.mutation<QAV2RespondResponse, { lessonId: string; student_message: string }>({
+            query: ({ lessonId, student_message }) => ({
+                url: `/lessons/${lessonId}/qa/v2/respond`,
+                method: 'POST',
+                body: { student_message },
+            }),
+        }),
+
+        /**
+         * Get grading report (feedback từng câu)
+         * GET /lessons/:lessonId/qa/v2/report
+         */
+        getProjectQAV2Report: builder.query<QAV2GradingReport, string>({
+            query: (lessonId) => `/lessons/${lessonId}/qa/v2/report`,
+        }),
+
+        /**
+         * Persist grading report
+         * PATCH /lessons/:lessonId/qa/v2/result
+         */
+        saveProjectQAV2Result: builder.mutation<
+            { success: boolean; session_id: string | null; stage: string },
+            { lessonId: string; grading_report: QAV2GradingReport }
+        >({
+            query: ({ lessonId, grading_report }) => ({
+                url: `/lessons/${lessonId}/qa/v2/result`,
+                method: 'PATCH',
+                body: { grading_report },
+            }),
         }),
 
         // ==================== Project Submission Endpoints ====================
@@ -260,6 +334,15 @@ export const {
     useGetQAHistoryQuery,
     useLazyGetQAHistoryQuery,
     useDeleteQAHistoryMutation,
+
+    // Project Q&A v2 hooks
+    useCreateProjectQAV2SessionMutation,
+    useGetProjectQAV2SessionQuery,
+    useLazyGetProjectQAV2SessionQuery,
+    useStartProjectQAV2InterviewMutation,
+    useRespondProjectQAV2Mutation,
+    useLazyGetProjectQAV2ReportQuery,
+    useSaveProjectQAV2ResultMutation,
 
     // Project Submission hooks
     useSubmitProjectMutation,

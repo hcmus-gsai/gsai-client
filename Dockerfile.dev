@@ -1,0 +1,35 @@
+# =============================================================================
+# gsai-client — image cho MÔI TRƯỜNG DEV (next dev, có hot reload)
+# =============================================================================
+# Cố ý KHÔNG dùng `next build`: docker-compose.dev.yml bind-mount mã nguồn từ
+# host vào /app, nên build sẵn trong image sẽ bị ghi đè. Ở đây chỉ cài sẵn
+# node_modules rồi chạy dev server.
+#
+# Muốn build bản production thì viết Dockerfile riêng (multi-stage +
+# `output: 'standalone'` trong next.config.ts) — file này không dùng cho prod.
+# =============================================================================
+FROM node:22-alpine
+
+# Một vài native dep của Next/SWC cần glibc shim trên Alpine.
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Cài dependency thành layer riêng để đổi mã nguồn không phải cài lại.
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Chỉ để image chạy được khi KHÔNG bind-mount; ở compose thư mục này bị mount đè.
+COPY . .
+
+ENV NEXT_TELEMETRY_DISABLED=1
+# Bind mount trên Windows/macOS không sinh inotify event, phải bật polling thì
+# hot reload mới nhận thay đổi file.
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
+
+EXPOSE 3000
+
+# --hostname 0.0.0.0 để cổng publish ra host truy cập được (mặc định next dev
+# chỉ bind localhost bên trong container).
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]

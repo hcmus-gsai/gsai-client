@@ -128,6 +128,77 @@ export interface QAHistoryResponse {
     lessonId: string;
     enrollmentId: string;
     history: QAMessage[];
+    grading_status?: string;
+}
+
+// ==================== Project Q&A v2 (vấn đáp 3 câu + báo cáo chấm điểm) ====================
+
+export interface QAV2Question {
+    question_id: string;
+    content: string;
+    intent: string;
+    rubric_ref: string | null;
+    difficulty: 'basic' | 'intermediate' | 'advanced';
+}
+
+export interface QAV2QuestionScore {
+    question_id: string;
+    question_content: string;
+    score: 0 | 1 | 2;
+    score_label: 'không hiểu' | 'hiểu một phần' | 'hiểu hoàn toàn';
+    what_student_got_right: string;
+    what_student_missed: string;
+    key_evidence: string;
+    rubric_criteria_met: string | null;
+}
+
+export interface QAV2GradingReport {
+    student_name: string | null;
+    total_score: number;
+    max_score: number;
+    percentage: number;
+    summary: string;
+    per_question: QAV2QuestionScore[];
+    generated_at: string;
+}
+
+export type QAV2Stage = 'loading' | 'interviewing' | 'grading' | 'result';
+
+export interface QAV2CreateSessionResponse {
+    session_id: string | null;
+    questions: QAV2Question[];
+    status: string;
+    stage: QAV2Stage;
+    grading_report: QAV2GradingReport | null;
+}
+
+export interface QAV2CurrentSessionResponse {
+    session_id: string | null;
+    stage: QAV2Stage;
+    questions: QAV2Question[];
+    grading_report: QAV2GradingReport | null;
+    last_status?: {
+        agent_message: string;
+        current_question_id: string;
+        question_index: number;
+        question_status: string;
+        interview_status: string;
+    };
+    updated_at: string;
+}
+
+export interface QAV2StartInterviewResponse {
+    question_index: number;
+    agent_message: string;
+    current_question_id: string;
+}
+
+export interface QAV2RespondResponse {
+    agent_message: string;
+    current_question_id: string;
+    question_index: number;
+    question_status: string;
+    interview_status: 'in_progress' | 'completed';
 }
 
 export interface SubmitJsonNode {
