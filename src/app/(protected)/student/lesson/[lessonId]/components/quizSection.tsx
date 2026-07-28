@@ -32,7 +32,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                 isShown: false
             }));
 
-            redirect('/student/home'); 
+            redirect('/student/home');
         }
     }, [error]);
 
@@ -50,6 +50,8 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
         }
     }, [latestAttempt]);
 
+    console.log(latestAttempt)
+
     const formatTime = (s: number) => ({
         hours: Math.floor(s / 3600),
         minutes: Math.floor((s % 3600) / 60),
@@ -66,7 +68,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                     <div className="w-full flex items-start justify-start gap-[0.5rem]">
                         <div>
                             <p className="text-[1rem] text-[var(--color-primary)]">Hết hạn vào</p>
-                            <p className="text-[0.875rem] text-[var(--color-primary)]">{quiz?.expired_date}</p>
+                            <p className="text-[0.875rem] text-[var(--color-primary)]">{quiz?.expired_date ? new Date(quiz.expired_date).toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}</p>
                         </div>
                         <div>
                             <p className="text-[1rem] text-[var(--color-primary)]">Thời gian</p>
@@ -105,7 +107,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                 >
                     <p className="text-[1rem] font-bold text-[var(--color-primary)]">Điểm</p>
                     <p className="text-[0.875rem] text-[var(--color-primary)]">Bạn chưa hoàn thành bài quiz này. Kết quả cao nhất sẽ được ghi nhớ.</p>
-                    <p className="text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 100/100</p>
+                    <p className="text-[0.875rem] text-[var(--color-primary)]">Điểm cao nhất: 0/100</p>
                 </Card>
             ) : (
                 <Card
@@ -133,7 +135,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
 
 
                         <Progress
-                            percent={latestAttempt?.score_percentage! * 100}
+                            percent={latestAttempt?.score_percentage! * 10}
                             type="circle"
                             size={200}
                             strokeWidth={12}
@@ -142,7 +144,7 @@ const QuizContent = ({ lessonId }: { lessonId: string }) => {
                             format={() => (
                                 <div style={{ textAlign: 'center', fontSize: 16, lineHeight: 1.2 }}>
                                     <div className="text-[2.5rem] font-bold text-[var(--color-secondary)]">
-                                        {(latestAttempt?.score_percentage! * 100).toFixed(2)}
+                                        {(latestAttempt?.score_percentage! * 10).toFixed(2)}
                                     </div>
                                 </div>
                             )}

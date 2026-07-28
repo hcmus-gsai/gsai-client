@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
+import {
   useLazyGetSubmissionQuery,
   useSubmitProjectMutation,
   useUpdateSubmissionMutation
- } from "@/store/api/[module]/projectApi";
+} from "@/store/api/[module]/projectApi";
 
 /* ===== Types ===== */
 type SubmissionData = {
