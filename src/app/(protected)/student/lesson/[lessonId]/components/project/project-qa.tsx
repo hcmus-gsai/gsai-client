@@ -5,7 +5,7 @@ import '@ant-design/v5-patch-for-react-19';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Collapse, Drawer, Empty, Form, Input, Popconfirm, Progress, Select, Skeleton, Spin, Tabs, Tree } from 'antd';
 import { Check, File as FileIcon, Folder as FolderIcon, Menu as MenuIcon, RefreshCw as RefreshIcon, Send as SendIcon } from '@deemlol/next-icons';
-import { AudioOutlined } from '@ant-design/icons';
+import { AudioOutlined, CloseCircleFilled, WarningFilled } from '@ant-design/icons';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
@@ -73,25 +73,21 @@ const QA_LABELS = {
  * đó chính là chỗ trước đây bài nộp sai đề vẫn lọt qua mà không ai biết.
  */
 const VALIDATION_STYLES: Record<QAV2ValidationStatus, {
-    alertType: 'success' | 'error' | 'warning';
     verdict: string;
     accent: string;
     badgeClass: string;
 }> = {
     valid: {
-        alertType: 'success',
         verdict: 'Bài làm đạt yêu cầu',
         accent: '#22c55e',
         badgeClass: 'bg-green-50 text-green-700 border-green-200',
     },
     invalid: {
-        alertType: 'error',
         verdict: 'Bài làm không đạt yêu cầu',
         accent: '#ef4444',
         badgeClass: 'bg-red-50 text-red-700 border-red-200',
     },
     unknown: {
-        alertType: 'warning',
         verdict: 'Chưa xác định được mức độ phù hợp với đề bài',
         accent: '#f59e0b',
         badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -202,6 +198,9 @@ const LectureProjQA = () => {
     const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
     const [submissionValidation, setSubmissionValidation] = useState<QAV2SubmissionValidation | null>(null);
+    // Mặc định thu gọn để chừa chỗ cho khung chat; nội dung cảnh báo đầy đủ vẫn nằm ở
+    // tin nhắn đầu tiên của giáo viên AI nên không mất thông tin.
+    const [isValidationOpen, setIsValidationOpen] = useState(false);
     const [attempt, setAttempt] = useState(1);
     const [isRetaking, setIsRetaking] = useState(false);
 
@@ -710,6 +709,10 @@ const LectureProjQA = () => {
 
     // Cảnh báo hiện suốt phiên vấn đáp, không chỉ ở tin nhắn đầu tiên — học sinh cuộn qua
     // là mất, mà đây là thông tin quyết định điểm cuối cùng.
+    //
+    // Thu gọn mặc định: ở dạng mở, khối này ăn ~230px trong panel chat vốn đã hẹp, đẩy ô
+    // nhập câu trả lời gần như ra khỏi màn hình. Dòng tiêu đề vẫn giữ đủ thông tin quyết
+    // định (kết luận + điểm phù hợp), chi tiết nằm sau một cú bấm.
     const renderValidationBanner = () => {
         if (!submissionValidation || submissionValidation.status === 'valid') return null;
 
@@ -717,49 +720,78 @@ const LectureProjQA = () => {
         const isInvalid = submissionValidation.status === 'invalid';
 
         return (
-            <Alert
-                type={style.alertType}
-                showIcon
-                className="mb-3"
-                message={<span className="text-sm font-semibold">{style.verdict}</span>}
-                description={
-                    <div className="text-xs text-gray-600">
-                        {submissionValidation.summary && (
-                            <p className="mb-1">{submissionValidation.summary}</p>
-                        )}
+            <div className={`mb-3 rounded-xl border ${style.badgeClass}`}>
+                <Collapse
+                    ghost
+                    size="small"
+                    expandIconPosition="end"
+                    activeKey={isValidationOpen ? ['validation'] : []}
+                    onChange={(keys) => setIsValidationOpen((keys as string[]).length > 0)}
+                    className="[&_.ant-collapse-header]:!px-3 [&_.ant-collapse-header]:!py-2 [&_.ant-collapse-header]:!items-center [&_.ant-collapse-content-box]:!px-3 [&_.ant-collapse-content-box]:!pt-0 [&_.ant-collapse-content-box]:!pb-3"
+                    items={[
+                        {
+                            key: 'validation',
+                            label: (
+                                <div className="flex items-center gap-2 min-w-0">
+                                    {isInvalid ? (
+                                        <CloseCircleFilled style={{ color: style.accent }} />
+                                    ) : (
+                                        <WarningFilled style={{ color: style.accent }} />
+                                    )}
 
-                        {submissionValidation.issues.length > 0 && (
-                            <ul className="list-disc pl-4 space-y-0.5">
-                                {submissionValidation.issues.slice(0, 3).map((issue, index) => (
-                                    <li key={index}>{issue}</li>
-                                ))}
-                            </ul>
-                        )}
+                                    <span className="text-[13px] font-semibold flex-1 min-w-0 truncate">
+                                        {style.verdict}
+                                    </span>
 
-                        {isInvalid && (
-                            <p className="mt-1 font-medium text-red-600">
-                                Buổi vấn đáp vẫn diễn ra, nhưng nếu kết luận này không thay đổi
-                                thì kết quả sẽ bị tính 0 điểm.
-                            </p>
-                        )}
+                                    <span
+                                        className="text-xs font-bold shrink-0 tabular-nums"
+                                        style={{ color: style.accent }}
+                                    >
+                                        {submissionValidation.validity_score}/100
+                                    </span>
+                                </div>
+                            ),
+                            children: (
+                                <div className="text-xs text-gray-600">
+                                    {submissionValidation.summary && (
+                                        <p className="mb-1">{submissionValidation.summary}</p>
+                                    )}
 
-                        {renderValidityScoreBar(submissionValidation, style.accent)}
-                    </div>
-                }
-            />
+                                    {submissionValidation.issues.length > 0 && (
+                                        <ul className="list-disc pl-4 space-y-0.5">
+                                            {submissionValidation.issues.slice(0, 3).map((issue, index) => (
+                                                <li key={index}>{issue}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+
+                                    {isInvalid && (
+                                        <p className="mt-1 font-medium text-red-600">
+                                            Buổi vấn đáp vẫn diễn ra, nhưng nếu kết luận này không
+                                            thay đổi thì kết quả sẽ bị tính 0 điểm.
+                                        </p>
+                                    )}
+
+                                    {renderValidityScoreBar(submissionValidation, style.accent)}
+                                </div>
+                            ),
+                        },
+                    ]}
+                />
+            </div>
         );
     };
 
     const renderProgressSteps = () => (
-        <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500">Câu hỏi {currentStep}/{totalQuestions}</span>
-                <span className="text-sm text-gray-500">{progressPercent}%</span>
+        <div className="mb-3">
+            <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-semibold text-gray-700">Câu hỏi {currentStep}/{totalQuestions}</span>
+                <span className="text-xs text-gray-400">{progressPercent}%</span>
             </div>
             <Progress percent={progressPercent} showInfo={false} strokeColor="var(--color-secondary)" />
 
             <div
-                className="mt-4 grid gap-2"
+                className="mt-2 grid gap-2"
                 style={{ gridTemplateColumns: `repeat(${totalQuestions}, minmax(0, 1fr))` }}
                 role="list"
                 aria-label="Tiến độ câu hỏi"
@@ -771,13 +803,14 @@ const LectureProjQA = () => {
                     return (
                         <div
                             key={index}
-                            className="flex flex-col items-center gap-2"
+                            className="flex items-center justify-center"
                             role="listitem"
                             aria-current={isActive ? 'step' : undefined}
+                            aria-label={`Câu ${index + 1}`}
                         >
                             <div
                                 className={[
-                                    'w-8 h-8 rounded-full border flex items-center justify-center text-xs font-semibold transition-all duration-300',
+                                    'w-7 h-7 rounded-full border flex items-center justify-center text-xs font-semibold transition-all duration-300',
                                     isDone
                                         ? 'bg-green-500 border-green-500 text-white'
                                         : isActive
@@ -787,7 +820,6 @@ const LectureProjQA = () => {
                             >
                                 {isDone ? <Check width={14} height={14} /> : index + 1}
                             </div>
-                            <span className="text-[11px] text-gray-400">{index + 1}</span>
                         </div>
                     );
                 })}
@@ -799,10 +831,6 @@ const LectureProjQA = () => {
         <>
             {renderValidationBanner()}
             {renderProgressSteps()}
-
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 mb-3">
-                <p className="text-sm font-semibold text-gray-700">Câu hỏi {currentQuestionIndex + 1}/{totalQuestions}</p>
-            </div>
 
             <div ref={chatContainerRef} className="flex-1 overflow-y-auto rounded-xl border border-gray-100 bg-white px-3 py-4 space-y-3">
                 {chatHistory.map((message) => {
