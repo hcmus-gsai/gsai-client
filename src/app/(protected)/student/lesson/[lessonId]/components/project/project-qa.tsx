@@ -3,8 +3,8 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Collapse, Drawer, Empty, Form, Input, Progress, Select, Skeleton, Spin, Tabs, Tree } from 'antd';
-import { Check, File as FileIcon, Folder as FolderIcon, Menu as MenuIcon, Send as SendIcon } from '@deemlol/next-icons';
+import { Alert, Button, Collapse, Drawer, Empty, Form, Input, Popconfirm, Progress, Select, Skeleton, Spin, Tabs, Tree } from 'antd';
+import { Check, File as FileIcon, Folder as FolderIcon, Menu as MenuIcon, RefreshCw as RefreshIcon, Send as SendIcon } from '@deemlol/next-icons';
 import { AudioOutlined } from '@ant-design/icons';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import Editor from '@monaco-editor/react';
@@ -17,12 +17,18 @@ import {
     useGetSubmitJsonQuery,
     useLazyGetProjectQAV2ReportQuery,
     useRespondProjectQAV2Mutation,
+    useRetakeProjectQAV2SessionMutation,
     useSaveProjectQAV2ResultMutation,
     useStartProjectQAV2InterviewMutation,
 } from '@/store/api/[module]/projectApi';
 import { useGetCoursesByLessonIdQuery } from '@/store/api/[module]/courseApi';
 import { useTranscribeAudioMutation } from '@/store/api/[module]/voiceApi';
-import type { QAV2GradingReport, QAV2Question } from '@/type/project.type';
+import type {
+    QAV2GradingReport,
+    QAV2Question,
+    QAV2SubmissionValidation,
+    QAV2ValidationStatus,
+} from '@/type/project.type';
 import { useAppDispatch } from '@/store/hook';
 import { addNotification } from '@/store/slice/notifySlice';
 
@@ -56,7 +62,45 @@ const QA_LABELS = {
     detailsTitle: 'Chi tiết từng câu',
     summaryTitle: 'Nhận xét tổng thể của giáo viên AI',
     retry: 'Thử lại',
+    validationTitle: 'Đối chiếu bài nộp với đề bài',
+    retake: 'Vấn đáp lại từ đầu',
+    retaking: 'Đang tạo phiên mới...',
 };
+
+/**
+ * Cách hiển thị từng trạng thái đối chiếu bài nộp với đề bài.
+ * `unknown` phải hiện là "chưa xác định" chứ không được hiện như "đạt" —
+ * đó chính là chỗ trước đây bài nộp sai đề vẫn lọt qua mà không ai biết.
+ */
+const VALIDATION_STYLES: Record<QAV2ValidationStatus, {
+    alertType: 'success' | 'error' | 'warning';
+    verdict: string;
+    accent: string;
+    badgeClass: string;
+}> = {
+    valid: {
+        alertType: 'success',
+        verdict: 'Bài làm đạt yêu cầu',
+        accent: '#22c55e',
+        badgeClass: 'bg-green-50 text-green-700 border-green-200',
+    },
+    invalid: {
+        alertType: 'error',
+        verdict: 'Bài làm không đạt yêu cầu',
+        accent: '#ef4444',
+        badgeClass: 'bg-red-50 text-red-700 border-red-200',
+    },
+    unknown: {
+        alertType: 'warning',
+        verdict: 'Chưa xác định được mức độ phù hợp với đề bài',
+        accent: '#f59e0b',
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    },
+};
+
+const getValidationStatus = (
+    validation: QAV2SubmissionValidation | null,
+): QAV2ValidationStatus => validation?.status ?? 'unknown';
 
 const SCORE_LABEL_MAP: Record<number, string> = {
     0: 'Không hiểu',
@@ -137,6 +181,7 @@ const LectureProjQA = () => {
     });
 
     const [createSession] = useCreateProjectQAV2SessionMutation();
+    const [retakeSession] = useRetakeProjectQAV2SessionMutation();
     const [startInterview] = useStartProjectQAV2InterviewMutation();
     const [respondToInterview] = useRespondProjectQAV2Mutation();
     const [triggerReport] = useLazyGetProjectQAV2ReportQuery();
@@ -155,6 +200,10 @@ const LectureProjQA = () => {
 
     const [gradingReport, setGradingReport] = useState<QAV2GradingReport | null>(null);
     const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
+
+    const [submissionValidation, setSubmissionValidation] = useState<QAV2SubmissionValidation | null>(null);
+    const [attempt, setAttempt] = useState(1);
+    const [isRetaking, setIsRetaking] = useState(false);
 
     const [inputValue, setInputValue] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -215,17 +264,34 @@ const LectureProjQA = () => {
         setIsInputDisabled(false);
     };
 
-    const initializeQASession = async () => {
+    const initializeQASession = async (options?: { retake?: boolean }) => {
         if (!lessonIdValue) return;
+
+        const isRetake = Boolean(options?.retake);
 
         setPanelError(null);
         setStage('loading');
         setIsInputDisabled(true);
         setChatHistory([]);
 
+        if (isRetake) {
+            // Dọn sạch kết quả lần trước để màn hình không lẫn điểm cũ với phiên mới.
+            setGradingReport(null);
+            setExpandedQuestion(null);
+            setCurrentQuestionIndex(0);
+            setCompletedQuestions(0);
+            setCurrentQuestionStatus('asking');
+            setInputValue('');
+        }
+
         try {
-            const session = await createSession(lessonIdValue).unwrap();
+            const session = isRetake
+                ? await retakeSession(lessonIdValue).unwrap()
+                : await createSession(lessonIdValue).unwrap();
+
             setQuestions(session.questions || []);
+            setSubmissionValidation(session.submission_validation ?? null);
+            setAttempt(session.attempt ?? 1);
 
             // Học sinh đã hoàn thành phiên trước đó → hiển thị lại báo cáo đã lưu.
             if (hasValidGradingReport(session.grading_report)) {
@@ -236,6 +302,9 @@ const LectureProjQA = () => {
             }
 
             const firstPrompt = await startInterview(lessonIdValue).unwrap();
+            if (firstPrompt.submission_validation) {
+                setSubmissionValidation(firstPrompt.submission_validation);
+            }
             setCurrentQuestionIndex(firstPrompt.question_index || 0);
             setStage('interviewing');
             await resetCurrentQuestionChat(firstPrompt.agent_message);
@@ -250,6 +319,16 @@ const LectureProjQA = () => {
             const detail = error?.data?.message || error?.data?.detail || 'Không thể khởi tạo phiên vấn đáp.';
             setPanelError(detail);
             notifyError('Khởi tạo vấn đáp thất bại', detail);
+        }
+    };
+
+    const handleRetake = async () => {
+        if (isRetaking) return;
+        setIsRetaking(true);
+        try {
+            await initializeQASession({ retake: true });
+        } finally {
+            setIsRetaking(false);
         }
     };
 
@@ -605,6 +684,72 @@ const LectureProjQA = () => {
         </div>
     );
 
+    /**
+     * Thanh điểm "mức độ phù hợp với đề bài" (0-100) kèm ngưỡng đạt.
+     * Đây là con số trước đây agent tính ra nhưng không bao giờ hiển thị cho học sinh.
+     */
+    const renderValidityScoreBar = (validation: QAV2SubmissionValidation, accent: string) => (
+        <div className="mt-2">
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                <span>Mức độ phù hợp với đề bài</span>
+                <span className="font-semibold" style={{ color: accent }}>
+                    {validation.validity_score}/100
+                </span>
+            </div>
+            <Progress
+                percent={validation.validity_score}
+                showInfo={false}
+                size="small"
+                strokeColor={accent}
+            />
+            <p className="text-[11px] text-gray-400 mt-1">
+                Ngưỡng đạt: {validation.threshold}/100
+            </p>
+        </div>
+    );
+
+    // Cảnh báo hiện suốt phiên vấn đáp, không chỉ ở tin nhắn đầu tiên — học sinh cuộn qua
+    // là mất, mà đây là thông tin quyết định điểm cuối cùng.
+    const renderValidationBanner = () => {
+        if (!submissionValidation || submissionValidation.status === 'valid') return null;
+
+        const style = VALIDATION_STYLES[submissionValidation.status];
+        const isInvalid = submissionValidation.status === 'invalid';
+
+        return (
+            <Alert
+                type={style.alertType}
+                showIcon
+                className="mb-3"
+                message={<span className="text-sm font-semibold">{style.verdict}</span>}
+                description={
+                    <div className="text-xs text-gray-600">
+                        {submissionValidation.summary && (
+                            <p className="mb-1">{submissionValidation.summary}</p>
+                        )}
+
+                        {submissionValidation.issues.length > 0 && (
+                            <ul className="list-disc pl-4 space-y-0.5">
+                                {submissionValidation.issues.slice(0, 3).map((issue, index) => (
+                                    <li key={index}>{issue}</li>
+                                ))}
+                            </ul>
+                        )}
+
+                        {isInvalid && (
+                            <p className="mt-1 font-medium text-red-600">
+                                Buổi vấn đáp vẫn diễn ra, nhưng nếu kết luận này không thay đổi
+                                thì kết quả sẽ bị tính 0 điểm.
+                            </p>
+                        )}
+
+                        {renderValidityScoreBar(submissionValidation, style.accent)}
+                    </div>
+                }
+            />
+        );
+    };
+
     const renderProgressSteps = () => (
         <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
@@ -652,6 +797,7 @@ const LectureProjQA = () => {
 
     const renderInterviewView = () => (
         <>
+            {renderValidationBanner()}
             {renderProgressSteps()}
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 mb-3">
@@ -773,6 +919,19 @@ const LectureProjQA = () => {
         const perQuestion = Array.isArray(gradingReport.per_question) ? gradingReport.per_question : [];
         const safeSummary = gradingReport.summary || 'Chưa có nhận xét tổng thể.';
 
+        // Báo cáo là nguồn chính; state validation chỉ là dự phòng khi báo cáo cũ chưa có field.
+        const verdictStatus: QAV2ValidationStatus =
+            gradingReport.submission_status ?? getValidationStatus(submissionValidation);
+        const verdictStyle = VALIDATION_STYLES[verdictStatus];
+        const verdictLabel = gradingReport.submission_verdict || verdictStyle.verdict;
+        const validityScore =
+            gradingReport.submission_validity_score ?? submissionValidation?.validity_score ?? 0;
+        const validityThreshold =
+            gradingReport.submission_validity_threshold ?? submissionValidation?.threshold ?? 40;
+        const verdictIssues = gradingReport.submission_issues ?? submissionValidation?.issues ?? [];
+        const verdictSummary = gradingReport.submission_summary || submissionValidation?.summary || '';
+        const isForcedZero = gradingReport.forced_zero ?? verdictStatus === 'invalid';
+
         // Mỗi câu tối đa 2 điểm, tổng = số câu × 2, quy về thang 10; điểm từng câu giữ 0/1/2.
         const numQuestions = perQuestion.length;
         const totalMax = numQuestions * 2;
@@ -787,6 +946,51 @@ const LectureProjQA = () => {
                     <p className="text-gray-500 mt-1">
                         {gradingReport.student_name || 'Học sinh'} · {courseResult?.data?.course_name || 'Project'}
                     </p>
+                    {attempt > 1 && (
+                        <p className="text-xs text-gray-400 mt-1">Lần vấn đáp thứ {attempt}</p>
+                    )}
+                </div>
+
+                {/* Kết luận về bài nộp: "đạt" hay "không đạt" yêu cầu đề bài, kèm điểm phù hợp. */}
+                <div className={`rounded-2xl border p-4 mb-4 ${verdictStyle.badgeClass}`}>
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-xs uppercase tracking-wide opacity-70">
+                                {QA_LABELS.validationTitle}
+                            </p>
+                            <p className="text-base font-bold mt-0.5">{verdictLabel}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                            <p className="text-2xl font-bold leading-none">{validityScore}</p>
+                            <p className="text-[11px] opacity-70">/ 100</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-3">
+                        <Progress
+                            percent={validityScore}
+                            showInfo={false}
+                            size="small"
+                            strokeColor={verdictStyle.accent}
+                        />
+                        <p className="text-[11px] opacity-70 mt-1">Ngưỡng đạt: {validityThreshold}/100</p>
+                    </div>
+
+                    {verdictSummary && <p className="text-xs mt-2">{verdictSummary}</p>}
+
+                    {verdictIssues.length > 0 && (
+                        <ul className="list-disc pl-4 mt-2 space-y-0.5 text-xs">
+                            {verdictIssues.slice(0, 4).map((issue, index) => (
+                                <li key={index}>{issue}</li>
+                            ))}
+                        </ul>
+                    )}
+
+                    {isForcedZero && (
+                        <p className="text-xs font-semibold mt-2">
+                            Vì bài nộp không đáp ứng yêu cầu đề bài, toàn bộ câu hỏi được tính 0 điểm.
+                        </p>
+                    )}
                 </div>
 
                 <div className="rounded-2xl border border-gray-200 p-4 mb-5">
@@ -843,6 +1047,37 @@ const LectureProjQA = () => {
                     <p className="text-sm font-semibold text-[var(--color-primary)] mb-2">{QA_LABELS.summaryTitle}</p>
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{safeSummary}</p>
                 </div>
+
+                <div className="mt-5 flex flex-col items-center gap-2">
+                    <Popconfirm
+                        title="Vấn đáp lại từ đầu?"
+                        description={
+                            <span className="text-xs">
+                                Hệ thống sẽ sinh bộ câu hỏi mới và chấm lại từ đầu.
+                                <br />
+                                Kết quả lần này vẫn được lưu trong lịch sử.
+                            </span>
+                        }
+                        okText="Bắt đầu lại"
+                        cancelText="Huỷ"
+                        onConfirm={() => void handleRetake()}
+                    >
+                        <Button
+                            type="primary"
+                            className="!rounded-full"
+                            icon={<RefreshIcon width={16} height={16} />}
+                            loading={isRetaking}
+                        >
+                            {isRetaking ? QA_LABELS.retaking : QA_LABELS.retake}
+                        </Button>
+                    </Popconfirm>
+
+                    {isForcedZero && (
+                        <p className="text-xs text-gray-500 text-center max-w-[320px]">
+                            Nếu em nộp nhầm repository, hãy nộp lại đúng bài trước khi vấn đáp lại.
+                        </p>
+                    )}
+                </div>
             </div>
         );
     };
@@ -850,7 +1085,36 @@ const LectureProjQA = () => {
     // --- Khối vấn đáp ---
     const ChatQAContent = (
         <div className="flex flex-col bg-white rounded-lg border border-gray-200 h-full p-3">
-            <h3 className="text-lg font-semibold mb-3 text-[var(--color-primary)]">Vấn đáp về Dự án</h3>
+            <div className="flex items-center justify-between gap-2 mb-3">
+                <h3 className="text-lg font-semibold text-[var(--color-primary)]">Vấn đáp về Dự án</h3>
+
+                {/* Làm lại giữa chừng: hữu ích khi học sinh phát hiện mình nộp nhầm repo. */}
+                {(stage === 'interviewing' || stage === 'grading') && (
+                    <Popconfirm
+                        title="Vấn đáp lại từ đầu?"
+                        description={
+                            <span className="text-xs">
+                                Toàn bộ câu trả lời của phiên hiện tại sẽ bị bỏ
+                                <br />
+                                và hệ thống sinh bộ câu hỏi mới.
+                            </span>
+                        }
+                        okText="Bắt đầu lại"
+                        cancelText="Huỷ"
+                        onConfirm={() => void handleRetake()}
+                    >
+                        <Button
+                            type="text"
+                            size="small"
+                            className="!text-gray-500 !flex !items-center !gap-1"
+                            icon={<RefreshIcon width={14} height={14} />}
+                            loading={isRetaking}
+                        >
+                            Làm lại
+                        </Button>
+                    </Popconfirm>
+                )}
+            </div>
 
             {panelError && (
                 <Alert

@@ -155,6 +155,18 @@ export const projectApi = baseApi.injectEndpoints({
         }),
 
         /**
+         * Bắt đầu lại phiên vấn đáp từ đầu (retake) — sinh bộ câu hỏi mới,
+         * kết quả lần trước được lưu vào previous_attempts.
+         * POST /lessons/:lessonId/qa/v2/retake
+         */
+        retakeProjectQAV2Session: builder.mutation<QAV2CreateSessionResponse, string>({
+            query: (lessonId) => ({
+                url: `/lessons/${lessonId}/qa/v2/retake`,
+                method: 'POST',
+            }),
+        }),
+
+        /**
          * Get current Q&A v2 session state
          * GET /lessons/:lessonId/qa/v2/sessions/current
          */
@@ -337,6 +349,7 @@ export const {
 
     // Project Q&A v2 hooks
     useCreateProjectQAV2SessionMutation,
+    useRetakeProjectQAV2SessionMutation,
     useGetProjectQAV2SessionQuery,
     useLazyGetProjectQAV2SessionQuery,
     useStartProjectQAV2InterviewMutation,
