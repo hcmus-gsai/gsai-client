@@ -166,7 +166,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={courseData?.teacher_avatar_url || starSVG}
+                                            src={courseData?.teacher_avatar_url || EmptyLayout}
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -197,7 +197,6 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                         </div>
 
                     </div>
-                    {/*<CourseHighlightComponent/> */}
 
                     <div className="mt-[8vh] sm:mt-[12vh] grid grid-cols-2 sm:grid-cols-4 w-[var(--global-width)] min-h-[11rem] bg-white shadow-[5px_5px_20px_var(--color-neutral)] rounded-[20px] border-2 border-gray-200 py-3 mx-4 sm:mx-0">
                         <div className="flex flex-col items-center w-full border-r-2 border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
@@ -220,8 +219,8 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
 
                         <div className="flex flex-col items-center w-full border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
                             <div className="mt-7 h-full">
-                                <span className="flex mb-3">
-                                    <p className="text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
+                                <span className="flex mb-3 justify-center">
+                                    <p className="text-[1.4rem] mr-1 font-bold text-[var(--color-primary)]">5.0</p>
 
                                     <Image
                                         src={starSVG} alt="Star Icon" width={0} height={0}
@@ -242,7 +241,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                         <div className="flex flex-col items-center w-full">
                             <div className="mt-7 w-[70%] h-full text-center">
                                 <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
-                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.duration}</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.duration} tháng</p>
                             </div>
                         </div>
                     </div>

@@ -20,21 +20,21 @@ interface InputProps {
 
 const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
     <Space.Compact style={{ width: '100%' }}>
-        <InputNumber 
+        <InputNumber
             id={id}
-            value={value} 
-            onChange={onChange} 
-            min={1} 
-            step={1} 
-            size="large" 
+            value={value}
+            onChange={onChange}
+            min={1}
+            step={1}
+            size="large"
             style={{ width: '100%' }}
         />
-        <Button 
-            disabled 
+        <Button
+            disabled
             size="large"
-            style={{ 
+            style={{
                 color: 'rgba(0, 0, 0, 0.88)',
-                backgroundColor: '#fafafa'  
+                backgroundColor: '#fafafa'
             }}
             className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
         >
@@ -44,11 +44,11 @@ const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => 
 );
 
 interface Props {
-  data: any; // Dữ liệu hiện có từ cha (nếu quay lại từ bước 2)
-  onNext: (data: Partial<Step1Data>) => void; // Hàm nhận vào dữ liệu của step 1
+    data: any; // Dữ liệu hiện có từ cha (nếu quay lại từ bước 2)
+    onNext: (data: Partial<Step1Data>) => void; // Hàm nhận vào dữ liệu của step 1
 }
 
-const Step1: React.FC<Props> = ({ data, onNext }) =>{
+const Step1: React.FC<Props> = ({ data, onNext }) => {
     const { message } = App.useApp();
 
     const searchParams = useSearchParams();
@@ -70,7 +70,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
 
     const handleFinish = async (values: any) => {
         console.log('Dữ liệu thu thập được:', values);
-        let buffer = values.duration + " tháng";
+        // let buffer = values.duration + " tháng";
 
         //Logic xử lý data từ step1
         const courseData = {
@@ -78,7 +78,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
             course_code: values.courseCode,
             course_name: values.courseName,
             course_description: values.description,
-            duration: buffer,
+            duration: String(values.duration),
             thumbnail_url: values.thumbnail_url || undefined,
             tuition_fee: values.price || 0,
             category: values.categories,
@@ -117,45 +117,45 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
         }
     };
 
-    return(
+    return (
         <main className="w-full min-h-screen flex justify-center">
             <div className="relative w-[var(--global-width)] top-[15vh] mb-[200px] z-10">
-                <CreateClassIntro step={1} title="Thông tin chung"/>
+                <CreateClassIntro step={1} title="Thông tin chung" />
 
                 <Form
-                    form={form} 
-                    onFinish={handleFinish} 
+                    form={form}
+                    onFinish={handleFinish}
                     initialValues={data} // Chỗ này load data get từ server
                     requiredMark={false}
                     labelCol={{
-                            xs: { span: 7 }, // Mặc định cho màn siêu nhỏ
-                            sm: { span: 4 }, // Màn nhỏ
-                            md: { span: 4 }, // Medium và trở xuống 
-                            lg: { span: 2 }, // Từ màn hình Large (992px+) trở lên thì dùng 2
-                            style: { display: 'flex', alignItems: 'center' } 
+                        xs: { span: 7 }, // Mặc định cho màn siêu nhỏ
+                        sm: { span: 4 }, // Màn nhỏ
+                        md: { span: 4 }, // Medium và trở xuống 
+                        lg: { span: 2 }, // Từ màn hình Large (992px+) trở lên thì dùng 2
+                        style: { display: 'flex', alignItems: 'center' }
                     }}
-                    labelAlign = "left"
+                    labelAlign="left"
                 >
-                    <Form.Item 
-                        name="courseCode" 
+                    <Form.Item
+                        name="courseCode"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Mã môn</span>} className='text-bold'
                         rules={[{ required: true, message: 'Vui lòng nhập mã môn!' }]}
                     >
-                        <Input size="large"/>
+                        <Input size="large" />
                     </Form.Item>
 
-                    <Form.Item 
-                        name="courseName" 
+                    <Form.Item
+                        name="courseName"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Tên môn</span>}
                         rules={[{ required: true, message: 'Vui lòng nhập tên môn!' }]}
                     >
-                        <Input size="large"/>
+                        <Input size="large" />
                     </Form.Item>
 
-                    <Form.Item 
+                    <Form.Item
                         name="description"
-                        label={<span style={{ fontWeight: 'bold', fontSize: '16px'}}>Mô tả</span>} 
-                        labelCol={{xs: { span: 7 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
+                        label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Mô tả</span>}
+                        labelCol={{ xs: { span: 7 }, sm: { span: 4 }, md: { span: 4 }, lg: { span: 2 }, }}
                         rules={[{ required: true, message: 'Vui lòng nhập mô tả môn học!' }]}
                     >
                         <TextArea
@@ -173,30 +173,30 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                         />
                     </Form.Item>
 
-                    <Form.Item 
-                        name="duration" 
+                    <Form.Item
+                        name="duration"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Thời lượng</span>}
                         rules={[{ required: true, message: 'Vui lòng nhập thời lượng môn học!' }]}
                     >
                         <CustomInput content="Tháng" />
                     </Form.Item>
 
-                    <Form.Item 
+                    <Form.Item
                         name="categories"
-                        className='mt-[10rem]' 
+                        className='mt-[10rem]'
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phân loại</span>}
                         rules={[{ required: true, message: 'Vui lòng chọn phân loại môn học!' }]}
                     >
-                        <Select size='large' mode="multiple" allowClear options={categoryData?.data?.map((category) => ({ label: category, value: category }))}/>
+                        <Select size='large' mode="multiple" allowClear options={categoryData?.data?.map((category) => ({ label: category, value: category }))} />
                     </Form.Item>
-                    
-                    <Form.Item 
+
+                    <Form.Item
                         name="pricingType"
                         label={<span style={{ fontWeight: 'bold', fontSize: '16px' }}>Phí</span>}
                         rules={[{ required: true, message: 'Vui lòng chọn kiểu học phí!' }]}
                     >
                         <Radio.Group
-                            style={{display:'flex', flexDirection: 'column', gap: 8}}
+                            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
                             onChange={onChangeRadio}
                             options={[
                                 { value: 1, label: 'Miễn phí' },
@@ -206,9 +206,9 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     </Form.Item>
 
                     {radioVal === 2 && (
-                        <Form.Item 
-                            name="price" 
-                            wrapperCol={{ xs: { offset: 4 }, sm: { offset: 4 }, md: { offset: 4 }, lg: { offset: 2 }}}
+                        <Form.Item
+                            name="price"
+                            wrapperCol={{ xs: { offset: 4 }, sm: { offset: 4 }, md: { offset: 4 }, lg: { offset: 2 } }}
                             rules={[{ required: true, message: 'Vui lòng nhập học phí!' }]}
                         >
                             <CustomInput content="VND" />
@@ -216,7 +216,7 @@ const Step1: React.FC<Props> = ({ data, onNext }) =>{
                     )}
 
                     <Form.Item className='flex justify-center'>
-                        <Button 
+                        <Button
                             type="primary"
                             htmlType="submit"
                             size="large"

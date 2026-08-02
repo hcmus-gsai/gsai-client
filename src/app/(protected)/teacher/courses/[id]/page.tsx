@@ -56,7 +56,7 @@ const CourseSyllabusSection = ({ category }: { category: string }) => {
 
                     <div className="w-full flex flex-wrap items-center justify-start gap-2">
                         {achievableSkills.map((skill) => (
-                            <div key={skill} className="min-w-[120px] sm:w-[145px] h-[32px] px-3 sm:px-0 bg-blue-200 flex items-center justify-center rounded-full">
+                            <div key={skill} className="min-w-[120px] sm:w-[160px] h-[32px] px-3 sm:px-0 bg-blue-200 flex items-center justify-center rounded-full">
                                 <p className="text-[0.9rem] sm:text-[1rem] text-[var(--color-secondary)]">{skill}</p>
                             </div>
                         ))}
@@ -89,7 +89,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="w-[20px] h-[20px] relative rounded-full overflow-hidden items-center justify-center">
                                         <Image
-                                            src={ courseData?.teacher_avatar_url || EmptyLayout }
+                                            src={courseData?.teacher_avatar_url || EmptyLayout}
                                             alt="Empty Layout"
                                             width={0}
                                             height={0}
@@ -133,8 +133,8 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
 
                         <div className="flex flex-col items-center w-full border-gray-200 sm:border-r-2 border-b-2 sm:border-b-0">
                             <div className="mt-7 h-full">
-                                <span className="flex mb-3">
-                                    <p className="text-[1.4rem] mr-4 font-bold text-[var(--color-primary)]">5.0</p>
+                                <span className="flex mb-3 justify-center">
+                                    <p className="text-[1.4rem] mr-1 font-bold text-[var(--color-primary)]">5.0</p>
 
                                     <Image
                                         src={starSVG} alt="Star Icon" width={0} height={0}
@@ -155,7 +155,7 @@ const CourseInfoSection = ({ courseData, courseId, totalEnrollment }: { courseDa
                         <div className="flex flex-col items-center w-full">
                             <div className="mt-7 w-[70%] h-full text-center">
                                 <p className="text-[1.4rem] mb-3 font-bold text-[var(--color-primary)]">Thời lượng khóa học</p>
-                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.duration}</p>
+                                <p className="text-[1rem] font-light text-[var(--color-primary)]">{courseData?.duration} tháng</p>
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,7 @@ export default function StudentCoursePage() {
     const courseData = courseInfo?.data;
     const { data: teacherStatistic } = useGetTotalEnrollmentQuery(id as string);
     let totalEnrollment = teacherStatistic;
-    
+
     if (!totalEnrollment) {
         totalEnrollment = 0;
     }
@@ -192,7 +192,7 @@ export default function StudentCoursePage() {
                 </div>
 
                 <div>
-                    <Button 
+                    <Button
                         type="primary"
                         onClick={() => redirect(`/teacher/courses/${id}/content`)}
                         className="!text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
@@ -202,8 +202,8 @@ export default function StudentCoursePage() {
                 </div>
             </div>
 
-            <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment}/>
-            <CourseSyllabusSection category={courseData?.category}/>
+            <CourseInfoSection courseData={courseData} courseId={id as string} totalEnrollment={totalEnrollment} />
+            <CourseSyllabusSection category={courseData?.category} />
         </main>
     )
 }

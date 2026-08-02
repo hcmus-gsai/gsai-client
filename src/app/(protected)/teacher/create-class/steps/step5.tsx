@@ -38,21 +38,21 @@ interface InputProps {
 
 const CustomInput: React.FC<InputProps> = ({ value, onChange, id, content }) => (
     <Space.Compact style={{ width: '100%' }}>
-        <InputNumber 
+        <InputNumber
             id={id}
-            value={value} 
-            onChange={onChange} 
-            min={1} 
-            step={1} 
-            size="large" 
+            value={value}
+            onChange={onChange}
+            min={1}
+            step={1}
+            size="large"
             style={{ width: '100%' }}
         />
-        <Button 
-            disabled 
+        <Button
+            disabled
             size="large"
-            style={{ 
+            style={{
                 color: 'rgba(0, 0, 0, 0.88)',
-                backgroundColor: '#fafafa'  
+                backgroundColor: '#fafafa'
             }}
             className="!cursor-not-allowed !pointer-events-none hover:!bg-inherit hover:!text-inherit hover:!border-inherit [&_.anticon]:!text-inherit"
         >
@@ -160,8 +160,8 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
             projectName: item.projectName,
             expiredDate: item.expiredDate,
             permit: permitValue,
-            file: { fileList: item.file ? [item.file] : [] },
-            audio: { fileList: item.audio ? [item.audio] : [] },
+            file: item.file ? [item.file] : [],
+            audio: item.audio ? [item.audio] : [],
         });
     };
 
@@ -534,7 +534,7 @@ const Step5: React.FC<Props> = ({ data, onNext, onBack }) => {
                                         label={<span className="font-semibold">Hạn nộp (tính từ ngày đăng kí học)</span>}
                                         rules={[{ required: true, message: 'Vui lòng nhập số ngày hạn nộp!' }]}
                                     >
-                                        <CustomInput content='ngày'/>
+                                        <CustomInput content='ngày' />
                                     </Form.Item>
 
                                     <Form.Item
@@ -653,8 +653,8 @@ function SubmitModal({ onCancel, onConfirm, loading = false }: SubmitProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
 
-            <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[40%] h-[35%] px-3 py-3">
-                <div className="flex flex-row justify-end mb-4">
+            <div className="relative flex flex-col bg-white rounded-xl shadow-xl w-[40%] h-[30%] sm:h-[35%] px-3 py-3">
+                <div className="flex flex-row justify-end mb-2 sm:mb-4">
                     <button
                         type="button"
                         onClick={onCancel}
@@ -665,20 +665,20 @@ function SubmitModal({ onCancel, onConfirm, loading = false }: SubmitProps) {
                 </div>
 
                 <div className="w-full h-auto flex flex-col justify-center items-center text-center">
-                    <h2 className="text-2xl font-bold mb-2">Xác nhận hoàn thành thiết lập môn học</h2>
-                    <p className="text-sm text-gray-600">Bạn đã cài đặt tất cả thông tin cho môn học này.</p>
-                    <p className="text-sm text-gray-600 mb-6">Hãy xác nhận để công bố môn học cho học sinh.</p>
+                    <h2 className="sm:text-lg md:text-2xl text-sm font-bold mb-2">Xác nhận hoàn thành thiết lập môn học</h2>
+                    <p className="md:text-sm text-xs text-gray-600">Bạn đã cài đặt tất cả thông tin cho môn học này.</p>
+                    <p className="md:text-sm sm:mb-4 md:mb-6 text-xs text-gray-600 mb-2">Hãy xác nhận để công bố môn học cho học sinh.</p>
 
                     <div className="flex justify-end gap-3">
                         <Button
-                            className="!w-[12.5rem] !h-[3.375rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
+                            className="lg:!w-[12.5rem] lg:!h-[3.375rem] !w-[6rem] !h-[2rem] !text-[var(--color-secondary)] !bg-[var(--color-bg-white)] !border-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-bg-white)] hover:!bg-[var(--color-secondary)]"
                             onClick={onCancel}
                         >
                             Hủy
                         </Button>
 
                         <Button
-                            className="!w-[12.5rem] !h-[3.375rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
+                            className="lg:!w-[12.5rem] lg:!h-[3.375rem] !w-[6rem] !h-[2rem] !text-[var(--color-bg-white)] !bg-[var(--color-secondary)] !rounded-full hover:!text-[var(--color-secondary)] hover:!bg-[var(--color-bg-white)] hover:!border-[var(--color-secondary)]"
                             onClick={onConfirm}
                             loading={loading}
                         >
