@@ -91,6 +91,19 @@ export const videoApi = baseApi.injectEndpoints({
             },
         }),
 
+        // Process PPTX: Convert PPTX to PDF + Extract speaker notes
+        processPptx: builder.mutation<{ pdfBuffer: string; scripts: { slideNumber: number; content: string }[] }, { file: File }>({
+            query: ({ file }) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                return {
+                    url: '/video-generation/process-pptx',
+                    method: 'POST',
+                    body: formData,
+                };
+            },
+        }),
+
     }),
 
 });
@@ -114,5 +127,8 @@ export const {
 
     // Start Generation Job
     useStartGenerationMutation,
+
+    // Process PPTX
+    useProcessPptxMutation,
 
 } = videoApi;

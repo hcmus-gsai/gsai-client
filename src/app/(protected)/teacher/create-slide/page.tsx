@@ -12,7 +12,8 @@ import {
     useCreateVideoGenJobMutation,
     useUploadVoiceMutation,
     useUploadSlideMutation,
-    useStartGenerationMutation
+    useStartGenerationMutation,
+    useProcessPptxMutation
 } from '@/store/api/[module]/genVideoApi';
 
 import { useCloneVoiceMutation } from '@/store/api/[module]/voiceApi';
@@ -88,6 +89,9 @@ export default function SlideList() {
     const [registerVoiceError, setRegisterVoiceError] = useState('');
     const [registerVoiceHint, setRegisterVoiceHint] = useState('');
     const [slideFile, setSlideFile] = useState<File | null>(null);
+    const [scriptFile, setScriptFile] = useState<File | null>(null);
+    const [uploadMode, setUploadMode] = useState<'pdf' | 'pptx' | null>(null);
+    const [scriptParseHint, setScriptParseHint] = useState<string>('');
     const [registeredVoices, setRegisteredVoices] = useState<Array<{ voice_name: string; audio_url: string }>>([]);
     const [selectedRegisteredVoice, setSelectedRegisteredVoice] = useState('');
 
@@ -102,6 +106,7 @@ export default function SlideList() {
     const thumbnailRef = useRef<HTMLInputElement>(null);
     const voiceRef = useRef<HTMLInputElement>(null);
     const slideRef = useRef<HTMLInputElement>(null);
+    const scriptRef = useRef<HTMLInputElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const mediaStreamRef = useRef<MediaStream | null>(null);
     const recordedChunksRef = useRef<Blob[]>([]);
@@ -115,6 +120,7 @@ export default function SlideList() {
     const [uploadVoices] = useUploadVoiceMutation();
     const [uploadSlide] = useUploadSlideMutation();
     const [startGeneration] = useStartGenerationMutation();
+    const [processPptx, { isLoading: isProcessingPptx }] = useProcessPptxMutation();
 
     const { data, isLoading, error, refetch } = useGetRegisterVoiceQuery();
     useEffect(() => {
@@ -136,8 +142,6 @@ export default function SlideList() {
     }, [data]);
 
     const [cloneVoice, { isLoading: isCloneVoiceLoading }] = useCloneVoiceMutation();
-
-
 
     const handleThumbnailUpload = (file: File) => {
         if (!file) {
@@ -307,64 +311,130 @@ export default function SlideList() {
         }
     };
 
-    const handleSlideFileUpload = async (file: File) => {
-        if (!file) {
-            return;
+    const parsePdfBufferToSlides = async (arrayBuffer: ArrayBuffer, initialScripts?: { slideNumber: number; content: string }[]) => {
+        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+        const n_pages = pdf.numPages;
+
+        const newSlides: Slide[] = [];
+
+        for (let pageIdx = 1; pageIdx <= n_pages; pageIdx++) {
+            const page = await pdf.getPage(pageIdx);
+            const viewport = page.getViewport({ scale: 1.5 });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            const ctx = canvas.getContext('2d')!;
+            await page.render({ canvas: canvas, canvasContext: ctx, viewport }).promise;
+
+            const imageUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            const autoScript = initialScripts?.find(s => s.slideNumber === pageIdx)?.content || '';
+
+            newSlides.push({
+                id: pageIdx,
+                title: `Slide ${pageIdx}`,
+                content: autoScript,
+                voice: '',
+                audioFile: null,
+                audioUrl: null,
+                isGenerating: false,
+                slideImageUrl: imageUrl,
+            });
         }
+        return newSlides;
+    };
+
+    const handleSlideFileUpload = async (file: File) => {
+        if (!file) return;
 
         setSlideFile(file);
+        setScriptFile(null);
+        setScriptParseHint('');
+        setIsParsingSlide(true);
 
-        if (!file.name.endsWith('.pdf')) {
+        const fileName = file.name.toLowerCase();
+        const isPptx = fileName.endsWith('.pptx');
+        const isPdf = fileName.endsWith('.pdf');
+
+        if (!isPptx && !isPdf) {
+            setIsParsingSlide(false);
             return;
         }
 
-        setIsParsingSlide(true);
+        try {
+            if (isPptx) {
+                setUploadMode('pptx');
+                const res = await processPptx({ file }).unwrap();
+
+                const binaryString = atob(res.pdfBuffer);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                const convertedPdfFile = new File(
+                    [bytes],
+                    file.name.replace(/\.[^/.]+$/, '.pdf'),
+                    { type: 'application/pdf' }
+                );
+                videoGen.slide = convertedPdfFile;
+
+                const newSlides = await parsePdfBufferToSlides(bytes.buffer, res.scripts);
+                setSlides(newSlides);
+
+                const notesCount = res.scripts.filter(s => s.content.trim()).length;
+                if (notesCount > 0) {
+                    setScriptParseHint(`Đã tự động trích xuất kịch bản cho ${notesCount}/${newSlides.length} slide từ PPTX.`);
+                }
+            } else {
+                setUploadMode('pdf');
+                videoGen.slide = file;
+                const arrayBuffer = await file.arrayBuffer();
+                const newSlides = await parsePdfBufferToSlides(arrayBuffer);
+                setSlides(newSlides);
+            }
+        } catch (err) {
+            console.error('Lỗi khi phân tích slide:', err);
+        } finally {
+            setIsParsingSlide(false);
+        }
+    };
+
+    const handleScriptFileUpload = async (file: File) => {
+        if (!file) return;
+        setScriptFile(file);
 
         try {
+            const text = await file.text();
 
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-            const n_pages = pdf.numPages;
-
-
-            const newSlides: Slide[] = [];
-
-            for (let pageIdx = 1; pageIdx <= n_pages; pageIdx++) {
-                const page = await pdf.getPage(pageIdx);
-                const viewport = page.getViewport({ scale: 1.5 });
-
-                const canvas = document.createElement('canvas');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                const ctx = canvas.getContext('2d')!;
-                await page.render({ canvas: canvas, canvasContext: ctx, viewport }).promise;
-
-                const imageUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-                newSlides.push({
-                    id: pageIdx,
-                    title: `Slide ${pageIdx}`,
-                    content: '',
-                    voice: '',
-                    audioFile: null,
-                    audioUrl: null,
-                    isGenerating: false,
-                    slideImageUrl: imageUrl,
-                });
-
+            let scriptItems: string[] = [];
+            if (text.includes('---')) {
+                scriptItems = text.split(/\n\s*---\s*\n|\n\s*---\s*$/).map(s => s.trim());
+            } else {
+                scriptItems = text.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
             }
-            setSlides(newSlides);
-            videoGen.slide = file;
-        }
 
-        catch (err) {
-            console.error('Lỗi parser PDF ở client', err);
+            if (scriptItems.length === 0) {
+                setScriptParseHint('File kịch bản rỗng hoặc không đúng định dạng.');
+                return;
+            }
+
+            setSlides(prev =>
+                prev.map((slide, index) => {
+                    const scriptText = scriptItems[index];
+                    return scriptText !== undefined ? { ...slide, content: scriptText } : slide;
+                })
+            );
+
+            const filledCount = Math.min(scriptItems.length, slides.length);
+            setScriptParseHint(`Đã nạp thành công kịch bản cho ${filledCount}/${slides.length} slide.`);
+        } catch (err) {
+            console.error('Lỗi khi nạp file kịch bản:', err);
+            setScriptParseHint('Không thể đọc file kịch bản.');
         }
-        finally {
-            setIsParsingSlide(false)
-        }
-    }
+    };
 
     const handleGenerateVoice = async (slideId: number, slideContent: string, slideVoice: string) => {
         const targetSlide = slides.find((slide) => slide.id === slideId);
@@ -805,11 +875,16 @@ export default function SlideList() {
                             </div>
                             <div>
                                 <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Tải Slide</p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">PDF</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">PDF, PPTX</p>
                             </div>
                             {slideFile && (
                                 <button
-                                    onClick={() => setSlideFile(null)}
+                                    onClick={() => {
+                                        setSlideFile(null);
+                                        setScriptFile(null);
+                                        setUploadMode(null);
+                                        setScriptParseHint('');
+                                    }}
                                     className="ml-auto text-slate-500 hover:text-red-400 transition-colors"
                                 >
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -820,7 +895,7 @@ export default function SlideList() {
                         </div>
 
                         <input
-                            type="file" accept=".pdf"
+                            type="file" accept=".pdf,.pptx"
                             ref={slideRef} className="hidden"
                             onChange={(e) => { const f = e.target.files?.[0]; if (f) handleSlideFileUpload(f); }}
                         />
@@ -832,10 +907,15 @@ export default function SlideList() {
                                             {slideFile.name.split('.').pop()}
                                         </span>
                                     </div>
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-xs font-medium text-[var(--color-secondary)] truncate">{slideFile.name}</p>
                                         <p className="text-[11px] text-slate-500">{(slideFile.size / 1024 / 1024).toFixed(2)} MB</p>
                                     </div>
+                                    {uploadMode && (
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase">
+                                            Chế độ {uploadMode.toUpperCase()}
+                                        </span>
+                                    )}
                                 </div>
                                 <button
                                     onClick={() => slideRef.current?.click()}
@@ -852,11 +932,87 @@ export default function SlideList() {
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-blue-400/50">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                                <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-blue-400 font-medium">chọn file</span></span>
-                                <span className="text-[11px] text-slate-500">PDF — tối đa 50MB</span>
+                                <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-blue-400 font-medium">chọn file slide</span></span>
+                                <span className="text-[11px] text-slate-500">PDF, PPTX — tối đa 100MB</span>
                             </label>
                         )}
                     </div>
+
+                    {uploadMode === 'pdf' && (
+                        <div className="md:col-span-2 group rounded-xl border border-indigo-500/20 bg-indigo-500/[0.02] p-5 hover:border-indigo-400/40 hover:bg-indigo-500/[0.05] transition-all duration-200">
+                            <div className="flex items-center gap-2.5 mb-4">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/15 flex items-center justify-center shrink-0">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#818cf8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="#818cf8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-[var(--color-secondary)] leading-none">Tải file kịch bản tự động (Tùy chọn)</p>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">TXT — phân tách các slide bằng dòng <code>---</code></p>
+                                </div>
+                                {scriptFile && (
+                                    <button
+                                        onClick={() => {
+                                            setScriptFile(null);
+                                            setScriptParseHint('');
+                                        }}
+                                        className="ml-auto text-slate-500 hover:text-red-400 transition-colors"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+
+                            <input
+                                type="file" accept=".txt"
+                                ref={scriptRef} className="hidden"
+                                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScriptFileUpload(f); }}
+                            />
+                            {scriptFile ? (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-4 py-3">
+                                        <div className="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
+                                            <span className="text-[10px] font-bold text-indigo-400 uppercase">
+                                                TXT
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-xs font-medium text-[var(--color-secondary)] truncate">{scriptFile.name}</p>
+                                            <p className="text-[11px] text-slate-500">{(scriptFile.size / 1024).toFixed(1)} KB</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => scriptRef.current?.click()}
+                                        className="w-full text-xs text-slate-500 hover:text-indigo-400 transition-colors text-center py-1"
+                                    >
+                                        Đổi file kịch bản khác
+                                    </button>
+                                </div>
+                            ) : (
+                                <label
+                                    onClick={() => scriptRef.current?.click()}
+                                    className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-indigo-500/20 rounded-lg py-5 cursor-pointer hover:border-indigo-400/50 transition-all"
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-indigo-400/50">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                    <span className="text-xs text-slate-400">Kéo thả hoặc <span className="text-indigo-400 font-medium">chọn file kịch bản (.txt)</span></span>
+                                </label>
+                            )}
+                        </div>
+                    )}
+
+                    {scriptParseHint && (
+                        <div className="md:col-span-2 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-600 flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {scriptParseHint}
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="w-full max-w-[1680px] px-4 md:px-6 lg:px-8 mt-[2.5rem]">
@@ -875,7 +1031,7 @@ export default function SlideList() {
                             <svg className="animate-spin text-blue-400" width="18" height="18" viewBox="0 0 24 24" fill="none">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeDasharray="32" strokeDashoffset="10" />
                             </svg>
-                            Đang phân tích slide...
+                            {isProcessingPptx ? 'Đang chuyển đổi PPTX sang PDF và trích xuất kịch bản...' : 'Đang phân tích slide...'}
                         </div>
                     )}
                     {slides.map((slide) => {
